@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sistema_coleta_arqueologica/pages/login_page.dart';
 import 'core/theme/app_theme.dart';
 
 void main() {
@@ -16,24 +17,8 @@ class SistemaColetaApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Teste de tema')),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('Testando as cores dos textos.', style: TextStyle(fontSize: 18)),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {},
-                child: const Text('botao primario')
-              ),
-            ],
-          ),
-        ),
-      ),
+      themeMode: ThemeMode.light,
+      home: const LoginPage(),
     );
   }
 }

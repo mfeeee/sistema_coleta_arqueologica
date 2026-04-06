@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
+import 'package:sistema_coleta_arqueologica/features/menu/pages/menu_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -12,6 +13,12 @@ class _MainPageState extends State<MainPage> {
   // Controladores de tela
   int _indiceAtual = 0;
 
+  // Telas (Widgets) na mesma ordem do BottomNavigationBar
+  final List<Widget> _telas = [
+    const InicioPage(),
+
+  ];
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -21,7 +28,11 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.transparent,
         iconTheme: IconThemeData(color: theme.primaryColor),
       ),
-      body: Center(child: Text('Conteúdo da aba $_indiceAtual')),
+      // Para manter as outras telas guardadas na memoria
+      body: IndexedStack(
+        index: _indiceAtual,
+        children: _telas,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _indiceAtual,
         onTap: (index) {

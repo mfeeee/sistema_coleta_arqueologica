@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import './register_page.dart';
-import './recover_password_page.dart';
+import 'package:sistema_coleta_arqueologica/core/navigation/main_page.dart';
+import 'register_page.dart';
+import 'recover_password_page.dart';
+import '../../../core/navigation/main_page.dart';
 
 class LoginPage extends StatefulWidget {
 	const LoginPage({super.key});
@@ -131,6 +133,11 @@ class _LoginPageState extends State<LoginPage> {
 												ElevatedButton(
 													onPressed: () {
 														//TODO
+                            Navigator.push(
+															context,
+															MaterialPageRoute(builder: (context) => const MainPage()),
+														);
+
 													},
 													child: const Text(
 														'Entrar',

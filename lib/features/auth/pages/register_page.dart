@@ -128,7 +128,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: _selectedClassification,
+                    initialValue: _selectedClassification,
                     decoration: const InputDecoration(
                       hintText: 'Selecione seu perfil',
                     ),

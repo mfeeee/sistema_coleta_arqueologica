@@ -95,7 +95,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Nome Completo
                   Text(
                     'Nome Completo',
-                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: theme.textTheme.displayLarge?.color),
+										style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: theme.primaryColor),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -109,7 +109,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   // E-mail
                   Text(
                     'E-mail',
-                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: theme.textTheme.displayLarge?.color),
+										style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: theme.primaryColor),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -124,7 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Classificação (Dropdown)
                   Text(
                     'Classificação',
-                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: theme.textTheme.displayLarge?.color),
+										style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: theme.primaryColor),
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
@@ -149,7 +149,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Senha
                   Text(
                     'Senha',
-                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: theme.textTheme.displayLarge?.color),
+										style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: theme.primaryColor),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -157,8 +157,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     obscureText: _hidePassword,
                     decoration: InputDecoration(
                       hintText: 'Crie uma senha',
+                      prefixIcon: Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
-                        icon: Icon(_hidePassword ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+                        icon: Icon(_hidePassword ? Icons.visibility_off : Icons.visibility),
                         onPressed: () {
                           setState(() {
                             _hidePassword = !_hidePassword;
@@ -172,16 +173,17 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Confirmar Senha
                   Text(
                     'Confirmar Senha',
-                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: theme.textTheme.displayLarge?.color),
+										style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: theme.primaryColor),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: _hideConfirmPassword,
-                    decoration: InputDecoration(
+                           decoration: InputDecoration(
                       hintText: 'Repita a senha',
+                      prefixIcon: Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
-                        icon: Icon(_hideConfirmPassword ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+                        icon: Icon(_hideConfirmPassword ? Icons.visibility_off : Icons.visibility),
                         onPressed: () {
                           setState(() {
                             _hideConfirmPassword = !_hideConfirmPassword;

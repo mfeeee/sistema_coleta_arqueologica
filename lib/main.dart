@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sistema_coleta_arqueologica/pages/login_page.dart';
+import 'package:sistema_coleta_arqueologica/features/auth/pages/login_page.dart';
 import 'core/theme/app_theme.dart';
 
 void main() {

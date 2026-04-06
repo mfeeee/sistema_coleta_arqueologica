@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './register_page.dart';
+import './recover_password_page.dart';
 
 class LoginPage extends StatefulWidget {
 	const LoginPage({super.key});
@@ -165,7 +166,10 @@ class _LoginPageState extends State<LoginPage> {
 													alignment: Alignment.center,
 													child: TextButton(
 														onPressed: () {
-															//TODO
+															Navigator.push(
+																context,
+																MaterialPageRoute(builder: (context) => const RecoverPasswordPage()),
+															);
 														},
 														child: const Text(
 															'Esqueceu sua senha?',

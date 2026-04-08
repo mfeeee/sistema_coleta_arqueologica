@@ -1,67 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
-import 'package:sistema_coleta_arqueologica/features/menu/pages/menu_page.dart';
+import 'package:go_router/go_router.dart';
 
-class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+class MainPage extends StatelessWidget {
+  const MainPage({
+    super.key,
+    required this.navigationShell,
+  });
 
-  @override
-  State<MainPage> createState() => _MainPageState();
-}
+  final StatefulNavigationShell navigationShell;
 
-class _MainPageState extends State<MainPage> {
-  // Controladores de tela
-  int _indiceAtual = 0;
-
-  // Telas (Widgets) na mesma ordem do BottomNavigationBar
-  final List<Widget> _telas = [
-    const InicioPage(),
-
-  ];
+  void _onTap(BuildContext context, int index) {
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        iconTheme: IconThemeData(color: theme.primaryColor),
-      ),
-      // Para manter as outras telas guardadas na memoria
-      body: IndexedStack(
-        index: _indiceAtual,
-        children: _telas,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _indiceAtual,
-        onTap: (index) {
-          setState(() {
-            _indiceAtual = index;
-          });
-        },
-
-        selectedItemColor: AppColors.primaryLight, 
-  
-        unselectedItemColor: Colors.grey, 
-        
-        selectedLabelStyle: const TextStyle(
-          fontSize: 12, 
-          fontWeight: FontWeight.bold,
-        ),
-        
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 12,
-        ),
-        
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Início'),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Coletas'),
-          BottomNavigationBarItem(icon: Icon(Icons.sync), label: 'Sincronizar'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+      body: navigationShell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (int index) => _onTap(context, index),
+        destinations: const <NavigationDestination>[
+          NavigationDestination(icon: Icon(Icons.home), label: 'Início'),
+          NavigationDestination(icon: Icon(Icons.list), label: 'Coletas'),
+          NavigationDestination(icon: Icon(Icons.sync), label: 'Sincronizar'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Perfil'),
         ],
-      ),    
+      ),
     );
   }
 }

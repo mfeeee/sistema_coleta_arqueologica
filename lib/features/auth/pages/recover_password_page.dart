@@ -139,18 +139,28 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
           const SizedBox(height: 48),
           
           // --- Footer Info ---
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: const TextStyle(fontSize: 14, color: Colors.grey, height: 1.5),
-              children: [
-                const TextSpan(text: 'Lembrou sua senha? '),
-                TextSpan(
-                  text: 'Fazer login',
-                  style: TextStyle(color: theme.colorScheme.primary, decoration: TextDecoration.underline, fontWeight: FontWeight.bold),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'Lembrou sua senha?',
+                style: theme.textTheme.bodyMedium,
+              ),
+              TextButton(
+                onPressed: () {
+                  // Remove a rota atual do navegador para retornar ao login
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/login');
+                  }
+                },
+                child: const Text(
+                  'Fazer login',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

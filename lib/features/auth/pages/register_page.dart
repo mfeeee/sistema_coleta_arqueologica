@@ -277,7 +277,7 @@ class _RegisterFormState extends State<_RegisterForm> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             onPressed: () {
-              Navigator.pop(context);
+              context.canPop() ? context.pop() : context.go('/login');;
             },
             child: Text(
               'Já tenho uma conta, entrar',

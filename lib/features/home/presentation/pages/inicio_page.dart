@@ -12,11 +12,43 @@ class InicioPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        // TODO
+        elevation: 0,
+        titleSpacing: 16.0,
+        title: Row(
+          children: <Widget>[
+            // Textos ArqueoData
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  'ArqueoData',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.displayLarge?.copyWith(
+                    fontSize: 18,
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: <Widget>[
+          // Sino de notificação 
+          Container(
+            margin: const EdgeInsets.only(right: 16.0),
+            child: IconButton(
+              icon: Icon(Icons.notifications_none, color: theme.colorScheme.primary, size: 20),
+              onPressed: () {
+                // TODO
+              },
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(top: 24.0, bottom: 144.0),
+          // padding: EdgeInsets.only(top: 24.0, bottom: 144.0),
           child: Column(
             children: <Widget>[
               const _WelcomeSection(),

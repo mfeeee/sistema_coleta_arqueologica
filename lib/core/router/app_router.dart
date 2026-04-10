@@ -6,6 +6,7 @@ import '../../features/auth/pages/recover_password_page.dart';
 import '../../features/auth/pages/register_page.dart';
 import '../../features/coleta/pages/coletas_page.dart';
 import '../../features/home/presentation/pages/inicio_page.dart';
+import '../../features/profile/pages/profile_page.dart';
 import '../navigation/main_page.dart';
 
 /// Configuração centralizada de rotas para o app
@@ -46,7 +47,22 @@ final GoRouter appRouter = GoRouter(
             ),
           ],
         ),
-        // Futuras StatefulShellBranch ficam aqui
+        StatefulShellBranch(
+          routes: <RouteBase>[
+            GoRoute(
+              path: '/sincronizar',
+              builder: (BuildContext context, GoRouterState state) => const ColetasPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: <RouteBase>[
+            GoRoute(
+              path: '/perfil',
+              builder: (BuildContext context, GoRouterState state) => const ProfilePage(),
+            ),
+          ],
+        ),
       ],
     ),
   ],

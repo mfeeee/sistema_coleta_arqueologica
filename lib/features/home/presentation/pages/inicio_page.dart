@@ -149,7 +149,7 @@ class _QuickActionsSection extends StatelessWidget {
                 Text(
                   'Nova Coleta',
                   style: TextStyle(
-                    fontSize: 18, 
+                    fontSize: 16, 
                     fontWeight: FontWeight.bold,
                     color: theme.textTheme.displayLarge?.color, // Texto escuro no modo claro, branco no modo escuro
                   ),
@@ -233,7 +233,7 @@ class _SquareActionCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  fontSize: 16,
+                  fontSize: 14,
                   color: theme.colorScheme.onSurface,
                   height: 1.2,
                 ),
@@ -263,7 +263,7 @@ class _ActivitySummarySection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start, // Alinha o titulo a esquerda
         children: <Widget>[
           Text(
-            'RESUMO DAS ATIVIDADES',
+            'Resumo das Atividades',
             style: theme.textTheme.titleSmall?.copyWith(
               color: const Color(0xFF64748B), // Cor do Figma
               fontWeight: FontWeight.bold,
@@ -299,7 +299,7 @@ class _ActivitySummarySection extends StatelessWidget {
                             style: theme.textTheme.headlineMedium?.copyWith(
                               color: theme.colorScheme.primary,
                               fontWeight: FontWeight.bold,
-                              fontSize: 32,
+                              fontSize: 24,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -308,7 +308,7 @@ class _ActivitySummarySection extends StatelessWidget {
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                              fontSize: 10,
                             ),
                           ),
                         ],
@@ -335,7 +335,7 @@ class _ActivitySummarySection extends StatelessWidget {
                             style: theme.textTheme.headlineMedium?.copyWith(
                               color: theme.colorScheme.error,
                               fontWeight: FontWeight.bold,
-                              fontSize: 32,
+                              fontSize: 24,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -344,7 +344,7 @@ class _ActivitySummarySection extends StatelessWidget {
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                              fontSize: 10,
                             ),
                           ),
                         ],
@@ -376,7 +376,7 @@ class _RecentActivitiesSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'ATIVIDADES RECENTES',
+                'Atividades Recentes',
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: const Color(0xFF64748B), // Cor do Figma
                   fontWeight: FontWeight.bold,

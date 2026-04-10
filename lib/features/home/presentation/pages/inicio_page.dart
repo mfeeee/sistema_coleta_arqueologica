@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sistema_coleta_arqueologica/core/widgets/custom_header.dart';
 import 'package:go_router/go_router.dart';
 
 class InicioPage extends StatelessWidget {

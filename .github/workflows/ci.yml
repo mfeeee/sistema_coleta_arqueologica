@@ -1,0 +1,40 @@
+name: Flutter CI Quality Check
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  quality_checks:
+    name: Lint, Format and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Faz o checkout do código do repositório
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configura o ambiente Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # 3. Baixa as dependências do projeto
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # 4. Verifica a formatação do código
+      # Falha o pipeline se houver arquivos fora do padrão de formatação do Dart
+      - name: Verify Formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      # 5. Roda o analisador estático (Lints)
+      - name: Analyze Code
+        run: flutter analyze
+
+      # 6. Executa testes automatizados (unitários e de widget)
+      - name: Run Tests
+        run: flutter test

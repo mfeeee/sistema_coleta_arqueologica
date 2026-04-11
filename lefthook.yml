@@ -1,0 +1,12 @@
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "*.dart"
+      run: dart format {staged_files}
+    analyze:
+      glob: "*.dart"
+      run: flutter analyze
+    test:
+      glob: "*.dart"
+      run: flutter test

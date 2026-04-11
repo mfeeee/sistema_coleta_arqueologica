@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
 class SyncPage extends StatelessWidget {
   const SyncPage({super.key});
 
@@ -32,7 +31,11 @@ class SyncPage extends StatelessWidget {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.help_outline, color: theme.colorScheme.primary, size: 24),
+            icon: Icon(
+              Icons.help_outline,
+              color: theme.colorScheme.primary,
+              size: 24,
+            ),
             onPressed: () {
               // TODO: Abrir ajuda ou FAQ sobre sincronização
             },
@@ -74,7 +77,9 @@ class _NetworkStatusCard extends StatelessWidget {
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+        ),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -146,7 +151,9 @@ class _SyncProgressCard extends StatelessWidget {
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+        ),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -247,7 +254,9 @@ class _DetailedBreakdownSection extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            ),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -308,7 +317,9 @@ class _ActionSection extends StatelessWidget {
           },
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(double.infinity, 56),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             shadowColor: theme.colorScheme.primary.withValues(alpha: 0.2),
           ),
           child: const Row(

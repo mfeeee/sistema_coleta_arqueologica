@@ -30,7 +30,11 @@ class ProfilePage extends StatelessWidget {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.settings_outlined, color: theme.colorScheme.primary, size: 24),
+            icon: Icon(
+              Icons.settings_outlined,
+              color: theme.colorScheme.primary,
+              size: 24,
+            ),
             onPressed: () {
               // TODO
             },
@@ -59,7 +63,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-
 
 class _UserInfoSection extends StatelessWidget {
   const _UserInfoSection();
@@ -102,14 +105,15 @@ class _UserInfoSection extends StatelessWidget {
           Text(
             'julian.martinez@archaeo.app',
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontSize: 14,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
           ),
           const SizedBox(height: 8),
 
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 4.0,
+            ),
             decoration: BoxDecoration(
               color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(9999),
@@ -126,7 +130,7 @@ class _UserInfoSection extends StatelessWidget {
           ),
         ],
       ),
-    ); 
+    );
   }
 }
 
@@ -156,17 +160,11 @@ class _MetricsSection extends StatelessWidget {
           Row(
             children: <Widget>[
               Expanded(
-                child: _MetricCard(
-                  title: 'SÍTIOS MAPEADOS',
-                  value: '42',
-                ),
+                child: _MetricCard(title: 'SÍTIOS MAPEADOS', value: '42'),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _MetricCard(
-                  title: 'DIAS EM CAMPO',
-                  value: '156',
-                ),
+                child: _MetricCard(title: 'DIAS EM CAMPO', value: '156'),
               ),
             ],
           ),
@@ -202,7 +200,9 @@ class _NotificationSection extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
-              border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -270,7 +270,9 @@ class _AppPreferencesSection extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
-              border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -290,7 +292,10 @@ class _AppPreferencesSection extends StatelessWidget {
                   title: 'Unidades de Medida',
                   trailing: Text(
                     'Métrico',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
                 ),
                 const Divider(height: 1, indent: 48),
@@ -299,7 +304,10 @@ class _AppPreferencesSection extends StatelessWidget {
                   title: 'Idioma',
                   trailing: Text(
                     'Português',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
                   ),
                 ),
               ],
@@ -322,12 +330,17 @@ class _ActionButtonsSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         children: <Widget>[
-          // Botão Exportar Logs 
+          // Botão Exportar Logs
           OutlinedButton(
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, 56),
-              side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.2), width: 2),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              side: BorderSide(
+                color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                width: 2,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () {
               // TODO
@@ -335,11 +348,19 @@ class _ActionButtonsSection extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(Icons.bug_report_outlined, color: theme.colorScheme.primary, size: 18),
+                Icon(
+                  Icons.bug_report_outlined,
+                  color: theme.colorScheme.primary,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Exportar logs de erro',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
               ],
             ),
@@ -351,7 +372,9 @@ class _ActionButtonsSection extends StatelessWidget {
               backgroundColor: theme.colorScheme.onSurface,
               elevation: 0,
               minimumSize: const Size(double.infinity, 52),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () {
               context.go('/login');
@@ -359,11 +382,19 @@ class _ActionButtonsSection extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(Icons.logout, color: theme.colorScheme.errorContainer, size: 18),
+                Icon(
+                  Icons.logout,
+                  color: theme.colorScheme.errorContainer,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Sair da conta',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.colorScheme.errorContainer),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.errorContainer,
+                  ),
                 ),
               ],
             ),
@@ -387,7 +418,9 @@ class _MetricCard extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withValues(alpha: 0.05),
-        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -417,7 +450,11 @@ class _MetricCard extends StatelessWidget {
 }
 
 class _SettingsTile extends StatelessWidget {
-  const _SettingsTile({required this.icon, required this.title, required this.trailing});
+  const _SettingsTile({
+    required this.icon,
+    required this.title,
+    required this.trailing,
+  });
   final IconData icon;
   final String title;
   final Widget trailing;
@@ -434,7 +471,11 @@ class _SettingsTile extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF334155)),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF334155),
+              ),
             ),
           ),
           trailing,

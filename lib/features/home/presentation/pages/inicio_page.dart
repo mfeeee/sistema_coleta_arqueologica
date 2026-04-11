@@ -33,11 +33,15 @@ class InicioPage extends StatelessWidget {
           ],
         ),
         actions: <Widget>[
-          // Sino de notificação 
+          // Sino de notificação
           Container(
             margin: const EdgeInsets.only(right: 16.0),
             child: IconButton(
-              icon: Icon(Icons.notifications_none, color: theme.colorScheme.primary, size: 20),
+              icon: Icon(
+                Icons.notifications_none,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
               onPressed: () {
                 // TODO
               },
@@ -62,7 +66,7 @@ class InicioPage extends StatelessWidget {
           ),
         ),
       ),
-      // 
+      //
     );
   }
 }
@@ -85,7 +89,7 @@ class _WelcomeSection extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(
                 color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                width: 2.0
+                width: 2.0,
               ),
             ),
             padding: const EdgeInsets.all(2.0),
@@ -104,19 +108,19 @@ class _WelcomeSection extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'Olá, Dr. Silva',
-                  style: theme.textTheme.displayLarge?.copyWith(fontSize: 20,),
+                  style: theme.textTheme.displayLarge?.copyWith(fontSize: 20),
                 ),
                 const SizedBox(height: 4.0),
                 Text(
                   'Pronto para novas descobertas hoje?',
-                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14,),
-                )
+                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+                ),
               ],
             ),
           ),
         ],
       ),
-    ); 
+    );
   }
 }
 
@@ -149,9 +153,12 @@ class _QuickActionsSection extends StatelessWidget {
                 Text(
                   'Nova Coleta',
                   style: TextStyle(
-                    fontSize: 16, 
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: theme.textTheme.displayLarge?.color, // Texto escuro no modo claro, branco no modo escuro
+                    color: theme
+                        .textTheme
+                        .displayLarge
+                        ?.color, // Texto escuro no modo claro, branco no modo escuro
                   ),
                 ),
               ],
@@ -200,7 +207,7 @@ class _SquareActionCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -211,7 +218,7 @@ class _SquareActionCard extends StatelessWidget {
         borderRadius: BorderRadiusGeometry.circular(12),
         side: BorderSide(
           color: theme.colorScheme.primary.withValues(alpha: 0.1),
-        )
+        ),
       ),
       child: InkWell(
         onTap: onTap,
@@ -222,11 +229,7 @@ class _SquareActionCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Icon(
-                icon,
-                color: theme.colorScheme.primary,
-                size: 24,
-              ),
+              Icon(icon, color: theme.colorScheme.primary, size: 24),
               const SizedBox(height: 8.0),
               Text(
                 label,
@@ -245,7 +248,7 @@ class _SquareActionCard extends StatelessWidget {
     );
   }
 }
- 
+
 /*
   Vertical divider vai ser usado para o divisor vertical do figma saber a sua altura e poder
   se desenhar na tela. 
@@ -260,7 +263,8 @@ class _ActivitySummarySection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // Alinha o titulo a esquerda
+        crossAxisAlignment:
+            CrossAxisAlignment.start, // Alinha o titulo a esquerda
         children: <Widget>[
           Text(
             'Resumo das Atividades',
@@ -287,7 +291,7 @@ class _ActivitySummarySection extends StatelessWidget {
             child: IntrinsicHeight(
               child: Row(
                 children: <Widget>[
-                  // Lado ESQUERDO 
+                  // Lado ESQUERDO
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -313,7 +317,7 @@ class _ActivitySummarySection extends StatelessWidget {
                           ),
                         ],
                       ),
-                    )
+                    ),
                   ),
 
                   // LINHA VERTICAL
@@ -349,12 +353,12 @@ class _ActivitySummarySection extends StatelessWidget {
                           ),
                         ],
                       ),
-                    )
+                    ),
                   ),
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -423,7 +427,7 @@ class _RecentActivitiesSection extends StatelessWidget {
                 },
               ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -453,7 +457,7 @@ class _ActivityListItem extends StatelessWidget {
         borderRadius: BorderRadiusGeometry.circular(8),
         side: BorderSide(
           color: theme.colorScheme.primary.withValues(alpha: 0.05),
-        )
+        ),
       ),
       child: InkWell(
         onTap: onTap,
@@ -469,15 +473,11 @@ class _ActivityListItem extends StatelessWidget {
                   color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Icon(
-                  icon,
-                  color: theme.colorScheme.primary,
-                  size: 24,
-                ),
+                child: Icon(icon, color: theme.colorScheme.primary, size: 24),
               ),
-              
+
               const SizedBox(width: 16.0),
-              
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,7 +489,8 @@ class _ActivityListItem extends StatelessWidget {
                         color: theme.colorScheme.onSurface,
                       ),
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis, // Corta o texto com '...' se for muito grande
+                      overflow: TextOverflow
+                          .ellipsis, // Corta o texto com '...' se for muito grande
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -512,7 +513,6 @@ class _ActivityListItem extends StatelessWidget {
                 color: theme.colorScheme.error,
                 size: 20,
               ),
-              
             ],
           ),
         ),

@@ -38,8 +38,16 @@ class ColetasPage extends StatelessWidget {
                   isScrollable: true,
                   labelColor: theme.colorScheme.primary,
                   unselectedLabelColor: const Color(0xFF64748B),
-                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
-                  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    letterSpacing: 1.2,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    letterSpacing: 1.2,
+                  ),
                   indicatorColor: theme.colorScheme.primary,
                   indicatorWeight: 2.0,
                   tabs: const <Widget>[
@@ -58,7 +66,7 @@ class ColetasPage extends StatelessWidget {
             const _ListaColetas(),
             const _ListaColetasPendentes(),
             const _ListaColetasAprovadas(),
-            const _ListaColetasRejeitadas(),          
+            const _ListaColetasRejeitadas(),
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -68,7 +76,7 @@ class ColetasPage extends StatelessWidget {
           backgroundColor: theme.colorScheme.primary,
           child: const Icon(Icons.add, color: Colors.white),
         ),
-      ), 
+      ),
     );
   }
 }
@@ -117,7 +125,7 @@ class _SyncProgressBar extends StatelessWidget {
                 ),
               ),
               FractionallySizedBox(
-                widthFactor: 0.65, 
+                widthFactor: 0.65,
                 child: Container(
                   height: 6,
                   decoration: BoxDecoration(
@@ -185,7 +193,12 @@ class _ListaColetas extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return ListView(
-      padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0, bottom: 96.0),
+      padding: const EdgeInsets.only(
+        top: 16.0,
+        left: 16.0,
+        right: 16.0,
+        bottom: 96.0,
+      ),
       children: <Widget>[
         // 1. Nao sincronizado
         _ColetaCard(
@@ -195,17 +208,27 @@ class _ListaColetas extends StatelessWidget {
           title: 'Sítio Arqueológico Pedra Branca',
           location: 'Petrolina - PE',
           date: '12/10/2023',
-          imageUrl: 'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png', // Substitua pela imagem real
+          imageUrl:
+              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png', // Substitua pela imagem real
           actionsRow: Row(
             children: <Widget>[
               Expanded(
                 flex: 2,
                 child: OutlinedButton.icon(
                   onPressed: () {},
-                  icon: Icon(Icons.edit_outlined, size: 16, color: theme.colorScheme.primary),
-                  label: Text('Editar', style: TextStyle(color: theme.colorScheme.primary)),
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  label: Text(
+                    'Editar',
+                    style: TextStyle(color: theme.colorScheme.primary),
+                  ),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                    ),
                   ),
                 ),
               ),
@@ -215,8 +238,13 @@ class _ListaColetas extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () {},
                   icon: const Icon(Icons.sync, size: 16, color: Colors.white),
-                  label: const Text('Sincronizar Agora', style: TextStyle(color: Colors.white)),
-                  style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.primary),
+                  label: const Text(
+                    'Sincronizar Agora',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                  ),
                 ),
               ),
             ],
@@ -232,27 +260,42 @@ class _ListaColetas extends StatelessWidget {
           title: 'Gruta do Eco',
           location: 'São Raimundo Nonato - PI',
           date: '08/10/2023',
-          imageUrl: 'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
+          imageUrl:
+              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
           actionsRow: Row(
             children: <Widget>[
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    backgroundColor: theme.colorScheme.primary.withValues(
+                      alpha: 0.1,
+                    ),
                     elevation: 0,
                   ),
-                  child: Text('Ver Detalhes', style: TextStyle(color: theme.colorScheme.primary)),
+                  child: Text(
+                    'Ver Detalhes',
+                    style: TextStyle(color: theme.colorScheme.primary),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {},
-                  icon: Icon(Icons.edit_outlined, size: 16, color: theme.colorScheme.primary),
-                  label: Text('Editar', style: TextStyle(color: theme.colorScheme.primary)),
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  label: Text(
+                    'Editar',
+                    style: TextStyle(color: theme.colorScheme.primary),
+                  ),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                    ),
                   ),
                 ),
               ),
@@ -269,7 +312,8 @@ class _ListaColetas extends StatelessWidget {
           title: 'Lapa do Sol',
           location: 'Iraquara - BA',
           date: '05/10/2023',
-          imageUrl: 'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
+          imageUrl:
+              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
           actionsRow: ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
@@ -277,7 +321,10 @@ class _ListaColetas extends StatelessWidget {
               elevation: 0,
               minimumSize: const Size(double.infinity, 40),
             ),
-            child: Text('Ver Detalhes', style: TextStyle(color: theme.colorScheme.primary)),
+            child: Text(
+              'Ver Detalhes',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -290,7 +337,8 @@ class _ListaColetas extends StatelessWidget {
           title: 'Toca do Boi',
           location: 'Januária - MG',
           date: '01/10/2023',
-          imageUrl: 'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
+          imageUrl:
+              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
           actionsRow: ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
@@ -299,10 +347,12 @@ class _ListaColetas extends StatelessWidget {
               elevation: 0,
               minimumSize: const Size(double.infinity, 40),
             ),
-            child: const Text('Ver Motivo da Rejeição', style: TextStyle(color: Color(0xFFDC2626))),
+            child: const Text(
+              'Ver Motivo da Rejeição',
+              style: TextStyle(color: Color(0xFFDC2626)),
+            ),
           ),
         ),
-
       ],
     );
   }
@@ -316,7 +366,12 @@ class _ListaColetasAprovadas extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return ListView(
-      padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0, bottom: 96.0),
+      padding: const EdgeInsets.only(
+        top: 16.0,
+        left: 16.0,
+        right: 16.0,
+        bottom: 96.0,
+      ),
       children: <Widget>[
         // 3. Aprovado
         _ColetaCard(
@@ -326,7 +381,8 @@ class _ListaColetasAprovadas extends StatelessWidget {
           title: 'Lapa do Sol',
           location: 'Iraquara - BA',
           date: '05/10/2023',
-          imageUrl: 'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
+          imageUrl:
+              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
           actionsRow: ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
@@ -334,7 +390,10 @@ class _ListaColetasAprovadas extends StatelessWidget {
               elevation: 0,
               minimumSize: const Size(double.infinity, 40),
             ),
-            child: Text('Ver Detalhes', style: TextStyle(color: theme.colorScheme.primary)),
+            child: Text(
+              'Ver Detalhes',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -351,7 +410,12 @@ class _ListaColetasPendentes extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return ListView(
-      padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0, bottom: 96.0),
+      padding: const EdgeInsets.only(
+        top: 16.0,
+        left: 16.0,
+        right: 16.0,
+        bottom: 96.0,
+      ),
       children: <Widget>[
         // Pendente
         _ColetaCard(
@@ -361,27 +425,42 @@ class _ListaColetasPendentes extends StatelessWidget {
           title: 'Gruta do Eco',
           location: 'São Raimundo Nonato - PI',
           date: '08/10/2023',
-          imageUrl: 'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
+          imageUrl:
+              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
           actionsRow: Row(
             children: <Widget>[
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    backgroundColor: theme.colorScheme.primary.withValues(
+                      alpha: 0.1,
+                    ),
                     elevation: 0,
                   ),
-                  child: Text('Ver Detalhes', style: TextStyle(color: theme.colorScheme.primary)),
+                  child: Text(
+                    'Ver Detalhes',
+                    style: TextStyle(color: theme.colorScheme.primary),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {},
-                  icon: Icon(Icons.edit_outlined, size: 16, color: theme.colorScheme.primary),
-                  label: Text('Editar', style: TextStyle(color: theme.colorScheme.primary)),
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  label: Text(
+                    'Editar',
+                    style: TextStyle(color: theme.colorScheme.primary),
+                  ),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                    ),
                   ),
                 ),
               ),
@@ -402,7 +481,12 @@ class _ListaColetasRejeitadas extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return ListView(
-      padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0, bottom: 96.0),
+      padding: const EdgeInsets.only(
+        top: 16.0,
+        left: 16.0,
+        right: 16.0,
+        bottom: 96.0,
+      ),
       children: <Widget>[
         // 4. Rejeitado
         _ColetaCard(
@@ -412,7 +496,8 @@ class _ListaColetasRejeitadas extends StatelessWidget {
           title: 'Toca do Boi',
           location: 'Januária - MG',
           date: '01/10/2023',
-          imageUrl: 'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
+          imageUrl:
+              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
           actionsRow: ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
@@ -421,7 +506,10 @@ class _ListaColetasRejeitadas extends StatelessWidget {
               elevation: 0,
               minimumSize: const Size(double.infinity, 40),
             ),
-            child: const Text('Ver Motivo da Rejeição', style: TextStyle(color: Color(0xFFDC2626))),
+            child: const Text(
+              'Ver Motivo da Rejeição',
+              style: TextStyle(color: Color(0xFFDC2626)),
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -429,7 +517,6 @@ class _ListaColetasRejeitadas extends StatelessWidget {
     );
   }
 }
-
 
 class _ColetaCard extends StatelessWidget {
   const _ColetaCard({
@@ -460,7 +547,9 @@ class _ColetaCard extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.05)),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.05),
+        ),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -481,7 +570,10 @@ class _ColetaCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 2.0,
+                      ),
                       decoration: BoxDecoration(
                         color: statusBgColor,
                         borderRadius: BorderRadius.circular(999),
@@ -516,11 +608,18 @@ class _ColetaCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: <Widget>[
-                        const Icon(Icons.calendar_today_outlined, size: 10, color: Color(0xFF94A3B8)),
+                        const Icon(
+                          Icons.calendar_today_outlined,
+                          size: 10,
+                          color: Color(0xFF94A3B8),
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Coletado em: $date',
-                          style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: Color(0xFF94A3B8),
+                          ),
                         ),
                       ],
                     ),
@@ -545,4 +644,4 @@ class _ColetaCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

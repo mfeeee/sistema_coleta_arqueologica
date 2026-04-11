@@ -24,7 +24,10 @@ class AppTheme {
         ),
       ),
       textTheme: const TextTheme(
-        displayLarge: TextStyle(color: AppColors.textPrimaryLight, fontWeight: FontWeight.bold),
+        displayLarge: TextStyle(
+          color: AppColors.textPrimaryLight,
+          fontWeight: FontWeight.bold,
+        ),
         bodyLarge: TextStyle(color: AppColors.textPrimaryLight),
         bodyMedium: TextStyle(color: AppColors.textSecondaryLight),
       ),
@@ -53,7 +56,10 @@ class AppTheme {
         ),
       ),
       textTheme: const TextTheme(
-        displayLarge: TextStyle(color: AppColors.textPrimaryDark, fontWeight: FontWeight.bold),
+        displayLarge: TextStyle(
+          color: AppColors.textPrimaryDark,
+          fontWeight: FontWeight.bold,
+        ),
         bodyLarge: TextStyle(color: AppColors.textPrimaryDark),
         bodyMedium: TextStyle(color: AppColors.textSecondaryDark),
       ),

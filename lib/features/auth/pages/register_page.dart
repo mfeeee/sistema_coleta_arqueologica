@@ -17,23 +17,31 @@ class RegisterPage extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(
-            color: theme.colorScheme.primary.withValues(alpha: 0.1), // border-bottom: rgba(73, 54, 39, 0.1)
+            color: theme.colorScheme.primary.withValues(
+              alpha: 0.1,
+            ), // border-bottom: rgba(73, 54, 39, 0.1)
             height: 1.0,
           ),
         ),
         title: Text(
           'Criar Conta',
           style: TextStyle(
-            fontSize: 18, 
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: theme.textTheme.displayLarge?.color, // Texto escuro no modo claro, branco no modo escuro
+            color: theme
+                .textTheme
+                .displayLarge
+                ?.color, // Texto escuro no modo claro, branco no modo escuro
           ),
         ),
       ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 24.0,
+            ),
             child: Container(
               constraints: const BoxConstraints(maxWidth: 480),
               child: Column(
@@ -59,7 +67,7 @@ class RegisterPage extends StatelessWidget {
 
 //   @override
 //   Widget build(BuildContext context) {
-    
+
 //     throw UnimplementedError();
 //   }
 // }
@@ -124,7 +132,7 @@ class _RegisterFormState extends State<_RegisterForm> {
     'Estudante',
     'Pesquisador',
     'Curador',
-    'Visitante'
+    'Visitante',
   ];
 
   @override
@@ -146,11 +154,15 @@ class _RegisterFormState extends State<_RegisterForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           // --- Form Container ---
-          
+
           // Nome Completo
           Text(
             'Nome Completo',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: theme.colorScheme.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: theme.colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -164,7 +176,11 @@ class _RegisterFormState extends State<_RegisterForm> {
           // E-mail
           Text(
             'E-mail',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: theme.colorScheme.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: theme.colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -179,14 +195,16 @@ class _RegisterFormState extends State<_RegisterForm> {
           // Classificação (Dropdown)
           Text(
             'Classificação',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: theme.colorScheme.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: theme.colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             initialValue: _selectedClassification,
-            decoration: const InputDecoration(
-              hintText: 'Selecione seu perfil',
-            ),
+            decoration: const InputDecoration(hintText: 'Selecione seu perfil'),
             items: _classifications.map((String classification) {
               return DropdownMenuItem<String>(
                 value: classification,
@@ -204,7 +222,11 @@ class _RegisterFormState extends State<_RegisterForm> {
           // Senha
           Text(
             'Senha',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: theme.colorScheme.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: theme.colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -214,7 +236,9 @@ class _RegisterFormState extends State<_RegisterForm> {
               hintText: 'Crie uma senha',
               prefixIcon: Icon(Icons.lock_outline),
               suffixIcon: IconButton(
-                icon: Icon(_hidePassword ? Icons.visibility_off : Icons.visibility),
+                icon: Icon(
+                  _hidePassword ? Icons.visibility_off : Icons.visibility,
+                ),
                 onPressed: () {
                   setState(() {
                     _hidePassword = !_hidePassword;
@@ -228,17 +252,25 @@ class _RegisterFormState extends State<_RegisterForm> {
           // Confirmar Senha
           Text(
             'Confirmar Senha',
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16, color: theme.colorScheme.primary),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: theme.colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 8),
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: _hideConfirmPassword,
-                    decoration: InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Repita a senha',
               prefixIcon: Icon(Icons.lock_outline),
               suffixIcon: IconButton(
-                icon: Icon(_hideConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                icon: Icon(
+                  _hideConfirmPassword
+                      ? Icons.visibility_off
+                      : Icons.visibility,
+                ),
                 onPressed: () {
                   setState(() {
                     _hideConfirmPassword = !_hideConfirmPassword;
@@ -253,7 +285,7 @@ class _RegisterFormState extends State<_RegisterForm> {
           ElevatedButton(
             onPressed: () => context.go('/home'),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center, 
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   'Criar Conta',
@@ -263,25 +295,34 @@ class _RegisterFormState extends State<_RegisterForm> {
                 Icon(
                   Icons.person_add_alt_outlined,
                   size: 20,
-                  color: theme.colorScheme.primary, 
+                  color: theme.colorScheme.primary,
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 12),
           OutlinedButton(
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, 56),
-              side: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              side: BorderSide(
+                color: theme.colorScheme.primary.withValues(alpha: 0.2),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () {
-              context.canPop() ? context.pop() : context.go('/login');;
+              context.canPop() ? context.pop() : context.go('/login');
+              ;
             },
             child: Text(
               'Já tenho uma conta, entrar',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -294,9 +335,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                 children: [
                   Text(
                     'Ao se cadastrar, você concorda com nossos',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 12,
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
                   ),
                 ],
               ),
@@ -313,14 +352,16 @@ class _RegisterFormState extends State<_RegisterForm> {
                     },
                     child: Text(
                       'Termos de Serviço',
-                      style: TextStyle(fontSize: 12, color: theme.colorScheme.surfaceTint, decoration: TextDecoration.underline),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.surfaceTint,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                   Text(
                     'e',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 12,
-                    ),
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
                   ),
                   TextButton(
                     onPressed: () {
@@ -332,18 +373,20 @@ class _RegisterFormState extends State<_RegisterForm> {
                     },
                     child: Text(
                       'Política de Privacidade',
-                      style: TextStyle(fontSize: 12, color: theme.colorScheme.surfaceTint, decoration: TextDecoration.underline),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.colorScheme.surfaceTint,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ],
-              )
-              
+              ),
             ],
-          )
+          ),
         ],
-      )
+      ),
     );
     throw UnimplementedError();
   }
-
 }

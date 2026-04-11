@@ -12,7 +12,10 @@ class LoginPage extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 44.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 44.0,
+            ),
             child: Container(
               constraints: const BoxConstraints(maxWidth: 480),
               decoration: BoxDecoration(
@@ -134,7 +137,9 @@ class _LoginFormState extends State<_LoginForm> {
               hintText: 'Digite sua senha',
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
-                icon: Icon(_hidePassword ? Icons.visibility_off : Icons.visibility),
+                icon: Icon(
+                  _hidePassword ? Icons.visibility_off : Icons.visibility,
+                ),
                 onPressed: () {
                   setState(() {
                     _hidePassword = !_hidePassword;
@@ -152,8 +157,12 @@ class _LoginFormState extends State<_LoginForm> {
           OutlinedButton(
             style: OutlinedButton.styleFrom(
               minimumSize: const Size(double.infinity, 54),
-              side: BorderSide(color: theme.primaryColor.withValues(alpha: 0.2)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              side: BorderSide(
+                color: theme.primaryColor.withValues(alpha: 0.2),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () => context.push('/register'),
             child: const Text('Criar Conta', style: TextStyle(fontSize: 16)),
@@ -165,7 +174,10 @@ class _LoginFormState extends State<_LoginForm> {
               onPressed: () => context.push('/recover-password'),
               child: const Text(
                 'Esqueceu sua senha?',
-                style: TextStyle(fontSize: 12, decoration: TextDecoration.underline),
+                style: TextStyle(
+                  fontSize: 12,
+                  decoration: TextDecoration.underline,
+                ),
               ),
             ),
           ),

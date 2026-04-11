@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
 class RecoverPasswordPage extends StatelessWidget {
   const RecoverPasswordPage({super.key});
 
@@ -17,7 +16,10 @@ class RecoverPasswordPage extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 24.0,
+            ),
             child: Container(
               constraints: const BoxConstraints(maxWidth: 480),
               child: Column(
@@ -65,7 +67,7 @@ class _HeaderArea extends StatelessWidget {
           textAlign: TextAlign.justify,
           style: theme.textTheme.displayLarge?.copyWith(
             fontSize: 30,
-            letterSpacing: -0.7
+            letterSpacing: -0.7,
           ),
         ),
         const SizedBox(height: 8),
@@ -98,7 +100,7 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -107,7 +109,11 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
           // E-mail
           Text(
             'E-mail',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: theme.colorScheme.primary),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: theme.colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 8),
           TextFormField(
@@ -119,14 +125,13 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
           ),
           const SizedBox(height: 16),
 
-
           // --- Action Buttons ---
           ElevatedButton(
             onPressed: () {
               // TODO: Lógica envio do link de recuperação
             },
             child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center, 
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   'Enviar Link',
@@ -137,15 +142,12 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
             ),
           ),
           const SizedBox(height: 48),
-          
+
           // --- Footer Info ---
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(
-                'Lembrou sua senha?',
-                style: theme.textTheme.bodyMedium,
-              ),
+              Text('Lembrou sua senha?', style: theme.textTheme.bodyMedium),
               TextButton(
                 onPressed: () {
                   // Remove a rota atual do navegador para retornar ao login
@@ -164,7 +166,6 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
           ),
         ],
       ),
-    );    
-    
+    );
   }
 }

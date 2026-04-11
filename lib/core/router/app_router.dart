@@ -20,23 +20,31 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/register',
-      builder: (BuildContext context, GoRouterState state) => const RegisterPage(),
+      builder: (BuildContext context, GoRouterState state) =>
+          const RegisterPage(),
     ),
     GoRoute(
       path: '/recover-password',
-      builder: (BuildContext context, GoRouterState state) => const RecoverPasswordPage(),
+      builder: (BuildContext context, GoRouterState state) =>
+          const RecoverPasswordPage(),
     ),
     // StatefulShellRoute preserva o estado de cada aba na BottomNavigationBar
     StatefulShellRoute.indexedStack(
-      builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
-        return MainPage(navigationShell: navigationShell);
-      },
+      builder:
+          (
+            BuildContext context,
+            GoRouterState state,
+            StatefulNavigationShell navigationShell,
+          ) {
+            return MainPage(navigationShell: navigationShell);
+          },
       branches: <StatefulShellBranch>[
         StatefulShellBranch(
           routes: <RouteBase>[
             GoRoute(
               path: '/home',
-              builder: (BuildContext context, GoRouterState state) => const InicioPage(),
+              builder: (BuildContext context, GoRouterState state) =>
+                  const InicioPage(),
             ),
           ],
         ),
@@ -44,7 +52,8 @@ final GoRouter appRouter = GoRouter(
           routes: <RouteBase>[
             GoRoute(
               path: '/coletas',
-              builder: (BuildContext context, GoRouterState state) => const ColetasPage(),
+              builder: (BuildContext context, GoRouterState state) =>
+                  const ColetasPage(),
             ),
           ],
         ),
@@ -52,7 +61,8 @@ final GoRouter appRouter = GoRouter(
           routes: <RouteBase>[
             GoRoute(
               path: '/sincronizar',
-              builder: (BuildContext context, GoRouterState state) => const SyncPage(),
+              builder: (BuildContext context, GoRouterState state) =>
+                  const SyncPage(),
             ),
           ],
         ),
@@ -60,7 +70,8 @@ final GoRouter appRouter = GoRouter(
           routes: <RouteBase>[
             GoRoute(
               path: '/perfil',
-              builder: (BuildContext context, GoRouterState state) => const ProfilePage(),
+              builder: (BuildContext context, GoRouterState state) =>
+                  const ProfilePage(),
             ),
           ],
         ),

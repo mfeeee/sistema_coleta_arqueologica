@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Modo Claro 
+  // Modo Claro
   static const Color primaryLight = Color(0xFF493627);
   static const Color navBarUnfocusedLight = Color(0xFF94A3B8);
-  static const Color backgroundLight = Color(0xFFF7F7F6); 
-  static const Color surfaceLight = Color(0xFFFFFFFF); 
-  static const Color surfaceLightSecondary = Color(0x33493627); 
+  static const Color backgroundLight = Color(0xFFF7F7F6);
+  static const Color surfaceLight = Color(0xFFFFFFFF);
+  static const Color surfaceLightSecondary = Color(0x33493627);
   static const Color textPrimaryLight = Color(0xFF292524);
   static const Color textSecondaryLight = Color(0xFF57534E);
 

@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/pages/login_page.dart';
 import '../../features/auth/pages/recover_password_page.dart';
 import '../../features/auth/pages/register_page.dart';
-import '../../features/coleta/pages/coletas_page.dart';
+import '../../features/coleta/presentation/pages/coletas_page.dart';
 import '../../features/home/presentation/pages/inicio_page.dart';
+import '../../features/sync/presentation/pages/sync_page.dart';
 import '../../features/profile/pages/profile_page.dart';
 import '../navigation/main_page.dart';
 
@@ -51,7 +52,7 @@ final GoRouter appRouter = GoRouter(
           routes: <RouteBase>[
             GoRoute(
               path: '/sincronizar',
-              builder: (BuildContext context, GoRouterState state) => const ColetasPage(),
+              builder: (BuildContext context, GoRouterState state) => const SyncPage(),
             ),
           ],
         ),

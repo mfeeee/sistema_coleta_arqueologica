@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class ColetasPage extends StatelessWidget {
   const ColetasPage({super.key});
@@ -63,10 +62,10 @@ class ColetasPage extends StatelessWidget {
         ),
         body: const TabBarView(
           children: <Widget>[
-            const _ListaColetas(),
-            const _ListaColetasPendentes(),
-            const _ListaColetasAprovadas(),
-            const _ListaColetasRejeitadas(),
+            _ListaColetas(),
+            _ListaColetasPendentes(),
+            _ListaColetasAprovadas(),
+            _ListaColetasRejeitadas(),
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -89,13 +88,13 @@ class _SyncProgressBar extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return Padding(
-      padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Text(
+              const Text(
                 'SINCRONIZANDO DADOS...',
                 style: TextStyle(
                   fontSize: 10,
@@ -478,7 +477,7 @@ class _ListaColetasRejeitadas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    // final ThemeData theme = Theme.of(context);
 
     return ListView(
       padding: const EdgeInsets.only(

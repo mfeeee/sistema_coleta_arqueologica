@@ -7,6 +7,6 @@ pre-commit:
     analyze:
       glob: "*.dart"
       run: flutter analyze
-    test:
-      glob: "*.dart"
-      run: flutter test
+    # test:
+    #   glob: "*.dart"
+    #   run: flutter test

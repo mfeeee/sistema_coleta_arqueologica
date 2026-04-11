@@ -104,7 +104,6 @@ class _HeaderArea extends StatelessWidget {
         ),
       ],
     );
-    throw UnimplementedError();
   }
 }
 
@@ -234,7 +233,7 @@ class _RegisterFormState extends State<_RegisterForm> {
             obscureText: _hidePassword,
             decoration: InputDecoration(
               hintText: 'Crie uma senha',
-              prefixIcon: Icon(Icons.lock_outline),
+              prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
                   _hidePassword ? Icons.visibility_off : Icons.visibility,
@@ -264,7 +263,7 @@ class _RegisterFormState extends State<_RegisterForm> {
             obscureText: _hideConfirmPassword,
             decoration: InputDecoration(
               hintText: 'Repita a senha',
-              prefixIcon: Icon(Icons.lock_outline),
+              prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
                   _hideConfirmPassword
@@ -287,11 +286,11 @@ class _RegisterFormState extends State<_RegisterForm> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                const Text(
                   'Criar Conta',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Icon(
                   Icons.person_add_alt_outlined,
                   size: 20,
@@ -314,7 +313,6 @@ class _RegisterFormState extends State<_RegisterForm> {
             ),
             onPressed: () {
               context.canPop() ? context.pop() : context.go('/login');
-              ;
             },
             child: Text(
               'Já tenho uma conta, entrar',
@@ -387,6 +385,5 @@ class _RegisterFormState extends State<_RegisterForm> {
         ],
       ),
     );
-    throw UnimplementedError();
   }
 }

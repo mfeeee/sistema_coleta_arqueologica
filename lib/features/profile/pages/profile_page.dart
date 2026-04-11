@@ -42,11 +42,11 @@ class ProfilePage extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: SafeArea(
+      body: const SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(top: 24.0, bottom: 40.0),
+          padding: EdgeInsets.only(top: 24.0, bottom: 40.0),
           child: Column(
-            children: const <Widget>[
+            children: <Widget>[
               _UserInfoSection(),
               SizedBox(height: 32.0),
               _MetricsSection(),
@@ -157,12 +157,12 @@ class _MetricsSection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
 
-          Row(
+          const Row(
             children: <Widget>[
               Expanded(
                 child: _MetricCard(title: 'SÍTIOS MAPEADOS', value: '42'),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16),
               Expanded(
                 child: _MetricCard(title: 'DIAS EM CAMPO', value: '156'),
               ),
@@ -212,7 +212,7 @@ class _NotificationSection extends StatelessWidget {
                   title: 'Alertas de Sincronização',
                   trailing: Switch(
                     value: true,
-                    activeColor: theme.colorScheme.primary,
+                    activeThumbColor: theme.colorScheme.primary,
                     onChanged: (bool val) {},
                   ),
                 ),
@@ -222,7 +222,7 @@ class _NotificationSection extends StatelessWidget {
                   title: 'Status de Curadoria',
                   trailing: Switch(
                     value: false,
-                    activeColor: theme.colorScheme.primary,
+                    activeThumbColor: theme.colorScheme.primary,
                     onChanged: (bool val) {},
                   ),
                 ),
@@ -232,7 +232,7 @@ class _NotificationSection extends StatelessWidget {
                   title: 'Avisos de Proximidade',
                   trailing: Switch(
                     value: true,
-                    activeColor: theme.colorScheme.primary,
+                    activeThumbColor: theme.colorScheme.primary,
                     onChanged: (bool val) {},
                   ),
                 ),
@@ -282,7 +282,7 @@ class _AppPreferencesSection extends StatelessWidget {
                   title: 'Modo Escuro',
                   trailing: Switch(
                     value: false,
-                    activeColor: theme.colorScheme.primary,
+                    activeThumbColor: theme.colorScheme.primary,
                     onChanged: (bool val) {},
                   ),
                 ),

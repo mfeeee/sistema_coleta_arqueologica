@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class SyncPage extends StatelessWidget {
   const SyncPage({super.key});
@@ -43,12 +42,12 @@ class SyncPage extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: SafeArea(
+      body: const SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: const <Widget>[
+            children: <Widget>[
               _NetworkStatusCard(),
               SizedBox(height: 16),
               _SyncProgressCard(),
@@ -129,7 +128,7 @@ class _NetworkStatusCard extends StatelessWidget {
           // Toggle (Switch)
           Switch(
             value: true,
-            activeColor: theme.colorScheme.primary,
+            activeThumbColor: theme.colorScheme.primary,
             onChanged: (bool val) {
               // TODO: Lógica para forçar modo offline/online
             },
@@ -261,15 +260,15 @@ class _DetailedBreakdownSection extends StatelessWidget {
           ),
           child: Column(
             children: <Widget>[
-              _BreakdownTile(
+              const _BreakdownTile(
                 icon: Icons.location_on_outlined,
-                iconColor: const Color(0xFF16A34A),
+                iconColor: Color(0xFF16A34A),
                 title: 'Dados de GPS',
                 // Chip verde
                 trailingChip: _StatusChip(
                   text: 'OK',
-                  textColor: const Color(0xFF16A34A),
-                  bgColor: const Color(0xFFF0FDF4),
+                  textColor: Color(0xFF16A34A),
+                  bgColor: Color(0xFFF0FDF4),
                 ),
               ),
               const Divider(height: 1, indent: 48),

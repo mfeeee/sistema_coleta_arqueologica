@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class InicioPage extends StatelessWidget {
   const InicioPage({super.key});
@@ -49,19 +48,19 @@ class InicioPage extends StatelessWidget {
           ),
         ],
       ),
-      body: SafeArea(
+      body: const SafeArea(
         child: SingleChildScrollView(
           // padding: EdgeInsets.only(top: 24.0, bottom: 144.0),
           child: Column(
             children: <Widget>[
-              const _WelcomeSection(),
-              const SizedBox(height: 32.0),
-              const _QuickActionsSection(),
-              const SizedBox(height: 32.0),
-              const _ActivitySummarySection(),
-              const SizedBox(height: 32.0),
-              const _RecentActivitiesSection(),
-              const SizedBox(height: 32.0),
+              _WelcomeSection(),
+              SizedBox(height: 32.0),
+              _QuickActionsSection(),
+              SizedBox(height: 32.0),
+              _ActivitySummarySection(),
+              SizedBox(height: 32.0),
+              _RecentActivitiesSection(),
+              SizedBox(height: 32.0),
             ],
           ),
         ),
@@ -93,7 +92,7 @@ class _WelcomeSection extends StatelessWidget {
               ),
             ),
             padding: const EdgeInsets.all(2.0),
-            child: CircleAvatar(
+            child: const CircleAvatar(
               backgroundImage: NetworkImage(
                 'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
               ),
@@ -148,8 +147,8 @@ class _QuickActionsSection extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(Icons.add_circle_outline, color: Colors.white),
-                SizedBox(width: 8),
+                const Icon(Icons.add_circle_outline, color: Colors.white),
+                const SizedBox(width: 8),
                 Text(
                   'Nova Coleta',
                   style: TextStyle(

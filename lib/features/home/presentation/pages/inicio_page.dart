@@ -393,7 +393,7 @@ class _RecentActivitiesSection extends StatelessWidget {
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 12,
                     letterSpacing: 0.7,
                   ),
                 ),

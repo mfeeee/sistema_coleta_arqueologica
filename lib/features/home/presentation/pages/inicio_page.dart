@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class InicioPage extends StatelessWidget {
   const InicioPage({super.key});
@@ -173,7 +174,7 @@ class _QuickActionsSection extends StatelessWidget {
                   icon: Icons.folder_open_outlined,
                   label: 'Ver Minhas Coletas',
                   onTap: () {
-                    // TODO
+                    context.go('/coletas');
                   },
                 ),
               ),
@@ -183,7 +184,7 @@ class _QuickActionsSection extends StatelessWidget {
                   icon: Icons.sync,
                   label: 'Sincronizar Agora',
                   onTap: () {
-                    // TODO
+                    context.go('/sincronizar');
                   },
                 ),
               ),
@@ -389,7 +390,7 @@ class _RecentActivitiesSection extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  // TODO
+                  context.go('/coletas');
                 },
                 child: Text(
                   'Ver tudo',

@@ -8,6 +8,7 @@ import '../../features/coleta/presentation/pages/coletas_page.dart';
 import '../../features/home/presentation/pages/inicio_page.dart';
 import '../../features/sync/presentation/pages/sync_page.dart';
 import '../../features/profile/pages/profile_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../navigation/main_page.dart';
 
 /// Configuração centralizada de rotas para o app
@@ -28,6 +29,12 @@ final GoRouter appRouter = GoRouter(
       builder: (BuildContext context, GoRouterState state) =>
           const RecoverPasswordPage(),
     ),
+
+    GoRoute(
+      path: '/notificacoes',
+      builder: (BuildContext context, GoRouterState state) => const NotificationsPage(),
+    ),
+
     // StatefulShellRoute preserva o estado de cada aba na BottomNavigationBar
     StatefulShellRoute.indexedStack(
       builder:

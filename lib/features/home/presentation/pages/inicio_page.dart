@@ -43,7 +43,7 @@ class InicioPage extends StatelessWidget {
                 size: 20,
               ),
               onPressed: () {
-                // TODO
+                context.push('/notificacoes');
               },
             ),
           ),

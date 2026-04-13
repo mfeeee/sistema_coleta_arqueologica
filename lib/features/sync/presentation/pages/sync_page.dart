@@ -119,7 +119,6 @@ class _NetworkStatusCard extends StatelessWidget {
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -176,7 +175,6 @@ class _SyncProgressCard extends StatelessWidget {
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: const Color(0xFF0F172A),
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -245,7 +243,6 @@ class _DetailedBreakdownSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF64748B),
               letterSpacing: 0.7,
             ),
           ),
@@ -378,7 +375,6 @@ class _BreakdownTile extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF0F172A),
               ),
             ),
           ),

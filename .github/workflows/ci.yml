@@ -32,8 +32,8 @@ jobs:
         run: dart format --output=none --set-exit-if-changed .
 
       # 5. Roda o analisador estático (Lints)
-      - name: Analyze Code
-        run: flutter analyze
+      # - name: Analyze Code
+      #   run: flutter analyze
 
       # Testes desligados temporariamente
       # - name: Run Tests

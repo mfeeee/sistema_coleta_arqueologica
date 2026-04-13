@@ -102,7 +102,7 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
     final ThemeData theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.only(bottom: 278.5, top: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

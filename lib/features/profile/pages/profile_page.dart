@@ -471,10 +471,9 @@ class _SettingsTile extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
+              style: theme.textTheme.bodyLarge?.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF334155),
               ),
             ),
           ),

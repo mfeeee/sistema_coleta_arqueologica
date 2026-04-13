@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import, unused_element, unused_local_variable, unused_field
+
 import 'dart:math' as math;
 import '../entities/sitio_cache_entity.dart';
 import '../repositories/coleta_repository.dart';

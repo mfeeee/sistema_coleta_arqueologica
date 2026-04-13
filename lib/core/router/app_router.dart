@@ -32,7 +32,8 @@ final GoRouter appRouter = GoRouter(
 
     GoRoute(
       path: '/notificacoes',
-      builder: (BuildContext context, GoRouterState state) => const NotificationsPage(),
+      builder: (BuildContext context, GoRouterState state) =>
+          const NotificationsPage(),
     ),
 
     // StatefulShellRoute preserva o estado de cada aba na BottomNavigationBar

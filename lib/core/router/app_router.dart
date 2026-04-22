@@ -9,6 +9,10 @@ import '../../features/home/presentation/pages/inicio_page.dart';
 import '../../features/sync/presentation/pages/sync_page.dart';
 import '../../features/profile/pages/profile_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../features/coleta/presentation/pages/nova_coleta_page.dart';
+import '../../features/coleta/presentation/pages/detalhes_coleta_page.dart';
+import '../../features/coleta/presentation/pages/motivo_rejeicao_page.dart';
+
 import '../navigation/main_page.dart';
 
 /// Configuração centralizada de rotas para o app
@@ -34,6 +38,21 @@ final GoRouter appRouter = GoRouter(
       path: '/notificacoes',
       builder: (BuildContext context, GoRouterState state) =>
           const NotificationsPage(),
+    ),
+    GoRoute(
+      path: '/nova-coleta',
+      builder: (BuildContext context, GoRouterState state) =>
+          const NovaColetaPage(),
+    ),
+    GoRoute(
+      path: '/detalhes-coleta',
+      builder: (BuildContext context, GoRouterState state) =>
+          const DetalhesColetaPage(),
+    ),
+    GoRoute(
+      path: '/motivo-rejeicao',
+      builder: (BuildContext context, GoRouterState state) =>
+          const MotivoRejeicaoPage(),
     ),
 
     // StatefulShellRoute preserva o estado de cada aba na BottomNavigationBar

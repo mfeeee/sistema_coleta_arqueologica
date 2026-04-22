@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ColetasPage extends StatelessWidget {
   const ColetasPage({super.key});
@@ -70,7 +71,7 @@ class ColetasPage extends StatelessWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // TODO: Ação de Nova Coleta
+            context.push('/nova-coleta');
           },
           backgroundColor: theme.colorScheme.primary,
           child: const Icon(Icons.add, color: Colors.white),
@@ -265,7 +266,9 @@ class _ListaColetas extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    context.go('/detalhes-coleta');
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary.withValues(
                       alpha: 0.1,
@@ -339,7 +342,9 @@ class _ListaColetas extends StatelessWidget {
           imageUrl:
               'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
           actionsRow: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              context.go('/motivo-rejeicao');
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFEF2F2),
               side: const BorderSide(color: Color(0xFFFECACA)),

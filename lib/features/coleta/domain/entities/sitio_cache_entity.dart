@@ -1,9 +1,13 @@
-// ignore_for_file: unused_import, unused_element, unused_local_variable, unused_field
-
-// TODO: Crie os atributos essenciais de um sítio para o cache (id, nome, lat, lon).
-/// Lembre-se que entidades de domínio não devem ter dependências do Flutter (ex: Material).
 class SitioCacheEntity {
-  // TODO: Declarar variáveis finais
+  final String id;
+  final String nome;
+  final double latitude;
+  final double longitude;
 
-  // TODO: Criar o construtor required
+  const SitioCacheEntity({
+    required this.id,
+    required this.nome,
+    required this.latitude,
+    required this.longitude,
+  });
 }

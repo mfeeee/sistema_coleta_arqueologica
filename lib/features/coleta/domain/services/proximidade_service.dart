@@ -1,5 +1,3 @@
-// ignore_for_file: unused_import, unused_element, unused_local_variable, unused_field
-
 import 'dart:math' as math;
 import '../entities/sitio_cache_entity.dart';
 import '../repositories/coleta_repository.dart';
@@ -15,30 +13,28 @@ class ProximidadeService {
     required double lonAtual,
     double raioMetros = 500.0,
   }) async {
-    // Busca TODOS os sítios do cache local
-    // (Num app real com milhões de pontos usaríamos queries espaciais,
-    // mas para 10.000 sítios no PI, trazer para memória é instantâneo).
+    // TODO: Melhorar a complexidade de tempo inserindo queries espaciais.
     final todosSitios = await _repository.getSitiosCacheOffline();
 
     final sitiosProximos = <SitioCacheEntity>[];
 
     for (final sitio in todosSitios) {
-      // final distancia = _calcularDistancia(
-      //   latAtual,
-      //   lonAtual,
-      //   sitio.latitude,
-      //   sitio.longitude,
-      // );
+      final distancia = _calcularDistancia(
+        latAtual,
+        lonAtual,
+        sitio.latitude,
+        sitio.longitude,
+      );
 
-      // if (distancia <= raioMetros) {
-      //   sitiosProximos.add(sitio);
-      // }
+      if (distancia <= raioMetros) {
+        sitiosProximos.add(sitio);
+      }
     }
 
     return sitiosProximos;
   }
 
-  /// Fórmula de Haversine: Calcula a distância em metros entre dois pontos na Terra
+  /// Fórmula de Haversine
   double _calcularDistancia(
     double lat1,
     double lon1,

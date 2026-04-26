@@ -16,12 +16,19 @@ class SecureStorageService {
   Future<void> _safeWrite(String key, String value) async {
     try {
       await _storage.write(
-        key: key, 
+        key: key,
         value: value,
-        iOptions: const IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+        iOptions: const IOSOptions(
+          accessibility: KeychainAccessibility.first_unlock,
+        ),
       );
     } catch (e, stack) {
-      log('Erro ao gravar $key', error: e, stackTrace: stack, name: 'SecureStorage');
+      log(
+        'Erro ao gravar $key',
+        error: e,
+        stackTrace: stack,
+        name: 'SecureStorage',
+      );
     }
   }
 
@@ -29,7 +36,12 @@ class SecureStorageService {
     try {
       return await _storage.read(key: key);
     } catch (e, stack) {
-      log('Erro ao ler $key', error: e, stackTrace: stack, name: 'SecureStorage');
+      log(
+        'Erro ao ler $key',
+        error: e,
+        stackTrace: stack,
+        name: 'SecureStorage',
+      );
       return null;
     }
   }
@@ -37,7 +49,8 @@ class SecureStorageService {
   Future<void> saveJwt(String token) => _safeWrite(_keyJwt, token);
   Future<String?> getJwt() => _safeRead(_keyJwt);
 
-  Future<void> saveRefreshToken(String token) => _safeWrite(_keyRefreshToken, token);
+  Future<void> saveRefreshToken(String token) =>
+      _safeWrite(_keyRefreshToken, token);
   Future<String?> getRefreshToken() => _safeRead(_keyRefreshToken);
 
   Future<String> getOrCreateDbPassphrase() async {
@@ -46,12 +59,14 @@ class SecureStorageService {
 
     final passphrase = _generatePassphrase();
     await _safeWrite(_keyDbPassphrase, passphrase);
-    
+
     final verified = await _safeRead(_keyDbPassphrase);
     if (verified == null) {
-      throw Exception('Falha crítica: Não foi possível persistir a passphrase do banco.');
+      throw Exception(
+        'Falha crítica: Não foi possível persistir a passphrase do banco.',
+      );
     }
-    
+
     return verified;
   }
 
@@ -64,8 +79,12 @@ class SecureStorageService {
   }
 
   String _generatePassphrase({int length = 32}) {
-    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#\$%^&*()_+-=[]{}|;:,.<>?';
+    const charset =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#\$%^&*()_+-=[]{}|;:,.<>?';
     final random = math.Random.secure();
-    return List.generate(length, (_) => charset[random.nextInt(charset.length)]).join();
+    return List.generate(
+      length,
+      (_) => charset[random.nextInt(charset.length)],
+    ).join();
   }
 }

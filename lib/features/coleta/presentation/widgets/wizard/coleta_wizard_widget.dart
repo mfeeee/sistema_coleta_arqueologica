@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'passo_1_identificacao_widget.dart';
 import 'passo_2_detalhes_widget.dart';
+import '../../viewmodels/coleta_form_notifier.dart';
 
 class ColetaWizardWidget extends StatefulWidget {
   final double latitude;
   final double longitude;
+  final ColetaFormNotifier formNotifier;
   final VoidCallback onFinalizar;
   final VoidCallback onCancelar;
 
@@ -12,6 +14,7 @@ class ColetaWizardWidget extends StatefulWidget {
     super.key,
     required this.latitude,
     required this.longitude,
+    required this.formNotifier,
     required this.onFinalizar,
     required this.onCancelar,
   });
@@ -53,7 +56,7 @@ class _ColetaWizardWidgetState extends State<ColetaWizardWidget> {
       FocusScope.of(context).unfocus();
       _pageController.nextPage(
         curve: Curves.easeInOut,
-        duration: const Duration(microseconds: 300),
+        duration: const Duration(milliseconds: 300),
       );
     }
   }
@@ -106,6 +109,7 @@ class _ColetaWizardWidgetState extends State<ColetaWizardWidget> {
         Passo2DetalhesWidget(
           formKey: _formKeyPasso2,
           sinteseController: _sinteseController,
+          formNotifier: widget.formNotifier,
           onVoltar: _voltarParaPasso1,
           onFinalizar: _finalizarColeta,
         ),

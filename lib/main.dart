@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/database/app_database.dart';
@@ -51,7 +52,7 @@ Future<void> main() async {
   );
 }
 
-class SistemaColetaApp extends StatelessWidget {
+class SistemaColetaApp extends StatefulWidget {
   const SistemaColetaApp({
     super.key,
     required this.authNotifier,
@@ -62,17 +63,36 @@ class SistemaColetaApp extends StatelessWidget {
   final SyncService syncService;
 
   @override
+  State<SistemaColetaApp> createState() => _SistemaColetaAppState();
+}
+
+class _SistemaColetaAppState extends State<SistemaColetaApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = createAppRouter(widget.authNotifier);
+  }
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AppScope(
-      authNotifier: authNotifier,
-      syncService: syncService,
+      authNotifier: widget.authNotifier,
+      syncService: widget.syncService,
       child: MaterialApp.router(
         title: 'Sistema de Coleta Arqueológica',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
-        routerConfig: appRouter,
+        routerConfig: _router,
       ),
     );
   }

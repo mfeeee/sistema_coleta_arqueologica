@@ -51,26 +51,26 @@ class $UsuariosTable extends Usuarios with TableInfo<$UsuariosTable, Usuario> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _perfilMeta = const VerificationMeta('perfil');
   @override
-  late final GeneratedColumn<String> perfil = GeneratedColumn<String>(
-    'perfil',
+  late final GeneratedColumnWithTypeConverter<PerfilUsuario, String> perfil =
+      GeneratedColumn<String>(
+        'perfil_usuario',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        clientDefault: () => PerfilUsuario.coletor.name,
+      ).withConverter<PerfilUsuario>($UsuariosTable.$converterperfil);
+  @override
+  late final GeneratedColumnWithTypeConverter<ClassificacaoUsuario, String>
+  classificacao = GeneratedColumn<String>(
+    'classificacao',
     aliasedName,
     false,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _classificacaoMeta = const VerificationMeta(
-    'classificacao',
-  );
-  @override
-  late final GeneratedColumn<String> classificacao = GeneratedColumn<String>(
-    'classificacao',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+    requiredDuringInsert: false,
+    clientDefault: () => ClassificacaoUsuario.arqueologo.name,
+  ).withConverter<ClassificacaoUsuario>($UsuariosTable.$converterclassificacao);
   static const VerificationMeta _ativoMeta = const VerificationMeta('ativo');
   @override
   late final GeneratedColumn<bool> ativo = GeneratedColumn<bool>(
@@ -151,25 +151,6 @@ class $UsuariosTable extends Usuarios with TableInfo<$UsuariosTable, Usuario> {
     } else if (isInserting) {
       context.missing(_senhaHashMeta);
     }
-    if (data.containsKey('perfil')) {
-      context.handle(
-        _perfilMeta,
-        perfil.isAcceptableOrUnknown(data['perfil']!, _perfilMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_perfilMeta);
-    }
-    if (data.containsKey('classificacao')) {
-      context.handle(
-        _classificacaoMeta,
-        classificacao.isAcceptableOrUnknown(
-          data['classificacao']!,
-          _classificacaoMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_classificacaoMeta);
-    }
     if (data.containsKey('ativo')) {
       context.handle(
         _ativoMeta,
@@ -207,14 +188,18 @@ class $UsuariosTable extends Usuarios with TableInfo<$UsuariosTable, Usuario> {
         DriftSqlType.string,
         data['${effectivePrefix}senha_hash'],
       )!,
-      perfil: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}perfil'],
-      )!,
-      classificacao: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}classificacao'],
-      )!,
+      perfil: $UsuariosTable.$converterperfil.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}perfil_usuario'],
+        )!,
+      ),
+      classificacao: $UsuariosTable.$converterclassificacao.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}classificacao'],
+        )!,
+      ),
       ativo: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}ativo'],
@@ -230,6 +215,13 @@ class $UsuariosTable extends Usuarios with TableInfo<$UsuariosTable, Usuario> {
   $UsuariosTable createAlias(String alias) {
     return $UsuariosTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<PerfilUsuario, String, String> $converterperfil =
+      const EnumNameConverter<PerfilUsuario>(PerfilUsuario.values);
+  static JsonTypeConverter2<ClassificacaoUsuario, String, String>
+  $converterclassificacao = const EnumNameConverter<ClassificacaoUsuario>(
+    ClassificacaoUsuario.values,
+  );
 }
 
 class Usuario extends DataClass implements Insertable<Usuario> {
@@ -237,8 +229,8 @@ class Usuario extends DataClass implements Insertable<Usuario> {
   final String nome;
   final String email;
   final String senhaHash;
-  final String perfil;
-  final String classificacao;
+  final PerfilUsuario perfil;
+  final ClassificacaoUsuario classificacao;
   final bool ativo;
   final DateTime criadoEm;
   const Usuario({
@@ -258,8 +250,16 @@ class Usuario extends DataClass implements Insertable<Usuario> {
     map['nome'] = Variable<String>(nome);
     map['email'] = Variable<String>(email);
     map['senha_hash'] = Variable<String>(senhaHash);
-    map['perfil'] = Variable<String>(perfil);
-    map['classificacao'] = Variable<String>(classificacao);
+    {
+      map['perfil_usuario'] = Variable<String>(
+        $UsuariosTable.$converterperfil.toSql(perfil),
+      );
+    }
+    {
+      map['classificacao'] = Variable<String>(
+        $UsuariosTable.$converterclassificacao.toSql(classificacao),
+      );
+    }
     map['ativo'] = Variable<bool>(ativo);
     map['criado_em'] = Variable<DateTime>(criadoEm);
     return map;
@@ -288,8 +288,12 @@ class Usuario extends DataClass implements Insertable<Usuario> {
       nome: serializer.fromJson<String>(json['nome']),
       email: serializer.fromJson<String>(json['email']),
       senhaHash: serializer.fromJson<String>(json['senhaHash']),
-      perfil: serializer.fromJson<String>(json['perfil']),
-      classificacao: serializer.fromJson<String>(json['classificacao']),
+      perfil: $UsuariosTable.$converterperfil.fromJson(
+        serializer.fromJson<String>(json['perfil']),
+      ),
+      classificacao: $UsuariosTable.$converterclassificacao.fromJson(
+        serializer.fromJson<String>(json['classificacao']),
+      ),
       ativo: serializer.fromJson<bool>(json['ativo']),
       criadoEm: serializer.fromJson<DateTime>(json['criadoEm']),
     );
@@ -302,8 +306,12 @@ class Usuario extends DataClass implements Insertable<Usuario> {
       'nome': serializer.toJson<String>(nome),
       'email': serializer.toJson<String>(email),
       'senhaHash': serializer.toJson<String>(senhaHash),
-      'perfil': serializer.toJson<String>(perfil),
-      'classificacao': serializer.toJson<String>(classificacao),
+      'perfil': serializer.toJson<String>(
+        $UsuariosTable.$converterperfil.toJson(perfil),
+      ),
+      'classificacao': serializer.toJson<String>(
+        $UsuariosTable.$converterclassificacao.toJson(classificacao),
+      ),
       'ativo': serializer.toJson<bool>(ativo),
       'criadoEm': serializer.toJson<DateTime>(criadoEm),
     };
@@ -314,8 +322,8 @@ class Usuario extends DataClass implements Insertable<Usuario> {
     String? nome,
     String? email,
     String? senhaHash,
-    String? perfil,
-    String? classificacao,
+    PerfilUsuario? perfil,
+    ClassificacaoUsuario? classificacao,
     bool? ativo,
     DateTime? criadoEm,
   }) => Usuario(
@@ -388,8 +396,8 @@ class UsuariosCompanion extends UpdateCompanion<Usuario> {
   final Value<String> nome;
   final Value<String> email;
   final Value<String> senhaHash;
-  final Value<String> perfil;
-  final Value<String> classificacao;
+  final Value<PerfilUsuario> perfil;
+  final Value<ClassificacaoUsuario> classificacao;
   final Value<bool> ativo;
   final Value<DateTime> criadoEm;
   final Value<int> rowid;
@@ -409,17 +417,15 @@ class UsuariosCompanion extends UpdateCompanion<Usuario> {
     required String nome,
     required String email,
     required String senhaHash,
-    required String perfil,
-    required String classificacao,
+    this.perfil = const Value.absent(),
+    this.classificacao = const Value.absent(),
     this.ativo = const Value.absent(),
     this.criadoEm = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : uuid = Value(uuid),
        nome = Value(nome),
        email = Value(email),
-       senhaHash = Value(senhaHash),
-       perfil = Value(perfil),
-       classificacao = Value(classificacao);
+       senhaHash = Value(senhaHash);
   static Insertable<Usuario> custom({
     Expression<String>? uuid,
     Expression<String>? nome,
@@ -436,7 +442,7 @@ class UsuariosCompanion extends UpdateCompanion<Usuario> {
       if (nome != null) 'nome': nome,
       if (email != null) 'email': email,
       if (senhaHash != null) 'senha_hash': senhaHash,
-      if (perfil != null) 'perfil': perfil,
+      if (perfil != null) 'perfil_usuario': perfil,
       if (classificacao != null) 'classificacao': classificacao,
       if (ativo != null) 'ativo': ativo,
       if (criadoEm != null) 'criado_em': criadoEm,
@@ -449,8 +455,8 @@ class UsuariosCompanion extends UpdateCompanion<Usuario> {
     Value<String>? nome,
     Value<String>? email,
     Value<String>? senhaHash,
-    Value<String>? perfil,
-    Value<String>? classificacao,
+    Value<PerfilUsuario>? perfil,
+    Value<ClassificacaoUsuario>? classificacao,
     Value<bool>? ativo,
     Value<DateTime>? criadoEm,
     Value<int>? rowid,
@@ -484,10 +490,14 @@ class UsuariosCompanion extends UpdateCompanion<Usuario> {
       map['senha_hash'] = Variable<String>(senhaHash.value);
     }
     if (perfil.present) {
-      map['perfil'] = Variable<String>(perfil.value);
+      map['perfil_usuario'] = Variable<String>(
+        $UsuariosTable.$converterperfil.toSql(perfil.value),
+      );
     }
     if (classificacao.present) {
-      map['classificacao'] = Variable<String>(classificacao.value);
+      map['classificacao'] = Variable<String>(
+        $UsuariosTable.$converterclassificacao.toSql(classificacao.value),
+      );
     }
     if (ativo.present) {
       map['ativo'] = Variable<bool>(ativo.value);
@@ -726,10 +736,8 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
     return $ColetasTable(attachedDatabase, alias);
   }
 
-  static JsonTypeConverter2<StatusColeta, String, String>
-  $converterstatusSincronizacao = const EnumNameConverter<StatusColeta>(
-    StatusColeta.values,
-  );
+  static TypeConverter<StatusColeta, String> $converterstatusSincronizacao =
+      const StatusColetaConverter();
   static TypeConverter<Map<String, Object?>, String> $converterdadosColetados =
       const JsonMapConverter();
 }
@@ -801,8 +809,8 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       uuid: serializer.fromJson<String>(json['uuid']),
       usuarioId: serializer.fromJson<String>(json['usuarioId']),
       dataColeta: serializer.fromJson<DateTime>(json['dataColeta']),
-      statusSincronizacao: $ColetasTable.$converterstatusSincronizacao.fromJson(
-        serializer.fromJson<String>(json['statusSincronizacao']),
+      statusSincronizacao: serializer.fromJson<StatusColeta>(
+        json['statusSincronizacao'],
       ),
       versao: serializer.fromJson<int>(json['versao']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -819,8 +827,8 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       'uuid': serializer.toJson<String>(uuid),
       'usuarioId': serializer.toJson<String>(usuarioId),
       'dataColeta': serializer.toJson<DateTime>(dataColeta),
-      'statusSincronizacao': serializer.toJson<String>(
-        $ColetasTable.$converterstatusSincronizacao.toJson(statusSincronizacao),
+      'statusSincronizacao': serializer.toJson<StatusColeta>(
+        statusSincronizacao,
       ),
       'versao': serializer.toJson<int>(versao),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -2174,26 +2182,29 @@ class $CuradoriasTable extends Curadorias
       'REFERENCES usuarios (uuid)',
     ),
   );
-  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
-  late final GeneratedColumn<String> status = GeneratedColumn<String>(
-    'status',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _acaoResultanteMeta = const VerificationMeta(
-    'acaoResultante',
-  );
+  late final GeneratedColumnWithTypeConverter<StatusCuradoria, String> status =
+      GeneratedColumn<String>(
+        'status_curadoria',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        clientDefault: () => StatusCuradoria.pendente.name,
+      ).withConverter<StatusCuradoria>($CuradoriasTable.$converterstatus);
   @override
-  late final GeneratedColumn<String> acaoResultante = GeneratedColumn<String>(
-    'acao_resultante',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<AcaoResultanteCuradoria, String>
+  acaoResultante =
+      GeneratedColumn<String>(
+        'acao_resultante',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        clientDefault: () => AcaoResultanteCuradoria.criarSitio.name,
+      ).withConverter<AcaoResultanteCuradoria>(
+        $CuradoriasTable.$converteracaoResultante,
+      );
   static const VerificationMeta _dataAvaliacaoMeta = const VerificationMeta(
     'dataAvaliacao',
   );
@@ -2274,25 +2285,6 @@ class $CuradoriasTable extends Curadorias
     } else if (isInserting) {
       context.missing(_usuarioIdMeta);
     }
-    if (data.containsKey('status')) {
-      context.handle(
-        _statusMeta,
-        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_statusMeta);
-    }
-    if (data.containsKey('acao_resultante')) {
-      context.handle(
-        _acaoResultanteMeta,
-        acaoResultante.isAcceptableOrUnknown(
-          data['acao_resultante']!,
-          _acaoResultanteMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_acaoResultanteMeta);
-    }
     if (data.containsKey('data_avaliacao')) {
       context.handle(
         _dataAvaliacaoMeta,
@@ -2333,14 +2325,18 @@ class $CuradoriasTable extends Curadorias
         DriftSqlType.string,
         data['${effectivePrefix}usuario_id'],
       )!,
-      status: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}status'],
-      )!,
-      acaoResultante: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}acao_resultante'],
-      )!,
+      status: $CuradoriasTable.$converterstatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}status_curadoria'],
+        )!,
+      ),
+      acaoResultante: $CuradoriasTable.$converteracaoResultante.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}acao_resultante'],
+        )!,
+      ),
       dataAvaliacao: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}data_avaliacao'],
@@ -2356,6 +2352,13 @@ class $CuradoriasTable extends Curadorias
   $CuradoriasTable createAlias(String alias) {
     return $CuradoriasTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<StatusCuradoria, String, String> $converterstatus =
+      const EnumNameConverter<StatusCuradoria>(StatusCuradoria.values);
+  static JsonTypeConverter2<AcaoResultanteCuradoria, String, String>
+  $converteracaoResultante = const EnumNameConverter<AcaoResultanteCuradoria>(
+    AcaoResultanteCuradoria.values,
+  );
 }
 
 class Curadoria extends DataClass implements Insertable<Curadoria> {
@@ -2363,8 +2366,8 @@ class Curadoria extends DataClass implements Insertable<Curadoria> {
   final String coletaId;
   final String? bemMaterialId;
   final String usuarioId;
-  final String status;
-  final String acaoResultante;
+  final StatusCuradoria status;
+  final AcaoResultanteCuradoria acaoResultante;
   final DateTime dataAvaliacao;
   final String? observacao;
   const Curadoria({
@@ -2386,8 +2389,16 @@ class Curadoria extends DataClass implements Insertable<Curadoria> {
       map['bem_material_id'] = Variable<String>(bemMaterialId);
     }
     map['usuario_id'] = Variable<String>(usuarioId);
-    map['status'] = Variable<String>(status);
-    map['acao_resultante'] = Variable<String>(acaoResultante);
+    {
+      map['status_curadoria'] = Variable<String>(
+        $CuradoriasTable.$converterstatus.toSql(status),
+      );
+    }
+    {
+      map['acao_resultante'] = Variable<String>(
+        $CuradoriasTable.$converteracaoResultante.toSql(acaoResultante),
+      );
+    }
     map['data_avaliacao'] = Variable<DateTime>(dataAvaliacao);
     if (!nullToAbsent || observacao != null) {
       map['observacao'] = Variable<String>(observacao);
@@ -2422,8 +2433,12 @@ class Curadoria extends DataClass implements Insertable<Curadoria> {
       coletaId: serializer.fromJson<String>(json['coletaId']),
       bemMaterialId: serializer.fromJson<String?>(json['bemMaterialId']),
       usuarioId: serializer.fromJson<String>(json['usuarioId']),
-      status: serializer.fromJson<String>(json['status']),
-      acaoResultante: serializer.fromJson<String>(json['acaoResultante']),
+      status: $CuradoriasTable.$converterstatus.fromJson(
+        serializer.fromJson<String>(json['status']),
+      ),
+      acaoResultante: $CuradoriasTable.$converteracaoResultante.fromJson(
+        serializer.fromJson<String>(json['acaoResultante']),
+      ),
       dataAvaliacao: serializer.fromJson<DateTime>(json['dataAvaliacao']),
       observacao: serializer.fromJson<String?>(json['observacao']),
     );
@@ -2436,8 +2451,12 @@ class Curadoria extends DataClass implements Insertable<Curadoria> {
       'coletaId': serializer.toJson<String>(coletaId),
       'bemMaterialId': serializer.toJson<String?>(bemMaterialId),
       'usuarioId': serializer.toJson<String>(usuarioId),
-      'status': serializer.toJson<String>(status),
-      'acaoResultante': serializer.toJson<String>(acaoResultante),
+      'status': serializer.toJson<String>(
+        $CuradoriasTable.$converterstatus.toJson(status),
+      ),
+      'acaoResultante': serializer.toJson<String>(
+        $CuradoriasTable.$converteracaoResultante.toJson(acaoResultante),
+      ),
       'dataAvaliacao': serializer.toJson<DateTime>(dataAvaliacao),
       'observacao': serializer.toJson<String?>(observacao),
     };
@@ -2448,8 +2467,8 @@ class Curadoria extends DataClass implements Insertable<Curadoria> {
     String? coletaId,
     Value<String?> bemMaterialId = const Value.absent(),
     String? usuarioId,
-    String? status,
-    String? acaoResultante,
+    StatusCuradoria? status,
+    AcaoResultanteCuradoria? acaoResultante,
     DateTime? dataAvaliacao,
     Value<String?> observacao = const Value.absent(),
   }) => Curadoria(
@@ -2530,8 +2549,8 @@ class CuradoriasCompanion extends UpdateCompanion<Curadoria> {
   final Value<String> coletaId;
   final Value<String?> bemMaterialId;
   final Value<String> usuarioId;
-  final Value<String> status;
-  final Value<String> acaoResultante;
+  final Value<StatusCuradoria> status;
+  final Value<AcaoResultanteCuradoria> acaoResultante;
   final Value<DateTime> dataAvaliacao;
   final Value<String?> observacao;
   final Value<int> rowid;
@@ -2551,16 +2570,14 @@ class CuradoriasCompanion extends UpdateCompanion<Curadoria> {
     required String coletaId,
     this.bemMaterialId = const Value.absent(),
     required String usuarioId,
-    required String status,
-    required String acaoResultante,
+    this.status = const Value.absent(),
+    this.acaoResultante = const Value.absent(),
     this.dataAvaliacao = const Value.absent(),
     this.observacao = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : uuid = Value(uuid),
        coletaId = Value(coletaId),
-       usuarioId = Value(usuarioId),
-       status = Value(status),
-       acaoResultante = Value(acaoResultante);
+       usuarioId = Value(usuarioId);
   static Insertable<Curadoria> custom({
     Expression<String>? uuid,
     Expression<String>? coletaId,
@@ -2577,7 +2594,7 @@ class CuradoriasCompanion extends UpdateCompanion<Curadoria> {
       if (coletaId != null) 'coleta_id': coletaId,
       if (bemMaterialId != null) 'bem_material_id': bemMaterialId,
       if (usuarioId != null) 'usuario_id': usuarioId,
-      if (status != null) 'status': status,
+      if (status != null) 'status_curadoria': status,
       if (acaoResultante != null) 'acao_resultante': acaoResultante,
       if (dataAvaliacao != null) 'data_avaliacao': dataAvaliacao,
       if (observacao != null) 'observacao': observacao,
@@ -2590,8 +2607,8 @@ class CuradoriasCompanion extends UpdateCompanion<Curadoria> {
     Value<String>? coletaId,
     Value<String?>? bemMaterialId,
     Value<String>? usuarioId,
-    Value<String>? status,
-    Value<String>? acaoResultante,
+    Value<StatusCuradoria>? status,
+    Value<AcaoResultanteCuradoria>? acaoResultante,
     Value<DateTime>? dataAvaliacao,
     Value<String?>? observacao,
     Value<int>? rowid,
@@ -2625,10 +2642,14 @@ class CuradoriasCompanion extends UpdateCompanion<Curadoria> {
       map['usuario_id'] = Variable<String>(usuarioId.value);
     }
     if (status.present) {
-      map['status'] = Variable<String>(status.value);
+      map['status_curadoria'] = Variable<String>(
+        $CuradoriasTable.$converterstatus.toSql(status.value),
+      );
     }
     if (acaoResultante.present) {
-      map['acao_resultante'] = Variable<String>(acaoResultante.value);
+      map['acao_resultante'] = Variable<String>(
+        $CuradoriasTable.$converteracaoResultante.toSql(acaoResultante.value),
+      );
     }
     if (dataAvaliacao.present) {
       map['data_avaliacao'] = Variable<DateTime>(dataAvaliacao.value);
@@ -2688,15 +2709,16 @@ class $MidiaLinksTable extends MidiaLinks
       'REFERENCES bens_materiais (uuid)',
     ),
   );
-  static const VerificationMeta _tipoMeta = const VerificationMeta('tipo');
   @override
-  late final GeneratedColumn<String> tipo = GeneratedColumn<String>(
-    'tipo',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumnWithTypeConverter<TipoMidia, String> tipo =
+      GeneratedColumn<String>(
+        'tipo',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        clientDefault: () => TipoMidia.imagem.name,
+      ).withConverter<TipoMidia>($MidiaLinksTable.$convertertipo);
   static const VerificationMeta _urlMeta = const VerificationMeta('url');
   @override
   late final GeneratedColumn<String> url = GeneratedColumn<String>(
@@ -2756,14 +2778,6 @@ class $MidiaLinksTable extends MidiaLinks
     } else if (isInserting) {
       context.missing(_bemMaterialIdMeta);
     }
-    if (data.containsKey('tipo')) {
-      context.handle(
-        _tipoMeta,
-        tipo.isAcceptableOrUnknown(data['tipo']!, _tipoMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_tipoMeta);
-    }
     if (data.containsKey('url')) {
       context.handle(
         _urlMeta,
@@ -2795,10 +2809,12 @@ class $MidiaLinksTable extends MidiaLinks
         DriftSqlType.string,
         data['${effectivePrefix}bem_material_id'],
       )!,
-      tipo: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}tipo'],
-      )!,
+      tipo: $MidiaLinksTable.$convertertipo.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}tipo'],
+        )!,
+      ),
       url: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}url'],
@@ -2814,12 +2830,15 @@ class $MidiaLinksTable extends MidiaLinks
   $MidiaLinksTable createAlias(String alias) {
     return $MidiaLinksTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<TipoMidia, String, String> $convertertipo =
+      const EnumNameConverter<TipoMidia>(TipoMidia.values);
 }
 
 class MidiaLink extends DataClass implements Insertable<MidiaLink> {
   final String uuid;
   final String bemMaterialId;
-  final String tipo;
+  final TipoMidia tipo;
   final String url;
   final String? descricao;
   const MidiaLink({
@@ -2834,7 +2853,11 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
     final map = <String, Expression>{};
     map['uuid'] = Variable<String>(uuid);
     map['bem_material_id'] = Variable<String>(bemMaterialId);
-    map['tipo'] = Variable<String>(tipo);
+    {
+      map['tipo'] = Variable<String>(
+        $MidiaLinksTable.$convertertipo.toSql(tipo),
+      );
+    }
     map['url'] = Variable<String>(url);
     if (!nullToAbsent || descricao != null) {
       map['descricao'] = Variable<String>(descricao);
@@ -2862,7 +2885,9 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
     return MidiaLink(
       uuid: serializer.fromJson<String>(json['uuid']),
       bemMaterialId: serializer.fromJson<String>(json['bemMaterialId']),
-      tipo: serializer.fromJson<String>(json['tipo']),
+      tipo: $MidiaLinksTable.$convertertipo.fromJson(
+        serializer.fromJson<String>(json['tipo']),
+      ),
       url: serializer.fromJson<String>(json['url']),
       descricao: serializer.fromJson<String?>(json['descricao']),
     );
@@ -2873,7 +2898,9 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
     return <String, dynamic>{
       'uuid': serializer.toJson<String>(uuid),
       'bemMaterialId': serializer.toJson<String>(bemMaterialId),
-      'tipo': serializer.toJson<String>(tipo),
+      'tipo': serializer.toJson<String>(
+        $MidiaLinksTable.$convertertipo.toJson(tipo),
+      ),
       'url': serializer.toJson<String>(url),
       'descricao': serializer.toJson<String?>(descricao),
     };
@@ -2882,7 +2909,7 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
   MidiaLink copyWith({
     String? uuid,
     String? bemMaterialId,
-    String? tipo,
+    TipoMidia? tipo,
     String? url,
     Value<String?> descricao = const Value.absent(),
   }) => MidiaLink(
@@ -2932,7 +2959,7 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
 class MidiaLinksCompanion extends UpdateCompanion<MidiaLink> {
   final Value<String> uuid;
   final Value<String> bemMaterialId;
-  final Value<String> tipo;
+  final Value<TipoMidia> tipo;
   final Value<String> url;
   final Value<String?> descricao;
   final Value<int> rowid;
@@ -2947,13 +2974,12 @@ class MidiaLinksCompanion extends UpdateCompanion<MidiaLink> {
   MidiaLinksCompanion.insert({
     required String uuid,
     required String bemMaterialId,
-    required String tipo,
+    this.tipo = const Value.absent(),
     required String url,
     this.descricao = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : uuid = Value(uuid),
        bemMaterialId = Value(bemMaterialId),
-       tipo = Value(tipo),
        url = Value(url);
   static Insertable<MidiaLink> custom({
     Expression<String>? uuid,
@@ -2976,7 +3002,7 @@ class MidiaLinksCompanion extends UpdateCompanion<MidiaLink> {
   MidiaLinksCompanion copyWith({
     Value<String>? uuid,
     Value<String>? bemMaterialId,
-    Value<String>? tipo,
+    Value<TipoMidia>? tipo,
     Value<String>? url,
     Value<String?>? descricao,
     Value<int>? rowid,
@@ -3001,7 +3027,9 @@ class MidiaLinksCompanion extends UpdateCompanion<MidiaLink> {
       map['bem_material_id'] = Variable<String>(bemMaterialId.value);
     }
     if (tipo.present) {
-      map['tipo'] = Variable<String>(tipo.value);
+      map['tipo'] = Variable<String>(
+        $MidiaLinksTable.$convertertipo.toSql(tipo.value),
+      );
     }
     if (url.present) {
       map['url'] = Variable<String>(url.value);
@@ -4106,7 +4134,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final Index status = Index(
     'status',
-    'CREATE INDEX status ON curadorias (status)',
+    'CREATE INDEX status ON curadorias (status_curadoria)',
   );
   late final Index curadoriasColetaIdx = Index(
     'curadorias_coleta_idx',
@@ -4157,8 +4185,8 @@ typedef $$UsuariosTableCreateCompanionBuilder =
       required String nome,
       required String email,
       required String senhaHash,
-      required String perfil,
-      required String classificacao,
+      Value<PerfilUsuario> perfil,
+      Value<ClassificacaoUsuario> classificacao,
       Value<bool> ativo,
       Value<DateTime> criadoEm,
       Value<int> rowid,
@@ -4169,8 +4197,8 @@ typedef $$UsuariosTableUpdateCompanionBuilder =
       Value<String> nome,
       Value<String> email,
       Value<String> senhaHash,
-      Value<String> perfil,
-      Value<String> classificacao,
+      Value<PerfilUsuario> perfil,
+      Value<ClassificacaoUsuario> classificacao,
       Value<bool> ativo,
       Value<DateTime> criadoEm,
       Value<int> rowid,
@@ -4265,14 +4293,20 @@ class $$UsuariosTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get perfil => $composableBuilder(
+  ColumnWithTypeConverterFilters<PerfilUsuario, PerfilUsuario, String>
+  get perfil => $composableBuilder(
     column: $table.perfil,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnFilters<String> get classificacao => $composableBuilder(
+  ColumnWithTypeConverterFilters<
+    ClassificacaoUsuario,
+    ClassificacaoUsuario,
+    String
+  >
+  get classificacao => $composableBuilder(
     column: $table.classificacao,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<bool> get ativo => $composableBuilder(
@@ -4432,10 +4466,11 @@ class $$UsuariosTableAnnotationComposer
   GeneratedColumn<String> get senhaHash =>
       $composableBuilder(column: $table.senhaHash, builder: (column) => column);
 
-  GeneratedColumn<String> get perfil =>
+  GeneratedColumnWithTypeConverter<PerfilUsuario, String> get perfil =>
       $composableBuilder(column: $table.perfil, builder: (column) => column);
 
-  GeneratedColumn<String> get classificacao => $composableBuilder(
+  GeneratedColumnWithTypeConverter<ClassificacaoUsuario, String>
+  get classificacao => $composableBuilder(
     column: $table.classificacao,
     builder: (column) => column,
   );
@@ -4558,8 +4593,9 @@ class $$UsuariosTableTableManager
                 Value<String> nome = const Value.absent(),
                 Value<String> email = const Value.absent(),
                 Value<String> senhaHash = const Value.absent(),
-                Value<String> perfil = const Value.absent(),
-                Value<String> classificacao = const Value.absent(),
+                Value<PerfilUsuario> perfil = const Value.absent(),
+                Value<ClassificacaoUsuario> classificacao =
+                    const Value.absent(),
                 Value<bool> ativo = const Value.absent(),
                 Value<DateTime> criadoEm = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -4580,8 +4616,9 @@ class $$UsuariosTableTableManager
                 required String nome,
                 required String email,
                 required String senhaHash,
-                required String perfil,
-                required String classificacao,
+                Value<PerfilUsuario> perfil = const Value.absent(),
+                Value<ClassificacaoUsuario> classificacao =
+                    const Value.absent(),
                 Value<bool> ativo = const Value.absent(),
                 Value<DateTime> criadoEm = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -6209,8 +6246,8 @@ typedef $$CuradoriasTableCreateCompanionBuilder =
       required String coletaId,
       Value<String?> bemMaterialId,
       required String usuarioId,
-      required String status,
-      required String acaoResultante,
+      Value<StatusCuradoria> status,
+      Value<AcaoResultanteCuradoria> acaoResultante,
       Value<DateTime> dataAvaliacao,
       Value<String?> observacao,
       Value<int> rowid,
@@ -6221,8 +6258,8 @@ typedef $$CuradoriasTableUpdateCompanionBuilder =
       Value<String> coletaId,
       Value<String?> bemMaterialId,
       Value<String> usuarioId,
-      Value<String> status,
-      Value<String> acaoResultante,
+      Value<StatusCuradoria> status,
+      Value<AcaoResultanteCuradoria> acaoResultante,
       Value<DateTime> dataAvaliacao,
       Value<String?> observacao,
       Value<int> rowid,
@@ -6327,14 +6364,20 @@ class $$CuradoriasTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get status => $composableBuilder(
+  ColumnWithTypeConverterFilters<StatusCuradoria, StatusCuradoria, String>
+  get status => $composableBuilder(
     column: $table.status,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnFilters<String> get acaoResultante => $composableBuilder(
+  ColumnWithTypeConverterFilters<
+    AcaoResultanteCuradoria,
+    AcaoResultanteCuradoria,
+    String
+  >
+  get acaoResultante => $composableBuilder(
     column: $table.acaoResultante,
-    builder: (column) => ColumnFilters(column),
+    builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
   ColumnFilters<DateTime> get dataAvaliacao => $composableBuilder(
@@ -6558,10 +6601,11 @@ class $$CuradoriasTableAnnotationComposer
   GeneratedColumn<String> get uuid =>
       $composableBuilder(column: $table.uuid, builder: (column) => column);
 
-  GeneratedColumn<String> get status =>
+  GeneratedColumnWithTypeConverter<StatusCuradoria, String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
-  GeneratedColumn<String> get acaoResultante => $composableBuilder(
+  GeneratedColumnWithTypeConverter<AcaoResultanteCuradoria, String>
+  get acaoResultante => $composableBuilder(
     column: $table.acaoResultante,
     builder: (column) => column,
   );
@@ -6708,8 +6752,9 @@ class $$CuradoriasTableTableManager
                 Value<String> coletaId = const Value.absent(),
                 Value<String?> bemMaterialId = const Value.absent(),
                 Value<String> usuarioId = const Value.absent(),
-                Value<String> status = const Value.absent(),
-                Value<String> acaoResultante = const Value.absent(),
+                Value<StatusCuradoria> status = const Value.absent(),
+                Value<AcaoResultanteCuradoria> acaoResultante =
+                    const Value.absent(),
                 Value<DateTime> dataAvaliacao = const Value.absent(),
                 Value<String?> observacao = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -6730,8 +6775,9 @@ class $$CuradoriasTableTableManager
                 required String coletaId,
                 Value<String?> bemMaterialId = const Value.absent(),
                 required String usuarioId,
-                required String status,
-                required String acaoResultante,
+                Value<StatusCuradoria> status = const Value.absent(),
+                Value<AcaoResultanteCuradoria> acaoResultante =
+                    const Value.absent(),
                 Value<DateTime> dataAvaliacao = const Value.absent(),
                 Value<String?> observacao = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -6879,7 +6925,7 @@ typedef $$MidiaLinksTableCreateCompanionBuilder =
     MidiaLinksCompanion Function({
       required String uuid,
       required String bemMaterialId,
-      required String tipo,
+      Value<TipoMidia> tipo,
       required String url,
       Value<String?> descricao,
       Value<int> rowid,
@@ -6888,7 +6934,7 @@ typedef $$MidiaLinksTableUpdateCompanionBuilder =
     MidiaLinksCompanion Function({
       Value<String> uuid,
       Value<String> bemMaterialId,
-      Value<String> tipo,
+      Value<TipoMidia> tipo,
       Value<String> url,
       Value<String?> descricao,
       Value<int> rowid,
@@ -6935,10 +6981,11 @@ class $$MidiaLinksTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get tipo => $composableBuilder(
-    column: $table.tipo,
-    builder: (column) => ColumnFilters(column),
-  );
+  ColumnWithTypeConverterFilters<TipoMidia, TipoMidia, String> get tipo =>
+      $composableBuilder(
+        column: $table.tipo,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<String> get url => $composableBuilder(
     column: $table.url,
@@ -7039,7 +7086,7 @@ class $$MidiaLinksTableAnnotationComposer
   GeneratedColumn<String> get uuid =>
       $composableBuilder(column: $table.uuid, builder: (column) => column);
 
-  GeneratedColumn<String> get tipo =>
+  GeneratedColumnWithTypeConverter<TipoMidia, String> get tipo =>
       $composableBuilder(column: $table.tipo, builder: (column) => column);
 
   GeneratedColumn<String> get url =>
@@ -7102,7 +7149,7 @@ class $$MidiaLinksTableTableManager
               ({
                 Value<String> uuid = const Value.absent(),
                 Value<String> bemMaterialId = const Value.absent(),
-                Value<String> tipo = const Value.absent(),
+                Value<TipoMidia> tipo = const Value.absent(),
                 Value<String> url = const Value.absent(),
                 Value<String?> descricao = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -7118,7 +7165,7 @@ class $$MidiaLinksTableTableManager
               ({
                 required String uuid,
                 required String bemMaterialId,
-                required String tipo,
+                Value<TipoMidia> tipo = const Value.absent(),
                 required String url,
                 Value<String?> descricao = const Value.absent(),
                 Value<int> rowid = const Value.absent(),

@@ -3,6 +3,17 @@ import 'usuarios_table.dart';
 import '../converters/json_map_converters.dart';
 import '../enums/enum_converters.dart';
 
+class StatusColetaConverter extends TypeConverter<StatusColeta, String> {
+  const StatusColetaConverter();
+
+  @override
+  StatusColeta fromSql(String fromDb) =>
+      StatusColeta.values.byName(fromDb);
+
+  @override
+  String toSql(StatusColeta value) => value.name;
+}
+
 @TableIndex(name: 'coletas_usuario_idx', columns: {#usuarioId})
 @TableIndex(name: 'coletas_sincronizada_idx', columns: {#statusSincronizacao})
 class Coletas extends Table {
@@ -14,8 +25,9 @@ class Coletas extends Table {
   DateTimeColumn get dataColeta =>
       dateTime().named('data_coleta').clientDefault(() => DateTime.now())();
 
-  TextColumn get statusSincronizacao => textEnum<StatusColeta>()
+  TextColumn get statusSincronizacao => text()
       .named('status_sincronizacao')
+      .map(const StatusColetaConverter())
       .clientDefault(() => StatusColeta.pendente.name)();
 
   IntColumn get versao => integer().clientDefault(() => 1)();

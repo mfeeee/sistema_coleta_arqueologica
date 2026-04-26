@@ -16,7 +16,9 @@ const _baseUrl = 'http://localhost:8000';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  const secureStorage = SecureStorageService(FlutterSecureStorage());
+  const secureStorage = SecureStorageService(
+    FlutterSecureStorage(),
+  );
 
   late final AppDatabase db;
   try {
@@ -39,15 +41,17 @@ Future<void> main() async {
     authService: authService,
   );
 
+  final authNotifier = AuthNotifier(authService: authService);
+  final syncService = SyncService(
+    database: db,
+    httpClient: authHttpClient,
+    baseUrl: _baseUrl,
+  );
+
   runApp(
     SistemaColetaApp(
-      database: db,
-      authNotifier: AuthNotifier(authService: authService),
-      syncService: SyncService(
-        database: db,
-        httpClient: authHttpClient,
-        baseUrl: _baseUrl,
-      ),
+      authNotifier: authNotifier,
+      syncService: syncService,
     ),
   );
 }
@@ -55,24 +59,49 @@ Future<void> main() async {
 class SistemaColetaApp extends StatelessWidget {
   const SistemaColetaApp({
     super.key,
-    required this.database,
     required this.authNotifier,
     required this.syncService,
   });
 
-  final AppDatabase database;
   final AuthNotifier authNotifier;
   final SyncService syncService;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Sistema de Coleta Arqueológica',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      routerConfig: appRouter,
+    return AppScope(
+      authNotifier: authNotifier,
+      syncService: syncService,
+      child: MaterialApp.router(
+        title: 'Sistema de Coleta Arqueológica',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        routerConfig: appRouter,
+      ),
     );
   }
+}
+
+class AppScope extends InheritedWidget {
+  const AppScope({
+    super.key,
+    required this.authNotifier,
+    required this.syncService,
+    required super.child,
+  });
+
+  final AuthNotifier authNotifier;
+  final SyncService syncService;
+
+  static AppScope of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<AppScope>();
+    assert(scope != null, 'AppScope não encontrado na árvore de widgets');
+    return scope!;
+  }
+
+  @override
+  bool updateShouldNotify(AppScope oldWidget) =>
+      authNotifier != oldWidget.authNotifier ||
+      syncService != oldWidget.syncService;
 }

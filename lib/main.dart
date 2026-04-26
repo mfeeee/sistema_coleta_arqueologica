@@ -11,6 +11,7 @@ import 'core/services/auth_service.dart';
 import 'core/services/authenticated_http_client.dart';
 import 'features/auth/auth_notifier.dart';
 import 'features/sync/sync_service.dart';
+import 'core/di/app_scope.dart';
 
 const _baseUrl = 'http://localhost:8000';
 
@@ -48,7 +49,11 @@ Future<void> main() async {
   );
 
   runApp(
-    SistemaColetaApp(authNotifier: authNotifier, syncService: syncService),
+    SistemaColetaApp(
+      authNotifier: authNotifier,
+      syncService: syncService,
+      database: db,
+    ),
   );
 }
 
@@ -57,10 +62,12 @@ class SistemaColetaApp extends StatefulWidget {
     super.key,
     required this.authNotifier,
     required this.syncService,
+    required this.database,
   });
 
   final AuthNotifier authNotifier;
   final SyncService syncService;
+  final AppDatabase database;
 
   @override
   State<SistemaColetaApp> createState() => _SistemaColetaAppState();
@@ -83,7 +90,8 @@ class _SistemaColetaAppState extends State<SistemaColetaApp> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScope(
+    return AppScope.create(
+      database: widget.database,
       authNotifier: widget.authNotifier,
       syncService: widget.syncService,
       child: MaterialApp.router(
@@ -96,27 +104,4 @@ class _SistemaColetaAppState extends State<SistemaColetaApp> {
       ),
     );
   }
-}
-
-class AppScope extends InheritedWidget {
-  const AppScope({
-    super.key,
-    required this.authNotifier,
-    required this.syncService,
-    required super.child,
-  });
-
-  final AuthNotifier authNotifier;
-  final SyncService syncService;
-
-  static AppScope of(BuildContext context) {
-    final scope = context.dependOnInheritedWidgetOfExactType<AppScope>();
-    assert(scope != null, 'AppScope não encontrado na árvore de widgets');
-    return scope!;
-  }
-
-  @override
-  bool updateShouldNotify(AppScope oldWidget) =>
-      authNotifier != oldWidget.authNotifier ||
-      syncService != oldWidget.syncService;
 }

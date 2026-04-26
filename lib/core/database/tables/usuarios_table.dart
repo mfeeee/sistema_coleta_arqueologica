@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import '../enums/enum_converters.dart';
 
 class Usuarios extends Table {
   TextColumn get uuid => text()();
@@ -9,9 +10,13 @@ class Usuarios extends Table {
 
   TextColumn get senhaHash => text().named('senha_hash')();
 
-  TextColumn get perfil => text()();
+  TextColumn get perfil => textEnum<PerfilUsuario>()
+      .named('perfil_usuario')
+      .clientDefault(() => PerfilUsuario.coletor.name)();
 
-  TextColumn get classificacao => text()();
+  TextColumn get classificacao => textEnum<ClassificacaoUsuario>()
+      .named('classificacao')
+      .clientDefault(() => ClassificacaoUsuario.arqueologo.name)();
 
   BoolColumn get ativo => boolean().clientDefault(() => true)();
 

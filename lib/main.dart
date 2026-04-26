@@ -5,6 +5,13 @@ import 'core/database/app_database.dart';
 import 'dart:developer';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'core/services/secure_storage_service.dart';
+import 'package:http/http.dart' as http;
+import 'core/services/auth_service.dart';
+import 'core/services/authenticated_http_client.dart';
+import 'features/auth/auth_notifier.dart';
+import 'features/sync/sync_service.dart';
+
+const _baseUrl = 'http://localhost:8000';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,18 +27,42 @@ Future<void> main() async {
     rethrow;
   }
 
-  runApp(SistemaColetaApp(database: db, secureStorage: secureStorage));
+  final plainHttpClient = http.Client();
+  final authService = AuthService(
+    secureStorage: secureStorage,
+    httpClient: plainHttpClient,
+    baseUrl: _baseUrl,
+  );
+
+  final authHttpClient = AuthenticatedHttpClient(
+    secureStorage: secureStorage,
+    authService: authService,
+  );
+
+  runApp(
+    SistemaColetaApp(
+      database: db,
+      authNotifier: AuthNotifier(authService: authService),
+      syncService: SyncService(
+        database: db,
+        httpClient: authHttpClient,
+        baseUrl: _baseUrl,
+      ),
+    ),
+  );
 }
 
 class SistemaColetaApp extends StatelessWidget {
   const SistemaColetaApp({
     super.key,
     required this.database,
-    required this.secureStorage,
+    required this.authNotifier,
+    required this.syncService,
   });
 
   final AppDatabase database;
-  final SecureStorageService secureStorage;
+  final AuthNotifier authNotifier;
+  final SyncService syncService;
 
   @override
   Widget build(BuildContext context) {

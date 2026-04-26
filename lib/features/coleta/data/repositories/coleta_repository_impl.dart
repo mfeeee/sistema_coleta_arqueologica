@@ -1,27 +1,42 @@
-import '../../domain/entities/sitio_cache_entity.dart';
+import '../../domain/entities/bem_material_cache_entity.dart';
 import '../../domain/repositories/coleta_repository.dart';
-import '../datasources/sitio_local_datasource.dart';
-import '../models/sitio_cache_model.dart';
+import '../datasources/bem_material_local_datasource.dart';
+import '../models/bem_material_cache_model.dart';
+import 'dart:developer';
+import '../../../../core/database/enums/enum_converters.dart';
 
 class ColetaRepositoryImpl implements ColetaRepository {
-  final SitioLocalDatasource localDatasource;
+  final BemMaterialLocalDatasource _localDatasource;
 
-  ColetaRepositoryImpl(this.localDatasource);
+  ColetaRepositoryImpl(this._localDatasource);
 
   @override
-  Future<List<SitioCacheEntity>> getSitiosCacheOffline() async {
+  Future<List<BemMaterialCacheEntity>> getBemMaterialsCacheOffline() async {
     try {
-      final List<SitioCacheModel> modelos = await localDatasource
-          .getAllSitiosCache();
-
-      return modelos;
+      return await _localDatasource.getAllBensMateriaisCache();
     } catch (e) {
+      log('Erro ao buscar sítios no cache', error: e, name: 'ColetaRepository');
       throw Exception('Erro ao procurar sítios no cache: $e');
     }
   }
 
   @override
-  Future<void> salvarNovaColeta(SitioCacheEntity novoSitio) async {
-    throw UnimplementedError('Ainda vou implementar');
+  Future<void> salvarNovaColeta(BemMaterialCacheEntity novoBemMaterial) async {
+    try {
+      final model = BemMaterialCacheModel(
+        id: novoBemMaterial.id,
+        nome: novoBemMaterial.nome,
+        latitude: novoBemMaterial.latitude,
+        longitude: novoBemMaterial.longitude,
+        usuarioId: '',
+        syncStatus: StatusColeta.pendente,
+        versao: 1,
+        updatedAt: DateTime.now(),
+      );
+      await _localDatasource.insertBemMaterial(model);
+    } catch (e) {
+      log('Erro ao salvar coleta', error: e, name: 'ColetaRepository');
+      throw Exception('Erro ao salvar coleta: $e');
+    }
   }
 }

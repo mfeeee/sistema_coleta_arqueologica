@@ -50,7 +50,8 @@ dependencies:
   json_serializable: ^6.13.1
   json_annotation: ^4.11.0
   sqlcipher_flutter_libs: 
-  sqlite3: 
+  sqlite3:
+  http: 
 
 
 dev_dependencies:

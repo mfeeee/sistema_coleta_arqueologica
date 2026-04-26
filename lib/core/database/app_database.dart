@@ -47,14 +47,16 @@ class AppDatabase extends _$AppDatabase {
 
     final dbDir = await getApplicationSupportDirectory();
     final dbPath = p.join(dbDir.path, 'sistema_arqueologico.db');
-      
+
     final executor = NativeDatabase.createInBackground(
       File(dbPath),
       setup: (rawDb) {
         rawDb.execute("PRAGMA key = '$passphrase';");
         final result = rawDb.select('PRAGMA cipher_version;');
-        log('SQLCipher version: ${result.first.values.first}',
-            name: 'AppDatabase');
+        log(
+          'SQLCipher version: ${result.first.values.first}',
+          name: 'AppDatabase',
+        );
       },
     );
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/di/app_scope.dart';
 import '../../../../core/utils/geolocator_helper.dart';
-import '../../data/datasources/sitio_local_datasource.dart';
-import '../../data/repositories/coleta_repository_impl.dart';
 import '../../domain/services/proximidade_service.dart';
 import '../viewmodels/coleta_viewmodel.dart';
 import '../widgets/alerta_proximidade_widget.dart';
@@ -16,24 +15,22 @@ class NovaColetaPage extends StatefulWidget {
 
 class _NovaColetaPageState extends State<NovaColetaPage> {
   late final ColetaViewModel _viewModel;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialized) return;
+    _initialized = true;
 
-    final datasource = SitioLocalDatasourceImpl();
-
-    final repository = ColetaRepositoryImpl(datasource);
-
+    final repository = AppScope.of(context).coletaRepository;
     final proximidadeService = ProximidadeService(repository);
-
     final geolocatorHelper = GeolocatorHelper();
 
     _viewModel = ColetaViewModel(
       proximidadeService: proximidadeService,
       geolocatorHelper: geolocatorHelper,
     );
-    // TODO: Chamar a inicialização do mapeamento aqui
     _viewModel.iniciarMapeamento();
   }
 

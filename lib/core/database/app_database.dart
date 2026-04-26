@@ -1,7 +1,12 @@
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'dart:developer';
+import 'dart:io';
+import 'package:drift/native.dart';
+import 'package:path/path.dart' as p;
+import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 import 'converters/json_map_converters.dart';
+import 'enums/enum_converters.dart';
 
 import 'tables/usuarios_table.dart';
 import 'tables/coletas_table.dart';
@@ -25,7 +30,7 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
+  AppDatabase(super.e);
 
   @override
   int get schemaVersion => 1;
@@ -37,12 +42,22 @@ class AppDatabase extends _$AppDatabase {
     },
   );
 
-  static QueryExecutor _openConnection() {
-    return driftDatabase(
-      name: 'sistema_arqueologico',
-      native: const DriftNativeOptions(
-        databaseDirectory: getApplicationSupportDirectory,
-      ),
+  static Future<AppDatabase> open(String passphrase) async {
+    await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
+
+    final dbDir = await getApplicationSupportDirectory();
+    final dbPath = p.join(dbDir.path, 'sistema_arqueologico.db');
+      
+    final executor = NativeDatabase.createInBackground(
+      File(dbPath),
+      setup: (rawDb) {
+        rawDb.execute("PRAGMA key = '$passphrase';");
+        final result = rawDb.select('PRAGMA cipher_version;');
+        log('SQLCipher version: ${result.first.values.first}',
+            name: 'AppDatabase');
+      },
     );
+
+    return AppDatabase(executor);
   }
 }

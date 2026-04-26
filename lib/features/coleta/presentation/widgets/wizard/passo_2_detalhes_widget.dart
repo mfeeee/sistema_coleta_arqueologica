@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../viewmodels/coleta_form_notifier.dart';
 
 class Passo2DetalhesWidget extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController sinteseController;
+  final ColetaFormNotifier formNotifier;
   final VoidCallback onVoltar;
   final VoidCallback onFinalizar;
 
@@ -10,6 +15,7 @@ class Passo2DetalhesWidget extends StatefulWidget {
     super.key,
     required this.formKey,
     required this.sinteseController,
+    required this.formNotifier,
     required this.onVoltar,
     required this.onFinalizar,
   });
@@ -20,7 +26,6 @@ class Passo2DetalhesWidget extends StatefulWidget {
 
 class _Passo2DetalhesWidgetState extends State<Passo2DetalhesWidget> {
   bool _gravandoAudio = false;
-  int _totalFotos = 0;
 
   final Color bgColor = const Color(0xFF1C1916);
   final Color primaryBrown = const Color(0xFF493627);
@@ -34,8 +39,43 @@ class _Passo2DetalhesWidgetState extends State<Passo2DetalhesWidget> {
     setState(() => _gravandoAudio = !_gravandoAudio);
   }
 
-  void _simularCaptura() {
-    setState(() => _totalFotos++);
+  void _escolherFonte() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: primaryBrown,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.white),
+              title: const Text(
+                'Câmera',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                widget.formNotifier.adicionarFoto(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Colors.white),
+              title: const Text(
+                'Galeria',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                widget.formNotifier.adicionarFoto(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -106,11 +146,14 @@ class _Passo2DetalhesWidgetState extends State<Passo2DetalhesWidget> {
                   _BotaoCapturar(
                     primaryBrown: primaryBrown,
                     textMuted: textMuted,
-                    onTap: _simularCaptura,
+                    onTap: _escolherFonte,
                   ),
-                  if (_totalFotos > 0) ...[
+                  if (widget.formNotifier.totalFotos > 0) ...[
                     const SizedBox(height: 12),
-                    _GradeMiniaturas(totalFotos: _totalFotos),
+                    _GradeMiniaturas(
+                      fotos: widget.formNotifier.fotos,
+                      onRemover: widget.formNotifier.removerFoto,
+                    ),
                   ],
                   const SizedBox(height: 48),
                   ElevatedButton.icon(
@@ -401,16 +444,19 @@ class _BotaoCapturar extends StatelessWidget {
 }
 
 class _GradeMiniaturas extends StatelessWidget {
-  final int totalFotos;
+  final List<File> fotos;
+  final void Function(int) onRemover;
 
   static const int _maxVisiveis = 3;
 
-  const _GradeMiniaturas({required this.totalFotos});
+  const _GradeMiniaturas({required this.fotos, required this.onRemover});
 
   @override
   Widget build(BuildContext context) {
-    final int exibindo = totalFotos > _maxVisiveis ? _maxVisiveis : totalFotos;
-    final int extras = totalFotos - _maxVisiveis;
+    final int exibindo = fotos.length > _maxVisiveis
+        ? _maxVisiveis
+        : fotos.length;
+    final int extras = fotos.length - _maxVisiveis;
 
     return GridView.builder(
       shrinkWrap: true,
@@ -423,28 +469,30 @@ class _GradeMiniaturas extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final bool isUltima = index == _maxVisiveis - 1 && extras > 0;
-
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              const ColoredBox(color: Color(0xFF2A2520)),
-              if (isUltima)
-                ColoredBox(
-                  color: Colors.black54,
-                  child: Center(
-                    child: Text(
-                      '+$extras',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+        return GestureDetector(
+          onLongPress: () => onRemover(index),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.file(fotos[index], fit: BoxFit.cover),
+                if (isUltima)
+                  ColoredBox(
+                    color: Colors.black54,
+                    child: Center(
+                      child: Text(
+                        '+$extras',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         );
       },

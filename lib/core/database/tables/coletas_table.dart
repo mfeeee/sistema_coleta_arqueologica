@@ -7,8 +7,7 @@ class StatusColetaConverter extends TypeConverter<StatusColeta, String> {
   const StatusColetaConverter();
 
   @override
-  StatusColeta fromSql(String fromDb) =>
-      StatusColeta.values.byName(fromDb);
+  StatusColeta fromSql(String fromDb) => StatusColeta.values.byName(fromDb);
 
   @override
   String toSql(StatusColeta value) => value.name;

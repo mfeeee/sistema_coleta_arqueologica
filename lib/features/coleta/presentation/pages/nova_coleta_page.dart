@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coleta_form_notifier.dart';
 import '../../../../core/di/app_scope.dart';
 import '../../../../core/utils/geolocator_helper.dart';
 import '../../domain/services/proximidade_service.dart';
@@ -16,6 +17,7 @@ class NovaColetaPage extends StatefulWidget {
 class _NovaColetaPageState extends State<NovaColetaPage> {
   late final ColetaViewModel _viewModel;
   bool _initialized = false;
+  late final ColetaFormNotifier _formNotifier;
 
   @override
   void didChangeDependencies() {
@@ -26,6 +28,9 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     final repository = AppScope.of(context).coletaRepository;
     final proximidadeService = ProximidadeService(repository);
     final geolocatorHelper = GeolocatorHelper();
+    final mediaService = AppScope.of(context).mediaService;
+
+    _formNotifier = ColetaFormNotifier(mediaService: mediaService);
 
     _viewModel = ColetaViewModel(
       proximidadeService: proximidadeService,
@@ -37,6 +42,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
   @override
   void dispose() {
     _viewModel.dispose();
+    _formNotifier.dispose();
     super.dispose();
   }
 
@@ -106,6 +112,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
       ColetaStep.fillingForm => ColetaWizardWidget(
         latitude: _viewModel.coordenadaAtual?.latitude ?? 0.0,
         longitude: _viewModel.coordenadaAtual?.longitude ?? 0.0,
+        formNotifier: _formNotifier,
         onCancelar: () => Navigator.pop(context),
         onFinalizar: () {
           // TODO: No futuro, aqui chamaremos a gravação final no SQLite

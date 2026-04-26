@@ -1,7 +1,7 @@
-import '../entities/sitio_cache_entity.dart';
+import '../entities/bem_material_cache_entity.dart';
 
 abstract class ColetaRepository {
-  Future<List<SitioCacheEntity>> getSitiosCacheOffline();
+  Future<List<BemMaterialCacheEntity>> getBemMaterialsCacheOffline();
 
-  Future<void> salvarNovaColeta(SitioCacheEntity novoSitio);
+  Future<void> salvarNovaColeta(BemMaterialCacheEntity novoBemMaterial);
 }

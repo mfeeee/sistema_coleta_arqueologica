@@ -16,9 +16,7 @@ const _baseUrl = 'http://localhost:8000';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  const secureStorage = SecureStorageService(
-    FlutterSecureStorage(),
-  );
+  const secureStorage = SecureStorageService(FlutterSecureStorage());
 
   late final AppDatabase db;
   try {
@@ -49,10 +47,7 @@ Future<void> main() async {
   );
 
   runApp(
-    SistemaColetaApp(
-      authNotifier: authNotifier,
-      syncService: syncService,
-    ),
+    SistemaColetaApp(authNotifier: authNotifier, syncService: syncService),
   );
 }
 

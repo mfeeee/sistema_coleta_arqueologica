@@ -1,10 +1,10 @@
-class SitioCacheEntity {
+class BemMaterialCacheEntity {
   final String id;
   final String nome;
   final double latitude;
   final double longitude;
 
-  const SitioCacheEntity({
+  const BemMaterialCacheEntity({
     required this.id,
     required this.nome,
     required this.latitude,

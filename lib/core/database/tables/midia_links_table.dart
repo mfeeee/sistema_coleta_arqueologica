@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'bens_materiais_table.dart';
+import '../enums/enum_converters.dart';
 
 class MidiaLinks extends Table {
   TextColumn get uuid => text()();
@@ -7,8 +8,12 @@ class MidiaLinks extends Table {
   TextColumn get bemMaterialId =>
       text().named('bem_material_id').references(BensMateriais, #uuid)();
 
-  TextColumn get tipo => text()();
+  TextColumn get tipo => textEnum<TipoMidia>()
+      .named('tipo')
+      .clientDefault(() => TipoMidia.imagem.name)();
+
   TextColumn get url => text()();
+
   TextColumn get descricao => text().named('descricao').nullable()();
 
   @override

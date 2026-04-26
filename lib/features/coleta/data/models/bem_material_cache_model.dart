@@ -38,7 +38,11 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
     return ColetasCompanion.insert(
       uuid: id,
       usuarioId: usuarioId,
-      dadosColetados: {'nome': nome, 'latitude': latitude, 'longitude': longitude},
+      dadosColetados: {
+        'nome': nome,
+        'latitude': latitude,
+        'longitude': longitude,
+      },
       statusSincronizacao: Value(syncStatus),
       versao: Value(versao),
       updatedAt: Value(updatedAt),

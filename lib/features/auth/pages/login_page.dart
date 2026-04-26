@@ -95,6 +95,10 @@ class _LoginFormState extends State<_LoginForm> {
     super.dispose();
   }
 
+  void _handleLogin() {
+    context.go('/home');
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -150,7 +154,13 @@ class _LoginFormState extends State<_LoginForm> {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => context.go('/home'),
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 54),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: _handleLogin,
             child: const Text('Entrar', style: TextStyle(fontSize: 16)),
           ),
           const SizedBox(height: 12),

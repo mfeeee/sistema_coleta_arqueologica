@@ -1,9 +1,10 @@
 import 'package:drift/drift.dart';
 import 'usuarios_table.dart';
 import '../converters/json_map_converters.dart';
+import '../enums/enum_converters.dart';
 
 @TableIndex(name: 'coletas_usuario_idx', columns: {#usuarioId})
-@TableIndex(name: 'coletas_sincronizada_idx', columns: {#sincronizada})
+@TableIndex(name: 'coletas_sincronizada_idx', columns: {#statusSincronizacao})
 class Coletas extends Table {
   TextColumn get uuid => text()();
 
@@ -13,7 +14,14 @@ class Coletas extends Table {
   DateTimeColumn get dataColeta =>
       dateTime().named('data_coleta').clientDefault(() => DateTime.now())();
 
-  BoolColumn get sincronizada => boolean().clientDefault(() => false)();
+  TextColumn get statusSincronizacao => textEnum<StatusColeta>()
+      .named('status_sincronizacao')
+      .clientDefault(() => StatusColeta.pendente.name)();
+
+  IntColumn get versao => integer().clientDefault(() => 1)();
+
+  DateTimeColumn get updatedAt =>
+      dateTime().named('updated_at').clientDefault(() => DateTime.now())();
 
   TextColumn get dadosColetados =>
       text().named('dados_coletados').map(const JsonMapConverter())();

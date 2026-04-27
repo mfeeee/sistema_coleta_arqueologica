@@ -1,20 +1,29 @@
 import 'package:drift/drift.dart';
 import 'usuarios_table.dart';
-import '../converters/json_map_converters.dart';
-import '../enums/enum_converters.dart';
+import '../converters/json_map_converter.dart';
+import '../enums/status_coleta.dart';
+import 'dart:convert';
 
-class StatusColetaConverter extends TypeConverter<StatusColeta, String> {
-  const StatusColetaConverter();
-
-  @override
-  StatusColeta fromSql(String fromDb) => StatusColeta.values.byName(fromDb);
+class StringListConverter extends TypeConverter<List<String>, String> {
+  const StringListConverter();
 
   @override
-  String toSql(StatusColeta value) => value.name;
+  List<String> fromSql(String fromDb) {
+    try {
+      return (jsonDecode(fromDb) as List).map((e) => e as String).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
+  String toSql(List<String> value) => jsonEncode(value);
 }
 
 @TableIndex(name: 'coletas_usuario_idx', columns: {#usuarioId})
 @TableIndex(name: 'coletas_sincronizada_idx', columns: {#statusSincronizacao})
+@TableIndex(name: 'coletas_natureza_idx', columns: {#natureza})
+@TableIndex(name: 'coletas_uf_idx', columns: {#uf})
 class Coletas extends Table {
   TextColumn get uuid => text()();
 
@@ -28,6 +37,23 @@ class Coletas extends Table {
       .named('status_sincronizacao')
       .map(const StatusColetaConverter())
       .clientDefault(() => StatusColeta.pendente.name)();
+
+  TextColumn get nomeBem => text().named('nome_bem').clientDefault(() => '')();
+
+  TextColumn get natureza => text().nullable()();
+
+  TextColumn get tipo => text().nullable()();
+
+  TextColumn get uf => text().withLength(min: 2, max: 2).nullable()();
+
+  RealColumn get latitude => real().clientDefault(() => 0.0)();
+
+  RealColumn get longitude => real().clientDefault(() => 0.0)();
+
+  TextColumn get artefatos => text()
+      .named('artefatos')
+      .map(const StringListConverter())
+      .clientDefault(() => '[]')();
 
   IntColumn get versao => integer().clientDefault(() => 1)();
 

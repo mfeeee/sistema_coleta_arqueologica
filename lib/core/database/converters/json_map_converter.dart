@@ -6,12 +6,13 @@ class JsonMapConverter extends TypeConverter<Map<String, Object?>, String> {
 
   @override
   Map<String, Object?> fromSql(String fromDb) {
-    final decoded = jsonDecode(fromDb);
-    return Map<String, Object?>.from(decoded as Map);
+    try {
+      return jsonDecode(fromDb) as Map<String, Object?>;
+    } catch (_) {
+      return {};
+    }
   }
 
   @override
-  String toSql(Map<String, Object?> value) {
-    return jsonEncode(value);
-  }
+  String toSql(Map<String, Object?> value) => jsonEncode(value);
 }

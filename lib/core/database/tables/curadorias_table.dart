@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 import 'coletas_table.dart';
 import 'bens_materiais_table.dart';
 import 'usuarios_table.dart';
-import '../enums/enum_converters.dart';
+import '../enums/status_curadoria.dart';
 
 @TableIndex(name: 'status', columns: {#status})
 @TableIndex(name: 'curadorias_coleta_idx', columns: {#coletaId})

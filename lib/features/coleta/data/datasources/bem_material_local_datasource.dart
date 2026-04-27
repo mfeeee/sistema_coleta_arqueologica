@@ -1,7 +1,7 @@
 import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
 import '../models/bem_material_cache_model.dart';
 import 'package:drift/drift.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/enum_converters.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 
 abstract class BemMaterialLocalDatasource {
   Future<List<BemMaterialCacheModel>> getAllBensMateriaisCache();

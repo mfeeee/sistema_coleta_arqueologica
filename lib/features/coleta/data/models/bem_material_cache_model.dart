@@ -1,7 +1,7 @@
 import '../../domain/entities/bem_material_cache_entity.dart';
 import 'package:drift/drift.dart';
 import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/enum_converters.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 
 class BemMaterialCacheModel extends BemMaterialCacheEntity {
   final String usuarioId;

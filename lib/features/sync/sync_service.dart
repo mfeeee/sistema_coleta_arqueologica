@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import '../../core/database/app_database.dart';
-import '../../core/database/enums/enum_converters.dart';
+import '../../core/database/enums/status_coleta.dart';
 import 'package:drift/drift.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

@@ -3,7 +3,7 @@ import '../../domain/repositories/coleta_repository.dart';
 import '../datasources/bem_material_local_datasource.dart';
 import '../models/bem_material_cache_model.dart';
 import 'dart:developer';
-import '../../../../core/database/enums/enum_converters.dart';
+import '../../../../core/database/enums/status_coleta.dart';
 
 class ColetaRepositoryImpl implements ColetaRepository {
   final BemMaterialLocalDatasource _localDatasource;

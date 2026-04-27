@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import '../enums/enum_converters.dart';
+import '../enums/perfil_usuario.dart';
 
 class Usuarios extends Table {
   TextColumn get uuid => text()();

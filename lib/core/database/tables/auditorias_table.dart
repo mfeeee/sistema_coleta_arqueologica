@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'usuarios_table.dart';
 import 'curadorias_table.dart';
-import '../converters/json_map_converters.dart';
+import '../converters/json_map_converter.dart';
 
 @TableIndex(name: 'auditorias_usuario_idx', columns: {#usuarioId})
 @TableIndex(name: 'entidade_tipo', columns: {#entidadeTipo})

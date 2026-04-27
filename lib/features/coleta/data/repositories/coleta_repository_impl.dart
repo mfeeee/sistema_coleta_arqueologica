@@ -29,7 +29,7 @@ class ColetaRepositoryImpl implements ColetaRepository {
         latitude: novoBemMaterial.latitude,
         longitude: novoBemMaterial.longitude,
         usuarioId: '',
-        syncStatus: StatusColeta.pendente,
+        coletaStatus: StatusColeta.pendente,
         versao: 1,
         updatedAt: DateTime.now(),
       );

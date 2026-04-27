@@ -5,7 +5,7 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.da
 
 class BemMaterialCacheModel extends BemMaterialCacheEntity {
   final String usuarioId;
-  final StatusColeta syncStatus;
+  final StatusColeta coletaStatus;
   final int versao;
   final DateTime updatedAt;
 
@@ -15,7 +15,7 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
     required super.latitude,
     required super.longitude,
     required this.usuarioId,
-    required this.syncStatus,
+    required this.coletaStatus,
     required this.versao,
     required this.updatedAt,
   });
@@ -28,7 +28,7 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
       latitude: (dados['latitude'] as num?)?.toDouble() ?? 0.0,
       longitude: (dados['longitude'] as num?)?.toDouble() ?? 0.0,
       usuarioId: row.usuarioId,
-      syncStatus: row.statusSincronizacao,
+      coletaStatus: row.statusSincronizacao,
       versao: row.versao,
       updatedAt: row.updatedAt,
     );
@@ -43,7 +43,7 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
         'latitude': latitude,
         'longitude': longitude,
       },
-      statusSincronizacao: Value(syncStatus),
+      statusSincronizacao: Value(coletaStatus),
       versao: Value(versao),
       updatedAt: Value(updatedAt),
     );
@@ -56,7 +56,7 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
       usuarioId: json['usuario_id'] as String? ?? '',
-      syncStatus: StatusColeta.values.byName(
+      coletaStatus: StatusColeta.values.byName(
         json['sync_status'] as String? ?? StatusColeta.pendente.name,
       ),
       versao: json['versao'] as int? ?? 1,

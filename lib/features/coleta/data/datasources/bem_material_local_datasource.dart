@@ -6,7 +6,7 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.da
 abstract class BemMaterialLocalDatasource {
   Future<List<BemMaterialCacheModel>> getAllBensMateriaisCache();
   Future<void> insertBemMaterial(BemMaterialCacheModel bemMaterial);
-  Future<void> updateSyncStatus(
+  Future<void> updatecoletaStatus(
     String uuid,
     StatusColeta status,
     int novaVersao,
@@ -32,7 +32,7 @@ class BemMaterialLocalDatasourceImpl implements BemMaterialLocalDatasource {
   }
 
   @override
-  Future<void> updateSyncStatus(
+  Future<void> updatecoletaStatus(
     String uuid,
     StatusColeta status,
     int novaVersao,

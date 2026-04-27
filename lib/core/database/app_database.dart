@@ -5,8 +5,7 @@ import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
-import 'converters/json_map_converters.dart';
-import 'enums/enum_converters.dart';
+import 'converters/json_map_converter.dart';
 
 import 'tables/usuarios_table.dart';
 import 'tables/coletas_table.dart';
@@ -15,6 +14,11 @@ import 'tables/curadorias_table.dart';
 import 'tables/midia_links_table.dart';
 import 'tables/responsaveis_sitio_table.dart';
 import 'tables/auditorias_table.dart';
+
+import 'enums/perfil_usuario.dart';
+import 'enums/status_coleta.dart';
+import 'enums/status_curadoria.dart';
+import 'enums/tipo_midia.dart';
 
 part 'app_database.g.dart';
 

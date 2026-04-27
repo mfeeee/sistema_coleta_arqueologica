@@ -578,6 +578,85 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
     requiredDuringInsert: false,
     clientDefault: () => StatusColeta.pendente.name,
   ).withConverter<StatusColeta>($ColetasTable.$converterstatusSincronizacao);
+  static const VerificationMeta _nomeBemMeta = const VerificationMeta(
+    'nomeBem',
+  );
+  @override
+  late final GeneratedColumn<String> nomeBem = GeneratedColumn<String>(
+    'nome_bem',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => '',
+  );
+  static const VerificationMeta _naturezaMeta = const VerificationMeta(
+    'natureza',
+  );
+  @override
+  late final GeneratedColumn<String> natureza = GeneratedColumn<String>(
+    'natureza',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _tipoMeta = const VerificationMeta('tipo');
+  @override
+  late final GeneratedColumn<String> tipo = GeneratedColumn<String>(
+    'tipo',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ufMeta = const VerificationMeta('uf');
+  @override
+  late final GeneratedColumn<String> uf = GeneratedColumn<String>(
+    'uf',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 2,
+      maxTextLength: 2,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _latitudeMeta = const VerificationMeta(
+    'latitude',
+  );
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+    'latitude',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    clientDefault: () => 0.0,
+  );
+  static const VerificationMeta _longitudeMeta = const VerificationMeta(
+    'longitude',
+  );
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+    'longitude',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    clientDefault: () => 0.0,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> artefatos =
+      GeneratedColumn<String>(
+        'artefatos',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        clientDefault: () => '[]',
+      ).withConverter<List<String>>($ColetasTable.$converterartefatos);
   static const VerificationMeta _versaoMeta = const VerificationMeta('versao');
   @override
   late final GeneratedColumn<int> versao = GeneratedColumn<int>(
@@ -626,6 +705,13 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
     usuarioId,
     dataColeta,
     statusSincronizacao,
+    nomeBem,
+    natureza,
+    tipo,
+    uf,
+    latitude,
+    longitude,
+    artefatos,
     versao,
     updatedAt,
     dadosColetados,
@@ -663,6 +749,39 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
       context.handle(
         _dataColetaMeta,
         dataColeta.isAcceptableOrUnknown(data['data_coleta']!, _dataColetaMeta),
+      );
+    }
+    if (data.containsKey('nome_bem')) {
+      context.handle(
+        _nomeBemMeta,
+        nomeBem.isAcceptableOrUnknown(data['nome_bem']!, _nomeBemMeta),
+      );
+    }
+    if (data.containsKey('natureza')) {
+      context.handle(
+        _naturezaMeta,
+        natureza.isAcceptableOrUnknown(data['natureza']!, _naturezaMeta),
+      );
+    }
+    if (data.containsKey('tipo')) {
+      context.handle(
+        _tipoMeta,
+        tipo.isAcceptableOrUnknown(data['tipo']!, _tipoMeta),
+      );
+    }
+    if (data.containsKey('uf')) {
+      context.handle(_ufMeta, uf.isAcceptableOrUnknown(data['uf']!, _ufMeta));
+    }
+    if (data.containsKey('latitude')) {
+      context.handle(
+        _latitudeMeta,
+        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
+      );
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(
+        _longitudeMeta,
+        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
       );
     }
     if (data.containsKey('versao')) {
@@ -710,6 +829,36 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
           data['${effectivePrefix}status_sincronizacao'],
         )!,
       ),
+      nomeBem: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nome_bem'],
+      )!,
+      natureza: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}natureza'],
+      ),
+      tipo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tipo'],
+      ),
+      uf: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uf'],
+      ),
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      )!,
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      )!,
+      artefatos: $ColetasTable.$converterartefatos.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}artefatos'],
+        )!,
+      ),
       versao: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}versao'],
@@ -738,6 +887,8 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
 
   static TypeConverter<StatusColeta, String> $converterstatusSincronizacao =
       const StatusColetaConverter();
+  static TypeConverter<List<String>, String> $converterartefatos =
+      const StringListConverter();
   static TypeConverter<Map<String, Object?>, String> $converterdadosColetados =
       const JsonMapConverter();
 }
@@ -747,6 +898,13 @@ class Coleta extends DataClass implements Insertable<Coleta> {
   final String usuarioId;
   final DateTime dataColeta;
   final StatusColeta statusSincronizacao;
+  final String nomeBem;
+  final String? natureza;
+  final String? tipo;
+  final String? uf;
+  final double latitude;
+  final double longitude;
+  final List<String> artefatos;
   final int versao;
   final DateTime updatedAt;
   final Map<String, Object?> dadosColetados;
@@ -756,6 +914,13 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     required this.usuarioId,
     required this.dataColeta,
     required this.statusSincronizacao,
+    required this.nomeBem,
+    this.natureza,
+    this.tipo,
+    this.uf,
+    required this.latitude,
+    required this.longitude,
+    required this.artefatos,
     required this.versao,
     required this.updatedAt,
     required this.dadosColetados,
@@ -770,6 +935,23 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     {
       map['status_sincronizacao'] = Variable<String>(
         $ColetasTable.$converterstatusSincronizacao.toSql(statusSincronizacao),
+      );
+    }
+    map['nome_bem'] = Variable<String>(nomeBem);
+    if (!nullToAbsent || natureza != null) {
+      map['natureza'] = Variable<String>(natureza);
+    }
+    if (!nullToAbsent || tipo != null) {
+      map['tipo'] = Variable<String>(tipo);
+    }
+    if (!nullToAbsent || uf != null) {
+      map['uf'] = Variable<String>(uf);
+    }
+    map['latitude'] = Variable<double>(latitude);
+    map['longitude'] = Variable<double>(longitude);
+    {
+      map['artefatos'] = Variable<String>(
+        $ColetasTable.$converterartefatos.toSql(artefatos),
       );
     }
     map['versao'] = Variable<int>(versao);
@@ -791,6 +973,15 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       usuarioId: Value(usuarioId),
       dataColeta: Value(dataColeta),
       statusSincronizacao: Value(statusSincronizacao),
+      nomeBem: Value(nomeBem),
+      natureza: natureza == null && nullToAbsent
+          ? const Value.absent()
+          : Value(natureza),
+      tipo: tipo == null && nullToAbsent ? const Value.absent() : Value(tipo),
+      uf: uf == null && nullToAbsent ? const Value.absent() : Value(uf),
+      latitude: Value(latitude),
+      longitude: Value(longitude),
+      artefatos: Value(artefatos),
       versao: Value(versao),
       updatedAt: Value(updatedAt),
       dadosColetados: Value(dadosColetados),
@@ -812,6 +1003,13 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       statusSincronizacao: serializer.fromJson<StatusColeta>(
         json['statusSincronizacao'],
       ),
+      nomeBem: serializer.fromJson<String>(json['nomeBem']),
+      natureza: serializer.fromJson<String?>(json['natureza']),
+      tipo: serializer.fromJson<String?>(json['tipo']),
+      uf: serializer.fromJson<String?>(json['uf']),
+      latitude: serializer.fromJson<double>(json['latitude']),
+      longitude: serializer.fromJson<double>(json['longitude']),
+      artefatos: serializer.fromJson<List<String>>(json['artefatos']),
       versao: serializer.fromJson<int>(json['versao']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       dadosColetados: serializer.fromJson<Map<String, Object?>>(
@@ -830,6 +1028,13 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       'statusSincronizacao': serializer.toJson<StatusColeta>(
         statusSincronizacao,
       ),
+      'nomeBem': serializer.toJson<String>(nomeBem),
+      'natureza': serializer.toJson<String?>(natureza),
+      'tipo': serializer.toJson<String?>(tipo),
+      'uf': serializer.toJson<String?>(uf),
+      'latitude': serializer.toJson<double>(latitude),
+      'longitude': serializer.toJson<double>(longitude),
+      'artefatos': serializer.toJson<List<String>>(artefatos),
       'versao': serializer.toJson<int>(versao),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'dadosColetados': serializer.toJson<Map<String, Object?>>(dadosColetados),
@@ -842,6 +1047,13 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     String? usuarioId,
     DateTime? dataColeta,
     StatusColeta? statusSincronizacao,
+    String? nomeBem,
+    Value<String?> natureza = const Value.absent(),
+    Value<String?> tipo = const Value.absent(),
+    Value<String?> uf = const Value.absent(),
+    double? latitude,
+    double? longitude,
+    List<String>? artefatos,
     int? versao,
     DateTime? updatedAt,
     Map<String, Object?>? dadosColetados,
@@ -851,6 +1063,13 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     usuarioId: usuarioId ?? this.usuarioId,
     dataColeta: dataColeta ?? this.dataColeta,
     statusSincronizacao: statusSincronizacao ?? this.statusSincronizacao,
+    nomeBem: nomeBem ?? this.nomeBem,
+    natureza: natureza.present ? natureza.value : this.natureza,
+    tipo: tipo.present ? tipo.value : this.tipo,
+    uf: uf.present ? uf.value : this.uf,
+    latitude: latitude ?? this.latitude,
+    longitude: longitude ?? this.longitude,
+    artefatos: artefatos ?? this.artefatos,
     versao: versao ?? this.versao,
     updatedAt: updatedAt ?? this.updatedAt,
     dadosColetados: dadosColetados ?? this.dadosColetados,
@@ -866,6 +1085,13 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       statusSincronizacao: data.statusSincronizacao.present
           ? data.statusSincronizacao.value
           : this.statusSincronizacao,
+      nomeBem: data.nomeBem.present ? data.nomeBem.value : this.nomeBem,
+      natureza: data.natureza.present ? data.natureza.value : this.natureza,
+      tipo: data.tipo.present ? data.tipo.value : this.tipo,
+      uf: data.uf.present ? data.uf.value : this.uf,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      artefatos: data.artefatos.present ? data.artefatos.value : this.artefatos,
       versao: data.versao.present ? data.versao.value : this.versao,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       dadosColetados: data.dadosColetados.present
@@ -884,6 +1110,13 @@ class Coleta extends DataClass implements Insertable<Coleta> {
           ..write('usuarioId: $usuarioId, ')
           ..write('dataColeta: $dataColeta, ')
           ..write('statusSincronizacao: $statusSincronizacao, ')
+          ..write('nomeBem: $nomeBem, ')
+          ..write('natureza: $natureza, ')
+          ..write('tipo: $tipo, ')
+          ..write('uf: $uf, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('artefatos: $artefatos, ')
           ..write('versao: $versao, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('dadosColetados: $dadosColetados, ')
@@ -898,6 +1131,13 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     usuarioId,
     dataColeta,
     statusSincronizacao,
+    nomeBem,
+    natureza,
+    tipo,
+    uf,
+    latitude,
+    longitude,
+    artefatos,
     versao,
     updatedAt,
     dadosColetados,
@@ -911,6 +1151,13 @@ class Coleta extends DataClass implements Insertable<Coleta> {
           other.usuarioId == this.usuarioId &&
           other.dataColeta == this.dataColeta &&
           other.statusSincronizacao == this.statusSincronizacao &&
+          other.nomeBem == this.nomeBem &&
+          other.natureza == this.natureza &&
+          other.tipo == this.tipo &&
+          other.uf == this.uf &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.artefatos == this.artefatos &&
           other.versao == this.versao &&
           other.updatedAt == this.updatedAt &&
           other.dadosColetados == this.dadosColetados &&
@@ -922,6 +1169,13 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
   final Value<String> usuarioId;
   final Value<DateTime> dataColeta;
   final Value<StatusColeta> statusSincronizacao;
+  final Value<String> nomeBem;
+  final Value<String?> natureza;
+  final Value<String?> tipo;
+  final Value<String?> uf;
+  final Value<double> latitude;
+  final Value<double> longitude;
+  final Value<List<String>> artefatos;
   final Value<int> versao;
   final Value<DateTime> updatedAt;
   final Value<Map<String, Object?>> dadosColetados;
@@ -932,6 +1186,13 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     this.usuarioId = const Value.absent(),
     this.dataColeta = const Value.absent(),
     this.statusSincronizacao = const Value.absent(),
+    this.nomeBem = const Value.absent(),
+    this.natureza = const Value.absent(),
+    this.tipo = const Value.absent(),
+    this.uf = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.artefatos = const Value.absent(),
     this.versao = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.dadosColetados = const Value.absent(),
@@ -943,6 +1204,13 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     required String usuarioId,
     this.dataColeta = const Value.absent(),
     this.statusSincronizacao = const Value.absent(),
+    this.nomeBem = const Value.absent(),
+    this.natureza = const Value.absent(),
+    this.tipo = const Value.absent(),
+    this.uf = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.artefatos = const Value.absent(),
     this.versao = const Value.absent(),
     this.updatedAt = const Value.absent(),
     required Map<String, Object?> dadosColetados,
@@ -956,6 +1224,13 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     Expression<String>? usuarioId,
     Expression<DateTime>? dataColeta,
     Expression<String>? statusSincronizacao,
+    Expression<String>? nomeBem,
+    Expression<String>? natureza,
+    Expression<String>? tipo,
+    Expression<String>? uf,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
+    Expression<String>? artefatos,
     Expression<int>? versao,
     Expression<DateTime>? updatedAt,
     Expression<String>? dadosColetados,
@@ -968,6 +1243,13 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
       if (dataColeta != null) 'data_coleta': dataColeta,
       if (statusSincronizacao != null)
         'status_sincronizacao': statusSincronizacao,
+      if (nomeBem != null) 'nome_bem': nomeBem,
+      if (natureza != null) 'natureza': natureza,
+      if (tipo != null) 'tipo': tipo,
+      if (uf != null) 'uf': uf,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (artefatos != null) 'artefatos': artefatos,
       if (versao != null) 'versao': versao,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (dadosColetados != null) 'dados_coletados': dadosColetados,
@@ -981,6 +1263,13 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     Value<String>? usuarioId,
     Value<DateTime>? dataColeta,
     Value<StatusColeta>? statusSincronizacao,
+    Value<String>? nomeBem,
+    Value<String?>? natureza,
+    Value<String?>? tipo,
+    Value<String?>? uf,
+    Value<double>? latitude,
+    Value<double>? longitude,
+    Value<List<String>>? artefatos,
     Value<int>? versao,
     Value<DateTime>? updatedAt,
     Value<Map<String, Object?>>? dadosColetados,
@@ -992,6 +1281,13 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
       usuarioId: usuarioId ?? this.usuarioId,
       dataColeta: dataColeta ?? this.dataColeta,
       statusSincronizacao: statusSincronizacao ?? this.statusSincronizacao,
+      nomeBem: nomeBem ?? this.nomeBem,
+      natureza: natureza ?? this.natureza,
+      tipo: tipo ?? this.tipo,
+      uf: uf ?? this.uf,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      artefatos: artefatos ?? this.artefatos,
       versao: versao ?? this.versao,
       updatedAt: updatedAt ?? this.updatedAt,
       dadosColetados: dadosColetados ?? this.dadosColetados,
@@ -1017,6 +1313,29 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
         $ColetasTable.$converterstatusSincronizacao.toSql(
           statusSincronizacao.value,
         ),
+      );
+    }
+    if (nomeBem.present) {
+      map['nome_bem'] = Variable<String>(nomeBem.value);
+    }
+    if (natureza.present) {
+      map['natureza'] = Variable<String>(natureza.value);
+    }
+    if (tipo.present) {
+      map['tipo'] = Variable<String>(tipo.value);
+    }
+    if (uf.present) {
+      map['uf'] = Variable<String>(uf.value);
+    }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (artefatos.present) {
+      map['artefatos'] = Variable<String>(
+        $ColetasTable.$converterartefatos.toSql(artefatos.value),
       );
     }
     if (versao.present) {
@@ -1046,6 +1365,13 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
           ..write('usuarioId: $usuarioId, ')
           ..write('dataColeta: $dataColeta, ')
           ..write('statusSincronizacao: $statusSincronizacao, ')
+          ..write('nomeBem: $nomeBem, ')
+          ..write('natureza: $natureza, ')
+          ..write('tipo: $tipo, ')
+          ..write('uf: $uf, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('artefatos: $artefatos, ')
           ..write('versao: $versao, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('dadosColetados: $dadosColetados, ')
@@ -1149,6 +1475,16 @@ class $BensMateriaisTable extends BensMateriais
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> artefatos =
+      GeneratedColumn<String>(
+        'artefatos',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        clientDefault: () => '[]',
+      ).withConverter<List<String>>($BensMateriaisTable.$converterartefatos);
   static const VerificationMeta _publicadoMeta = const VerificationMeta(
     'publicado',
   );
@@ -1169,13 +1505,13 @@ class $BensMateriaisTable extends BensMateriais
   late final GeneratedColumn<String> uf = GeneratedColumn<String>(
     'uf',
     aliasedName,
-    false,
+    true,
     additionalChecks: GeneratedColumn.checkTextLength(
       minTextLength: 2,
       maxTextLength: 2,
     ),
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _municipioMeta = const VerificationMeta(
     'municipio',
@@ -1184,9 +1520,9 @@ class $BensMateriaisTable extends BensMateriais
   late final GeneratedColumn<String> municipio = GeneratedColumn<String>(
     'municipio',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _cepMeta = const VerificationMeta('cep');
   @override
@@ -1212,22 +1548,22 @@ class $BensMateriaisTable extends BensMateriais
     'latitude',
   );
   @override
-  late final GeneratedColumn<String> latitude = GeneratedColumn<String>(
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
     'latitude',
     aliasedName,
     true,
-    type: DriftSqlType.string,
+    type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _longitudeMeta = const VerificationMeta(
     'longitude',
   );
   @override
-  late final GeneratedColumn<String> longitude = GeneratedColumn<String>(
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
     'longitude',
     aliasedName,
     true,
-    type: DriftSqlType.string,
+    type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _geojsonMeta = const VerificationMeta(
@@ -1241,6 +1577,28 @@ class $BensMateriaisTable extends BensMateriais
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _anoRegistroMeta = const VerificationMeta(
+    'anoRegistro',
+  );
+  @override
+  late final GeneratedColumn<int> anoRegistro = GeneratedColumn<int>(
+    'ano_registro',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _descricaoAtualizacaoMeta =
+      const VerificationMeta('descricaoAtualizacao');
+  @override
+  late final GeneratedColumn<String> descricaoAtualizacao =
+      GeneratedColumn<String>(
+        'descricao_atualizacao',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _criadoEmMeta = const VerificationMeta(
     'criadoEm',
   );
@@ -1286,6 +1644,7 @@ class $BensMateriaisTable extends BensMateriais
     natureza,
     tipo,
     meiosAcesso,
+    artefatos,
     publicado,
     uf,
     municipio,
@@ -1294,6 +1653,8 @@ class $BensMateriaisTable extends BensMateriais
     latitude,
     longitude,
     geojson,
+    anoRegistro,
+    descricaoAtualizacao,
     criadoEm,
     atualizadoEm,
     deletadoEm,
@@ -1385,16 +1746,12 @@ class $BensMateriaisTable extends BensMateriais
     }
     if (data.containsKey('uf')) {
       context.handle(_ufMeta, uf.isAcceptableOrUnknown(data['uf']!, _ufMeta));
-    } else if (isInserting) {
-      context.missing(_ufMeta);
     }
     if (data.containsKey('municipio')) {
       context.handle(
         _municipioMeta,
         municipio.isAcceptableOrUnknown(data['municipio']!, _municipioMeta),
       );
-    } else if (isInserting) {
-      context.missing(_municipioMeta);
     }
     if (data.containsKey('cep')) {
       context.handle(
@@ -1424,6 +1781,24 @@ class $BensMateriaisTable extends BensMateriais
       context.handle(
         _geojsonMeta,
         geojson.isAcceptableOrUnknown(data['geojson']!, _geojsonMeta),
+      );
+    }
+    if (data.containsKey('ano_registro')) {
+      context.handle(
+        _anoRegistroMeta,
+        anoRegistro.isAcceptableOrUnknown(
+          data['ano_registro']!,
+          _anoRegistroMeta,
+        ),
+      );
+    }
+    if (data.containsKey('descricao_atualizacao')) {
+      context.handle(
+        _descricaoAtualizacaoMeta,
+        descricaoAtualizacao.isAcceptableOrUnknown(
+          data['descricao_atualizacao']!,
+          _descricaoAtualizacaoMeta,
+        ),
       );
     }
     if (data.containsKey('criado_em')) {
@@ -1488,6 +1863,12 @@ class $BensMateriaisTable extends BensMateriais
         DriftSqlType.string,
         data['${effectivePrefix}meios_acesso'],
       ),
+      artefatos: $BensMateriaisTable.$converterartefatos.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}artefatos'],
+        )!,
+      ),
       publicado: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}publicado'],
@@ -1495,11 +1876,11 @@ class $BensMateriaisTable extends BensMateriais
       uf: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}uf'],
-      )!,
+      ),
       municipio: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}municipio'],
-      )!,
+      ),
       cep: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}cep'],
@@ -1509,16 +1890,24 @@ class $BensMateriaisTable extends BensMateriais
         data['${effectivePrefix}endereco'],
       ),
       latitude: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.double,
         data['${effectivePrefix}latitude'],
       ),
       longitude: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.double,
         data['${effectivePrefix}longitude'],
       ),
       geojson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}geojson'],
+      ),
+      anoRegistro: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ano_registro'],
+      ),
+      descricaoAtualizacao: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}descricao_atualizacao'],
       ),
       criadoEm: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -1539,6 +1928,9 @@ class $BensMateriaisTable extends BensMateriais
   $BensMateriaisTable createAlias(String alias) {
     return $BensMateriaisTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<String>, String> $converterartefatos =
+      const StringListConverter();
 }
 
 class BensMateriai extends DataClass implements Insertable<BensMateriai> {
@@ -1550,14 +1942,17 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
   final String natureza;
   final String tipo;
   final String? meiosAcesso;
+  final List<String> artefatos;
   final bool publicado;
-  final String uf;
-  final String municipio;
+  final String? uf;
+  final String? municipio;
   final String? cep;
   final String? endereco;
-  final String? latitude;
-  final String? longitude;
+  final double? latitude;
+  final double? longitude;
   final String? geojson;
+  final int? anoRegistro;
+  final String? descricaoAtualizacao;
   final DateTime criadoEm;
   final DateTime atualizadoEm;
   final DateTime? deletadoEm;
@@ -1570,14 +1965,17 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     required this.natureza,
     required this.tipo,
     this.meiosAcesso,
+    required this.artefatos,
     required this.publicado,
-    required this.uf,
-    required this.municipio,
+    this.uf,
+    this.municipio,
     this.cep,
     this.endereco,
     this.latitude,
     this.longitude,
     this.geojson,
+    this.anoRegistro,
+    this.descricaoAtualizacao,
     required this.criadoEm,
     required this.atualizadoEm,
     this.deletadoEm,
@@ -1599,9 +1997,18 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     if (!nullToAbsent || meiosAcesso != null) {
       map['meios_acesso'] = Variable<String>(meiosAcesso);
     }
+    {
+      map['artefatos'] = Variable<String>(
+        $BensMateriaisTable.$converterartefatos.toSql(artefatos),
+      );
+    }
     map['publicado'] = Variable<bool>(publicado);
-    map['uf'] = Variable<String>(uf);
-    map['municipio'] = Variable<String>(municipio);
+    if (!nullToAbsent || uf != null) {
+      map['uf'] = Variable<String>(uf);
+    }
+    if (!nullToAbsent || municipio != null) {
+      map['municipio'] = Variable<String>(municipio);
+    }
     if (!nullToAbsent || cep != null) {
       map['cep'] = Variable<String>(cep);
     }
@@ -1609,13 +2016,19 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       map['endereco'] = Variable<String>(endereco);
     }
     if (!nullToAbsent || latitude != null) {
-      map['latitude'] = Variable<String>(latitude);
+      map['latitude'] = Variable<double>(latitude);
     }
     if (!nullToAbsent || longitude != null) {
-      map['longitude'] = Variable<String>(longitude);
+      map['longitude'] = Variable<double>(longitude);
     }
     if (!nullToAbsent || geojson != null) {
       map['geojson'] = Variable<String>(geojson);
+    }
+    if (!nullToAbsent || anoRegistro != null) {
+      map['ano_registro'] = Variable<int>(anoRegistro);
+    }
+    if (!nullToAbsent || descricaoAtualizacao != null) {
+      map['descricao_atualizacao'] = Variable<String>(descricaoAtualizacao);
     }
     map['criado_em'] = Variable<DateTime>(criadoEm);
     map['atualizado_em'] = Variable<DateTime>(atualizadoEm);
@@ -1641,9 +2054,12 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       meiosAcesso: meiosAcesso == null && nullToAbsent
           ? const Value.absent()
           : Value(meiosAcesso),
+      artefatos: Value(artefatos),
       publicado: Value(publicado),
-      uf: Value(uf),
-      municipio: Value(municipio),
+      uf: uf == null && nullToAbsent ? const Value.absent() : Value(uf),
+      municipio: municipio == null && nullToAbsent
+          ? const Value.absent()
+          : Value(municipio),
       cep: cep == null && nullToAbsent ? const Value.absent() : Value(cep),
       endereco: endereco == null && nullToAbsent
           ? const Value.absent()
@@ -1657,6 +2073,12 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       geojson: geojson == null && nullToAbsent
           ? const Value.absent()
           : Value(geojson),
+      anoRegistro: anoRegistro == null && nullToAbsent
+          ? const Value.absent()
+          : Value(anoRegistro),
+      descricaoAtualizacao: descricaoAtualizacao == null && nullToAbsent
+          ? const Value.absent()
+          : Value(descricaoAtualizacao),
       criadoEm: Value(criadoEm),
       atualizadoEm: Value(atualizadoEm),
       deletadoEm: deletadoEm == null && nullToAbsent
@@ -1679,14 +2101,19 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       natureza: serializer.fromJson<String>(json['natureza']),
       tipo: serializer.fromJson<String>(json['tipo']),
       meiosAcesso: serializer.fromJson<String?>(json['meiosAcesso']),
+      artefatos: serializer.fromJson<List<String>>(json['artefatos']),
       publicado: serializer.fromJson<bool>(json['publicado']),
-      uf: serializer.fromJson<String>(json['uf']),
-      municipio: serializer.fromJson<String>(json['municipio']),
+      uf: serializer.fromJson<String?>(json['uf']),
+      municipio: serializer.fromJson<String?>(json['municipio']),
       cep: serializer.fromJson<String?>(json['cep']),
       endereco: serializer.fromJson<String?>(json['endereco']),
-      latitude: serializer.fromJson<String?>(json['latitude']),
-      longitude: serializer.fromJson<String?>(json['longitude']),
+      latitude: serializer.fromJson<double?>(json['latitude']),
+      longitude: serializer.fromJson<double?>(json['longitude']),
       geojson: serializer.fromJson<String?>(json['geojson']),
+      anoRegistro: serializer.fromJson<int?>(json['anoRegistro']),
+      descricaoAtualizacao: serializer.fromJson<String?>(
+        json['descricaoAtualizacao'],
+      ),
       criadoEm: serializer.fromJson<DateTime>(json['criadoEm']),
       atualizadoEm: serializer.fromJson<DateTime>(json['atualizadoEm']),
       deletadoEm: serializer.fromJson<DateTime?>(json['deletadoEm']),
@@ -1704,14 +2131,17 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       'natureza': serializer.toJson<String>(natureza),
       'tipo': serializer.toJson<String>(tipo),
       'meiosAcesso': serializer.toJson<String?>(meiosAcesso),
+      'artefatos': serializer.toJson<List<String>>(artefatos),
       'publicado': serializer.toJson<bool>(publicado),
-      'uf': serializer.toJson<String>(uf),
-      'municipio': serializer.toJson<String>(municipio),
+      'uf': serializer.toJson<String?>(uf),
+      'municipio': serializer.toJson<String?>(municipio),
       'cep': serializer.toJson<String?>(cep),
       'endereco': serializer.toJson<String?>(endereco),
-      'latitude': serializer.toJson<String?>(latitude),
-      'longitude': serializer.toJson<String?>(longitude),
+      'latitude': serializer.toJson<double?>(latitude),
+      'longitude': serializer.toJson<double?>(longitude),
       'geojson': serializer.toJson<String?>(geojson),
+      'anoRegistro': serializer.toJson<int?>(anoRegistro),
+      'descricaoAtualizacao': serializer.toJson<String?>(descricaoAtualizacao),
       'criadoEm': serializer.toJson<DateTime>(criadoEm),
       'atualizadoEm': serializer.toJson<DateTime>(atualizadoEm),
       'deletadoEm': serializer.toJson<DateTime?>(deletadoEm),
@@ -1727,14 +2157,17 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     String? natureza,
     String? tipo,
     Value<String?> meiosAcesso = const Value.absent(),
+    List<String>? artefatos,
     bool? publicado,
-    String? uf,
-    String? municipio,
+    Value<String?> uf = const Value.absent(),
+    Value<String?> municipio = const Value.absent(),
     Value<String?> cep = const Value.absent(),
     Value<String?> endereco = const Value.absent(),
-    Value<String?> latitude = const Value.absent(),
-    Value<String?> longitude = const Value.absent(),
+    Value<double?> latitude = const Value.absent(),
+    Value<double?> longitude = const Value.absent(),
     Value<String?> geojson = const Value.absent(),
+    Value<int?> anoRegistro = const Value.absent(),
+    Value<String?> descricaoAtualizacao = const Value.absent(),
     DateTime? criadoEm,
     DateTime? atualizadoEm,
     Value<DateTime?> deletadoEm = const Value.absent(),
@@ -1749,14 +2182,19 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     natureza: natureza ?? this.natureza,
     tipo: tipo ?? this.tipo,
     meiosAcesso: meiosAcesso.present ? meiosAcesso.value : this.meiosAcesso,
+    artefatos: artefatos ?? this.artefatos,
     publicado: publicado ?? this.publicado,
-    uf: uf ?? this.uf,
-    municipio: municipio ?? this.municipio,
+    uf: uf.present ? uf.value : this.uf,
+    municipio: municipio.present ? municipio.value : this.municipio,
     cep: cep.present ? cep.value : this.cep,
     endereco: endereco.present ? endereco.value : this.endereco,
     latitude: latitude.present ? latitude.value : this.latitude,
     longitude: longitude.present ? longitude.value : this.longitude,
     geojson: geojson.present ? geojson.value : this.geojson,
+    anoRegistro: anoRegistro.present ? anoRegistro.value : this.anoRegistro,
+    descricaoAtualizacao: descricaoAtualizacao.present
+        ? descricaoAtualizacao.value
+        : this.descricaoAtualizacao,
     criadoEm: criadoEm ?? this.criadoEm,
     atualizadoEm: atualizadoEm ?? this.atualizadoEm,
     deletadoEm: deletadoEm.present ? deletadoEm.value : this.deletadoEm,
@@ -1777,6 +2215,7 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       meiosAcesso: data.meiosAcesso.present
           ? data.meiosAcesso.value
           : this.meiosAcesso,
+      artefatos: data.artefatos.present ? data.artefatos.value : this.artefatos,
       publicado: data.publicado.present ? data.publicado.value : this.publicado,
       uf: data.uf.present ? data.uf.value : this.uf,
       municipio: data.municipio.present ? data.municipio.value : this.municipio,
@@ -1785,6 +2224,12 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
       geojson: data.geojson.present ? data.geojson.value : this.geojson,
+      anoRegistro: data.anoRegistro.present
+          ? data.anoRegistro.value
+          : this.anoRegistro,
+      descricaoAtualizacao: data.descricaoAtualizacao.present
+          ? data.descricaoAtualizacao.value
+          : this.descricaoAtualizacao,
       criadoEm: data.criadoEm.present ? data.criadoEm.value : this.criadoEm,
       atualizadoEm: data.atualizadoEm.present
           ? data.atualizadoEm.value
@@ -1806,6 +2251,7 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
           ..write('natureza: $natureza, ')
           ..write('tipo: $tipo, ')
           ..write('meiosAcesso: $meiosAcesso, ')
+          ..write('artefatos: $artefatos, ')
           ..write('publicado: $publicado, ')
           ..write('uf: $uf, ')
           ..write('municipio: $municipio, ')
@@ -1814,6 +2260,8 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('geojson: $geojson, ')
+          ..write('anoRegistro: $anoRegistro, ')
+          ..write('descricaoAtualizacao: $descricaoAtualizacao, ')
           ..write('criadoEm: $criadoEm, ')
           ..write('atualizadoEm: $atualizadoEm, ')
           ..write('deletadoEm: $deletadoEm')
@@ -1822,7 +2270,7 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     uuid,
     coletaId,
     codigoIphan,
@@ -1831,6 +2279,7 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     natureza,
     tipo,
     meiosAcesso,
+    artefatos,
     publicado,
     uf,
     municipio,
@@ -1839,10 +2288,12 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     latitude,
     longitude,
     geojson,
+    anoRegistro,
+    descricaoAtualizacao,
     criadoEm,
     atualizadoEm,
     deletadoEm,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1855,6 +2306,7 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
           other.natureza == this.natureza &&
           other.tipo == this.tipo &&
           other.meiosAcesso == this.meiosAcesso &&
+          other.artefatos == this.artefatos &&
           other.publicado == this.publicado &&
           other.uf == this.uf &&
           other.municipio == this.municipio &&
@@ -1863,6 +2315,8 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
           other.latitude == this.latitude &&
           other.longitude == this.longitude &&
           other.geojson == this.geojson &&
+          other.anoRegistro == this.anoRegistro &&
+          other.descricaoAtualizacao == this.descricaoAtualizacao &&
           other.criadoEm == this.criadoEm &&
           other.atualizadoEm == this.atualizadoEm &&
           other.deletadoEm == this.deletadoEm);
@@ -1877,14 +2331,17 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
   final Value<String> natureza;
   final Value<String> tipo;
   final Value<String?> meiosAcesso;
+  final Value<List<String>> artefatos;
   final Value<bool> publicado;
-  final Value<String> uf;
-  final Value<String> municipio;
+  final Value<String?> uf;
+  final Value<String?> municipio;
   final Value<String?> cep;
   final Value<String?> endereco;
-  final Value<String?> latitude;
-  final Value<String?> longitude;
+  final Value<double?> latitude;
+  final Value<double?> longitude;
   final Value<String?> geojson;
+  final Value<int?> anoRegistro;
+  final Value<String?> descricaoAtualizacao;
   final Value<DateTime> criadoEm;
   final Value<DateTime> atualizadoEm;
   final Value<DateTime?> deletadoEm;
@@ -1898,6 +2355,7 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     this.natureza = const Value.absent(),
     this.tipo = const Value.absent(),
     this.meiosAcesso = const Value.absent(),
+    this.artefatos = const Value.absent(),
     this.publicado = const Value.absent(),
     this.uf = const Value.absent(),
     this.municipio = const Value.absent(),
@@ -1906,6 +2364,8 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
     this.geojson = const Value.absent(),
+    this.anoRegistro = const Value.absent(),
+    this.descricaoAtualizacao = const Value.absent(),
     this.criadoEm = const Value.absent(),
     this.atualizadoEm = const Value.absent(),
     this.deletadoEm = const Value.absent(),
@@ -1920,14 +2380,17 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     required String natureza,
     required String tipo,
     this.meiosAcesso = const Value.absent(),
+    this.artefatos = const Value.absent(),
     this.publicado = const Value.absent(),
-    required String uf,
-    required String municipio,
+    this.uf = const Value.absent(),
+    this.municipio = const Value.absent(),
     this.cep = const Value.absent(),
     this.endereco = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
     this.geojson = const Value.absent(),
+    this.anoRegistro = const Value.absent(),
+    this.descricaoAtualizacao = const Value.absent(),
     this.criadoEm = const Value.absent(),
     this.atualizadoEm = const Value.absent(),
     this.deletadoEm = const Value.absent(),
@@ -1936,9 +2399,7 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
        coletaId = Value(coletaId),
        nomeBem = Value(nomeBem),
        natureza = Value(natureza),
-       tipo = Value(tipo),
-       uf = Value(uf),
-       municipio = Value(municipio);
+       tipo = Value(tipo);
   static Insertable<BensMateriai> custom({
     Expression<String>? uuid,
     Expression<String>? coletaId,
@@ -1948,14 +2409,17 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     Expression<String>? natureza,
     Expression<String>? tipo,
     Expression<String>? meiosAcesso,
+    Expression<String>? artefatos,
     Expression<bool>? publicado,
     Expression<String>? uf,
     Expression<String>? municipio,
     Expression<String>? cep,
     Expression<String>? endereco,
-    Expression<String>? latitude,
-    Expression<String>? longitude,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
     Expression<String>? geojson,
+    Expression<int>? anoRegistro,
+    Expression<String>? descricaoAtualizacao,
     Expression<DateTime>? criadoEm,
     Expression<DateTime>? atualizadoEm,
     Expression<DateTime>? deletadoEm,
@@ -1970,6 +2434,7 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
       if (natureza != null) 'natureza': natureza,
       if (tipo != null) 'tipo': tipo,
       if (meiosAcesso != null) 'meios_acesso': meiosAcesso,
+      if (artefatos != null) 'artefatos': artefatos,
       if (publicado != null) 'publicado': publicado,
       if (uf != null) 'uf': uf,
       if (municipio != null) 'municipio': municipio,
@@ -1978,6 +2443,9 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
       if (geojson != null) 'geojson': geojson,
+      if (anoRegistro != null) 'ano_registro': anoRegistro,
+      if (descricaoAtualizacao != null)
+        'descricao_atualizacao': descricaoAtualizacao,
       if (criadoEm != null) 'criado_em': criadoEm,
       if (atualizadoEm != null) 'atualizado_em': atualizadoEm,
       if (deletadoEm != null) 'deletado_em': deletadoEm,
@@ -1994,14 +2462,17 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     Value<String>? natureza,
     Value<String>? tipo,
     Value<String?>? meiosAcesso,
+    Value<List<String>>? artefatos,
     Value<bool>? publicado,
-    Value<String>? uf,
-    Value<String>? municipio,
+    Value<String?>? uf,
+    Value<String?>? municipio,
     Value<String?>? cep,
     Value<String?>? endereco,
-    Value<String?>? latitude,
-    Value<String?>? longitude,
+    Value<double?>? latitude,
+    Value<double?>? longitude,
     Value<String?>? geojson,
+    Value<int?>? anoRegistro,
+    Value<String?>? descricaoAtualizacao,
     Value<DateTime>? criadoEm,
     Value<DateTime>? atualizadoEm,
     Value<DateTime?>? deletadoEm,
@@ -2016,6 +2487,7 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
       natureza: natureza ?? this.natureza,
       tipo: tipo ?? this.tipo,
       meiosAcesso: meiosAcesso ?? this.meiosAcesso,
+      artefatos: artefatos ?? this.artefatos,
       publicado: publicado ?? this.publicado,
       uf: uf ?? this.uf,
       municipio: municipio ?? this.municipio,
@@ -2024,6 +2496,8 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       geojson: geojson ?? this.geojson,
+      anoRegistro: anoRegistro ?? this.anoRegistro,
+      descricaoAtualizacao: descricaoAtualizacao ?? this.descricaoAtualizacao,
       criadoEm: criadoEm ?? this.criadoEm,
       atualizadoEm: atualizadoEm ?? this.atualizadoEm,
       deletadoEm: deletadoEm ?? this.deletadoEm,
@@ -2058,6 +2532,11 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     if (meiosAcesso.present) {
       map['meios_acesso'] = Variable<String>(meiosAcesso.value);
     }
+    if (artefatos.present) {
+      map['artefatos'] = Variable<String>(
+        $BensMateriaisTable.$converterartefatos.toSql(artefatos.value),
+      );
+    }
     if (publicado.present) {
       map['publicado'] = Variable<bool>(publicado.value);
     }
@@ -2074,13 +2553,21 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
       map['endereco'] = Variable<String>(endereco.value);
     }
     if (latitude.present) {
-      map['latitude'] = Variable<String>(latitude.value);
+      map['latitude'] = Variable<double>(latitude.value);
     }
     if (longitude.present) {
-      map['longitude'] = Variable<String>(longitude.value);
+      map['longitude'] = Variable<double>(longitude.value);
     }
     if (geojson.present) {
       map['geojson'] = Variable<String>(geojson.value);
+    }
+    if (anoRegistro.present) {
+      map['ano_registro'] = Variable<int>(anoRegistro.value);
+    }
+    if (descricaoAtualizacao.present) {
+      map['descricao_atualizacao'] = Variable<String>(
+        descricaoAtualizacao.value,
+      );
     }
     if (criadoEm.present) {
       map['criado_em'] = Variable<DateTime>(criadoEm.value);
@@ -2108,6 +2595,7 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
           ..write('natureza: $natureza, ')
           ..write('tipo: $tipo, ')
           ..write('meiosAcesso: $meiosAcesso, ')
+          ..write('artefatos: $artefatos, ')
           ..write('publicado: $publicado, ')
           ..write('uf: $uf, ')
           ..write('municipio: $municipio, ')
@@ -2116,6 +2604,8 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
           ..write('geojson: $geojson, ')
+          ..write('anoRegistro: $anoRegistro, ')
+          ..write('descricaoAtualizacao: $descricaoAtualizacao, ')
           ..write('criadoEm: $criadoEm, ')
           ..write('atualizadoEm: $atualizadoEm, ')
           ..write('deletadoEm: $deletadoEm, ')
@@ -4124,6 +4614,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'coletas_sincronizada_idx',
     'CREATE INDEX coletas_sincronizada_idx ON coletas (status_sincronizacao)',
   );
+  late final Index coletasNaturezaIdx = Index(
+    'coletas_natureza_idx',
+    'CREATE INDEX coletas_natureza_idx ON coletas (natureza)',
+  );
+  late final Index coletasUfIdx = Index(
+    'coletas_uf_idx',
+    'CREATE INDEX coletas_uf_idx ON coletas (uf)',
+  );
   late final Index bensColetaIdx = Index(
     'bens_coleta_idx',
     'CREATE INDEX bens_coleta_idx ON bens_materiais (coleta_id)',
@@ -4131,6 +4629,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final Index municipio = Index(
     'municipio',
     'CREATE INDEX municipio ON bens_materiais (municipio)',
+  );
+  late final Index bensNaturezaIdx = Index(
+    'bens_natureza_idx',
+    'CREATE INDEX bens_natureza_idx ON bens_materiais (natureza)',
+  );
+  late final Index bensTipoIdx = Index(
+    'bens_tipo_idx',
+    'CREATE INDEX bens_tipo_idx ON bens_materiais (tipo)',
+  );
+  late final Index bensUfIdx = Index(
+    'bens_uf_idx',
+    'CREATE INDEX bens_uf_idx ON bens_materiais (uf)',
   );
   late final Index status = Index(
     'status',
@@ -4166,8 +4676,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     auditorias,
     coletasUsuarioIdx,
     coletasSincronizadaIdx,
+    coletasNaturezaIdx,
+    coletasUfIdx,
     bensColetaIdx,
     municipio,
+    bensNaturezaIdx,
+    bensTipoIdx,
+    bensUfIdx,
     status,
     curadoriasColetaIdx,
     auditoriasUsuarioIdx,
@@ -4752,6 +5267,13 @@ typedef $$ColetasTableCreateCompanionBuilder =
       required String usuarioId,
       Value<DateTime> dataColeta,
       Value<StatusColeta> statusSincronizacao,
+      Value<String> nomeBem,
+      Value<String?> natureza,
+      Value<String?> tipo,
+      Value<String?> uf,
+      Value<double> latitude,
+      Value<double> longitude,
+      Value<List<String>> artefatos,
       Value<int> versao,
       Value<DateTime> updatedAt,
       required Map<String, Object?> dadosColetados,
@@ -4764,6 +5286,13 @@ typedef $$ColetasTableUpdateCompanionBuilder =
       Value<String> usuarioId,
       Value<DateTime> dataColeta,
       Value<StatusColeta> statusSincronizacao,
+      Value<String> nomeBem,
+      Value<String?> natureza,
+      Value<String?> tipo,
+      Value<String?> uf,
+      Value<double> latitude,
+      Value<double> longitude,
+      Value<List<String>> artefatos,
       Value<int> versao,
       Value<DateTime> updatedAt,
       Value<Map<String, Object?>> dadosColetados,
@@ -4853,6 +5382,42 @@ class $$ColetasTableFilterComposer
   ColumnWithTypeConverterFilters<StatusColeta, StatusColeta, String>
   get statusSincronizacao => $composableBuilder(
     column: $table.statusSincronizacao,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get nomeBem => $composableBuilder(
+    column: $table.nomeBem,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get natureza => $composableBuilder(
+    column: $table.natureza,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uf => $composableBuilder(
+    column: $table.uf,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+  get artefatos => $composableBuilder(
+    column: $table.artefatos,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
@@ -4979,6 +5544,41 @@ class $$ColetasTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get nomeBem => $composableBuilder(
+    column: $table.nomeBem,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get natureza => $composableBuilder(
+    column: $table.natureza,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uf => $composableBuilder(
+    column: $table.uf,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get artefatos => $composableBuilder(
+    column: $table.artefatos,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get versao => $composableBuilder(
     column: $table.versao,
     builder: (column) => ColumnOrderings(column),
@@ -5045,6 +5645,27 @@ class $$ColetasTableAnnotationComposer
     column: $table.statusSincronizacao,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get nomeBem =>
+      $composableBuilder(column: $table.nomeBem, builder: (column) => column);
+
+  GeneratedColumn<String> get natureza =>
+      $composableBuilder(column: $table.natureza, builder: (column) => column);
+
+  GeneratedColumn<String> get tipo =>
+      $composableBuilder(column: $table.tipo, builder: (column) => column);
+
+  GeneratedColumn<String> get uf =>
+      $composableBuilder(column: $table.uf, builder: (column) => column);
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get artefatos =>
+      $composableBuilder(column: $table.artefatos, builder: (column) => column);
 
   GeneratedColumn<int> get versao =>
       $composableBuilder(column: $table.versao, builder: (column) => column);
@@ -5173,6 +5794,13 @@ class $$ColetasTableTableManager
                 Value<String> usuarioId = const Value.absent(),
                 Value<DateTime> dataColeta = const Value.absent(),
                 Value<StatusColeta> statusSincronizacao = const Value.absent(),
+                Value<String> nomeBem = const Value.absent(),
+                Value<String?> natureza = const Value.absent(),
+                Value<String?> tipo = const Value.absent(),
+                Value<String?> uf = const Value.absent(),
+                Value<double> latitude = const Value.absent(),
+                Value<double> longitude = const Value.absent(),
+                Value<List<String>> artefatos = const Value.absent(),
                 Value<int> versao = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<Map<String, Object?>> dadosColetados =
@@ -5184,6 +5812,13 @@ class $$ColetasTableTableManager
                 usuarioId: usuarioId,
                 dataColeta: dataColeta,
                 statusSincronizacao: statusSincronizacao,
+                nomeBem: nomeBem,
+                natureza: natureza,
+                tipo: tipo,
+                uf: uf,
+                latitude: latitude,
+                longitude: longitude,
+                artefatos: artefatos,
                 versao: versao,
                 updatedAt: updatedAt,
                 dadosColetados: dadosColetados,
@@ -5196,6 +5831,13 @@ class $$ColetasTableTableManager
                 required String usuarioId,
                 Value<DateTime> dataColeta = const Value.absent(),
                 Value<StatusColeta> statusSincronizacao = const Value.absent(),
+                Value<String> nomeBem = const Value.absent(),
+                Value<String?> natureza = const Value.absent(),
+                Value<String?> tipo = const Value.absent(),
+                Value<String?> uf = const Value.absent(),
+                Value<double> latitude = const Value.absent(),
+                Value<double> longitude = const Value.absent(),
+                Value<List<String>> artefatos = const Value.absent(),
                 Value<int> versao = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 required Map<String, Object?> dadosColetados,
@@ -5206,6 +5848,13 @@ class $$ColetasTableTableManager
                 usuarioId: usuarioId,
                 dataColeta: dataColeta,
                 statusSincronizacao: statusSincronizacao,
+                nomeBem: nomeBem,
+                natureza: natureza,
+                tipo: tipo,
+                uf: uf,
+                latitude: latitude,
+                longitude: longitude,
+                artefatos: artefatos,
                 versao: versao,
                 updatedAt: updatedAt,
                 dadosColetados: dadosColetados,
@@ -5344,14 +5993,17 @@ typedef $$BensMateriaisTableCreateCompanionBuilder =
       required String natureza,
       required String tipo,
       Value<String?> meiosAcesso,
+      Value<List<String>> artefatos,
       Value<bool> publicado,
-      required String uf,
-      required String municipio,
+      Value<String?> uf,
+      Value<String?> municipio,
       Value<String?> cep,
       Value<String?> endereco,
-      Value<String?> latitude,
-      Value<String?> longitude,
+      Value<double?> latitude,
+      Value<double?> longitude,
       Value<String?> geojson,
+      Value<int?> anoRegistro,
+      Value<String?> descricaoAtualizacao,
       Value<DateTime> criadoEm,
       Value<DateTime> atualizadoEm,
       Value<DateTime?> deletadoEm,
@@ -5367,14 +6019,17 @@ typedef $$BensMateriaisTableUpdateCompanionBuilder =
       Value<String> natureza,
       Value<String> tipo,
       Value<String?> meiosAcesso,
+      Value<List<String>> artefatos,
       Value<bool> publicado,
-      Value<String> uf,
-      Value<String> municipio,
+      Value<String?> uf,
+      Value<String?> municipio,
       Value<String?> cep,
       Value<String?> endereco,
-      Value<String?> latitude,
-      Value<String?> longitude,
+      Value<double?> latitude,
+      Value<double?> longitude,
       Value<String?> geojson,
+      Value<int?> anoRegistro,
+      Value<String?> descricaoAtualizacao,
       Value<DateTime> criadoEm,
       Value<DateTime> atualizadoEm,
       Value<DateTime?> deletadoEm,
@@ -5523,6 +6178,12 @@ class $$BensMateriaisTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+  get artefatos => $composableBuilder(
+    column: $table.artefatos,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
   ColumnFilters<bool> get publicado => $composableBuilder(
     column: $table.publicado,
     builder: (column) => ColumnFilters(column),
@@ -5548,18 +6209,28 @@ class $$BensMateriaisTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get latitude => $composableBuilder(
+  ColumnFilters<double> get latitude => $composableBuilder(
     column: $table.latitude,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get longitude => $composableBuilder(
+  ColumnFilters<double> get longitude => $composableBuilder(
     column: $table.longitude,
     builder: (column) => ColumnFilters(column),
   );
 
   ColumnFilters<String> get geojson => $composableBuilder(
     column: $table.geojson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get anoRegistro => $composableBuilder(
+    column: $table.anoRegistro,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get descricaoAtualizacao => $composableBuilder(
+    column: $table.descricaoAtualizacao,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5721,6 +6392,11 @@ class $$BensMateriaisTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get artefatos => $composableBuilder(
+    column: $table.artefatos,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get publicado => $composableBuilder(
     column: $table.publicado,
     builder: (column) => ColumnOrderings(column),
@@ -5746,18 +6422,28 @@ class $$BensMateriaisTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get latitude => $composableBuilder(
+  ColumnOrderings<double> get latitude => $composableBuilder(
     column: $table.latitude,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get longitude => $composableBuilder(
+  ColumnOrderings<double> get longitude => $composableBuilder(
     column: $table.longitude,
     builder: (column) => ColumnOrderings(column),
   );
 
   ColumnOrderings<String> get geojson => $composableBuilder(
     column: $table.geojson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get anoRegistro => $composableBuilder(
+    column: $table.anoRegistro,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get descricaoAtualizacao => $composableBuilder(
+    column: $table.descricaoAtualizacao,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5836,6 +6522,9 @@ class $$BensMateriaisTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumnWithTypeConverter<List<String>, String> get artefatos =>
+      $composableBuilder(column: $table.artefatos, builder: (column) => column);
+
   GeneratedColumn<bool> get publicado =>
       $composableBuilder(column: $table.publicado, builder: (column) => column);
 
@@ -5851,14 +6540,24 @@ class $$BensMateriaisTableAnnotationComposer
   GeneratedColumn<String> get endereco =>
       $composableBuilder(column: $table.endereco, builder: (column) => column);
 
-  GeneratedColumn<String> get latitude =>
+  GeneratedColumn<double> get latitude =>
       $composableBuilder(column: $table.latitude, builder: (column) => column);
 
-  GeneratedColumn<String> get longitude =>
+  GeneratedColumn<double> get longitude =>
       $composableBuilder(column: $table.longitude, builder: (column) => column);
 
   GeneratedColumn<String> get geojson =>
       $composableBuilder(column: $table.geojson, builder: (column) => column);
+
+  GeneratedColumn<int> get anoRegistro => $composableBuilder(
+    column: $table.anoRegistro,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get descricaoAtualizacao => $composableBuilder(
+    column: $table.descricaoAtualizacao,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get criadoEm =>
       $composableBuilder(column: $table.criadoEm, builder: (column) => column);
@@ -6014,14 +6713,17 @@ class $$BensMateriaisTableTableManager
                 Value<String> natureza = const Value.absent(),
                 Value<String> tipo = const Value.absent(),
                 Value<String?> meiosAcesso = const Value.absent(),
+                Value<List<String>> artefatos = const Value.absent(),
                 Value<bool> publicado = const Value.absent(),
-                Value<String> uf = const Value.absent(),
-                Value<String> municipio = const Value.absent(),
+                Value<String?> uf = const Value.absent(),
+                Value<String?> municipio = const Value.absent(),
                 Value<String?> cep = const Value.absent(),
                 Value<String?> endereco = const Value.absent(),
-                Value<String?> latitude = const Value.absent(),
-                Value<String?> longitude = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
                 Value<String?> geojson = const Value.absent(),
+                Value<int?> anoRegistro = const Value.absent(),
+                Value<String?> descricaoAtualizacao = const Value.absent(),
                 Value<DateTime> criadoEm = const Value.absent(),
                 Value<DateTime> atualizadoEm = const Value.absent(),
                 Value<DateTime?> deletadoEm = const Value.absent(),
@@ -6035,6 +6737,7 @@ class $$BensMateriaisTableTableManager
                 natureza: natureza,
                 tipo: tipo,
                 meiosAcesso: meiosAcesso,
+                artefatos: artefatos,
                 publicado: publicado,
                 uf: uf,
                 municipio: municipio,
@@ -6043,6 +6746,8 @@ class $$BensMateriaisTableTableManager
                 latitude: latitude,
                 longitude: longitude,
                 geojson: geojson,
+                anoRegistro: anoRegistro,
+                descricaoAtualizacao: descricaoAtualizacao,
                 criadoEm: criadoEm,
                 atualizadoEm: atualizadoEm,
                 deletadoEm: deletadoEm,
@@ -6058,14 +6763,17 @@ class $$BensMateriaisTableTableManager
                 required String natureza,
                 required String tipo,
                 Value<String?> meiosAcesso = const Value.absent(),
+                Value<List<String>> artefatos = const Value.absent(),
                 Value<bool> publicado = const Value.absent(),
-                required String uf,
-                required String municipio,
+                Value<String?> uf = const Value.absent(),
+                Value<String?> municipio = const Value.absent(),
                 Value<String?> cep = const Value.absent(),
                 Value<String?> endereco = const Value.absent(),
-                Value<String?> latitude = const Value.absent(),
-                Value<String?> longitude = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
                 Value<String?> geojson = const Value.absent(),
+                Value<int?> anoRegistro = const Value.absent(),
+                Value<String?> descricaoAtualizacao = const Value.absent(),
                 Value<DateTime> criadoEm = const Value.absent(),
                 Value<DateTime> atualizadoEm = const Value.absent(),
                 Value<DateTime?> deletadoEm = const Value.absent(),
@@ -6079,6 +6787,7 @@ class $$BensMateriaisTableTableManager
                 natureza: natureza,
                 tipo: tipo,
                 meiosAcesso: meiosAcesso,
+                artefatos: artefatos,
                 publicado: publicado,
                 uf: uf,
                 municipio: municipio,
@@ -6087,6 +6796,8 @@ class $$BensMateriaisTableTableManager
                 latitude: latitude,
                 longitude: longitude,
                 geojson: geojson,
+                anoRegistro: anoRegistro,
+                descricaoAtualizacao: descricaoAtualizacao,
                 criadoEm: criadoEm,
                 atualizadoEm: atualizadoEm,
                 deletadoEm: deletadoEm,

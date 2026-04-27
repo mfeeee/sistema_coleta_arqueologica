@@ -1,4 +1,4 @@
-enum Artefato {
+enum ArtefatoBem {
   fainca('Faiança'),
   malacologico('Malacológico'),
   semente('Semente'),
@@ -21,13 +21,13 @@ enum Artefato {
   ossosHumanos('Ossos humanos'),
   outros('Outros');
 
-  const Artefato(this.label);
+  const ArtefatoBem(this.label);
   final String label;
 
-  static Artefato? tryFromString(String value) {
+  static ArtefatoBem? tryFromString(String value) {
     final key = value.split(':').first;
     try {
-      return Artefato.values.firstWhere((e) => e.name == key);
+      return ArtefatoBem.values.firstWhere((e) => e.name == key);
     } catch (_) {
       return null;
     }

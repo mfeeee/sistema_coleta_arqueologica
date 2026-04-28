@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'passo_1_identificacao_widget.dart';
-import 'passo_2_detalhes_widget.dart';
+import 'passo_3_detalhes_widget.dart';
 import '../../viewmodels/coleta_form_notifier.dart';
+import 'passo_2_artefatos_widget.dart';
 
 class ColetaWizardWidget extends StatefulWidget {
   final double latitude;
@@ -24,58 +25,48 @@ class ColetaWizardWidget extends StatefulWidget {
 }
 
 class _ColetaWizardWidgetState extends State<ColetaWizardWidget> {
-  // TODO: Instanciar PageController
   final PageController _pageController = PageController(initialPage: 0);
 
-  // TODO: Criar GlobalKeys para os formulários
   final GlobalKey<FormState> _formKeyPasso1 = GlobalKey<FormState>();
-  final GlobalKey<FormState> _formKeyPasso2 = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKeyPasso3 = GlobalKey<FormState>();
 
-  // TODO: Criar TextEditingControllers
-  final TextEditingController _nomeController = TextEditingController();
-  final TextEditingController _nomesPopularesController =
-      TextEditingController();
-  final TextEditingController _sinteseController = TextEditingController();
-
-  String? _naturezaSelecionada;
-  String? _tipoSelecionado;
-  String? _estadoConservacao = 'Bom';
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    _nomeController.dispose();
-    _nomesPopularesController.dispose();
-    _sinteseController.dispose();
-    super.dispose();
+  void _irParaPagina(int index) {
+    FocusScope.of(context).unfocus();
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _avancarParaPasso2() {
-    // TODO: Validar form do Passo 1 e mover o PageController para a próxima página
     if (_formKeyPasso1.currentState?.validate() ?? false) {
-      FocusScope.of(context).unfocus();
-      _pageController.nextPage(
-        curve: Curves.easeInOut,
-        duration: const Duration(milliseconds: 300),
+      _irParaPagina(1);
+    }
+  }
+
+  void _avancarParaPasso3() {
+    if (widget.formNotifier.passo2Valido) {
+      _irParaPagina(2);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecione ao menos um tipo de artefato.'),
+        ),
       );
     }
   }
 
-  void _voltarParaPasso1() {
-    // TODO: Mover o PageController para a página anterior
-    FocusScope.of(context).unfocus();
-    _pageController.previousPage(
-      curve: Curves.easeInOut,
-      duration: const Duration(microseconds: 300),
-    );
-  }
-
   void _finalizarColeta() {
-    // TODO: Validar form do Passo 2 e chamar widget.onFinalizar()
-    if (_formKeyPasso2.currentState?.validate() ?? false) {
-      // TODO: salvar no bd local
+    if (_formKeyPasso3.currentState?.validate() ?? false) {
       widget.onFinalizar();
     }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -88,29 +79,21 @@ class _ColetaWizardWidgetState extends State<ColetaWizardWidget> {
           formKey: _formKeyPasso1,
           latitude: widget.latitude,
           longitude: widget.longitude,
-          nomeController: _nomeController,
-          nomesPopularesController: _nomesPopularesController,
-          naturezaSelecionada: _naturezaSelecionada,
-          onNaturezaChanged: (val) {
-            setState(() => _naturezaSelecionada = val);
-          },
-          tipoSelecionado: _tipoSelecionado,
-          onTipoSelecionadoChanged: (val) {
-            setState(() => _tipoSelecionado = val);
-          },
-          estadoConservacao: _estadoConservacao,
-          onEstadoConservacaoChanged: (val) {
-            setState(() => _estadoConservacao = val);
-          },
+          formNotifier: widget.formNotifier,
           onAvancar: _avancarParaPasso2,
           onCancelar: widget.onCancelar,
         ),
 
-        Passo2DetalhesWidget(
-          formKey: _formKeyPasso2,
-          sinteseController: _sinteseController,
+        Passo2ArtefatosWidget(
           formNotifier: widget.formNotifier,
-          onVoltar: _voltarParaPasso1,
+          onVoltar: () => _irParaPagina(0),
+          onAvancar: _avancarParaPasso3,
+        ),
+
+        Passo3DetalhesWidget(
+          formKey: _formKeyPasso3,
+          formNotifier: widget.formNotifier,
+          onVoltar: () => _irParaPagina(1),
           onFinalizar: _finalizarColeta,
         ),
       ],

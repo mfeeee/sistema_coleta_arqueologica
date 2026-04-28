@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
+import '../../viewmodels/coleta_form_notifier.dart';
 
 class Passo1IdentificacaoWidget extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final double latitude;
   final double longitude;
-  final TextEditingController nomeController;
-  final TextEditingController nomesPopularesController;
-  final String? naturezaSelecionada;
-  final ValueChanged<String?> onNaturezaChanged;
-  final String? tipoSelecionado;
-  final ValueChanged<String?> onTipoSelecionadoChanged;
-  final String? estadoConservacao;
-  final ValueChanged<String?> onEstadoConservacaoChanged;
+  final ColetaFormNotifier formNotifier;
   final VoidCallback onAvancar;
   final VoidCallback onCancelar;
 
@@ -20,14 +16,7 @@ class Passo1IdentificacaoWidget extends StatefulWidget {
     required this.formKey,
     required this.latitude,
     required this.longitude,
-    required this.nomeController,
-    required this.nomesPopularesController,
-    required this.naturezaSelecionada,
-    required this.onNaturezaChanged,
-    required this.tipoSelecionado,
-    required this.onTipoSelecionadoChanged,
-    required this.estadoConservacao,
-    required this.onEstadoConservacaoChanged,
+    required this.formNotifier,
     required this.onAvancar,
     required this.onCancelar,
   });
@@ -62,6 +51,11 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _ProgressStep(isActive: true, color: primaryBrown),
+                const SizedBox(width: 12),
+                _ProgressStep(
+                  isActive: false,
+                  color: primaryBrown.withValues(alpha: 0.2),
+                ),
                 const SizedBox(width: 12),
                 _ProgressStep(
                   isActive: false,
@@ -106,7 +100,8 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                   _SectionLabel('NOME DO BEM', textColor: textLight),
                   const SizedBox(height: 8),
                   _CustomTextField(
-                    controller: widget.nomeController,
+                    initialValue: widget.formNotifier.nome,
+                    onChanged: widget.formNotifier.setNome,
                     borderColor: borderColor,
                     textColor: inputText,
                     hintText: 'Ex: Muro de Arrimo - Setor A',
@@ -131,7 +126,8 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                   ),
                   const SizedBox(height: 8),
                   _CustomTextField(
-                    controller: widget.nomesPopularesController,
+                    initialValue: widget.formNotifier.nomesPopulares.join(', '),
+                    onChanged: widget.formNotifier.setNomesPopulares,
                     borderColor: borderColor,
                     textColor: inputText,
                     hintText: 'Como a comunidade local se refere a este bem?',
@@ -142,72 +138,28 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                   // --- NATUREZA ---
                   _SectionLabel('NATUREZA', textColor: textLight),
                   const SizedBox(height: 8),
-                  _CustomDropdown(
-                    value: widget.naturezaSelecionada,
-                    items: const [
-                      'Arqueológico',
-                      'Paleontológico',
-                      'Histórico',
-                    ],
+                  _CustomDropdown<NaturezaBem>(
+                    value: widget.formNotifier.natureza,
+                    items: NaturezaBem.values,
+                    labelBuilder: (e) => e.label,
                     borderColor: borderColor,
                     textColor: inputText,
-                    onChanged: widget.onNaturezaChanged,
+                    onChanged: widget.formNotifier.setNatureza,
                   ),
                   const SizedBox(height: 24),
 
                   // --- TIPO ---
                   _SectionLabel('TIPO', textColor: textLight),
                   const SizedBox(height: 8),
-                  _CustomDropdown(
-                    value: widget.tipoSelecionado,
-                    items: const ['Estrutura', 'Fragmento', 'Sítio Completo'],
+                  _CustomDropdown<TipoBem>(
+                    value: widget.formNotifier.tipo,
+                    items: TipoBem.values,
+                    labelBuilder: (e) => e.label,
                     borderColor: borderColor,
                     textColor: inputText,
-                    onChanged: widget.onTipoSelecionadoChanged,
+                    onChanged: widget.formNotifier.setTipo,
                   ),
-                  const SizedBox(height: 24),
 
-                  // --- ESTADO DE CONSERVAÇÃO ---
-                  _SectionLabel('ESTADO DE CONSERVAÇÃO', textColor: textLight),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _ConservationButton(
-                          label: 'BOM',
-                          isSelected: widget.estadoConservacao == 'BOM',
-                          activeColor: primaryBrown,
-                          borderColor: borderColor,
-                          textMuted: textMuted,
-                          onTap: () => widget.onEstadoConservacaoChanged('BOM'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _ConservationButton(
-                          label: 'REGULAR',
-                          isSelected: widget.estadoConservacao == 'REGULAR',
-                          activeColor: primaryBrown,
-                          borderColor: borderColor,
-                          textMuted: textMuted,
-                          onTap: () =>
-                              widget.onEstadoConservacaoChanged('REGULAR'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _ConservationButton(
-                          label: 'RUIM',
-                          isSelected: widget.estadoConservacao == 'RUIM',
-                          activeColor: primaryBrown,
-                          borderColor: borderColor,
-                          textMuted: textMuted,
-                          onTap: () =>
-                              widget.onEstadoConservacaoChanged('RUIM'),
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 48),
 
                   // --- BOTÕES DE AÇÃO ---
@@ -226,7 +178,7 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Próximo Passo: Documentação',
+                          'Próximo Passo: Artefatos',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -359,14 +311,16 @@ class _GpsBox extends StatelessWidget {
 }
 
 class _CustomTextField extends StatelessWidget {
-  final TextEditingController controller;
+  final String initialValue;
+  final ValueChanged<String> onChanged;
   final Color borderColor;
   final Color textColor;
   final String hintText;
   final int maxLines;
 
   const _CustomTextField({
-    required this.controller,
+    required this.initialValue,
+    required this.onChanged,
     required this.borderColor,
     required this.textColor,
     required this.hintText,
@@ -376,7 +330,8 @@ class _CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: controller,
+      initialValue: initialValue,
+      onChanged: onChanged,
       maxLines: maxLines,
       style: TextStyle(color: textColor, fontSize: 16),
       decoration: InputDecoration(
@@ -399,16 +354,18 @@ class _CustomTextField extends StatelessWidget {
   }
 }
 
-class _CustomDropdown extends StatelessWidget {
-  final String? value;
-  final List<String> items;
+class _CustomDropdown<T> extends StatelessWidget {
+  final T? value;
+  final List<T> items;
+  final String Function(T) labelBuilder;
   final Color borderColor;
   final Color textColor;
-  final ValueChanged<String?> onChanged;
+  final ValueChanged<T?> onChanged;
 
   const _CustomDropdown({
     required this.value,
     required this.items,
+    required this.labelBuilder,
     required this.borderColor,
     required this.textColor,
     required this.onChanged,
@@ -416,7 +373,7 @@ class _CustomDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
+    return DropdownButtonFormField<T>(
       initialValue: value,
       dropdownColor: const Color(0xFF1C1916), // Fundo do menu aberto
       icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF6B7280)),
@@ -436,62 +393,12 @@ class _CustomDropdown extends StatelessWidget {
         ),
       ),
       items: items.map((item) {
-        return DropdownMenuItem(value: item, child: Text(item));
+        return DropdownMenuItem<T>(
+          value: item,
+          child: Text(labelBuilder(item)),
+        );
       }).toList(),
       onChanged: onChanged,
-    );
-  }
-}
-
-class _ConservationButton extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final Color activeColor;
-  final Color borderColor;
-  final Color textMuted;
-  final VoidCallback onTap;
-
-  const _ConservationButton({
-    required this.label,
-    required this.isSelected,
-    required this.activeColor,
-    required this.borderColor,
-    required this.textMuted,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        height: 42,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isSelected ? activeColor : Colors.transparent,
-          border: Border.all(color: isSelected ? activeColor : borderColor),
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : textMuted,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-          ),
-        ),
-      ),
     );
   }
 }

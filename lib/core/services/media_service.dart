@@ -28,15 +28,23 @@ class MediaService {
 }
 
 Future<String?> _compressIsolate(String sourcePath) async {
-  final targetPath = '${sourcePath}_c.jpg';
-  final result = await FlutterImageCompress.compressAndGetFile(
-    sourcePath,
-    targetPath,
-    quality: 75,
-    minWidth: 1280,
-    minHeight: 720,
-    format: CompressFormat.jpeg,
-  );
+  if (!File(sourcePath).existsSync()) {
+    return null;
+  }
 
-  return result?.path;
+  try {
+    final targetPath = '${sourcePath}_c.jpg';
+    final result = await FlutterImageCompress.compressAndGetFile(
+      sourcePath,
+      targetPath,
+      quality: 75,
+      minWidth: 1280,
+      minHeight: 720,
+      format: CompressFormat.jpeg,
+    );
+
+    return result?.path;
+  } catch (e) {
+    return null;
+  }
 }

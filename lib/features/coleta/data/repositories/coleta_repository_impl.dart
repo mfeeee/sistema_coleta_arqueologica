@@ -3,7 +3,6 @@ import '../../domain/repositories/coleta_repository.dart';
 import '../datasources/bem_material_local_datasource.dart';
 import '../models/bem_material_cache_model.dart';
 import 'dart:developer';
-import '../../../../core/database/enums/status_coleta.dart';
 
 class ColetaRepositoryImpl implements ColetaRepository {
   final BemMaterialLocalDatasource _localDatasource;
@@ -21,18 +20,9 @@ class ColetaRepositoryImpl implements ColetaRepository {
   }
 
   @override
-  Future<void> salvarNovaColeta(BemMaterialCacheEntity novoBemMaterial) async {
+  Future<void> salvarNovaColeta(BemMaterialCacheEntity entity) async {
     try {
-      final model = BemMaterialCacheModel(
-        id: novoBemMaterial.id,
-        nome: novoBemMaterial.nome,
-        latitude: novoBemMaterial.latitude,
-        longitude: novoBemMaterial.longitude,
-        usuarioId: '',
-        coletaStatus: StatusColeta.pendente,
-        versao: 1,
-        updatedAt: DateTime.now(),
-      );
+      final model = BemMaterialCacheModel.fromEntity(entity);
       await _localDatasource.insertBemMaterial(model);
     } catch (e) {
       log('Erro ao salvar coleta', error: e, name: 'ColetaRepository');

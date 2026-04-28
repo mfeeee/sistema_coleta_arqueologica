@@ -57,7 +57,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
           child: Container(height: 1.0),
         ),
         title: const Text(
-          'Nova Coleta - Passo 1/2',
+          'Nova Coleta - Passo 1/3',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

@@ -17,7 +17,6 @@ class AuthenticatedHttpClient extends http.BaseClient {
 
   Completer<bool>? _refreshCompleter;
 
-
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     final token = await secureStorage.getJwt();
@@ -35,7 +34,7 @@ class AuthenticatedHttpClient extends http.BaseClient {
     final refreshed = await _getOrAwaitRefresh();
 
     if (!refreshed) {
-      log('Refresh falhou. Sessão encerrada.',name: 'AuthenticatedHttpClient');
+      log('Refresh falhou. Sessão encerrada.', name: 'AuthenticatedHttpClient');
       return response;
     }
 
@@ -46,7 +45,10 @@ class AuthenticatedHttpClient extends http.BaseClient {
 
   Future<bool> _getOrAwaitRefresh() async {
     if (_refreshCompleter != null) {
-      log('Aguardando refresh em andamento...', name: 'AuthenticatedHttpClient');
+      log(
+        'Aguardando refresh em andamento...',
+        name: 'AuthenticatedHttpClient',
+      );
       return _refreshCompleter!.future;
     }
 

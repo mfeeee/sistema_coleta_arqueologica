@@ -79,7 +79,7 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                           checkmarkColor: Colors.white,
                           labelStyle: TextStyle(
                             color: selecionado ? Colors.white : _textMuted,
-                            fontSize: 13,
+                            fontSize: 16,
                             fontWeight: selecionado
                                 ? FontWeight.bold
                                 : FontWeight.normal,

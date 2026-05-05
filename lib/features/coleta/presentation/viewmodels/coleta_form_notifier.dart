@@ -7,8 +7,15 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dar
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
+import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
 import '../../domain/entities/coleta_entity.dart';
 import 'package:uuid/uuid.dart';
+
+class ColetaFormResult {
+  final ColetaEntity coleta;
+  final BemMaterialEntity bemMaterial;
+  const ColetaFormResult({required this.coleta, required this.bemMaterial});
+}
 
 class ColetaFormNotifier extends ChangeNotifier {
   final MediaService _mediaService;
@@ -114,29 +121,48 @@ class ColetaFormNotifier extends ChangeNotifier {
 
   bool get passo2Valido => _artefatos.isNotEmpty;
 
-  ColetaEntity toEntity({
+  ColetaFormResult toResult({
     required double lat,
     required double lng,
     required String usuarioId,
   }) {
-    assert(passo1Valido, 'toEntity() chamado com Passo 1 inválido');
-    assert(passo2Valido, 'toEntity() chamado com nenhum artefato selecionado');
-    return ColetaEntity(
-      id: const Uuid().v4(),
+    assert(passo1Valido, 'toResult() chamado com Passo 1 inválido');
+    assert(passo2Valido, 'toResult() chamado com nenhum artefato selecionado');
+
+    final coletaId = const Uuid().v4();
+    final agora = DateTime.now();
+
+    final coleta = ColetaEntity(
+      id: coletaId,
       usuarioId: usuarioId,
-      nome: nome.trim(),
-      nomesPopulares: nomesPopulares,
-      natureza: natureza!,
-      tipo: tipo!,
+      dataColeta: agora,
+      syncStatus: StatusColeta.pendente,
+      nomeBem: nome.trim(),
+      natureza: natureza,
+      tipo: tipo,
       artefatos: _artefatos.toList(),
-      fotoPaths: fotoPaths,
-      meiosAcesso: meiosAcesso?.trim(),
       latitude: lat,
       longitude: lng,
-      syncStatus: StatusColeta.pendente,
       versao: 1,
-      updatedAt: DateTime.now(),
+      updatedAt: agora,
+      dadosColetados: {'foto_paths': fotoPaths},
     );
+
+    final bemMaterial = BemMaterialEntity(
+      id: const Uuid().v4(),
+      coletaId: coletaId,
+      nomeBem: nome.trim(),
+      nomesPopulares: nomesPopulares,
+      natureza: natureza!.name,
+      tipo: tipo!.name,
+      meiosAcesso: meiosAcesso?.trim(),
+      artefatos: _artefatos.toList(),
+      publicado: false,
+      criadoEm: agora,
+      atualizadoEm: agora,
+    );
+
+    return ColetaFormResult(coleta: coleta, bemMaterial: bemMaterial);
   }
 
   @override

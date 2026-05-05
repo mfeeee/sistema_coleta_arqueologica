@@ -17,7 +17,7 @@ import 'core/services/auth_service.dart';
 import 'features/auth/auth_notifier.dart';
 import 'core/di/app_scope.dart';
 
-const _baseUrl = 'http://localhost:8000';
+const _baseUrl = 'https://sistemaarqueologicoapi-production.up.railway.app/api';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

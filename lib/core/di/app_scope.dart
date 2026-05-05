@@ -1,9 +1,8 @@
-// lib/core/di/app_scope.dart
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/domain/sync_notifier.dart';
 import '../../features/auth/auth_notifier.dart';
-import '../../features/sync/sync_service.dart';
 import '../../features/coleta/data/datasources/coleta_local_datasource.dart';
 import '../../features/coleta/data/repositories/coleta_repository_impl.dart';
 import '../../core/database/app_database.dart';
@@ -12,21 +11,21 @@ class AppScope extends InheritedWidget {
   const AppScope({
     super.key,
     required this.authNotifier,
-    required this.syncService,
+    required this.syncNotifier,
     required this.coletaRepository,
     required this.mediaService,
     required super.child,
   });
 
   final AuthNotifier authNotifier;
-  final SyncService syncService;
+  final SyncNotifier syncNotifier;
   final ColetaRepositoryImpl coletaRepository;
   final MediaService mediaService;
 
   factory AppScope.create({
     required AppDatabase database,
     required AuthNotifier authNotifier,
-    required SyncService syncService,
+    required SyncNotifier syncNotifier,
     required Widget child,
   }) {
     final datasource = ColetaLocalDatasourceImpl(database);
@@ -35,7 +34,7 @@ class AppScope extends InheritedWidget {
 
     return AppScope(
       authNotifier: authNotifier,
-      syncService: syncService,
+      syncNotifier: syncNotifier,
       coletaRepository: coletaRepository,
       mediaService: mediaService,
       child: child,
@@ -51,7 +50,7 @@ class AppScope extends InheritedWidget {
   @override
   bool updateShouldNotify(AppScope oldWidget) =>
       authNotifier != oldWidget.authNotifier ||
-      syncService != oldWidget.syncService ||
+      syncNotifier != oldWidget.syncNotifier ||
       coletaRepository != oldWidget.coletaRepository ||
       mediaService != oldWidget.mediaService;
 }

@@ -9,7 +9,8 @@ sealed class AuthResult {
 }
 
 final class AuthSuccess extends AuthResult {
-  const AuthSuccess();
+  const AuthSuccess({required this.userName});
+  final String userName;
 }
 
 final class AuthFailure extends AuthResult {
@@ -32,24 +33,35 @@ class AuthService {
     try {
       final response = await httpClient.post(
         Uri.parse('$baseUrl/auth/login'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
 
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body) as Map<String, dynamic>;
-        await secureStorage.saveJwt(body['access_token'] as String);
-        await secureStorage.saveRefreshToken(body['refresh_token'] as String);
-        return const AuthSuccess();
-      }
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
 
-      if (response.statusCode == 401) {
-        return const AuthFailure('E-mail ou senha incorretos.');
-      }
+      switch (response.statusCode) {
+        case 200:
+          final token = body['token'] as String?;
+          if (token == null) {
+            return const AuthFailure('Resposta inválida do servidor.');
+          }
+          await secureStorage.saveJwt(token);
+          final userName = (body['user'] as Map<String, dynamic>?)?['name']
+              as String? ?? 'Usuário';
+          return AuthSuccess(userName: userName);
+        
+        case 401:
+          return const AuthFailure('E-mail ou senha incorretos.');
 
-      return AuthFailure('Erro inesperado (${response.statusCode})');
+        case 403:
+          return const AuthFailure('Conta desativada. Contate o administrador.');
+
+        default:
+          final msg = body['message'] as String?;
+          return AuthFailure(msg ?? 'Erro inesperado (${response.statusCode})');
+      }
     } on SocketException {
-      return const AuthFailure('Sem conexão com a internet.');
+      return const AuthFailure('Sem conexão com o servidor.');
     } on http.ClientException catch (e) {
       log('Erro HTTP no login', error: e, name: 'AuthService');
       return const AuthFailure('Falha na comunicação com o servidor.');
@@ -60,29 +72,27 @@ class AuthService {
   }
 
   Future<bool> refreshToken() async {
-    try {
-      final refresh = await secureStorage.getRefreshToken();
-      if (refresh == null) return false;
-
-      final response = await httpClient.post(
-        Uri.parse('$baseUrl/auth/refresh'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'refresh-token': refresh}),
-      );
-
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body) as Map<String, dynamic>;
-        await secureStorage.saveJwt(body['access_token'] as String);
-        return true;
-      }
-      return false;
-    } catch (e) {
-      log('Falha ao renovar token', error: e, name: 'AuthService');
-      return false;
-    }
+    log('Sanctum não suporta refresh. Forçando novo login.', name: 'AuthService');
+    return false;
   }
 
   Future<void> logout() async {
-    await secureStorage.clearAll();
+    try {
+      final token = await secureStorage.getJwt();
+      if (token != null) {
+        await httpClient.post(
+          Uri.parse('$baseUrl/auth/logout'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
+      }
+    } catch (e) {
+      log('Falha ao chamar /auth/logout', error: e, name: 'AuthService');
+    } finally {
+      await secureStorage.clearAll();
+    }
   }
 }

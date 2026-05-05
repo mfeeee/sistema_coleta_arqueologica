@@ -6,50 +6,35 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.da
 class ColetaEntity {
   final String id;
   final String usuarioId;
-
-  final String nome;
-  final List<String> nomesPopulares;
-  final NaturezaBem natureza;
-  final TipoBem tipo;
-  final List<ArtefatoBem> artefatos;
-  final String? meiosAcesso;
-  final List<String> fotoPaths;
-
+  final DateTime dataColeta;
+  final StatusColeta syncStatus;
+  final String nomeBem;
+  final NaturezaBem? natureza;
+  final TipoBem? tipo;
+  final String? uf;
   final double latitude;
   final double longitude;
-
-  final String? uf;
-  final String? municipio;
-  final String? cep;
-  final String? endereco;
-  final String? geom;
-
-  final String? codigoIphan;
-
-  final StatusColeta syncStatus;
+  final List<ArtefatoBem> artefatos;
   final int versao;
   final DateTime updatedAt;
+  final Map<String, dynamic> dadosColetados;
+  final DateTime? deletadoEm;
 
   const ColetaEntity({
     required this.id,
     required this.usuarioId,
-    required this.nome,
-    required this.nomesPopulares,
-    required this.natureza,
-    required this.tipo,
-    required this.artefatos,
-    required this.fotoPaths,
+    required this.dataColeta,
+    required this.syncStatus,
+    required this.nomeBem,
     required this.latitude,
     required this.longitude,
-    required this.syncStatus,
+    required this.artefatos,
     required this.versao,
     required this.updatedAt,
-    this.meiosAcesso,
+    required this.dadosColetados,
+    this.natureza,
+    this.tipo,
     this.uf,
-    this.municipio,
-    this.cep,
-    this.endereco,
-    this.geom,
-    this.codigoIphan,
+    this.deletadoEm,
   });
 }

@@ -9,8 +9,9 @@ sealed class AuthResult {
 }
 
 final class AuthSuccess extends AuthResult {
-  const AuthSuccess({required this.userName});
+  const AuthSuccess({required this.userName, required this.userId});
   final String userName;
+  final String userId;
 }
 
 final class AuthFailure extends AuthResult {
@@ -49,10 +50,11 @@ class AuthService {
             return const AuthFailure('Resposta inválida do servidor.');
           }
           await secureStorage.saveJwt(token);
-          final userName =
-              (body['user'] as Map<String, dynamic>?)?['name'] as String? ??
-              'Usuário';
-          return AuthSuccess(userName: userName);
+          final user = body['user'] as Map<String, dynamic>?;
+          return AuthSuccess(
+            userName: user?['name'] as String? ?? 'Usuário',
+            userId: user?['id'] as String? ?? '',
+          );
 
         case 401:
           return const AuthFailure('E-mail ou senha incorretos.');

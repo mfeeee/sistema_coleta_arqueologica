@@ -102,14 +102,14 @@ class ColetaModel extends ColetaEntity {
       uf: json['uf'] as String?,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      artefatos: (json['artefatos'] as List<dynamic>?)
+      artefatos:
+          (json['artefatos'] as List<dynamic>?)
               ?.map((e) => ArtefatoBem.values.byName(e as String))
               .toList() ??
           [],
       versao: json['versao'] as int? ?? 1,
       updatedAt: DateTime.parse(json['updated_at'] as String),
-      dadosColetados:
-          json['dados_coletados'] as Map<String, dynamic>? ?? {},
+      dadosColetados: json['dados_coletados'] as Map<String, dynamic>? ?? {},
       deletadoEm: json['deletado_em'] != null
           ? DateTime.tryParse(json['deletado_em'] as String)
           : null,

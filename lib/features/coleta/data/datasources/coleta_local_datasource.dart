@@ -4,14 +4,16 @@ import 'package:drift/drift.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 
 abstract class ColetaLocalDatasource {
-  Future<List<ColetaModel>> getAllBensMateriaisCache();
-  Future<void> insertBemMaterial(ColetaModel bemMaterial);
-  Future<void> updatecoletaStatus(
+  Future<List<ColetaModel>> getAll();
+  Future<List<ColetaModel>> getPendentes();
+  Future<ColetaModel?> getById(String uuid);
+  Future<void> inserir(ColetaModel coleta);
+  Future<void> atualizarStatus(
     String uuid,
     StatusColeta status,
     int novaVersao,
   );
-  Future<List<ColetaModel>> getBensPendentes();
+  Future<void> deletar(String uuid);
 }
 
 class ColetaLocalDatasourceImpl implements ColetaLocalDatasource {
@@ -20,20 +22,40 @@ class ColetaLocalDatasourceImpl implements ColetaLocalDatasource {
   const ColetaLocalDatasourceImpl(this._db);
 
   @override
-  Future<List<ColetaModel>> getAllBensMateriaisCache() async {
-    final rows = await _db.select(_db.coletas).get();
-    return rows.map(ColetaModel.fromColetaData).toList();
+  Future<List<ColetaModel>> getAll() async {
+    final rows = await (_db.select(
+      _db.coletas,
+    )..where((t) => t.deletadoEm.isNull())).get();
+    return rows.map(ColetaModel.fromRow).toList();
   }
 
   @override
-  Future<void> insertBemMaterial(ColetaModel bemMaterial) async {
-    await _db
-        .into(_db.coletas)
-        .insertOnConflictUpdate(bemMaterial.toCompanion());
+  Future<List<ColetaModel>> getPendentes() async {
+    final rows =
+        await (_db.select(_db.coletas)..where(
+              (t) =>
+                  t.statusSincronizacao.equalsValue(StatusColeta.pendente) &
+                  t.deletadoEm.isNull(),
+            ))
+            .get();
+    return rows.map(ColetaModel.fromRow).toList();
   }
 
   @override
-  Future<void> updatecoletaStatus(
+  Future<ColetaModel?> getById(String uuid) async {
+    final row = await (_db.select(
+      _db.coletas,
+    )..where((t) => t.uuid.equals(uuid))).getSingleOrNull();
+    return row != null ? ColetaModel.fromRow(row) : null;
+  }
+
+  @override
+  Future<void> inserir(ColetaModel coleta) async {
+    await _db.into(_db.coletas).insertOnConflictUpdate(coleta.toCompanion());
+  }
+
+  @override
+  Future<void> atualizarStatus(
     String uuid,
     StatusColeta status,
     int novaVersao,
@@ -48,12 +70,9 @@ class ColetaLocalDatasourceImpl implements ColetaLocalDatasource {
   }
 
   @override
-  Future<List<ColetaModel>> getBensPendentes() async {
-    final rows =
-        await (_db.select(_db.coletas)..where(
-              (t) => t.statusSincronizacao.equalsValue(StatusColeta.pendente),
-            ))
-            .get();
-    return rows.map(ColetaModel.fromColetaData).toList();
+  Future<void> deletar(String uuid) async {
+    await (_db.update(_db.coletas)..where((t) => t.uuid.equals(uuid))).write(
+      ColetasCompanion(deletadoEm: Value(DateTime.now())),
+    );
   }
 }

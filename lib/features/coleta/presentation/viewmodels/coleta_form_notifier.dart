@@ -7,7 +7,7 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dar
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
-import '../../domain/entities/bem_material_cache_entity.dart';
+import '../../domain/entities/coleta_entity.dart';
 import 'package:uuid/uuid.dart';
 
 class ColetaFormNotifier extends ChangeNotifier {
@@ -114,14 +114,14 @@ class ColetaFormNotifier extends ChangeNotifier {
 
   bool get passo2Valido => _artefatos.isNotEmpty;
 
-  BemMaterialCacheEntity toEntity({
+  ColetaEntity toEntity({
     required double lat,
     required double lng,
     required String usuarioId,
   }) {
     assert(passo1Valido, 'toEntity() chamado com Passo 1 inválido');
     assert(passo2Valido, 'toEntity() chamado com nenhum artefato selecionado');
-    return BemMaterialCacheEntity(
+    return ColetaEntity(
       id: const Uuid().v4(),
       usuarioId: usuarioId,
       nome: nome.trim(),

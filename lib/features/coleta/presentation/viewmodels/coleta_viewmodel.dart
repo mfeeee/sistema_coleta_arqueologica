@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../../../core/utils/geolocator_helper.dart';
-import '../../domain/entities/bem_material_cache_entity.dart';
+import '../../domain/entities/coleta_entity.dart';
 import '../../domain/services/proximidade_service.dart';
 
 enum ColetaStep {
@@ -30,7 +30,7 @@ class ColetaViewModel {
   final ValueNotifier<String?> errorMessage = ValueNotifier<String?>(null);
 
   Coordenada? coordenadaAtual;
-  List<BemMaterialCacheEntity> sitiosConflitantes = [];
+  List<ColetaEntity> sitiosConflitantes = [];
 
   /// TODO: Implementar o fluxo de pegar GPS -> Calcular Proximidade -> Mudar Estado
   Future<void> iniciarMapeamento() async {

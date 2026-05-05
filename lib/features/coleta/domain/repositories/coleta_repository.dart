@@ -1,7 +1,7 @@
-import '../entities/bem_material_cache_entity.dart';
+import '../entities/coleta_entity.dart';
 
 abstract class ColetaRepository {
-  Future<List<BemMaterialCacheEntity>> getBemMaterialsCacheOffline();
+  Future<List<ColetaEntity>> getBemMaterialsCacheOffline();
 
-  Future<void> salvarNovaColeta(BemMaterialCacheEntity novoBemMaterial);
+  Future<void> salvarNovaColeta(ColetaEntity novoBemMaterial);
 }

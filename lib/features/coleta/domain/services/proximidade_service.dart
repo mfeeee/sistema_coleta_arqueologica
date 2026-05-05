@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import '../entities/bem_material_cache_entity.dart';
+import '../entities/coleta_entity.dart';
 import '../repositories/coleta_repository.dart';
 
 class ProximidadeService {
@@ -8,7 +8,7 @@ class ProximidadeService {
   ProximidadeService(this._repository);
 
   /// Varre o banco offline em busca de sítios próximos à coordenada dada.
-  Future<List<BemMaterialCacheEntity>> buscarBemMaterialsProximos({
+  Future<List<ColetaEntity>> buscarBemMaterialsProximos({
     required double latAtual,
     required double lonAtual,
     double raioMetros = 500.0,
@@ -16,7 +16,7 @@ class ProximidadeService {
     // TODO: Melhorar a complexidade de tempo inserindo queries espaciais.
     final todosBemMaterials = await _repository.getBemMaterialsCacheOffline();
 
-    final sitiosProximos = <BemMaterialCacheEntity>[];
+    final sitiosProximos = <ColetaEntity>[];
 
     for (final sitio in todosBemMaterials) {
       final distancia = _calcularDistancia(

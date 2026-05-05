@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import '../../features/auth/auth_notifier.dart';
 import '../../features/sync/sync_service.dart';
-import '../../features/coleta/data/datasources/bem_material_local_datasource.dart';
+import '../../features/coleta/data/datasources/coleta_local_datasource.dart';
 import '../../features/coleta/data/repositories/coleta_repository_impl.dart';
 import '../../core/database/app_database.dart';
 
@@ -29,7 +29,7 @@ class AppScope extends InheritedWidget {
     required SyncService syncService,
     required Widget child,
   }) {
-    final datasource = BemMaterialLocalDatasourceImpl(database);
+    final datasource = ColetaLocalDatasourceImpl(database);
     final coletaRepository = ColetaRepositoryImpl(datasource);
     final mediaService = MediaService(ImagePicker());
 

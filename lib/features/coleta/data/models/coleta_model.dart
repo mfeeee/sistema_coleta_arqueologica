@@ -11,58 +11,50 @@ class ColetaModel extends ColetaEntity {
   const ColetaModel({
     required super.id,
     required super.usuarioId,
-    required super.nome,
-    required super.nomesPopulares,
-    required super.natureza,
-    required super.tipo,
-    required super.artefatos,
-    required super.fotoPaths,
+    required super.dataColeta,
+    required super.syncStatus,
+    required super.nomeBem,
     required super.latitude,
     required super.longitude,
-    required super.syncStatus,
+    required super.artefatos,
     required super.versao,
     required super.updatedAt,
-    super.meiosAcesso,
+    required super.dadosColetados,
+    super.natureza,
+    super.tipo,
     super.uf,
-    super.municipio,
-    super.cep,
-    super.endereco,
-    super.geom,
-    super.codigoIphan,
+    super.deletadoEm,
   });
 
-  factory ColetaModel.fromColetaData(Coleta row) {
-    final dados = row.dadosColetados;
+  factory ColetaModel.fromRow(Coleta row) {
     return ColetaModel(
       id: row.uuid,
       usuarioId: row.usuarioId,
-      nome: dados['nome'] as String? ?? '',
-      nomesPopulares: (dados['nomes_populares'] as List?)?.cast<String>() ?? [],
-      natureza: NaturezaBem.values.firstWhere(
-        (e) => e.name == (dados['natureza'] as String? ?? ''),
-        orElse: () => NaturezaBem.bemArqueologico,
-      ),
-      tipo: TipoBem.values.firstWhere(
-        (e) => e.name == (dados['tipo'] as String? ?? ''),
-        orElse: () => TipoBem.sitio,
-      ),
-      latitude: (dados['latitude'] as num?)?.toDouble() ?? 0.0,
-      longitude: (dados['longitude'] as num?)?.toDouble() ?? 0.0,
-      artefatos:
-          (dados['artefatos'] as List<dynamic>?)
-              ?.map((e) => ArtefatoBem.values.byName(e as String))
-              .toList() ??
-          [],
-      uf: dados['uf'] as String?,
-      municipio: dados['municipio'] as String?,
-      cep: dados['cep'] as String?,
-      endereco: dados['endereco'] as String?,
-      codigoIphan: dados['codigo_iphan'] as String?,
-      meiosAcesso: dados['meios_acesso'] as String?,
-      fotoPaths: (dados['foto_paths'] as List?)?.cast<String>() ?? [],
+      dataColeta: row.dataColeta,
       syncStatus: row.statusSincronizacao,
+      nomeBem: row.nomeBem,
+      natureza: row.natureza != null
+          ? NaturezaBem.values.firstWhere(
+              (e) => e.name == row.natureza,
+              orElse: () => NaturezaBem.bemArqueologico,
+            )
+          : null,
+      tipo: row.tipo != null
+          ? TipoBem.values.firstWhere(
+              (e) => e.name == row.tipo,
+              orElse: () => TipoBem.sitio,
+            )
+          : null,
+      uf: row.uf,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      artefatos: row.artefatos
+          .map((e) => ArtefatoBem.values.byName(e))
+          .toList(),
       versao: row.versao,
       updatedAt: row.updatedAt,
+      dadosColetados: row.dadosColetados,
+      deletadoEm: row.deletadoEm,
     );
   }
 
@@ -70,24 +62,57 @@ class ColetaModel extends ColetaEntity {
     return ColetaModel(
       id: entity.id,
       usuarioId: entity.usuarioId,
-      nome: entity.nome,
-      nomesPopulares: entity.nomesPopulares,
+      dataColeta: entity.dataColeta,
+      syncStatus: entity.syncStatus,
+      nomeBem: entity.nomeBem,
       natureza: entity.natureza,
       tipo: entity.tipo,
-      artefatos: entity.artefatos,
-      fotoPaths: entity.fotoPaths,
+      uf: entity.uf,
       latitude: entity.latitude,
       longitude: entity.longitude,
-      syncStatus: entity.syncStatus,
+      artefatos: entity.artefatos,
       versao: entity.versao,
       updatedAt: entity.updatedAt,
-      meiosAcesso: entity.meiosAcesso,
-      uf: entity.uf,
-      municipio: entity.municipio,
-      cep: entity.cep,
-      endereco: entity.endereco,
-      geom: entity.geom,
-      codigoIphan: entity.codigoIphan,
+      dadosColetados: entity.dadosColetados,
+      deletadoEm: entity.deletadoEm,
+    );
+  }
+
+  factory ColetaModel.fromJson(Map<String, dynamic> json) {
+    return ColetaModel(
+      id: json['uuid'] as String,
+      usuarioId: json['usuario_id'] as String,
+      dataColeta: DateTime.parse(json['data_coleta'] as String),
+      syncStatus: StatusColeta.values.byName(
+        json['status_sincronizacao'] as String? ?? StatusColeta.pendente.name,
+      ),
+      nomeBem: json['nome_bem'] as String? ?? '',
+      natureza: json['natureza'] != null
+          ? NaturezaBem.values.firstWhere(
+              (e) => e.name == json['natureza'],
+              orElse: () => NaturezaBem.bemArqueologico,
+            )
+          : null,
+      tipo: json['tipo'] != null
+          ? TipoBem.values.firstWhere(
+              (e) => e.name == json['tipo'],
+              orElse: () => TipoBem.sitio,
+            )
+          : null,
+      uf: json['uf'] as String?,
+      latitude: (json['latitude'] as num).toDouble(),
+      longitude: (json['longitude'] as num).toDouble(),
+      artefatos: (json['artefatos'] as List<dynamic>?)
+              ?.map((e) => ArtefatoBem.values.byName(e as String))
+              .toList() ??
+          [],
+      versao: json['versao'] as int? ?? 1,
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+      dadosColetados:
+          json['dados_coletados'] as Map<String, dynamic>? ?? {},
+      deletadoEm: json['deletado_em'] != null
+          ? DateTime.tryParse(json['deletado_em'] as String)
+          : null,
     );
   }
 
@@ -95,69 +120,19 @@ class ColetaModel extends ColetaEntity {
     return ColetasCompanion.insert(
       uuid: id,
       usuarioId: usuarioId,
-      nomeBem: Value(nome),
-      natureza: Value(natureza.name),
-      tipo: Value(tipo.name),
+      dataColeta: Value(dataColeta),
+      statusSincronizacao: Value(syncStatus),
+      nomeBem: Value(nomeBem),
+      natureza: Value(natureza?.name),
+      tipo: Value(tipo?.name),
+      uf: Value(uf),
       latitude: Value(latitude),
       longitude: Value(longitude),
       artefatos: Value(artefatos.map((e) => e.name).toList()),
-      statusSincronizacao: Value(syncStatus),
       versao: Value(versao),
       updatedAt: Value(updatedAt),
-      dadosColetados: {
-        'nome': nome,
-        'nomes_populares': nomesPopulares,
-        'natureza': natureza.name,
-        'tipo': tipo.name,
-        'latitude': latitude,
-        'longitude': longitude,
-        'artefatos': artefatos.map((e) => e.name).toList(),
-        'foto_paths': fotoPaths,
-        'meios_acesso': meiosAcesso,
-        'uf': uf,
-        'municipio': municipio,
-        'cep': cep,
-        'endereco': endereco,
-        'codigo_iphan': codigoIphan,
-      },
-    );
-  }
-
-  factory ColetaModel.fromJson(Map<String, dynamic> json) {
-    return ColetaModel(
-      id: json['id'] as String,
-      usuarioId: json['usuario_id'] as String? ?? '',
-      nome: json['nome'] as String,
-      nomesPopulares: (json['nomes_populares'] as List?)?.cast<String>() ?? [],
-      natureza: NaturezaBem.values.firstWhere(
-        (e) => e.name == (json['natureza'] as String? ?? ''),
-        orElse: () => NaturezaBem.bemArqueologico,
-      ),
-      tipo: TipoBem.values.firstWhere(
-        (e) => e.name == (json['tipo'] as String? ?? ''),
-        orElse: () => TipoBem.sitio,
-      ),
-      latitude: (json['latitude'] as num).toDouble(),
-      longitude: (json['longitude'] as num).toDouble(),
-      artefatos:
-          (json['artefatos'] as List<dynamic>?)
-              ?.map((e) => ArtefatoBem.values.byName(e as String))
-              .toList() ??
-          [],
-      fotoPaths: (json['foto_paths'] as List?)?.cast<String>() ?? [],
-      syncStatus: StatusColeta.values.byName(
-        json['sync_status'] as String? ?? StatusColeta.pendente.name,
-      ),
-      versao: json['versao'] as int? ?? 1,
-      updatedAt:
-          DateTime.tryParse(json['updated_at'] as String? ?? '') ??
-          DateTime.now(),
-      meiosAcesso: json['meios_acesso'] as String?,
-      uf: json['uf'] as String?,
-      municipio: json['municipio'] as String?,
-      cep: json['cep'] as String?,
-      endereco: json['endereco'] as String?,
-      codigoIphan: json['codigo_iphan'] as String?,
+      dadosColetados: dadosColetados,
+      deletadoEm: Value(deletadoEm),
     );
   }
 }

@@ -33,7 +33,10 @@ class AuthService {
     try {
       final response = await httpClient.post(
         Uri.parse('$baseUrl/auth/login'),
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
         body: jsonEncode({'email': email, 'password': password}),
       );
 
@@ -46,15 +49,18 @@ class AuthService {
             return const AuthFailure('Resposta inválida do servidor.');
           }
           await secureStorage.saveJwt(token);
-          final userName = (body['user'] as Map<String, dynamic>?)?['name']
-              as String? ?? 'Usuário';
+          final userName =
+              (body['user'] as Map<String, dynamic>?)?['name'] as String? ??
+              'Usuário';
           return AuthSuccess(userName: userName);
-        
+
         case 401:
           return const AuthFailure('E-mail ou senha incorretos.');
 
         case 403:
-          return const AuthFailure('Conta desativada. Contate o administrador.');
+          return const AuthFailure(
+            'Conta desativada. Contate o administrador.',
+          );
 
         default:
           final msg = body['message'] as String?;
@@ -72,7 +78,10 @@ class AuthService {
   }
 
   Future<bool> refreshToken() async {
-    log('Sanctum não suporta refresh. Forçando novo login.', name: 'AuthService');
+    log(
+      'Sanctum não suporta refresh. Forçando novo login.',
+      name: 'AuthService',
+    );
     return false;
   }
 

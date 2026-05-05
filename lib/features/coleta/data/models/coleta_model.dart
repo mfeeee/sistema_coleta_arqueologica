@@ -2,13 +2,13 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dar
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 
-import '../../domain/entities/bem_material_cache_entity.dart';
+import '../../domain/entities/coleta_entity.dart';
 import 'package:drift/drift.dart';
 import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 
-class BemMaterialCacheModel extends BemMaterialCacheEntity {
-  const BemMaterialCacheModel({
+class ColetaModel extends ColetaEntity {
+  const ColetaModel({
     required super.id,
     required super.usuarioId,
     required super.nome,
@@ -22,11 +22,18 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
     required super.syncStatus,
     required super.versao,
     required super.updatedAt,
+    super.meiosAcesso,
+    super.uf,
+    super.municipio,
+    super.cep,
+    super.endereco,
+    super.geom,
+    super.codigoIphan,
   });
 
-  factory BemMaterialCacheModel.fromColetaData(Coleta row) {
+  factory ColetaModel.fromColetaData(Coleta row) {
     final dados = row.dadosColetados;
-    return BemMaterialCacheModel(
+    return ColetaModel(
       id: row.uuid,
       usuarioId: row.usuarioId,
       nome: dados['nome'] as String? ?? '',
@@ -41,7 +48,17 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
       ),
       latitude: (dados['latitude'] as num?)?.toDouble() ?? 0.0,
       longitude: (dados['longitude'] as num?)?.toDouble() ?? 0.0,
-      artefatos: (dados['artefatos'] as List?)?.cast<ArtefatoBem>() ?? [],
+      artefatos:
+          (dados['artefatos'] as List<dynamic>?)
+              ?.map((e) => ArtefatoBem.values.byName(e as String))
+              .toList() ??
+          [],
+      uf: dados['uf'] as String?,
+      municipio: dados['municipio'] as String?,
+      cep: dados['cep'] as String?,
+      endereco: dados['endereco'] as String?,
+      codigoIphan: dados['codigo_iphan'] as String?,
+      meiosAcesso: dados['meios_acesso'] as String?,
       fotoPaths: (dados['foto_paths'] as List?)?.cast<String>() ?? [],
       syncStatus: row.statusSincronizacao,
       versao: row.versao,
@@ -49,8 +66,8 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
     );
   }
 
-  factory BemMaterialCacheModel.fromEntity(BemMaterialCacheEntity entity) {
-    return BemMaterialCacheModel(
+  factory ColetaModel.fromEntity(ColetaEntity entity) {
+    return ColetaModel(
       id: entity.id,
       usuarioId: entity.usuarioId,
       nome: entity.nome,
@@ -64,6 +81,13 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
       syncStatus: entity.syncStatus,
       versao: entity.versao,
       updatedAt: entity.updatedAt,
+      meiosAcesso: entity.meiosAcesso,
+      uf: entity.uf,
+      municipio: entity.municipio,
+      cep: entity.cep,
+      endereco: entity.endereco,
+      geom: entity.geom,
+      codigoIphan: entity.codigoIphan,
     );
   }
 
@@ -71,19 +95,36 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
     return ColetasCompanion.insert(
       uuid: id,
       usuarioId: usuarioId,
-      dadosColetados: {
-        'nome': nome,
-        'latitude': latitude,
-        'longitude': longitude,
-      },
+      nomeBem: Value(nome),
+      natureza: Value(natureza.name),
+      tipo: Value(tipo.name),
+      latitude: Value(latitude),
+      longitude: Value(longitude),
+      artefatos: Value(artefatos.map((e) => e.name).toList()),
       statusSincronizacao: Value(syncStatus),
       versao: Value(versao),
       updatedAt: Value(updatedAt),
+      dadosColetados: {
+        'nome': nome,
+        'nomes_populares': nomesPopulares,
+        'natureza': natureza.name,
+        'tipo': tipo.name,
+        'latitude': latitude,
+        'longitude': longitude,
+        'artefatos': artefatos.map((e) => e.name).toList(),
+        'foto_paths': fotoPaths,
+        'meios_acesso': meiosAcesso,
+        'uf': uf,
+        'municipio': municipio,
+        'cep': cep,
+        'endereco': endereco,
+        'codigo_iphan': codigoIphan,
+      },
     );
   }
 
-  factory BemMaterialCacheModel.fromJson(Map<String, dynamic> json) {
-    return BemMaterialCacheModel(
+  factory ColetaModel.fromJson(Map<String, dynamic> json) {
+    return ColetaModel(
       id: json['id'] as String,
       usuarioId: json['usuario_id'] as String? ?? '',
       nome: json['nome'] as String,
@@ -98,7 +139,11 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
       ),
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      artefatos: (json['artefatos'] as List?)?.cast<ArtefatoBem>() ?? [],
+      artefatos:
+          (json['artefatos'] as List<dynamic>?)
+              ?.map((e) => ArtefatoBem.values.byName(e as String))
+              .toList() ??
+          [],
       fotoPaths: (json['foto_paths'] as List?)?.cast<String>() ?? [],
       syncStatus: StatusColeta.values.byName(
         json['sync_status'] as String? ?? StatusColeta.pendente.name,
@@ -107,6 +152,12 @@ class BemMaterialCacheModel extends BemMaterialCacheEntity {
       updatedAt:
           DateTime.tryParse(json['updated_at'] as String? ?? '') ??
           DateTime.now(),
+      meiosAcesso: json['meios_acesso'] as String?,
+      uf: json['uf'] as String?,
+      municipio: json['municipio'] as String?,
+      cep: json['cep'] as String?,
+      endereco: json['endereco'] as String?,
+      codigoIphan: json['codigo_iphan'] as String?,
     );
   }
 }

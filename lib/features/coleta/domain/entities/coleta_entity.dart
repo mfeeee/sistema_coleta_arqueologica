@@ -3,7 +3,7 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dar
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 
-class BemMaterialCacheEntity {
+class ColetaEntity {
   final String id;
   final String usuarioId;
 
@@ -30,7 +30,7 @@ class BemMaterialCacheEntity {
   final int versao;
   final DateTime updatedAt;
 
-  const BemMaterialCacheEntity({
+  const ColetaEntity({
     required this.id,
     required this.usuarioId,
     required this.nome,

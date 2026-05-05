@@ -14,11 +14,11 @@ class ProximidadeService {
     double raioMetros = 500.0,
   }) async {
     // TODO: Melhorar a complexidade de tempo inserindo queries espaciais.
-    final todosBemMaterials = await _repository.getBemMaterialsCacheOffline();
+    final coletas = await _repository.getAll();
 
     final sitiosProximos = <ColetaEntity>[];
 
-    for (final sitio in todosBemMaterials) {
+    for (final sitio in coletas) {
       final distancia = _calcularDistancia(
         latAtual,
         lonAtual,

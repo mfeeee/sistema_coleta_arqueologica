@@ -12,10 +12,12 @@ class AuthNotifier extends ChangeNotifier {
   AuthStatus _status = AuthStatus.idle;
   String? _errorMessage;
   String? _userName;
+  String? _userId;
 
   AuthStatus get status => _status;
   String? get errorMessage => _errorMessage;
   String? get userName => _userName;
+  String? get userId => _userId;
   bool get isLoading => _status == AuthStatus.loading;
 
   Future<void> login(String email, String password) async {
@@ -29,6 +31,7 @@ class AuthNotifier extends ChangeNotifier {
       case AuthSuccess():
         _status = AuthStatus.authenticated;
         _userName = userName;
+        _userId = userId;
       case AuthFailure(:final message):
         _status = AuthStatus.error;
         _errorMessage = message;
@@ -42,6 +45,7 @@ class AuthNotifier extends ChangeNotifier {
     await authService.logout();
     _status = AuthStatus.unauthenticated;
     _userName = null;
+    _userId = userId;
     _errorMessage = null;
     notifyListeners();
   }

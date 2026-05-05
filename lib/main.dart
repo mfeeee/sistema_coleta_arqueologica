@@ -1,5 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/features/bem_material/data/datasources/bem_material_local_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/domain/sync_notifier.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/database/app_database.dart';
@@ -8,9 +14,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'core/services/secure_storage_service.dart';
 import 'package:http/http.dart' as http;
 import 'core/services/auth_service.dart';
-import 'core/services/authenticated_http_client.dart';
 import 'features/auth/auth_notifier.dart';
-import 'features/sync/sync_service.dart';
 import 'core/di/app_scope.dart';
 
 const _baseUrl = 'http://localhost:8000';
@@ -36,22 +40,35 @@ Future<void> main() async {
     baseUrl: _baseUrl,
   );
 
-  final authHttpClient = AuthenticatedHttpClient(
-    secureStorage: secureStorage,
-    authService: authService,
+  final authNotifier = AuthNotifier(authService: authService);
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: _baseUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 30),
+      headers: {'Accept': 'application/json'},
+    ),
   );
 
-  final authNotifier = AuthNotifier(authService: authService);
-  final syncService = SyncService(
-    database: db,
-    httpClient: authHttpClient,
-    baseUrl: _baseUrl,
+  final syncApiDatasource = SyncApiDatasourceImpl(dio);
+  final coletaLocalDatasource = ColetaLocalDatasourceImpl(db);
+  final bemMaterialLocalDatasource = BemMaterialLocalDatasourceImpl(db);
+
+  final syncRepository = SyncRepository(
+    coletaDatasource: coletaLocalDatasource,
+    bemMaterialDatasource: bemMaterialLocalDatasource,
+    apiDatasource: syncApiDatasource,
+  );
+
+  final syncNotifier = SyncNotifier(
+    repository: syncRepository,
+    secureStorage: secureStorage,
   );
 
   runApp(
     SistemaColetaApp(
       authNotifier: authNotifier,
-      syncService: syncService,
+      syncNotifier: syncNotifier,
       database: db,
     ),
   );
@@ -61,12 +78,12 @@ class SistemaColetaApp extends StatefulWidget {
   const SistemaColetaApp({
     super.key,
     required this.authNotifier,
-    required this.syncService,
+    required this.syncNotifier,
     required this.database,
   });
 
   final AuthNotifier authNotifier;
-  final SyncService syncService;
+  final SyncNotifier syncNotifier;
   final AppDatabase database;
 
   @override
@@ -93,7 +110,7 @@ class _SistemaColetaAppState extends State<SistemaColetaApp> {
     return AppScope.create(
       database: widget.database,
       authNotifier: widget.authNotifier,
-      syncService: widget.syncService,
+      syncNotifier: widget.syncNotifier,
       child: MaterialApp.router(
         title: 'Sistema de Coleta Arqueológica',
         debugShowCheckedModeBanner: false,

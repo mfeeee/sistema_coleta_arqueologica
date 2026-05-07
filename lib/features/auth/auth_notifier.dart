@@ -53,6 +53,36 @@ class AuthNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> register({
+    required String name,
+    required String email,
+    required String password,
+    required String classificacao,
+  }) async {
+    _status = AuthStatus.loading;
+    _errorMessage = null;
+    notifyListeners();
+
+    final result = await authService.register(
+      name: name,
+      email: email,
+      password: password,
+      classificacao: classificacao,
+    );
+
+    switch (result) {
+      case AuthSuccess(:final userName):
+        _status = AuthStatus.authenticated;
+        _userName = userName;
+      case AuthFailure(:final message):
+        _status = AuthStatus.error;
+        _errorMessage = message;
+        log('Registro falhou: $message', name: 'AuthNotifier');
+    }
+
+    notifyListeners();
+  }
+
   Future<bool> podeDeslogar() async {
     final pendentes = await _coletaRepository.getPendentes();
     return pendentes.isEmpty;

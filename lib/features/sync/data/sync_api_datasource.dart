@@ -1,7 +1,6 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import '../../coleta/domain/entities/coleta_entity.dart';
-import '../../bem_material/domain/entities/bem_material_entity.dart';
 
 enum SyncResultStatus { sucesso, erroRede, conflito }
 
@@ -14,7 +13,6 @@ class SyncResultado {
 abstract class SyncApiDatasource {
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
-    required BemMaterialEntity bemMaterial,
     required String bearerToken,
   });
 }
@@ -27,23 +25,44 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
   @override
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
-    required BemMaterialEntity bemMaterial,
     required String bearerToken,
   }) async {
     try {
-      final formData = await _buildFormData(coleta, bemMaterial);
+      final payload = {
+        'coletas': [
+          {
+            'id': coleta.id,
+            'data_coleta': coleta.dataColeta.toUtc().toIso8601String(),
+            'nome_bem': coleta.nomeBem,
+            'latitude': coleta.latitude,
+            'longitude': coleta.longitude,
+            'natureza': coleta.natureza?.name,
+            'tipo': coleta.tipo?.name,
+            'uf': coleta.uf,
+            'artefatos': coleta.artefatos.map((e) => e.name).toList(),
+            'versao': coleta.versao,
+            'dados_coletados': coleta.dadosColetados,
+          },
+        ],
+      };
+
+      log('POST /v1/mobile/sync payload: $payload', name: 'SyncApiDatasource');
 
       final response = await _dio.post(
-        '/coletas',
-        data: formData,
+        '/v1/mobile/sync',
+        data: payload,
         options: Options(
-          headers: {'Authorization': 'Bearer $bearerToken'},
+          headers: {
+            'Authorization': 'Bearer $bearerToken',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
           validateStatus: (status) => status != null && status < 500,
         ),
       );
 
       log(
-        'POST /coletas → ${response.statusCode} (coleta: ${coleta.id})',
+        'POST /v1/mobile/sync → ${response.statusCode} | ${response.data}',
         name: 'SyncApiDatasource',
       );
 
@@ -65,69 +84,5 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
         status: SyncResultStatus.erroRede,
       );
     }
-  }
-
-  Future<FormData> _buildFormData(
-    ColetaEntity coleta,
-    BemMaterialEntity bemMaterial,
-  ) async {
-    final Map<String, dynamic> fields = {
-      // Coleta
-      'uuid': coleta.id,
-      'usuario_id': coleta.usuarioId,
-      'data_coleta': coleta.dataColeta.toIso8601String(),
-      'nome_bem': coleta.nomeBem,
-      'natureza': coleta.natureza?.name,
-      'tipo': coleta.tipo?.name,
-      'uf': coleta.uf,
-      'latitude': coleta.latitude,
-      'longitude': coleta.longitude,
-      'artefatos': coleta.artefatos.map((e) => e.name).toList(),
-      'versao': coleta.versao,
-      // Bem Material
-      'bem_codigo_iphan': bemMaterial.codigoIphan,
-      'bem_municipio': bemMaterial.municipio,
-      'bem_cep': bemMaterial.cep,
-      'bem_endereco': bemMaterial.endereco,
-      'bem_meios_acesso': bemMaterial.meiosAcesso,
-      'bem_nomes_populares': bemMaterial.nomesPopulares.join(','),
-    };
-
-    fields.removeWhere((_, v) => v == null);
-
-    final formData = FormData.fromMap(fields);
-
-    final fotoPaths = coleta.dadosColetados['foto_paths'];
-    if (fotoPaths is List) {
-      for (int i = 0; i < fotoPaths.length; i++) {
-        final path = fotoPaths[i] as String?;
-        if (path != null && path.isNotEmpty) {
-          formData.files.add(
-            MapEntry(
-              'fotos[$i]',
-              await MultipartFile.fromFile(
-                path,
-                filename: 'foto_${coleta.id}_$i.jpg',
-              ),
-            ),
-          );
-        }
-      }
-    }
-
-    final audioPath = coleta.dadosColetados['audio_path'] as String?;
-    if (audioPath != null && audioPath.isNotEmpty) {
-      formData.files.add(
-        MapEntry(
-          'audio',
-          await MultipartFile.fromFile(
-            audioPath,
-            filename: 'audio_${coleta.id}.m4a',
-          ),
-        ),
-      );
-    }
-
-    return formData;
   }
 }

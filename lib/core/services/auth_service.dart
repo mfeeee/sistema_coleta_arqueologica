@@ -9,7 +9,7 @@ sealed class AuthResult {
 }
 
 final class AuthSuccess extends AuthResult {
-  const AuthSuccess({required this.userName, required this.userId});
+  AuthSuccess({required this.userName, required this.userId});
   final String userName;
   final String userId;
 }

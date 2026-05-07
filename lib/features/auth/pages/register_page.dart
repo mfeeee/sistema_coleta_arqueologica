@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
@@ -120,19 +122,20 @@ class _RegisterFormState extends State<_RegisterForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   // Controles de visibilidade de senha
   bool _hidePassword = true;
   bool _hideConfirmPassword = true;
 
   // Variável para armazenar o valor do Dropdown de Classificação
-  String? _selectedClassification;
-  final List<String> _classifications = [
-    'Estudante',
-    'Pesquisador',
-    'Curador',
-    'Visitante',
+  static const _classifications = [
+    ('estudante', 'Estudante'),
+    ('professor', 'Professor'),
+    ('arqueologo', 'Arqueólogo'),
   ];
+
+  String _selectedClassification = _classifications.first.$1;
 
   @override
   void dispose() {
@@ -143,246 +146,312 @@ class _RegisterFormState extends State<_RegisterForm> {
     super.dispose();
   }
 
+  Future<void> _handleRegister(AuthNotifier notifier) async {
+    if (!_formKey.currentState!.validate()) return;
+
+    await notifier.register(
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      classificacao: _selectedClassification,
+    );
+
+    if (!mounted) return;
+    if (notifier.status == AuthStatus.authenticated) {
+      context.go('/home');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final notifier = AppScope.of(context).authNotifier;
     final ThemeData theme = Theme.of(context);
 
     return Padding(
       padding: const EdgeInsets.all(32.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          // --- Form Container ---
+      child: ListenableBuilder(
+        listenable: notifier,
+        builder: (context, _) {
+          return Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                // --- Form Container ---
 
-          // Nome Completo
-          Text(
-            'Nome Completo',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              hintText: 'Digite seu nome completo',
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // E-mail
-          Text(
-            'E-mail',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              hintText: 'exemplo@instituicao.br',
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Classificação (Dropdown)
-          Text(
-            'Classificação',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            initialValue: _selectedClassification,
-            decoration: const InputDecoration(hintText: 'Selecione seu perfil'),
-            items: _classifications.map((String classification) {
-              return DropdownMenuItem<String>(
-                value: classification,
-                child: Text(classification),
-              );
-            }).toList(),
-            onChanged: (String? newValue) {
-              setState(() {
-                _selectedClassification = newValue;
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Senha
-          Text(
-            'Senha',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _hidePassword,
-            decoration: InputDecoration(
-              hintText: 'Crie uma senha',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _hidePassword ? Icons.visibility_off : Icons.visibility,
+                // Nome Completo
+                Text(
+                  'Nome Completo',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
-                onPressed: () {
-                  setState(() {
-                    _hidePassword = !_hidePassword;
-                  });
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Confirmar Senha
-          Text(
-            'Confirmar Senha',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _confirmPasswordController,
-            obscureText: _hideConfirmPassword,
-            decoration: InputDecoration(
-              hintText: 'Repita a senha',
-              prefixIcon: const Icon(Icons.lock_outline),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _hideConfirmPassword
-                      ? Icons.visibility_off
-                      : Icons.visibility,
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _nameController,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(
+                    hintText: 'Digite seu nome completo',
+                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Informe seu nome'
+                      : null,
                 ),
-                onPressed: () {
-                  setState(() {
-                    _hideConfirmPassword = !_hideConfirmPassword;
-                  });
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
+                const SizedBox(height: 16),
 
-          // --- Action Buttons ---
-          ElevatedButton(
-            onPressed: () => context.go('/home'),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Criar Conta',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                // E-mail
+                Text(
+                  'E-mail',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.person_add_alt_outlined,
-                  size: 20,
-                  color: theme.colorScheme.primary,
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    hintText: 'exemplo@instituicao.br',
+                  ),
+                  validator: (v) => (v == null || !v.contains('@'))
+                      ? 'E-mail inválido'
+                      : null,
+                ),
+                const SizedBox(height: 16),
+
+                // Classificação (Dropdown)
+                Text(
+                  'Classificação',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedClassification,
+                  decoration: const InputDecoration(
+                    hintText: 'Selecione seu perfil',
+                  ),
+                  items: _classifications
+                      .map(
+                        (e) => DropdownMenuItem(value: e.$1, child: Text(e.$2)),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    setState(() {
+                      _selectedClassification = v!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Senha
+                Text(
+                  'Senha',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _hidePassword,
+                  decoration: InputDecoration(
+                    hintText: 'Crie uma senha',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _hidePassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _hidePassword = !_hidePassword;
+                        });
+                      },
+                    ),
+                  ),
+                  validator: (v) => (v == null || v.length < 8)
+                      ? 'Mínimo 8 caracteres'
+                      : null,
+                ),
+                const SizedBox(height: 16),
+
+                // Confirmar Senha
+                Text(
+                  'Confirmar Senha',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: _hideConfirmPassword,
+                  decoration: InputDecoration(
+                    hintText: 'Repita a senha',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _hideConfirmPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _hideConfirmPassword = !_hideConfirmPassword;
+                        });
+                      },
+                    ),
+                  ),
+                  validator: (v) => v != _passwordController.text
+                      ? 'Senhas não coincidem'
+                      : null,
+                ),
+
+                if (notifier.errorMessage != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    notifier.errorMessage!,
+                    style: TextStyle(
+                      color: theme.colorScheme.error,
+                      fontSize: 13,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+
+                const SizedBox(height: 32),
+
+                // --- Action Buttons ---
+                ElevatedButton(
+                  onPressed: notifier.isLoading
+                      ? null
+                      : () => _handleRegister(notifier),
+                  child: notifier.isLoading
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Criar Conta',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.person_add_alt_outlined,
+                              size: 20,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ],
+                        ),
+                ),
+
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 56),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    context.canPop() ? context.pop() : context.go('/login');
+                  },
+                  child: Text(
+                    'Já tenho uma conta, entrar',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // --- Footer Info ---
+                Column(
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Ao se cadastrar, você concorda com nossos',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go('#');
+                            }
+                          },
+                          child: Text(
+                            'Termos de Serviço',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.surfaceTint,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'e',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontSize: 12,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            if (context.canPop()) {
+                              context.pop();
+                            } else {
+                              context.go('#');
+                            }
+                          },
+                          child: Text(
+                            'Política de Privacidade',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.surfaceTint,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
-          ),
-
-          const SizedBox(height: 12),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 56),
-              side: BorderSide(
-                color: theme.colorScheme.primary.withValues(alpha: 0.2),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: () {
-              context.canPop() ? context.pop() : context.go('/login');
-            },
-            child: Text(
-              'Já tenho uma conta, entrar',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // --- Footer Info ---
-          Column(
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Ao se cadastrar, você concorda com nossos',
-                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.go('#');
-                      }
-                    },
-                    child: Text(
-                      'Termos de Serviço',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.surfaceTint,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    'e',
-                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      if (context.canPop()) {
-                        context.pop();
-                      } else {
-                        context.go('#');
-                      }
-                    },
-                    child: Text(
-                      'Política de Privacidade',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.surfaceTint,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }

@@ -1,5 +1,5 @@
 enum ArtefatoBem {
-  fainca('Faiança'),
+  faianca('Faiança'),
   malacologico('Malacológico'),
   semente('Semente'),
   ossosFaunisticos('Ossos faunísticos'),
@@ -7,7 +7,7 @@ enum ArtefatoBem {
   plastico('Plástico'),
   gres('Grés'),
   carvao('Carvão'),
-  faincaFina('Faiança fina'),
+  faiancaFina('Faiança fina'),
   madeira('Madeira'),
   porcelana('Porcelana'),
   textil('Têxtil'),

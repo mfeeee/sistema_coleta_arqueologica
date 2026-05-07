@@ -145,7 +145,11 @@ class ColetaFormNotifier extends ChangeNotifier {
       longitude: lng,
       versao: 1,
       updatedAt: agora,
-      dadosColetados: {'foto_paths': fotoPaths},
+      dadosColetados: {
+        'nomes_populares': nomesPopulares,
+        'meios_acesso': meiosAcesso,
+        'foto_paths': fotoPaths,
+      },
     );
 
     final bemMaterial = BemMaterialEntity(

@@ -2,20 +2,16 @@ import 'dart:developer';
 import '../../../core/database/enums/status_coleta.dart';
 import '../../coleta/data/datasources/coleta_local_datasource.dart';
 import '../../coleta/domain/entities/coleta_entity.dart';
-import '../../bem_material/data/datasources/bem_material_local_datasource.dart';
 import 'sync_api_datasource.dart';
 
 class SyncRepository {
   final ColetaLocalDatasource _coletaDatasource;
-  final BemMaterialLocalDatasource _bemMaterialDatasource;
   final SyncApiDatasource _apiDatasource;
 
   const SyncRepository({
     required ColetaLocalDatasource coletaDatasource,
-    required BemMaterialLocalDatasource bemMaterialDatasource,
     required SyncApiDatasource apiDatasource,
   }) : _coletaDatasource = coletaDatasource,
-       _bemMaterialDatasource = bemMaterialDatasource,
        _apiDatasource = apiDatasource;
 
   Future<int> contarPendentes() async {
@@ -62,24 +58,8 @@ class SyncRepository {
     ColetaEntity coleta,
     String bearerToken,
   ) async {
-    final bens = await _bemMaterialDatasource.getByColetaId(coleta.id);
-
-    if (bens.isEmpty) {
-      log(
-        'Coleta ${coleta.id} sem BemMaterial associado. Marcando como conflito.',
-        name: 'SyncRepository',
-      );
-      await _coletaDatasource.atualizarStatus(
-        coleta.id,
-        StatusColeta.conflito,
-        coleta.versao + 1,
-      );
-      return SyncResultStatus.conflito;
-    }
-
     final resultado = await _apiDatasource.enviarColeta(
       coleta: coleta,
-      bemMaterial: bens.first,
       bearerToken: bearerToken,
     );
 

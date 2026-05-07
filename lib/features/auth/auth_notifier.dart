@@ -1,13 +1,22 @@
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import '../../core/services/auth_service.dart';
 
 enum AuthStatus { idle, loading, authenticated, unauthenticated, error }
 
 class AuthNotifier extends ChangeNotifier {
-  AuthNotifier({required this.authService});
+  AuthNotifier({
+    required this.authService,
+    required ColetaRepository coletaRepository,
+    required PullService pullService,
+  }) : _coletaRepository = coletaRepository,
+       _pullService = pullService;
 
   final AuthService authService;
+  final ColetaRepository _coletaRepository;
+  final PullService _pullService;
 
   AuthStatus _status = AuthStatus.idle;
   String? _errorMessage;
@@ -30,8 +39,11 @@ class AuthNotifier extends ChangeNotifier {
     switch (result) {
       case AuthSuccess():
         _status = AuthStatus.authenticated;
-        _userName = userName;
-        _userId = userId;
+        _userName = result.userName;
+        _userId = result.userId;
+        _pullService.sincronizarPull().catchError(
+          (e) => log('Pull falhou silenciosamente: $e', name: 'AuthNotifier'),
+        );
       case AuthFailure(:final message):
         _status = AuthStatus.error;
         _errorMessage = message;
@@ -39,6 +51,11 @@ class AuthNotifier extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  Future<bool> podeDeslogar() async {
+    final pendentes = await _coletaRepository.getPendentes();
+    return pendentes.isEmpty;
   }
 
   Future<void> logout() async {

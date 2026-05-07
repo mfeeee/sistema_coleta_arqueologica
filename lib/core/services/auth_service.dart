@@ -79,6 +79,65 @@ class AuthService {
     }
   }
 
+  Future<AuthResult> register({
+    required String name,
+    required String email,
+    required String password,
+    required String classificacao,
+  }) async {
+    try {
+      final response = await httpClient.post(
+        Uri.parse('$baseUrl/auth/register'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+          'password_confirmation': password,
+          'classificacao': classificacao,
+        }),
+      );
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+
+      switch (response.statusCode) {
+        case 201:
+          final token = body['token'] as String?;
+          if (token == null) {
+            return const AuthFailure('Resposta inválida do servidor.');
+          }
+          await secureStorage.saveJwt(token);
+          final userName =
+              (body['user'] as Map<String, dynamic>?)?['name'] as String? ??
+              'Usuário';
+          return AuthSuccess(userName: userName, userId: '');
+
+        case 422:
+          final errors = body['errors'] as Map<String, dynamic>?;
+          final first = errors?.values.first;
+          final msg = (first is List && first.isNotEmpty)
+              ? first.first as String
+              : 'Dados inválidos.';
+          return AuthFailure(msg);
+
+        default:
+          final msg = body['message'] as String?;
+          return AuthFailure(msg ?? 'Erro inesperado (${response.statusCode})');
+      }
+    } on SocketException {
+      return const AuthFailure('Sem conexão com o servidor.');
+    } on http.ClientException catch (e) {
+      log('Erro HTTP no registro', error: e, name: 'AuthService');
+      return const AuthFailure('Falha na comunicação com o servidor.');
+    } catch (e) {
+      log('Erro desconhecido no registro', error: e, name: 'AuthService');
+      return const AuthFailure('Ocorreu um erro inesperado.');
+    }
+  }
+
   Future<bool> refreshToken() async {
     log(
       'Sanctum não suporta refresh. Forçando novo login.',

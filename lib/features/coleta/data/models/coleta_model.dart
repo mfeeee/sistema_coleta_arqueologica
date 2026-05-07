@@ -49,7 +49,8 @@ class ColetaModel extends ColetaEntity {
       latitude: row.latitude,
       longitude: row.longitude,
       artefatos: row.artefatos
-          .map((e) => ArtefatoBem.values.byName(e))
+          .map((e) => ArtefatoBem.tryFromString(e))
+          .whereType<ArtefatoBem>()
           .toList(),
       versao: row.versao,
       updatedAt: row.updatedAt,
@@ -104,7 +105,8 @@ class ColetaModel extends ColetaEntity {
       longitude: (json['longitude'] as num).toDouble(),
       artefatos:
           (json['artefatos'] as List<dynamic>?)
-              ?.map((e) => ArtefatoBem.values.byName(e as String))
+              ?.map((e) => ArtefatoBem.tryFromString(e as String))
+              .whereType<ArtefatoBem>()
               .toList() ??
           [],
       versao: json['versao'] as int? ?? 1,

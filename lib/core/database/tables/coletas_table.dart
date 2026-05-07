@@ -1,5 +1,4 @@
 import 'package:drift/drift.dart';
-import 'usuarios_table.dart';
 import '../converters/json_map_converter.dart';
 import '../enums/status_coleta.dart';
 import 'dart:convert';
@@ -27,8 +26,7 @@ class StringListConverter extends TypeConverter<List<String>, String> {
 class Coletas extends Table {
   TextColumn get uuid => text()();
 
-  TextColumn get usuarioId =>
-      text().named('usuario_id').references(Usuarios, #uuid)();
+  TextColumn get usuarioId => text().named('usuario_id')();
 
   DateTimeColumn get dataColeta =>
       dateTime().named('data_coleta').clientDefault(() => DateTime.now())();

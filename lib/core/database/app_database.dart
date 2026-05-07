@@ -24,7 +24,6 @@ part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [
-    Usuarios,
     Coletas,
     BensMateriais,
     Curadorias,

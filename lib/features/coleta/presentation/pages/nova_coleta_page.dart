@@ -6,6 +6,7 @@ import '../../domain/services/proximidade_service.dart';
 import '../viewmodels/coleta_viewmodel.dart';
 import '../widgets/alerta_proximidade_widget.dart';
 import '../widgets/wizard/coleta_wizard_widget.dart';
+import 'dart:developer';
 
 class NovaColetaPage extends StatefulWidget {
   const NovaColetaPage({super.key});
@@ -16,8 +17,9 @@ class NovaColetaPage extends StatefulWidget {
 
 class _NovaColetaPageState extends State<NovaColetaPage> {
   late final ColetaViewModel _viewModel;
-  bool _initialized = false;
   late final ColetaFormNotifier _formNotifier;
+  bool _initialized = false;
+  bool _saving = false;
 
   @override
   void didChangeDependencies() {
@@ -108,21 +110,12 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
         onProsseguir: _viewModel.prosseguirParaFormularioIgnorandoAlerta,
       ),
 
-      // ESTADO DE FORMULÁRIO (Área limpa ou alerta ignorado)
       ColetaStep.fillingForm => ColetaWizardWidget(
         latitude: _viewModel.coordenadaAtual?.latitude ?? 0.0,
         longitude: _viewModel.coordenadaAtual?.longitude ?? 0.0,
         formNotifier: _formNotifier,
         onCancelar: () => Navigator.pop(context),
-        onFinalizar: () {
-          // TODO: No futuro, aqui chamaremos a gravação final no SQLite
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Sítio registado com sucesso no cache offline!'),
-            ),
-          );
-          Navigator.pop(context);
-        },
+        onFinalizar: _saving ? () {} : () => _salvarColeta(),
       ),
 
       // ESTADO DE ERRO (GPS desligado ou sem permissão)
@@ -145,5 +138,65 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
         ),
       ),
     };
+  }
+
+  Future<void> _salvarColeta() async {
+    final scope = AppScope.of(context);
+
+    final usuarioId = scope.authNotifier.userId;
+
+    if (usuarioId == null || usuarioId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sessão expirada. Faça login novamente.')),
+      );
+      return;
+    }
+
+    final coord = _viewModel.coordenadaAtual;
+    if (coord == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Coordenadas não disponíveis.')),
+      );
+      return;
+    }
+
+    setState(() => _saving = true);
+
+    try {
+      final resultado = _formNotifier.toResult(
+        lat: coord.latitude,
+        lng: coord.longitude,
+        usuarioId: usuarioId,
+      );
+
+      await scope.coletaRepository.salvar(resultado.coleta);
+      await scope.bemMaterialRepository.salvar(resultado.bemMaterial);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Coleta salva com sucesso!'),
+          backgroundColor: Color(0xFF16A34A),
+        ),
+      );
+      Navigator.pop(context);
+    } catch (e, stackTrace) {
+      log(
+        'Erro ao salvar coleta',
+        error: e,
+        stackTrace: stackTrace,
+        name: 'NovaColetaPage',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro ao salvar. Tente novamente.'),
+          backgroundColor: Color(0xFFDC2626),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 }

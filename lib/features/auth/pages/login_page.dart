@@ -201,7 +201,7 @@ class _LoginFormState extends State<_LoginForm> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () => context.push('/register'),
+                onPressed: () => context.go('/register'),
                 child: const Text(
                   'Criar Conta',
                   style: TextStyle(fontSize: 16),
@@ -211,7 +211,7 @@ class _LoginFormState extends State<_LoginForm> {
               Align(
                 alignment: Alignment.center,
                 child: TextButton(
-                  onPressed: () => context.push('/recover-password'),
+                  onPressed: () => context.go('/recover-password'),
                   child: const Text(
                     'Esqueceu sua senha?',
                     style: TextStyle(

@@ -1,10 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/domain/sync_notifier.dart';
 
-class SyncPage extends StatelessWidget {
+class SyncPage extends StatefulWidget {
   const SyncPage({super.key});
 
   @override
+  State<SyncPage> createState() => _SyncPageState();
+}
+
+class _SyncPageState extends State<SyncPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppScope.of(context).syncNotifier.carregarPendentes();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final syncNotifier = AppScope.of(context).syncNotifier;
     final ThemeData theme = Theme.of(context);
 
     return Scaffold(
@@ -42,22 +59,30 @@ class SyncPage extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: const SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              _NetworkStatusCard(),
-              SizedBox(height: 16),
-              _SyncProgressCard(),
-              SizedBox(height: 24),
-              _DetailedBreakdownSection(),
-              SizedBox(height: 32),
-              _ActionSection(),
-            ],
-          ),
-        ),
+      body: ListenableBuilder(
+        listenable: syncNotifier,
+        builder: (context, _) {
+          return SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 24.0,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  const _NetworkStatusCard(),
+                  const SizedBox(height: 16),
+                  _SyncProgressCard(notifier: syncNotifier),
+                  const SizedBox(height: 24),
+                  _DetailedBreakdownSection(notifier: syncNotifier),
+                  const SizedBox(height: 32),
+                  _ActionSection(notifier: syncNotifier),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -124,14 +149,6 @@ class _NetworkStatusCard extends StatelessWidget {
               ],
             ),
           ),
-          // Toggle (Switch)
-          Switch(
-            value: true,
-            activeThumbColor: theme.colorScheme.primary,
-            onChanged: (bool val) {
-              // TODO: Lógica para forçar modo offline/online
-            },
-          ),
         ],
       ),
     );
@@ -139,11 +156,23 @@ class _NetworkStatusCard extends StatelessWidget {
 }
 
 class _SyncProgressCard extends StatelessWidget {
-  const _SyncProgressCard();
+  const _SyncProgressCard({required this.notifier});
+
+  final SyncNotifier notifier;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+
+    final resumo = notifier.ultimoResumo;
+    final total = resumo?.total ?? 0;
+    final sucessos = resumo?.sucessos ?? 0;
+    final progresso = total > 0 ? (sucessos / total).clamp(0.0, 1.0) : 0.0;
+    final porcentagem = (progresso * 100).toInt();
+
+    final label = resumo != null
+        ? '$porcentagem% sincronizado'
+        : '${notifier.pendentes} pendente(s)';
 
     return Container(
       padding: const EdgeInsets.all(20.0),
@@ -178,9 +207,9 @@ class _SyncProgressCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  const Text(
-                    '65% sincronizado',
-                    style: TextStyle(
+                  Text(
+                    label,
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       color: Color(0xFF64748B),
@@ -189,7 +218,7 @@ class _SyncProgressCard extends StatelessWidget {
                 ],
               ),
               Text(
-                '65%',
+                resumo != null ? '$porcentagem%' : '--',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w900,
                   fontSize: 24,
@@ -199,26 +228,33 @@ class _SyncProgressCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Stack(
-            children: <Widget>[
-              Container(
-                height: 12,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-              FractionallySizedBox(
-                widthFactor: 0.65,
-                child: Container(
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(999),
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: progresso),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOut,
+            builder: (context, value, _) {
+              return Stack(
+                children: <Widget>[
+                  Container(
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                   ),
-                ),
-              ),
-            ],
+                  FractionallySizedBox(
+                    widthFactor: 0.65,
+                    child: Container(
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -227,11 +263,70 @@ class _SyncProgressCard extends StatelessWidget {
 }
 
 class _DetailedBreakdownSection extends StatelessWidget {
-  const _DetailedBreakdownSection();
+  const _DetailedBreakdownSection({required this.notifier});
+
+  final SyncNotifier notifier;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+
+    final resumo = notifier.ultimoResumo;
+
+    const okColor = Color(0xFF16A34A);
+    const okBgColor = Color(0xFFF0FDF4);
+    final pendColor = theme.colorScheme.primary;
+    final pendBgColor = theme.colorScheme.primary.withValues(alpha: 0.1);
+    const conflictColor = Color(0xFFDC2626);
+    const conflictBgColor = Color(0xFFFEF2F2);
+
+    Widget pendentesChip() {
+      final count = notifier.pendentes;
+      if (count == 0) {
+        return const _StatusChip(
+          text: 'OK',
+          textColor: okColor,
+          bgColor: okBgColor,
+        );
+      }
+      return _StatusChip(
+        text: '$count pendente(s)',
+        textColor: pendColor,
+        bgColor: pendBgColor,
+      );
+    }
+
+    Widget conflitosChip() {
+      final count = resumo?.conflitos ?? 0;
+      if (count == 0) {
+        return const _StatusChip(
+          text: 'OK',
+          textColor: okColor,
+          bgColor: okBgColor,
+        );
+      }
+      return _StatusChip(
+        text: '$count conflito(s)',
+        textColor: conflictColor,
+        bgColor: conflictBgColor,
+      );
+    }
+
+    Widget errosChip() {
+      final count = resumo?.erros ?? 0;
+      if (count == 0) {
+        return const _StatusChip(
+          text: 'OK',
+          textColor: okColor,
+          bgColor: okBgColor,
+        );
+      }
+      return _StatusChip(
+        text: '$count erro(s)',
+        textColor: conflictColor,
+        bgColor: conflictBgColor,
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,36 +354,35 @@ class _DetailedBreakdownSection extends StatelessWidget {
             children: <Widget>[
               const _BreakdownTile(
                 icon: Icons.location_on_outlined,
-                iconColor: Color(0xFF16A34A),
+                iconColor: okColor,
                 title: 'Dados de GPS',
                 // Chip verde
                 trailingChip: _StatusChip(
                   text: 'OK',
-                  textColor: Color(0xFF16A34A),
-                  bgColor: Color(0xFFF0FDF4),
+                  textColor: okColor,
+                  bgColor: okBgColor,
                 ),
               ),
               const Divider(height: 1, indent: 48),
               _BreakdownTile(
                 icon: Icons.description_outlined,
                 iconColor: theme.colorScheme.primary,
-                title: 'Formulários',
-                trailingChip: _StatusChip(
-                  text: '12 pendentes',
-                  textColor: theme.colorScheme.primary,
-                  bgColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-                ),
+                title: 'Formulários Pendentes',
+                trailingChip: pendentesChip(),
               ),
               const Divider(height: 1, indent: 48),
               _BreakdownTile(
-                icon: Icons.image_outlined,
-                iconColor: theme.colorScheme.primary,
-                title: 'Imagens/Links',
-                trailingChip: _StatusChip(
-                  text: '5 pendentes',
-                  textColor: theme.colorScheme.primary,
-                  bgColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-                ),
+                icon: Icons.warning_amber_outlined,
+                iconColor: conflictColor,
+                title: 'Conflitos',
+                trailingChip: conflitosChip(),
+              ),
+              const Divider(height: 1, indent: 48),
+              _BreakdownTile(
+                icon: Icons.cloud_off_outlined,
+                iconColor: conflictColor,
+                title: 'Erros de Envio',
+                trailingChip: errosChip(),
               ),
             ],
           ),
@@ -299,18 +393,43 @@ class _DetailedBreakdownSection extends StatelessWidget {
 }
 
 class _ActionSection extends StatelessWidget {
-  const _ActionSection();
+  const _ActionSection({required this.notifier});
+
+  final SyncNotifier notifier;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final sincronizando = notifier.sincronizando;
+    final resumo = notifier.ultimoResumo;
+
+    String? feedbackMsg;
+    Color feedbackColor = const Color(0xFF64748B);
+
+    switch (notifier.state) {
+      case SyncState.concluido:
+        if (resumo != null && resumo.totalOk) {
+          feedbackMsg = 'Tudo sincronizado com sucesso!';
+          feedbackColor = const Color(0xFF16A34A);
+        } else {
+          feedbackMsg =
+              '${resumo?.conflitos ?? 0} conflito(s) precisam de revisão.';
+          feedbackColor = const Color(0xFFDC2626);
+        }
+      case SyncState.semToken:
+        feedbackMsg = 'Sessão expirada. Faça login novamente.';
+        feedbackColor = const Color(0xFFDC2626);
+      case SyncState.erro:
+        feedbackMsg = notifier.mensagemErro ?? 'Erro inesperado.';
+        feedbackColor = const Color(0xFFDC2626);
+      default:
+        feedbackMsg = 'Última sincronização: --';
+    }
 
     return Column(
       children: <Widget>[
         ElevatedButton(
-          onPressed: () {
-            // TODO: Iniciar sincronização
-          },
+          onPressed: sincronizando ? null : () => notifier.sincronizar(),
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(double.infinity, 56),
             shape: RoundedRectangleBorder(
@@ -318,29 +437,38 @@ class _ActionSection extends StatelessWidget {
             ),
             shadowColor: theme.colorScheme.primary.withValues(alpha: 0.2),
           ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(Icons.sync, color: Colors.white, size: 20),
-              SizedBox(width: 8),
-              Text(
-                'Iniciar Sincronização Total',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+          child: sincronizando
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2.5,
+                  ),
+                )
+              : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(Icons.sync, color: Colors.white, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'Iniciar Sincronização Total',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
         const SizedBox(height: 16),
-        const Text(
-          'Última sincronização: hoje às 14:30',
+        Text(
+          feedbackMsg,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF64748B),
+            color: feedbackColor,
           ),
         ),
       ],

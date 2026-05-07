@@ -1,19 +1,18 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:sistema_coleta_arqueologica/features/bem_material/data/datasources/bem_material_local_datasource.dart';
+import 'dart:developer';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
-import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';
-import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.dart';
-import 'package:sistema_coleta_arqueologica/features/sync/domain/sync_notifier.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/repositories/coleta_repository_impl.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
+
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/database/app_database.dart';
-import 'dart:developer';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'core/services/secure_storage_service.dart';
-import 'package:http/http.dart' as http;
 import 'core/services/auth_service.dart';
+import 'package:http/http.dart' as http;
 import 'features/auth/auth_notifier.dart';
 import 'core/di/app_scope.dart';
 
@@ -40,7 +39,26 @@ Future<void> main() async {
     baseUrl: _baseUrl,
   );
 
-  final authNotifier = AuthNotifier(authService: authService);
+  final coletaApiDatasource = ColetaApiDatasourceImpl(
+    httpClient: plainHttpClient,
+    secureStorage: secureStorage,
+    baseUrl: _baseUrl,
+  );
+
+  final coletaLocalDatasource = ColetaLocalDatasourceImpl(db);
+  final coletaRepository = ColetaRepositoryImpl(coletaLocalDatasource);
+
+  final pullService = PullService(
+    apiDatasource: coletaApiDatasource,
+    localRepository: coletaRepository,
+  );
+
+  final authNotifier = AuthNotifier(
+    authService: authService,
+    coletaRepository: coletaRepository,
+    pullService: pullService,
+  );
+
   final dio = Dio(
     BaseOptions(
       baseUrl: _baseUrl,
@@ -50,75 +68,20 @@ Future<void> main() async {
     ),
   );
 
-  final syncApiDatasource = SyncApiDatasourceImpl(dio);
-  final coletaLocalDatasource = ColetaLocalDatasourceImpl(db);
-  final bemMaterialLocalDatasource = BemMaterialLocalDatasourceImpl(db);
-
-  final syncRepository = SyncRepository(
-    coletaDatasource: coletaLocalDatasource,
-    bemMaterialDatasource: bemMaterialLocalDatasource,
-    apiDatasource: syncApiDatasource,
-  );
-
-  final syncNotifier = SyncNotifier(
-    repository: syncRepository,
-    secureStorage: secureStorage,
-  );
-
   runApp(
-    SistemaColetaApp(
-      authNotifier: authNotifier,
-      syncNotifier: syncNotifier,
+    AppScope.create(
       database: db,
-    ),
-  );
-}
-
-class SistemaColetaApp extends StatefulWidget {
-  const SistemaColetaApp({
-    super.key,
-    required this.authNotifier,
-    required this.syncNotifier,
-    required this.database,
-  });
-
-  final AuthNotifier authNotifier;
-  final SyncNotifier syncNotifier;
-  final AppDatabase database;
-
-  @override
-  State<SistemaColetaApp> createState() => _SistemaColetaAppState();
-}
-
-class _SistemaColetaAppState extends State<SistemaColetaApp> {
-  late final GoRouter _router;
-
-  @override
-  void initState() {
-    super.initState();
-    _router = createAppRouter(widget.authNotifier);
-  }
-
-  @override
-  void dispose() {
-    _router.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AppScope.create(
-      database: widget.database,
-      authNotifier: widget.authNotifier,
-      syncNotifier: widget.syncNotifier,
+      secureStorage: secureStorage,
+      authNotifier: authNotifier,
+      dio: dio,
       child: MaterialApp.router(
         title: 'Sistema de Coleta Arqueológica',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
-        routerConfig: _router,
+        routerConfig: createAppRouter(authNotifier),
       ),
-    );
-  }
+    ),
+  );
 }

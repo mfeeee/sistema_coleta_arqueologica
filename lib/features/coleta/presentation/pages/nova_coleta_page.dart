@@ -94,16 +94,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     return switch (step) {
       ColetaStep.initial ||
       ColetaStep.gettingLocation ||
-      ColetaStep.checkingProximity => const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 24),
-            Text('Sincronizando coordenadas e verificando radar...'),
-          ],
-        ),
-      ),
+      ColetaStep.checkingProximity => const _CarregandoLocalizacaoBody(),
 
       ColetaStep.proximityAlert => AlertaProximidadeWidget(
         sitios: _viewModel.sitiosConflitantes,
@@ -118,24 +109,34 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
         onFinalizar: _saving ? () {} : () => _salvarColeta(),
       ),
 
-      // ESTADO DE ERRO (GPS desligado ou sem permissão)
-      ColetaStep.error => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(_viewModel.errorMessage.value ?? 'Erro desconhecido'),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _viewModel.tentarNovamente,
-                child: const Text('Tentar Novamente'),
-              ),
-            ],
-          ),
-        ),
+      ColetaStep.error => _PainelErroGps(
+        icone: Icons.error_outline,
+        mensagem: _viewModel.errorMessage.value ?? 'Erro desconhecido.',
+        labelPrimario: 'Tentar Novamente',
+        onPrimario: _viewModel.tentarNovamente,
+      ),
+
+      ColetaStep.permissaoNegada => _PainelErroGps(
+        icone: Icons.location_off_outlined,
+        mensagem: _viewModel.errorMessage.value ?? '',
+        labelPrimario: 'Conceder Permissão',
+        onPrimario: _viewModel.tentarNovamente,
+      ),
+
+      ColetaStep.permissaoNegadaPermanentemente => _PainelErroGps(
+        icone: Icons.lock_outlined,
+        mensagem: _viewModel.errorMessage.value ?? '',
+        labelPrimario: 'Abrir Configurações do App',
+        onPrimario: _viewModel.abrirConfiguracoes,
+      ),
+
+      ColetaStep.gpsDesativado => _PainelErroGps(
+        icone: Icons.gps_off,
+        mensagem: _viewModel.errorMessage.value ?? '',
+        labelPrimario: 'Ativar Localização',
+        onPrimario: _viewModel.abrirConfiguracoesLocalizacao,
+        labelSecundario: 'Tentar Novamente',
+        onSecundario: _viewModel.tentarNovamente,
       ),
     };
   }
@@ -198,5 +199,67 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+}
+
+class _CarregandoLocalizacaoBody extends StatelessWidget {
+  const _CarregandoLocalizacaoBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 24),
+          Text('Sincronizando coordenadas e verificando radar...'),
+        ],
+      ),
+    );
+  }
+}
+
+class _PainelErroGps extends StatelessWidget {
+  const _PainelErroGps({
+    required this.icone,
+    required this.mensagem,
+    required this.labelPrimario,
+    required this.onPrimario,
+    this.labelSecundario,
+    this.onSecundario,
+  });
+
+  final IconData icone;
+  final String mensagem;
+  final String labelPrimario;
+  final VoidCallback onPrimario;
+  final String? labelSecundario;
+  final VoidCallback? onSecundario;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icone, size: 64, color: Colors.orange),
+            const SizedBox(height: 16),
+            Text(mensagem, textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            FilledButton(onPressed: onPrimario, child: Text(labelPrimario)),
+            if (labelSecundario != null && onSecundario != null) ...[
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: onSecundario,
+                child: Text(labelSecundario!),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }

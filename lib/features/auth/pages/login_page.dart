@@ -86,9 +86,16 @@ class _LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<_LoginForm> {
+  static final _regexEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _hidePassword = true;
+
+  bool get _podeSubmeter =>
+      _regexEmail.hasMatch(_emailController.text.trim()) &&
+      _passwordController.text.isNotEmpty;
 
   @override
   void dispose() {
@@ -98,6 +105,7 @@ class _LoginFormState extends State<_LoginForm> {
   }
 
   void _handleLogin(AuthNotifier notifier) async {
+    if (!_formKey.currentState!.validate()) return;
     await notifier.login(
       _emailController.text.trim(),
       _passwordController.text,
@@ -114,114 +122,145 @@ class _LoginFormState extends State<_LoginForm> {
       child: ListenableBuilder(
         listenable: notifier,
         builder: (context, _) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Text(
-                'Acesso ao Sistema',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.displayLarge?.copyWith(
-                  fontSize: 28,
-                  letterSpacing: -0.7,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Plataforma de Coleta de Dados Arqueológicos',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
-              ),
-              const SizedBox(height: 32),
-              TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'E-mail',
-                  hintText: 'exemplo@arqueo.org',
-                  prefixIcon: Icon(Icons.email_outlined),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                obscureText: _hidePassword,
-                decoration: InputDecoration(
-                  labelText: 'Senha',
-                  hintText: 'Digite sua senha',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _hidePassword ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _hidePassword = !_hidePassword;
-                      });
-                    },
+          final emailValido = _regexEmail.hasMatch(
+            _emailController.text.trim(),
+          );
+          return Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text(
+                  'Acesso ao Sistema',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.displayLarge?.copyWith(
+                    fontSize: 28,
+                    letterSpacing: -0.7,
                   ),
                 ),
-              ),
-              if (notifier.errorMessage != null) ...[
                 const SizedBox(height: 8),
                 Text(
-                  notifier.errorMessage!,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
-                    fontSize: 13,
-                  ),
+                  'Plataforma de Coleta de Dados Arqueológicos',
                   textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
                 ),
-              ],
-              const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 54),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                const SizedBox(height: 32),
+                TextFormField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: 'E-mail',
+                    hintText: 'exemplo@arqueo.org',
+                    prefixIcon: const Icon(Icons.email_outlined),
+                    suffixIcon: _emailController.text.isEmpty
+                        ? null
+                        : Icon(
+                            emailValido
+                                ? Icons.check_circle_outline
+                                : Icons.cancel_outlined,
+                            color: emailValido
+                                ? Colors.green
+                                : theme.colorScheme.error,
+                            size: 20,
+                          ),
                   ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Informe seu e-mail';
+                    }
+                    if (!_regexEmail.hasMatch(v.trim())) {
+                      return 'E-mail inválido';
+                    }
+                    return null;
+                  },
                 ),
-                onPressed: notifier.isLoading
-                    ? null
-                    : () => _handleLogin(notifier),
-                child: notifier.isLoading
-                    ? const SizedBox.square(
-                        dimension: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Entrar', style: TextStyle(fontSize: 16)),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 54),
-                  side: BorderSide(
-                    color: theme.primaryColor.withValues(alpha: 0.2),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: _hidePassword,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: 'Senha',
+                    hintText: 'Digite sua senha',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _hidePassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _hidePassword = !_hidePassword;
+                        });
+                      },
+                    ),
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? 'Informe sua senha' : null,
                 ),
-                onPressed: () => context.go('/register'),
-                child: const Text(
-                  'Criar Conta',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.center,
-                child: TextButton(
-                  onPressed: () => context.go('/recover-password'),
-                  child: const Text(
-                    'Esqueceu sua senha?',
+                if (notifier.errorMessage != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    notifier.errorMessage!,
                     style: TextStyle(
-                      fontSize: 12,
-                      decoration: TextDecoration.underline,
+                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 13,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 54),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: (notifier.isLoading || !_podeSubmeter)
+                      ? null
+                      : () => _handleLogin(notifier),
+                  child: notifier.isLoading
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Entrar', style: TextStyle(fontSize: 16)),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 54),
+                    side: BorderSide(
+                      color: theme.primaryColor.withValues(alpha: 0.2),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () => context.go('/register'),
+                  child: const Text(
+                    'Criar Conta',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Align(
+                  alignment: Alignment.center,
+                  child: TextButton(
+                    onPressed: () => context.go('/recover-password'),
+                    child: const Text(
+                      'Esqueceu sua senha?',
+                      style: TextStyle(
+                        fontSize: 12,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),

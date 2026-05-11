@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:sqlite3/open.dart';
+import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/repositories/coleta_repository_impl.dart';
@@ -20,6 +24,11 @@ const _baseUrl = 'https://sistemaarqueologicoapi-production.up.railway.app/api';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isAndroid) {
+    await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
+    open.overrideFor(OperatingSystem.android, openCipherOnAndroid);
+  }
 
   const secureStorage = SecureStorageService(FlutterSecureStorage());
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/tratador_de_erros.dart';
 import '../../../../core/utils/geolocator_helper.dart';
 import '../../domain/entities/coleta_entity.dart';
@@ -73,6 +74,11 @@ class ColetaViewModel {
       stepNotifier.value = ColetaStep.gpsDesativado;
     } on TimeoutException {
       errorMessage.value = TratadorDeErros.timeout;
+      stepNotifier.value = ColetaStep.error;
+    } on PlatformException catch (e) {
+      errorMessage.value =
+          'Não foi possível obter a localização (${e.code}). '
+          'Verifique se o GPS está ativo e tente novamente.';
       stepNotifier.value = ColetaStep.error;
     } catch (e) {
       errorMessage.value = TratadorDeErros.deExcecao(e);

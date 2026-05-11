@@ -3,6 +3,9 @@ allprojects {
         google()
         mavenCentral()
     }
+    configurations.all {
+        exclude(group = "eu.simonbinder", module = "sqlite3_flutter_libs")
+    }
 }
 
 val newBuildDir: Directory =

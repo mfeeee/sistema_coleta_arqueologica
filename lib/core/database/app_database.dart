@@ -1,10 +1,8 @@
 import 'package:drift/drift.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:developer';
 import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
-import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 import 'converters/json_map_converter.dart';
 
 import 'tables/usuarios_table.dart';
@@ -46,23 +44,36 @@ class AppDatabase extends _$AppDatabase {
   );
 
   static Future<AppDatabase> open(String passphrase) async {
-    await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
-
     final dbDir = await getApplicationSupportDirectory();
     final dbPath = p.join(dbDir.path, 'sistema_arqueologico.db');
+    final dbFile = File(dbPath);
 
-    final executor = NativeDatabase.createInBackground(
-      File(dbPath),
+    return _abrirComFallback(dbFile, passphrase);
+  }
+
+  static AppDatabase _criar(File dbFile, String passphrase) {
+    final executor = NativeDatabase(
+      dbFile,
       setup: (rawDb) {
         rawDb.execute("PRAGMA key = '$passphrase';");
-        final result = rawDb.select('PRAGMA cipher_version;');
-        log(
-          'SQLCipher version: ${result.first.values.first}',
-          name: 'AppDatabase',
-        );
+        rawDb.select('SELECT count(*) FROM sqlite_master;');
       },
     );
-
     return AppDatabase(executor);
+  }
+
+  static Future<AppDatabase> _abrirComFallback(
+    File dbFile,
+    String passphrase,
+  ) async {
+    final db = _criar(dbFile, passphrase);
+    try {
+      await db.customSelect('SELECT 1').get();
+      return db;
+    } catch (e) {
+      await db.close();
+      if (await dbFile.exists()) await dbFile.delete();
+      return _criar(dbFile, passphrase);
+    }
   }
 }

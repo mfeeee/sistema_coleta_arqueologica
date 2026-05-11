@@ -10,7 +10,6 @@ class RegisterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      // AppBar seguindo o design de "Header / TopAppBar"
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -19,9 +18,7 @@ class RegisterPage extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(
-            color: theme.colorScheme.primary.withValues(
-              alpha: 0.1,
-            ), // border-bottom: rgba(73, 54, 39, 0.1)
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
             height: 1.0,
           ),
         ),
@@ -30,10 +27,7 @@ class RegisterPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: theme
-                .textTheme
-                .displayLarge
-                ?.color, // Texto escuro no modo claro, branco no modo escuro
+            color: theme.textTheme.displayLarge?.color,
           ),
         ),
       ),
@@ -49,7 +43,6 @@ class RegisterPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  // _AppBarArea(theme:theme),
                   _HeaderArea(theme: theme),
                   const _RegisterForm(),
                 ],
@@ -61,18 +54,6 @@ class RegisterPage extends StatelessWidget {
     );
   }
 }
-
-// class _AppBarArea extends StatelessWidget {
-//   const _AppBarArea({required this.theme});
-
-//   final ThemeData theme;
-
-//   @override
-//   Widget build(BuildContext context) {
-
-//     throw UnimplementedError();
-//   }
-// }
 
 class _HeaderArea extends StatelessWidget {
   const _HeaderArea({required this.theme});
@@ -117,18 +98,17 @@ class _RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<_RegisterForm> {
-  // Controladores de texto
+  static final _regexEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  // Controles de visibilidade de senha
   bool _hidePassword = true;
   bool _hideConfirmPassword = true;
 
-  // Variável para armazenar o valor do Dropdown de Classificação
   static const _classifications = [
     ('estudante', 'Estudante'),
     ('professor', 'Professor'),
@@ -136,6 +116,12 @@ class _RegisterFormState extends State<_RegisterForm> {
   ];
 
   String _selectedClassification = _classifications.first.$1;
+
+  bool get _podeSubmeter =>
+      _nameController.text.trim().isNotEmpty &&
+      _regexEmail.hasMatch(_emailController.text.trim()) &&
+      _passwordController.text.length >= 8 &&
+      _confirmPasswordController.text == _passwordController.text;
 
   @override
   void dispose() {
@@ -172,14 +158,15 @@ class _RegisterFormState extends State<_RegisterForm> {
       child: ListenableBuilder(
         listenable: notifier,
         builder: (context, _) {
+          final emailValido = _regexEmail.hasMatch(
+            _emailController.text.trim(),
+          );
           return Form(
             key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                // --- Form Container ---
-
-                // Nome Completo
                 Text(
                   'Nome Completo',
                   style: TextStyle(
@@ -192,16 +179,26 @@ class _RegisterFormState extends State<_RegisterForm> {
                 TextFormField(
                   controller: _nameController,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
                     hintText: 'Digite seu nome completo',
+                    suffixIcon: _nameController.text.isEmpty
+                        ? null
+                        : Icon(
+                            _nameController.text.trim().isNotEmpty
+                                ? Icons.check_circle_outline
+                                : Icons.cancel_outlined,
+                            color: _nameController.text.trim().isNotEmpty
+                                ? Colors.green
+                                : theme.colorScheme.error,
+                            size: 20,
+                          ),
                   ),
                   validator: (v) => (v == null || v.trim().isEmpty)
                       ? 'Informe seu nome'
                       : null,
                 ),
                 const SizedBox(height: 16),
-
-                // E-mail
                 Text(
                   'E-mail',
                   style: TextStyle(
@@ -214,16 +211,32 @@ class _RegisterFormState extends State<_RegisterForm> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
                     hintText: 'exemplo@instituicao.br',
+                    suffixIcon: _emailController.text.isEmpty
+                        ? null
+                        : Icon(
+                            emailValido
+                                ? Icons.check_circle_outline
+                                : Icons.cancel_outlined,
+                            color: emailValido
+                                ? Colors.green
+                                : theme.colorScheme.error,
+                            size: 20,
+                          ),
                   ),
-                  validator: (v) => (v == null || !v.contains('@'))
-                      ? 'E-mail inválido'
-                      : null,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Informe seu e-mail';
+                    }
+                    if (!_regexEmail.hasMatch(v.trim())) {
+                      return 'E-mail inválido';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
-
-                // Classificação (Dropdown)
                 Text(
                   'Classificação',
                   style: TextStyle(
@@ -250,8 +263,6 @@ class _RegisterFormState extends State<_RegisterForm> {
                   },
                 ),
                 const SizedBox(height: 16),
-
-                // Senha
                 Text(
                   'Senha',
                   style: TextStyle(
@@ -264,6 +275,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _hidePassword,
+                  onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
                     hintText: 'Crie uma senha',
                     prefixIcon: const Icon(Icons.lock_outline),
@@ -283,8 +295,6 @@ class _RegisterFormState extends State<_RegisterForm> {
                       : null,
                 ),
                 const SizedBox(height: 16),
-
-                // Confirmar Senha
                 Text(
                   'Confirmar Senha',
                   style: TextStyle(
@@ -297,6 +307,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                 TextFormField(
                   controller: _confirmPasswordController,
                   obscureText: _hideConfirmPassword,
+                  onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
                     hintText: 'Repita a senha',
                     prefixIcon: const Icon(Icons.lock_outline),
@@ -317,7 +328,6 @@ class _RegisterFormState extends State<_RegisterForm> {
                       ? 'Senhas não coincidem'
                       : null,
                 ),
-
                 if (notifier.errorMessage != null) ...[
                   const SizedBox(height: 12),
                   Text(
@@ -329,12 +339,9 @@ class _RegisterFormState extends State<_RegisterForm> {
                     textAlign: TextAlign.center,
                   ),
                 ],
-
                 const SizedBox(height: 32),
-
-                // --- Action Buttons ---
                 ElevatedButton(
-                  onPressed: notifier.isLoading
+                  onPressed: (notifier.isLoading || !_podeSubmeter)
                       ? null
                       : () => _handleRegister(notifier),
                   child: notifier.isLoading
@@ -361,7 +368,6 @@ class _RegisterFormState extends State<_RegisterForm> {
                           ],
                         ),
                 ),
-
                 const SizedBox(height: 12),
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
@@ -386,8 +392,6 @@ class _RegisterFormState extends State<_RegisterForm> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // --- Footer Info ---
                 Column(
                   children: <Widget>[
                     Row(

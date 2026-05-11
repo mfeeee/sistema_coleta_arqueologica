@@ -1,8 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:sistema_coleta_arqueologica/core/utils/tratador_de_erros.dart';
 import 'secure_storage_service.dart';
+
+const _kTimeoutRequisicao = Duration(seconds: 15);
 
 sealed class AuthResult {
   const AuthResult();
@@ -32,14 +36,16 @@ class AuthService {
 
   Future<AuthResult> login(String email, String password) async {
     try {
-      final response = await httpClient.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({'email': email, 'password': password}),
-      );
+      final response = await httpClient
+          .post(
+            Uri.parse('$baseUrl/auth/login'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({'email': email, 'password': password}),
+          )
+          .timeout(_kTimeoutRequisicao);
 
       final body = jsonDecode(response.body) as Map<String, dynamic>;
 
@@ -47,7 +53,7 @@ class AuthService {
         case 200:
           final token = body['token'] as String?;
           if (token == null) {
-            return const AuthFailure('Resposta inválida do servidor.');
+            return const AuthFailure(TratadorDeErros.respostaInvalida);
           }
           await secureStorage.saveJwt(token);
           final user = body['user'] as Map<String, dynamic>?;
@@ -57,25 +63,25 @@ class AuthService {
           );
 
         case 401:
-          return const AuthFailure('E-mail ou senha incorretos.');
+          return const AuthFailure(TratadorDeErros.credenciaisInvalidas);
 
         case 403:
-          return const AuthFailure(
-            'Conta desativada. Contate o administrador.',
-          );
+          return const AuthFailure(TratadorDeErros.contaDesativada);
 
         default:
           final msg = body['message'] as String?;
-          return AuthFailure(msg ?? 'Erro inesperado (${response.statusCode})');
+          return AuthFailure(msg ?? TratadorDeErros.erroInesperado);
       }
     } on SocketException {
-      return const AuthFailure('Sem conexão com o servidor.');
+      return const AuthFailure(TratadorDeErros.semConexao);
+    } on TimeoutException {
+      return const AuthFailure(TratadorDeErros.timeout);
     } on http.ClientException catch (e) {
       log('Erro HTTP no login', error: e, name: 'AuthService');
-      return const AuthFailure('Falha na comunicação com o servidor.');
+      return const AuthFailure(TratadorDeErros.erroComunicacao);
     } catch (e) {
       log('Erro desconhecido no login', error: e, name: 'AuthService');
-      return const AuthFailure('Ocorreu um erro inesperado.');
+      return const AuthFailure(TratadorDeErros.erroInesperado);
     }
   }
 
@@ -86,20 +92,22 @@ class AuthService {
     required String classificacao,
   }) async {
     try {
-      final response = await httpClient.post(
-        Uri.parse('$baseUrl/auth/register'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'name': name,
-          'email': email,
-          'password': password,
-          'password_confirmation': password,
-          'classificacao': classificacao,
-        }),
-      );
+      final response = await httpClient
+          .post(
+            Uri.parse('$baseUrl/auth/register'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({
+              'name': name,
+              'email': email,
+              'password': password,
+              'password_confirmation': password,
+              'classificacao': classificacao,
+            }),
+          )
+          .timeout(_kTimeoutRequisicao);
 
       final body = jsonDecode(response.body) as Map<String, dynamic>;
 
@@ -107,7 +115,7 @@ class AuthService {
         case 201:
           final token = body['token'] as String?;
           if (token == null) {
-            return const AuthFailure('Resposta inválida do servidor.');
+            return const AuthFailure(TratadorDeErros.respostaInvalida);
           }
           await secureStorage.saveJwt(token);
           final userName =
@@ -120,21 +128,23 @@ class AuthService {
           final first = errors?.values.first;
           final msg = (first is List && first.isNotEmpty)
               ? first.first as String
-              : 'Dados inválidos.';
+              : TratadorDeErros.erroInesperado;
           return AuthFailure(msg);
 
         default:
           final msg = body['message'] as String?;
-          return AuthFailure(msg ?? 'Erro inesperado (${response.statusCode})');
+          return AuthFailure(msg ?? TratadorDeErros.erroInesperado);
       }
     } on SocketException {
-      return const AuthFailure('Sem conexão com o servidor.');
+      return const AuthFailure(TratadorDeErros.semConexao);
+    } on TimeoutException {
+      return const AuthFailure(TratadorDeErros.timeout);
     } on http.ClientException catch (e) {
       log('Erro HTTP no registro', error: e, name: 'AuthService');
-      return const AuthFailure('Falha na comunicação com o servidor.');
+      return const AuthFailure(TratadorDeErros.erroComunicacao);
     } catch (e) {
       log('Erro desconhecido no registro', error: e, name: 'AuthService');
-      return const AuthFailure('Ocorreu um erro inesperado.');
+      return const AuthFailure(TratadorDeErros.erroInesperado);
     }
   }
 

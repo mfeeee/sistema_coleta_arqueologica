@@ -392,63 +392,51 @@ class _RegisterFormState extends State<_RegisterForm> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                Column(
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Ao se cadastrar, você concorda com nossos',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontSize: 12,
-                          ),
+                Text(
+                  'Ao se cadastrar, você concorda com nossos',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
+                ),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('#');
+                        }
+                      },
+                      child: Text(
+                        'Termos de Serviço',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.surfaceTint,
+                          decoration: TextDecoration.underline,
                         ),
-                      ],
+                      ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            if (context.canPop()) {
-                              context.pop();
-                            } else {
-                              context.go('#');
-                            }
-                          },
-                          child: Text(
-                            'Termos de Serviço',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: theme.colorScheme.surfaceTint,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
+                    Text(
+                      'e',
+                      style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('#');
+                        }
+                      },
+                      child: Text(
+                        'Política de Privacidade',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.surfaceTint,
+                          decoration: TextDecoration.underline,
                         ),
-                        Text(
-                          'e',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontSize: 12,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            if (context.canPop()) {
-                              context.pop();
-                            } else {
-                              context.go('#');
-                            }
-                          },
-                          child: Text(
-                            'Política de Privacidade',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: theme.colorScheme.surfaceTint,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

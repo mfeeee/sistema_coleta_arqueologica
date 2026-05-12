@@ -93,9 +93,32 @@ class _NetworkStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final estaOnline =
+        AppScope.of(context).conectividadeService.estaOnline;
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: estaOnline,
+      builder: (context, online, _) => _ConexaoCard(online: online),
+    );
+  }
+}
+
+class _ConexaoCard extends StatelessWidget {
+  const _ConexaoCard({required this.online});
+
+  final bool online;
+
+  @override
+  Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    const Color successColor = Color(0xFF16A34A);
-    const Color successBgColor = Color(0xFFDCFCE7);
+
+    final Color iconColor =
+        online ? const Color(0xFF16A34A) : const Color(0xFF64748B);
+    final Color iconBgColor =
+        online ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9);
+    final IconData icone = online ? Icons.wifi : Icons.wifi_off;
+    final String rotulo =
+        online ? 'Você está Online' : 'Você está Offline';
 
     return Container(
       padding: const EdgeInsets.all(20.0),
@@ -115,18 +138,13 @@ class _NetworkStatusCard extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          // Ícone de Wifi
           Container(
             width: 48,
             height: 48,
-            decoration: const BoxDecoration(
-              color: successBgColor,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.wifi, color: successColor, size: 24),
+            decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+            child: Icon(icone, color: iconColor, size: 24),
           ),
           const SizedBox(width: 16),
-          // Textos
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,10 +158,11 @@ class _NetworkStatusCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Você está Online',
+                  rotulo,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
+                    color: iconColor,
                   ),
                 ),
               ],

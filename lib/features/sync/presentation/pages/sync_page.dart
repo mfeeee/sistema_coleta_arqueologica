@@ -419,6 +419,11 @@ class _ActionSection extends StatelessWidget {
       case SyncState.semToken:
         feedbackMsg = 'Sessão expirada. Faça login novamente.';
         feedbackColor = const Color(0xFFDC2626);
+      case SyncState.semConexao:
+        feedbackMsg =
+            notifier.mensagemErro ??
+            'Sem conexão. Conecte-se à internet para sincronizar.';
+        feedbackColor = const Color(0xFFD97706);
       case SyncState.erro:
         feedbackMsg = notifier.mensagemErro ?? 'Erro inesperado.';
         feedbackColor = const Color(0xFFDC2626);

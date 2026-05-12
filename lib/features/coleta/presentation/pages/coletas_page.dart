@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/di/app_scope.dart';
 
 class ColetasPage extends StatelessWidget {
   const ColetasPage({super.key});
@@ -147,7 +148,30 @@ class _OnlineIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final estaOnline = AppScope.of(context).conectividadeService.estaOnline;
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: estaOnline,
+      builder: (context, online, _) => _IndicadorConexao(online: online),
+    );
+  }
+}
+
+class _IndicadorConexao extends StatelessWidget {
+  const _IndicadorConexao({required this.online});
+
+  final bool online;
+
+  @override
+  Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final Color cor = online
+        ? const Color(0xFF22C55E)
+        : const Color(0xFF94A3B8);
+    final Color corHalo = online
+        ? const Color(0xFF4ADE80)
+        : const Color(0xFFCBD5E1);
+    final String rotulo = online ? 'Online' : 'Offline';
 
     return Row(
       children: <Widget>[
@@ -158,26 +182,23 @@ class _OnlineIndicator extends StatelessWidget {
               width: 12,
               height: 12,
               decoration: BoxDecoration(
-                color: const Color(0xFF4ADE80).withValues(alpha: 0.75),
+                color: corHalo.withValues(alpha: 0.75),
                 shape: BoxShape.circle,
               ),
             ),
             Container(
               width: 8,
               height: 8,
-              decoration: const BoxDecoration(
-                color: Color(0xFF22C55E),
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: cor, shape: BoxShape.circle),
             ),
           ],
         ),
         const SizedBox(width: 8),
         Text(
-          'Online',
+          rotulo,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: theme.colorScheme.primary,
+            color: online ? theme.colorScheme.primary : const Color(0xFF64748B),
           ),
         ),
       ],

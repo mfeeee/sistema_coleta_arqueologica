@@ -1,4 +1,6 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coleta_form_notifier.dart';
 import '../../../../core/di/app_scope.dart';
 import '../../../../core/utils/geolocator_helper.dart';
@@ -6,7 +8,6 @@ import '../../domain/services/proximidade_service.dart';
 import '../viewmodels/coleta_viewmodel.dart';
 import '../widgets/alerta_proximidade_widget.dart';
 import '../widgets/wizard/coleta_wizard_widget.dart';
-import 'dart:developer';
 
 class NovaColetaPage extends StatefulWidget {
   const NovaColetaPage({super.key});
@@ -18,6 +19,7 @@ class NovaColetaPage extends StatefulWidget {
 class _NovaColetaPageState extends State<NovaColetaPage> {
   late final ColetaViewModel _viewModel;
   late final ColetaFormNotifier _formNotifier;
+  late final ConectividadeService _conectividadeService;
   bool _initialized = false;
   bool _saving = false;
 
@@ -27,12 +29,12 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     if (_initialized) return;
     _initialized = true;
 
-    final repository = AppScope.of(context).coletaRepository;
-    final proximidadeService = ProximidadeService(repository);
+    final scope = AppScope.of(context);
+    final proximidadeService = ProximidadeService(scope.coletaRepository);
     final geolocatorHelper = GeolocatorHelper();
-    final mediaService = AppScope.of(context).mediaService;
 
-    _formNotifier = ColetaFormNotifier(mediaService: mediaService);
+    _formNotifier = ColetaFormNotifier(mediaService: scope.mediaService);
+    _conectividadeService = scope.conectividadeService;
 
     _viewModel = ColetaViewModel(
       proximidadeService: proximidadeService,
@@ -77,14 +79,27 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
         ],
       ),
       body: SafeArea(
-        child: ValueListenableBuilder<ColetaStep>(
-          valueListenable: _viewModel.stepNotifier,
-          builder: (context, step, child) {
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: _buildBody(step),
-            );
-          },
+        child: Column(
+          children: <Widget>[
+            ValueListenableBuilder<bool>(
+              valueListenable: _conectividadeService.estaOnline,
+              builder: (context, online, _) {
+                if (online) return const SizedBox.shrink();
+                return const _BannerOffline();
+              },
+            ),
+            Expanded(
+              child: ValueListenableBuilder<ColetaStep>(
+                valueListenable: _viewModel.stepNotifier,
+                builder: (context, step, child) {
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: _buildBody(step),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -98,6 +113,8 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
 
       ColetaStep.proximityAlert => AlertaProximidadeWidget(
         sitios: _viewModel.sitiosConflitantes,
+        latAtual: _viewModel.coordenadaAtual?.latitude ?? 0.0,
+        lonAtual: _viewModel.coordenadaAtual?.longitude ?? 0.0,
         onProsseguir: _viewModel.prosseguirParaFormularioIgnorandoAlerta,
       ),
 
@@ -199,6 +216,35 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+}
+
+class _BannerOffline extends StatelessWidget {
+  const _BannerOffline();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFFFEF3C7),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: const Row(
+        children: <Widget>[
+          Icon(Icons.wifi_off, size: 16, color: Color(0xFF92400E)),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Você está offline. A coleta será salva localmente.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Color(0xFF92400E),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/services/auth_service.dart';
+import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
@@ -179,6 +180,7 @@ SyncNotifier _criarStubSyncNotifier() => SyncNotifier(
     apiDatasource: _StubSyncApiDatasource(),
   ),
   secureStorage: _StubSecureStorage(),
+  conectividadeService: ConectividadeService(),
 );
 
 Widget _montarWidget(_FakeAuthNotifier notifier) {
@@ -203,6 +205,7 @@ Widget _montarWidget(_FakeAuthNotifier notifier) {
     coletaRepository: _StubColetaRepository(),
     bemMaterialRepository: _StubBemMaterialRepository(),
     mediaService: MediaService(ImagePicker()),
+    conectividadeService: ConectividadeService(),
     child: MaterialApp.router(routerConfig: router),
   );
 }

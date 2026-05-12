@@ -1,19 +1,23 @@
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
+import '../../../core/services/conectividade_service.dart';
 import '../../../core/services/secure_storage_service.dart';
 import '../data/sync_repository.dart';
 
-enum SyncState { idle, sincronizando, concluido, semToken, erro }
+enum SyncState { idle, sincronizando, concluido, semToken, semConexao, erro }
 
 class SyncNotifier extends ChangeNotifier {
   final SyncRepository _repository;
   final SecureStorageService _secureStorage;
+  final ConectividadeService _conectividadeService;
 
   SyncNotifier({
     required SyncRepository repository,
     required SecureStorageService secureStorage,
+    required ConectividadeService conectividadeService,
   }) : _repository = repository,
-       _secureStorage = secureStorage;
+       _secureStorage = secureStorage,
+       _conectividadeService = conectividadeService;
 
   SyncState _state = SyncState.idle;
   SyncResumo? _ultimoResumo;
@@ -33,6 +37,14 @@ class SyncNotifier extends ChangeNotifier {
 
   Future<void> sincronizar() async {
     if (_state == SyncState.sincronizando) return;
+
+    final online = await _conectividadeService.verificar();
+    if (!online) {
+      _state = SyncState.semConexao;
+      _mensagemErro = 'Sem conexão. Conecte-se à internet para sincronizar.';
+      notifyListeners();
+      return;
+    }
 
     final token = await _secureStorage.getJwt();
     if (token == null) {

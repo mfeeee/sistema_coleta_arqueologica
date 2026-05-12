@@ -19,7 +19,7 @@ class ProximidadeService {
     final sitiosProximos = <ColetaEntity>[];
 
     for (final sitio in coletas) {
-      final distancia = _calcularDistancia(
+      final distancia = calcularDistanciaMetros(
         latAtual,
         lonAtual,
         sitio.latitude,
@@ -34,8 +34,7 @@ class ProximidadeService {
     return sitiosProximos;
   }
 
-  /// Fórmula de Haversine
-  double _calcularDistancia(
+  static double calcularDistanciaMetros(
     double lat1,
     double lon1,
     double lat2,
@@ -56,7 +55,5 @@ class ProximidadeService {
     return raioTerra * c;
   }
 
-  double _grausParaRadianos(double graus) {
-    return graus * math.pi / 180;
-  }
+  static double _grausParaRadianos(double graus) => graus * math.pi / 180;
 }

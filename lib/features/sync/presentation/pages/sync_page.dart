@@ -93,8 +93,7 @@ class _NetworkStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final estaOnline =
-        AppScope.of(context).conectividadeService.estaOnline;
+    final estaOnline = AppScope.of(context).conectividadeService.estaOnline;
 
     return ValueListenableBuilder<bool>(
       valueListenable: estaOnline,
@@ -112,13 +111,14 @@ class _ConexaoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    final Color iconColor =
-        online ? const Color(0xFF16A34A) : const Color(0xFF64748B);
-    final Color iconBgColor =
-        online ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9);
+    final Color iconColor = online
+        ? const Color(0xFF16A34A)
+        : const Color(0xFF64748B);
+    final Color iconBgColor = online
+        ? const Color(0xFFDCFCE7)
+        : const Color(0xFFF1F5F9);
     final IconData icone = online ? Icons.wifi : Icons.wifi_off;
-    final String rotulo =
-        online ? 'Você está Online' : 'Você está Offline';
+    final String rotulo = online ? 'Você está Online' : 'Você está Offline';
 
     return Container(
       padding: const EdgeInsets.all(20.0),
@@ -141,7 +141,10 @@ class _ConexaoCard extends StatelessWidget {
           Container(
             width: 48,
             height: 48,
-            decoration: BoxDecoration(color: iconBgColor, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+              color: iconBgColor,
+              shape: BoxShape.circle,
+            ),
             child: Icon(icone, color: iconColor, size: 24),
           ),
           const SizedBox(width: 16),

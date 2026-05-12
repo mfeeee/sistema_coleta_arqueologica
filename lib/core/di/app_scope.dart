@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
@@ -24,6 +25,7 @@ class AppScope extends InheritedWidget {
     required this.coletaRepository,
     required this.bemMaterialRepository,
     required this.mediaService,
+    required this.conectividadeService,
     required super.child,
   });
 
@@ -32,6 +34,7 @@ class AppScope extends InheritedWidget {
   final ColetaRepository coletaRepository;
   final BemMaterialRepository bemMaterialRepository;
   final MediaService mediaService;
+  final ConectividadeService conectividadeService;
 
   factory AppScope.create({
     required AppDatabase database,
@@ -53,9 +56,12 @@ class AppScope extends InheritedWidget {
       coletaDatasource: coletaDatasource,
       apiDatasource: syncApiDatasource,
     );
+    final conectividadeService = ConectividadeService();
+
     final syncNotifier = SyncNotifier(
       repository: syncRepository,
       secureStorage: secureStorage,
+      conectividadeService: conectividadeService,
     );
 
     final mediaService = MediaService(ImagePicker());
@@ -66,6 +72,7 @@ class AppScope extends InheritedWidget {
       coletaRepository: coletaRepository,
       bemMaterialRepository: bemMaterialRepository,
       mediaService: mediaService,
+      conectividadeService: conectividadeService,
       child: child,
     );
   }
@@ -82,5 +89,6 @@ class AppScope extends InheritedWidget {
       syncNotifier != oldWidget.syncNotifier ||
       coletaRepository != oldWidget.coletaRepository ||
       bemMaterialRepository != oldWidget.bemMaterialRepository ||
-      mediaService != oldWidget.mediaService;
+      mediaService != oldWidget.mediaService ||
+      conectividadeService != oldWidget.conectividadeService;
 }

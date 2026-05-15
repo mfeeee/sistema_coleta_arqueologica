@@ -22,6 +22,8 @@ import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_m
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
+import 'package:dio/dio.dart';
+import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/domain/sync_notifier.dart';
@@ -108,6 +110,7 @@ class _StubSyncApiDatasource implements SyncApiDatasource {
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
     required String bearerToken,
+    Map<String, dynamic>? dadosColetadosOverride,
   }) async =>
       SyncResultado(coletaId: coleta.id, status: SyncResultStatus.sucesso);
 }
@@ -178,6 +181,7 @@ SyncNotifier _criarStubSyncNotifier() => SyncNotifier(
   repository: SyncRepository(
     coletaDatasource: _StubColetaLocalDatasource(),
     apiDatasource: _StubSyncApiDatasource(),
+    fotoUploadService: FotoUploadService(Dio()),
   ),
   secureStorage: _StubSecureStorage(),
   conectividadeService: ConectividadeService(),

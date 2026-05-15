@@ -22,11 +22,13 @@ class SyncNotifier extends ChangeNotifier {
   SyncState _state = SyncState.idle;
   SyncResumo? _ultimoResumo;
   String? _mensagemErro;
+  String? _mensagemProgresso;
   int _pendentes = 0;
 
   SyncState get state => _state;
   SyncResumo? get ultimoResumo => _ultimoResumo;
   String? get mensagemErro => _mensagemErro;
+  String? get mensagemProgresso => _mensagemProgresso;
   int get pendentes => _pendentes;
   bool get sincronizando => _state == SyncState.sincronizando;
 
@@ -56,11 +58,18 @@ class SyncNotifier extends ChangeNotifier {
 
     _state = SyncState.sincronizando;
     _mensagemErro = null;
+    _mensagemProgresso = null;
     _ultimoResumo = null;
     notifyListeners();
 
     try {
-      final resumo = await _repository.sincronizarTodas(token);
+      final resumo = await _repository.sincronizarTodas(
+        token,
+        onProgresso: (msg) {
+          _mensagemProgresso = msg;
+          notifyListeners();
+        },
+      );
       _ultimoResumo = resumo;
       _pendentes = await _repository.contarPendentes();
       _state = SyncState.concluido;

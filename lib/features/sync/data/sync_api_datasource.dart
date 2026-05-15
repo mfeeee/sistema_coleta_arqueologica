@@ -14,6 +14,7 @@ abstract class SyncApiDatasource {
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
     required String bearerToken,
+    Map<String, dynamic>? dadosColetadosOverride,
   });
 }
 
@@ -26,6 +27,7 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
     required String bearerToken,
+    Map<String, dynamic>? dadosColetadosOverride,
   }) async {
     try {
       final payload = {
@@ -41,7 +43,7 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
             'uf': coleta.uf,
             'artefatos': coleta.artefatos.map((e) => e.name).toList(),
             'versao': coleta.versao,
-            'dados_coletados': coleta.dadosColetados,
+            'dados_coletados': dadosColetadosOverride ?? coleta.dadosColetados,
           },
         ],
       };

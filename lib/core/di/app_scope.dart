@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
+import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
@@ -52,9 +53,11 @@ class AppScope extends InheritedWidget {
     );
 
     final syncApiDatasource = SyncApiDatasourceImpl(dio);
+    final fotoUploadService = FotoUploadService(dio);
     final syncRepository = SyncRepository(
       coletaDatasource: coletaDatasource,
       apiDatasource: syncApiDatasource,
+      fotoUploadService: fotoUploadService,
     );
     final conectividadeService = ConectividadeService();
 

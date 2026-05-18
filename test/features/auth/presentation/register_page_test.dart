@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -202,7 +203,10 @@ SyncNotifier _criarStubSyncNotifier() => SyncNotifier(
   conectividadeService: ConectividadeService(),
 );
 
-Widget _montarWidget(_FakeAuthNotifier notifier) {
+Future<Widget> _montarWidget(_FakeAuthNotifier notifier) async {
+  SharedPreferences.setMockInitialValues({});
+  final prefs = await SharedPreferences.getInstance();
+
   final router = GoRouter(
     initialLocation: '/register',
     routes: [
@@ -225,6 +229,8 @@ Widget _montarWidget(_FakeAuthNotifier notifier) {
     bemMaterialRepository: _StubBemMaterialRepository(),
     mediaService: MediaService(ImagePicker()),
     conectividadeService: ConectividadeService(),
+    prefs: prefs,
+    temaModo: ValueNotifier(ThemeMode.light),
     child: MaterialApp.router(routerConfig: router),
   );
 }
@@ -258,7 +264,7 @@ void main() {
     tester,
   ) async {
     final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(_montarWidget(notifier));
+    await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
     final botao = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
@@ -269,7 +275,7 @@ void main() {
     tester,
   ) async {
     final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(_montarWidget(notifier));
+    await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
     await _preencherFormularioValido(tester);
@@ -282,7 +288,7 @@ void main() {
     tester,
   ) async {
     final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(_montarWidget(notifier));
+    await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
     await _preencherFormularioValido(tester);
@@ -295,7 +301,7 @@ void main() {
     tester,
   ) async {
     final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(_montarWidget(notifier));
+    await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
     await _preencherFormularioValido(tester);
@@ -308,7 +314,7 @@ void main() {
 
   testWidgets('mensagem de erro do notifier é exibida na tela', (tester) async {
     final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(_montarWidget(notifier));
+    await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
     notifier.definirErro('E-mail já cadastrado.');

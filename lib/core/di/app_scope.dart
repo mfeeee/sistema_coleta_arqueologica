@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
@@ -27,6 +28,8 @@ class AppScope extends InheritedWidget {
     required this.bemMaterialRepository,
     required this.mediaService,
     required this.conectividadeService,
+    required this.prefs,
+    required this.temaModo,
     required super.child,
   });
 
@@ -36,12 +39,16 @@ class AppScope extends InheritedWidget {
   final BemMaterialRepository bemMaterialRepository;
   final MediaService mediaService;
   final ConectividadeService conectividadeService;
+  final SharedPreferences prefs;
+  final ValueNotifier<ThemeMode> temaModo;
 
   factory AppScope.create({
     required AppDatabase database,
     required SecureStorageService secureStorage,
     required AuthNotifier authNotifier,
     required Dio dio,
+    required SharedPreferences prefs,
+    required ValueNotifier<ThemeMode> temaModo,
     required Widget child,
   }) {
     final coletaDatasource = ColetaLocalDatasourceImpl(database);
@@ -76,6 +83,8 @@ class AppScope extends InheritedWidget {
       bemMaterialRepository: bemMaterialRepository,
       mediaService: mediaService,
       conectividadeService: conectividadeService,
+      prefs: prefs,
+      temaModo: temaModo,
       child: child,
     );
   }
@@ -93,5 +102,7 @@ class AppScope extends InheritedWidget {
       coletaRepository != oldWidget.coletaRepository ||
       bemMaterialRepository != oldWidget.bemMaterialRepository ||
       mediaService != oldWidget.mediaService ||
-      conectividadeService != oldWidget.conectividadeService;
+      conectividadeService != oldWidget.conectividadeService ||
+      prefs != oldWidget.prefs ||
+      temaModo != oldWidget.temaModo;
 }

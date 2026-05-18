@@ -4,8 +4,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqlite3/open.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
+import 'package:sistema_coleta_arqueologica/core/utils/log_capture.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/repositories/coleta_repository_impl.dart';
@@ -24,6 +27,22 @@ const _baseUrl = 'https://sistemaarqueologicoapi-production.up.railway.app/api';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    LogCapture.registrar(
+      details.exceptionAsString(),
+      nome: 'FlutterError',
+      erro: details.exception,
+      stackTrace: details.stack,
+    );
+    FlutterError.presentError(details);
+  };
+
+  final prefs = await SharedPreferences.getInstance();
+  final modoEscuroSalvo = prefs.getBool('pref_modo_escuro') ?? false;
+  final temaModo = ValueNotifier<ThemeMode>(
+    modoEscuroSalvo ? ThemeMode.dark : ThemeMode.light,
+  );
 
   if (Platform.isAndroid) {
     await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
@@ -77,20 +96,55 @@ Future<void> main() async {
     ),
   );
 
+  final router = createAppRouter(authNotifier);
+
   runApp(
     AppScope.create(
       database: db,
       secureStorage: secureStorage,
       authNotifier: authNotifier,
       dio: dio,
-      child: MaterialApp.router(
-        title: 'Sistema de Coleta Arqueológica',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
-        routerConfig: createAppRouter(authNotifier),
-      ),
+      prefs: prefs,
+      temaModo: temaModo,
+      child: _ArqueoApp(router: router, temaModo: temaModo),
     ),
   );
+}
+
+class _ArqueoApp extends StatefulWidget {
+  const _ArqueoApp({required this.router, required this.temaModo});
+
+  final GoRouter router;
+  final ValueNotifier<ThemeMode> temaModo;
+
+  @override
+  State<_ArqueoApp> createState() => _ArqueoAppState();
+}
+
+class _ArqueoAppState extends State<_ArqueoApp> {
+  @override
+  void initState() {
+    super.initState();
+    widget.temaModo.addListener(_onTemaAlterado);
+  }
+
+  @override
+  void dispose() {
+    widget.temaModo.removeListener(_onTemaAlterado);
+    super.dispose();
+  }
+
+  void _onTemaAlterado() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'Sistema de Coleta Arqueológica',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: widget.temaModo.value,
+      routerConfig: widget.router,
+    );
+  }
 }

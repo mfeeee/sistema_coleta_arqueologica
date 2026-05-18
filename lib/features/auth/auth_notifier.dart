@@ -22,11 +22,15 @@ class AuthNotifier extends ChangeNotifier {
   String? _errorMessage;
   String? _userName;
   String? _userId;
+  String? _userEmail;
+  String? _userClassificacao;
 
   AuthStatus get status => _status;
   String? get errorMessage => _errorMessage;
   String? get userName => _userName;
   String? get userId => _userId;
+  String? get userEmail => _userEmail;
+  String? get userClassificacao => _userClassificacao;
   bool get isLoading => _status == AuthStatus.loading;
 
   Future<void> login(String email, String password) async {
@@ -37,10 +41,17 @@ class AuthNotifier extends ChangeNotifier {
     final result = await authService.login(email, password);
 
     switch (result) {
-      case AuthSuccess():
+      case AuthSuccess(
+        userName: final nomeRetornado,
+        userId: final idRetornado,
+        email: final emailRetornado,
+        classificacao: final classifRetornada,
+      ):
         _status = AuthStatus.authenticated;
-        _userName = result.userName;
-        _userId = result.userId;
+        _userName = nomeRetornado;
+        _userId = idRetornado;
+        _userEmail = emailRetornado;
+        _userClassificacao = classifRetornada;
         _pullService.sincronizarPull().catchError(
           (e) => log('Pull falhou silenciosamente: $e', name: 'AuthNotifier'),
         );
@@ -71,9 +82,15 @@ class AuthNotifier extends ChangeNotifier {
     );
 
     switch (result) {
-      case AuthSuccess(:final userName):
+      case AuthSuccess(
+        userName: final nomeRetornado,
+        email: final emailRetornado,
+        classificacao: final classifRetornada,
+      ):
         _status = AuthStatus.authenticated;
-        _userName = userName;
+        _userName = nomeRetornado;
+        _userEmail = emailRetornado;
+        _userClassificacao = classifRetornada;
       case AuthFailure(:final message):
         _status = AuthStatus.error;
         _errorMessage = message;
@@ -92,7 +109,9 @@ class AuthNotifier extends ChangeNotifier {
     await authService.logout();
     _status = AuthStatus.unauthenticated;
     _userName = null;
-    _userId = userId;
+    _userId = null;
+    _userEmail = null;
+    _userClassificacao = null;
     _errorMessage = null;
     notifyListeners();
   }

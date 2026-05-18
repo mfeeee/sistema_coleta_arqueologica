@@ -13,9 +13,16 @@ sealed class AuthResult {
 }
 
 final class AuthSuccess extends AuthResult {
-  AuthSuccess({required this.userName, required this.userId});
+  AuthSuccess({
+    required this.userName,
+    required this.userId,
+    this.email,
+    this.classificacao,
+  });
   final String userName;
   final String userId;
+  final String? email;
+  final String? classificacao;
 }
 
 final class AuthFailure extends AuthResult {
@@ -59,7 +66,9 @@ class AuthService {
           final user = body['user'] as Map<String, dynamic>?;
           return AuthSuccess(
             userName: user?['name'] as String? ?? 'Usuário',
-            userId: user?['id'] as String? ?? '',
+            userId: user?['id']?.toString() ?? '',
+            email: user?['email'] as String?,
+            classificacao: user?['classificacao'] as String?,
           );
 
         case 401:
@@ -118,10 +127,13 @@ class AuthService {
             return const AuthFailure(TratadorDeErros.respostaInvalida);
           }
           await secureStorage.saveJwt(token);
-          final userName =
-              (body['user'] as Map<String, dynamic>?)?['name'] as String? ??
-              'Usuário';
-          return AuthSuccess(userName: userName, userId: '');
+          final userBody = body['user'] as Map<String, dynamic>?;
+          return AuthSuccess(
+            userName: userBody?['name'] as String? ?? name,
+            userId: userBody?['id']?.toString() ?? '',
+            email: email,
+            classificacao: classificacao,
+          );
 
         case 422:
           final errors = body['errors'] as Map<String, dynamic>?;

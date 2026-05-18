@@ -1,8 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/features/profile/viewmodels/profile_viewmodel.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  late final ProfileViewModel _viewModel;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      final scope = AppScope.of(context);
+      _viewModel = ProfileViewModel(
+        authNotifier: scope.authNotifier,
+        coletaRepository: scope.coletaRepository,
+        prefs: scope.prefs,
+        temaModo: scope.temaModo,
+      );
+      _viewModel.carregarEstatisticas();
+    }
+  }
+
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  Future<void> _confirmarLogout() async {
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Sair da conta'),
+        content: const Text(
+          'Deseja encerrar a sessão? Coletas não sincronizadas '
+          'precisam ser enviadas antes de sair.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmado != true || !mounted) return;
+
+    await _viewModel.sair();
+
+    if (!mounted) return;
+
+    if (_viewModel.temPendentesSemSync.value) {
+      _viewModel.temPendentesSemSync.value = false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Você tem coletas pendentes de sincronização. '
+            'Sincronize antes de sair.',
+          ),
+        ),
+      );
+    }
+    // GoRouter redireciona automaticamente via refreshListenable após logout.
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,27 +109,31 @@ class ProfilePage extends StatelessWidget {
               color: theme.colorScheme.primary,
               size: 24,
             ),
-            onPressed: () {
-              // TODO
-            },
+            onPressed: () => context.push('/notificacoes'),
           ),
           const SizedBox(width: 8),
         ],
       ),
-      body: const SafeArea(
+      body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(top: 24.0, bottom: 40.0),
+          padding: const EdgeInsets.only(top: 24.0, bottom: 40.0),
           child: Column(
             children: <Widget>[
-              _UserInfoSection(),
-              SizedBox(height: 32.0),
-              _MetricsSection(),
-              SizedBox(height: 32.0),
-              _NotificationSection(),
-              SizedBox(height: 32.0),
-              _AppPreferencesSection(),
-              SizedBox(height: 32.0),
-              _ActionButtonsSection(),
+              _UserInfoSection(viewModel: _viewModel),
+              const SizedBox(height: 32.0),
+              _MetricsSection(
+                totalColetas: _viewModel.totalColetas,
+                coletasPendentes: _viewModel.coletasPendentes,
+              ),
+              const SizedBox(height: 32.0),
+              _NotificationSection(viewModel: _viewModel),
+              const SizedBox(height: 32.0),
+              _AppPreferencesSection(viewModel: _viewModel),
+              const SizedBox(height: 32.0),
+              _ActionButtonsSection(
+                viewModel: _viewModel,
+                onLogout: _confirmarLogout,
+              ),
             ],
           ),
         ),
@@ -65,11 +143,16 @@ class ProfilePage extends StatelessWidget {
 }
 
 class _UserInfoSection extends StatelessWidget {
-  const _UserInfoSection();
+  const _UserInfoSection({required this.viewModel});
+
+  final ProfileViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final String badge = viewModel.classificacao.isNotEmpty
+        ? viewModel.classificacao.toUpperCase()
+        : 'USUÁRIO';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -85,16 +168,21 @@ class _UserInfoSection extends StatelessWidget {
                 width: 4.0,
               ),
             ),
-            child: const CircleAvatar(
-              backgroundImage: NetworkImage(
-                'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
+            child: CircleAvatar(
+              backgroundColor: theme.colorScheme.primaryContainer,
+              child: Text(
+                viewModel.iniciais,
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 40,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 16),
-          // Nome e E-mail
           Text(
-            'Dr. Julian Martínez',
+            viewModel.nome,
             textAlign: TextAlign.center,
             style: theme.textTheme.displayLarge?.copyWith(
               fontSize: 24,
@@ -103,12 +191,11 @@ class _UserInfoSection extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'julian.martinez@archaeo.app',
+            viewModel.email,
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
           ),
           const SizedBox(height: 8),
-
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 12.0,
@@ -118,9 +205,9 @@ class _UserInfoSection extends StatelessWidget {
               color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(9999),
             ),
-            child: const Text(
-              'ARQUEÓLOGO',
-              style: TextStyle(
+            child: Text(
+              badge,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
@@ -135,7 +222,13 @@ class _UserInfoSection extends StatelessWidget {
 }
 
 class _MetricsSection extends StatelessWidget {
-  const _MetricsSection();
+  const _MetricsSection({
+    required this.totalColetas,
+    required this.coletasPendentes,
+  });
+
+  final ValueNotifier<int> totalColetas;
+  final ValueNotifier<int> coletasPendentes;
 
   @override
   Widget build(BuildContext context) {
@@ -156,17 +249,27 @@ class _MetricsSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-
-          const Row(
-            children: <Widget>[
-              Expanded(
-                child: _MetricCard(title: 'SÍTIOS MAPEADOS', value: '42'),
-              ),
-              SizedBox(width: 16),
-              Expanded(
-                child: _MetricCard(title: 'DIAS EM CAMPO', value: '156'),
-              ),
-            ],
+          ListenableBuilder(
+            listenable: Listenable.merge([totalColetas, coletasPendentes]),
+            builder: (context, _) {
+              return Row(
+                children: <Widget>[
+                  Expanded(
+                    child: _MetricCard(
+                      title: 'COLETAS REGISTRADAS',
+                      value: '${totalColetas.value}',
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _MetricCard(
+                      title: 'PENDENTES SYNC',
+                      value: '${coletasPendentes.value}',
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -175,7 +278,9 @@ class _MetricsSection extends StatelessWidget {
 }
 
 class _NotificationSection extends StatelessWidget {
-  const _NotificationSection();
+  const _NotificationSection({required this.viewModel});
+
+  final ProfileViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +301,6 @@ class _NotificationSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-
           Container(
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
@@ -210,30 +314,40 @@ class _NotificationSection extends StatelessWidget {
                 _SettingsTile(
                   icon: Icons.notifications_active_outlined,
                   title: 'Alertas de Sincronização',
-                  trailing: Switch(
-                    value: true,
-                    activeThumbColor: theme.colorScheme.primary,
-                    onChanged: (bool val) {},
+                  trailing: ValueListenableBuilder<bool>(
+                    valueListenable: viewModel.alertasSincronizacao,
+                    builder: (_, valor, __) => Switch(
+                      value: valor,
+                      activeThumbColor: theme.colorScheme.primary,
+                      onChanged: (v) =>
+                          viewModel.alertasSincronizacao.value = v,
+                    ),
                   ),
                 ),
                 const Divider(height: 1, indent: 48),
                 _SettingsTile(
                   icon: Icons.fact_check_outlined,
                   title: 'Status de Curadoria',
-                  trailing: Switch(
-                    value: false,
-                    activeThumbColor: theme.colorScheme.primary,
-                    onChanged: (bool val) {},
+                  trailing: ValueListenableBuilder<bool>(
+                    valueListenable: viewModel.statusCuradoria,
+                    builder: (_, valor, __) => Switch(
+                      value: valor,
+                      activeThumbColor: theme.colorScheme.primary,
+                      onChanged: (v) => viewModel.statusCuradoria.value = v,
+                    ),
                   ),
                 ),
                 const Divider(height: 1, indent: 48),
                 _SettingsTile(
                   icon: Icons.location_on_outlined,
                   title: 'Avisos de Proximidade',
-                  trailing: Switch(
-                    value: true,
-                    activeThumbColor: theme.colorScheme.primary,
-                    onChanged: (bool val) {},
+                  trailing: ValueListenableBuilder<bool>(
+                    valueListenable: viewModel.avisosProximidade,
+                    builder: (_, valor, __) => Switch(
+                      value: valor,
+                      activeThumbColor: theme.colorScheme.primary,
+                      onChanged: (v) => viewModel.avisosProximidade.value = v,
+                    ),
                   ),
                 ),
               ],
@@ -246,7 +360,9 @@ class _NotificationSection extends StatelessWidget {
 }
 
 class _AppPreferencesSection extends StatelessWidget {
-  const _AppPreferencesSection();
+  const _AppPreferencesSection({required this.viewModel});
+
+  final ProfileViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
@@ -280,10 +396,13 @@ class _AppPreferencesSection extends StatelessWidget {
                 _SettingsTile(
                   icon: Icons.dark_mode_outlined,
                   title: 'Modo Escuro',
-                  trailing: Switch(
-                    value: false,
-                    activeThumbColor: theme.colorScheme.primary,
-                    onChanged: (bool val) {},
+                  trailing: ValueListenableBuilder<bool>(
+                    valueListenable: viewModel.modoEscuro,
+                    builder: (_, valor, __) => Switch(
+                      value: valor,
+                      activeThumbColor: theme.colorScheme.primary,
+                      onChanged: (v) => viewModel.modoEscuro.value = v,
+                    ),
                   ),
                 ),
                 const Divider(height: 1, indent: 48),
@@ -320,7 +439,13 @@ class _AppPreferencesSection extends StatelessWidget {
 }
 
 class _ActionButtonsSection extends StatelessWidget {
-  const _ActionButtonsSection();
+  const _ActionButtonsSection({
+    required this.viewModel,
+    required this.onLogout,
+  });
+
+  final ProfileViewModel viewModel;
+  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
@@ -330,73 +455,91 @@ class _ActionButtonsSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         children: <Widget>[
-          // Botão Exportar Logs
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 56),
-              side: BorderSide(
-                color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                width: 2,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            onPressed: () {
-              // TODO
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.bug_report_outlined,
-                  color: theme.colorScheme.primary,
-                  size: 18,
+          ValueListenableBuilder<bool>(
+            valueListenable: viewModel.exportandoLogs,
+            builder: (_, exportando, __) => OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 56),
+                side: BorderSide(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                  width: 2,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Exportar logs de erro',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
+              ),
+              onPressed: exportando ? null : viewModel.exportarLogs,
+              child: exportando
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.colorScheme.primary,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Icons.bug_report_outlined,
+                          color: theme.colorScheme.primary,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Exportar logs de erro',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ),
           const SizedBox(height: 12),
-          // Botão Sair da Conta
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.onSurface,
-              elevation: 0,
-              minimumSize: const Size(double.infinity, 52),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          ValueListenableBuilder<bool>(
+            valueListenable: viewModel.estaCarregando,
+            builder: (_, carregando, __) => ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.onSurface,
+                elevation: 0,
+                minimumSize: const Size(double.infinity, 52),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-            ),
-            onPressed: () {
-              context.go('/login');
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Icon(
-                  Icons.logout,
-                  color: theme.colorScheme.errorContainer,
-                  size: 18,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Sair da conta',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.errorContainer,
-                  ),
-                ),
-              ],
+              onPressed: carregando ? null : onLogout,
+              child: carregando
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.colorScheme.errorContainer,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Icons.logout,
+                          color: theme.colorScheme.errorContainer,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Sair da conta',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.errorContainer,
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ),
         ],
@@ -405,9 +548,9 @@ class _ActionButtonsSection extends StatelessWidget {
   }
 }
 
-// Card de Estatística
 class _MetricCard extends StatelessWidget {
   const _MetricCard({required this.title, required this.value});
+
   final String title;
   final String value;
 
@@ -455,6 +598,7 @@ class _SettingsTile extends StatelessWidget {
     required this.title,
     required this.trailing,
   });
+
   final IconData icon;
   final String title;
   final Widget trailing;

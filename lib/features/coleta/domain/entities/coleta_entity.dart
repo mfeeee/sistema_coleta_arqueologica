@@ -18,6 +18,7 @@ class ColetaEntity {
   final int versao;
   final DateTime updatedAt;
   final Map<String, dynamic> dadosColetados;
+  final List<String> fotosUrls;
   final DateTime? deletadoEm;
 
   const ColetaEntity({
@@ -32,6 +33,7 @@ class ColetaEntity {
     required this.versao,
     required this.updatedAt,
     required this.dadosColetados,
+    this.fotosUrls = const [],
     this.natureza,
     this.tipo,
     this.uf,

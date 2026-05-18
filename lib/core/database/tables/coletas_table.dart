@@ -61,6 +61,11 @@ class Coletas extends Table {
   TextColumn get dadosColetados =>
       text().named('dados_coletados').map(const JsonMapConverter())();
 
+  TextColumn get fotosUrls => text()
+      .named('fotos_urls')
+      .map(const StringListConverter())
+      .withDefault(const Constant('[]'))();
+
   DateTimeColumn get deletadoEm => dateTime().named('deletado_em').nullable()();
 
   @override

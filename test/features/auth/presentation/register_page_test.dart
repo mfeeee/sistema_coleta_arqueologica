@@ -111,6 +111,7 @@ class _StubSyncApiDatasource implements SyncApiDatasource {
     required ColetaEntity coleta,
     required String bearerToken,
     Map<String, dynamic>? dadosColetadosOverride,
+    void Function(int tentativa, int max)? onTentativa,
   }) async =>
       SyncResultado(coletaId: coleta.id, status: SyncResultStatus.sucesso);
 }

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import '../../coleta/domain/entities/coleta_entity.dart';
+import '../../../../core/utils/retry_util.dart';
 
 enum SyncResultStatus { sucesso, erroRede, conflito }
 
@@ -15,6 +16,7 @@ abstract class SyncApiDatasource {
     required ColetaEntity coleta,
     required String bearerToken,
     Map<String, dynamic>? dadosColetadosOverride,
+    void Function(int tentativa, int max)? onTentativa,
   });
 }
 
@@ -28,39 +30,50 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
     required ColetaEntity coleta,
     required String bearerToken,
     Map<String, dynamic>? dadosColetadosOverride,
+    void Function(int tentativa, int max)? onTentativa,
   }) async {
+    final payload = {
+      'coletas': [
+        {
+          'id': coleta.id,
+          'data_coleta': coleta.dataColeta.toUtc().toIso8601String(),
+          'nome_bem': coleta.nomeBem,
+          'latitude': coleta.latitude,
+          'longitude': coleta.longitude,
+          'natureza': coleta.natureza?.name,
+          'tipo': coleta.tipo?.name,
+          'uf': coleta.uf,
+          'artefatos': coleta.artefatos.map((e) => e.name).toList(),
+          'versao': coleta.versao,
+          'dados_coletados': dadosColetadosOverride ?? coleta.dadosColetados,
+        },
+      ],
+    };
+
     try {
-      final payload = {
-        'coletas': [
-          {
-            'id': coleta.id,
-            'data_coleta': coleta.dataColeta.toUtc().toIso8601String(),
-            'nome_bem': coleta.nomeBem,
-            'latitude': coleta.latitude,
-            'longitude': coleta.longitude,
-            'natureza': coleta.natureza?.name,
-            'tipo': coleta.tipo?.name,
-            'uf': coleta.uf,
-            'artefatos': coleta.artefatos.map((e) => e.name).toList(),
-            'versao': coleta.versao,
-            'dados_coletados': dadosColetadosOverride ?? coleta.dadosColetados,
-          },
-        ],
-      };
-
-      log('POST /v1/mobile/sync payload: $payload', name: 'SyncApiDatasource');
-
-      final response = await _dio.post(
-        '/v1/mobile/sync',
-        data: payload,
-        options: Options(
-          headers: {
-            'Authorization': 'Bearer $bearerToken',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          validateStatus: (status) => status != null && status < 500,
-        ),
+      final response = await comRetry(
+        maxTentativas: 3,
+        delayInicial: const Duration(seconds: 1),
+        onTentativa: onTentativa,
+        operacao: () {
+          log(
+            'POST /v1/mobile/sync payload: $payload',
+            name: 'SyncApiDatasource',
+          );
+          return _dio.post(
+            '/v1/mobile/sync',
+            data: payload,
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer $bearerToken',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              sendTimeout: const Duration(seconds: 30),
+              validateStatus: (status) => status != null && status < 500,
+            ),
+          );
+        },
       );
 
       log(
@@ -78,7 +91,8 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
       );
     } on DioException catch (e) {
       log(
-        'Erro de rede ao enviar coleta ${coleta.id}: ${e.message}',
+        'Erro de rede ao enviar coleta ${coleta.id} após tentativas: '
+        '${e.message}',
         name: 'SyncApiDatasource',
       );
       return SyncResultado(

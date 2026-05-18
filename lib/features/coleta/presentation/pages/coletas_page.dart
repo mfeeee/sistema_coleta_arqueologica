@@ -1,9 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coletas_viewmodel.dart';
 
-class ColetasPage extends StatelessWidget {
+class ColetasPage extends StatefulWidget {
   const ColetasPage({super.key});
+
+  @override
+  State<ColetasPage> createState() => _ColetasPageState();
+}
+
+class _ColetasPageState extends State<ColetasPage> {
+  late final ColetasViewModel _viewModel;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      _viewModel = ColetasViewModel(AppScope.of(context).coletaRepository);
+      _viewModel.carregarColetas();
+    }
+  }
+
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  void _verDetalhes(String id) => context.push('/detalhes-coleta', extra: id);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +50,6 @@ class ColetasPage extends StatelessWidget {
             children: <Widget>[
               Text(
                 'Minhas Coletas',
-                textAlign: TextAlign.center,
                 style: theme.textTheme.displayLarge?.copyWith(
                   fontSize: 18,
                   height: 1.2,
@@ -62,21 +90,343 @@ class ColetasPage extends StatelessWidget {
             ),
           ),
         ),
-        body: const TabBarView(
-          children: <Widget>[
-            _ListaColetas(),
-            _ListaColetasPendentes(),
-            _ListaColetasAprovadas(),
-            _ListaColetasRejeitadas(),
-          ],
+        body: ListenableBuilder(
+          listenable: Listenable.merge([
+            _viewModel.coletas,
+            _viewModel.carregando,
+            _viewModel.erro,
+          ]),
+          builder: (context, _) {
+            final carregando = _viewModel.carregando.value;
+            final erro = _viewModel.erro.value;
+
+            return TabBarView(
+              children: <Widget>[
+                _ListaColetasFiltrada(
+                  coletas: _viewModel.coletas.value,
+                  carregando: carregando,
+                  erro: erro,
+                  onRefresh: _viewModel.atualizar,
+                  onVerDetalhes: _verDetalhes,
+                ),
+                _ListaColetasFiltrada(
+                  coletas: _viewModel.pendentes,
+                  carregando: carregando,
+                  erro: erro,
+                  onRefresh: _viewModel.atualizar,
+                  onVerDetalhes: _verDetalhes,
+                ),
+                _ListaColetasFiltrada(
+                  coletas: _viewModel.sincronizadas,
+                  carregando: carregando,
+                  erro: erro,
+                  onRefresh: _viewModel.atualizar,
+                  onVerDetalhes: _verDetalhes,
+                ),
+                _ListaColetasFiltrada(
+                  coletas: _viewModel.conflitos,
+                  carregando: carregando,
+                  erro: erro,
+                  onRefresh: _viewModel.atualizar,
+                  onVerDetalhes: _verDetalhes,
+                ),
+              ],
+            );
+          },
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            context.push('/nova-coleta');
+          onPressed: () async {
+            await context.push('/nova-coleta');
+            if (mounted) _viewModel.atualizar();
           },
           backgroundColor: theme.colorScheme.primary,
           child: const Icon(Icons.add, color: Colors.white),
         ),
+      ),
+    );
+  }
+}
+
+class _ListaColetasFiltrada extends StatelessWidget {
+  const _ListaColetasFiltrada({
+    required this.coletas,
+    required this.carregando,
+    required this.erro,
+    required this.onRefresh,
+    required this.onVerDetalhes,
+  });
+
+  final List<ColetaEntity> coletas;
+  final bool carregando;
+  final String? erro;
+  final Future<void> Function() onRefresh;
+  final void Function(String id) onVerDetalhes;
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(onRefresh: onRefresh, child: _conteudo(context));
+  }
+
+  Widget _conteudo(BuildContext context) {
+    if (carregando) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (erro != null) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [_EstadoErro(mensagem: erro!, onTentarNovamente: onRefresh)],
+      );
+    }
+    if (coletas.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: const [_EstadoVazio()],
+      );
+    }
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 96),
+      itemCount: coletas.length,
+      itemBuilder: (_, index) => Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: _ColetaItem(
+          coleta: coletas[index],
+          onVerDetalhes: () => onVerDetalhes(coletas[index].id),
+        ),
+      ),
+    );
+  }
+}
+
+class _EstadoVazio extends StatelessWidget {
+  const _EstadoVazio();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            Icons.layers_outlined,
+            size: 64,
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Nenhuma coleta encontrada',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: const Color(0xFF64748B),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Registre sua primeira coleta arqueológica.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: const Color(0xFF94A3B8),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () => context.push('/nova-coleta'),
+            icon: const Icon(Icons.add, color: Colors.white),
+            label: const Text(
+              'Nova Coleta',
+              style: TextStyle(color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EstadoErro extends StatelessWidget {
+  const _EstadoErro({required this.mensagem, required this.onTentarNovamente});
+
+  final String mensagem;
+  final VoidCallback onTentarNovamente;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: theme.colorScheme.error.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            mensagem,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: const Color(0xFF64748B),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: onTentarNovamente,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Tentar novamente'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ColetaItem extends StatelessWidget {
+  const _ColetaItem({required this.coleta, required this.onVerDetalhes});
+
+  final ColetaEntity coleta;
+  final VoidCallback onVerDetalhes;
+
+  @override
+  Widget build(BuildContext context) {
+    final (statusText, statusColor, statusBgColor) = _statusInfo();
+    final localizacao =
+        coleta.uf ??
+        '${coleta.latitude.toStringAsFixed(4)}, '
+            '${coleta.longitude.toStringAsFixed(4)}';
+    final data = _formatarData(coleta.dataColeta);
+
+    return _ColetaCard(
+      statusText: statusText,
+      statusColor: statusColor,
+      statusBgColor: statusBgColor,
+      title: coleta.nomeBem,
+      location: localizacao,
+      date: data,
+      imageUrl: coleta.fotosUrls.firstOrNull,
+      onTap: onVerDetalhes,
+      actionsRow: _AcoesColeta(coleta: coleta, onVerDetalhes: onVerDetalhes),
+    );
+  }
+
+  (String, Color, Color) _statusInfo() => switch (coleta.syncStatus) {
+    StatusColeta.pendente => (
+      'Não Sincronizado',
+      const Color(0xFF475569),
+      const Color(0xFFF1F5F9),
+    ),
+    StatusColeta.sincronizado => (
+      'Sincronizado',
+      const Color(0xFF15803D),
+      const Color(0xFFDCFCE7),
+    ),
+    StatusColeta.conflito => (
+      'Conflito',
+      const Color(0xFFB91C1C),
+      const Color(0xFFFEE2E2),
+    ),
+  };
+
+  String _formatarData(DateTime data) {
+    final d = data.day.toString().padLeft(2, '0');
+    final m = data.month.toString().padLeft(2, '0');
+    return '$d/$m/${data.year}';
+  }
+}
+
+class _AcoesColeta extends StatelessWidget {
+  const _AcoesColeta({required this.coleta, required this.onVerDetalhes});
+
+  final ColetaEntity coleta;
+  final VoidCallback onVerDetalhes;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return switch (coleta.syncStatus) {
+      StatusColeta.pendente => _acoesPendente(theme),
+      StatusColeta.sincronizado => _botaoVerDetalhes(theme),
+      StatusColeta.conflito => _botaoConflito(theme),
+    };
+  }
+
+  Widget _acoesPendente(ThemeData theme) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          flex: 2,
+          child: OutlinedButton.icon(
+            onPressed: () {},
+            icon: Icon(
+              Icons.edit_outlined,
+              size: 16,
+              color: theme.colorScheme.primary,
+            ),
+            label: Text(
+              'Editar',
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(
+                color: theme.colorScheme.primary.withValues(alpha: 0.2),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 3,
+          child: ElevatedButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.sync, size: 16, color: Colors.white),
+            label: const Text(
+              'Sincronizar Agora',
+              style: TextStyle(color: Colors.white),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _botaoVerDetalhes(ThemeData theme) {
+    return ElevatedButton(
+      onPressed: onVerDetalhes,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+        elevation: 0,
+        minimumSize: const Size(double.infinity, 40),
+      ),
+      child: Text(
+        'Ver Detalhes',
+        style: TextStyle(color: theme.colorScheme.primary),
+      ),
+    );
+  }
+
+  Widget _botaoConflito(ThemeData theme) {
+    return ElevatedButton(
+      onPressed: onVerDetalhes,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFFEF2F2),
+        side: const BorderSide(color: Color(0xFFFECACA)),
+        elevation: 0,
+        minimumSize: const Size(double.infinity, 40),
+      ),
+      child: const Text(
+        'Ver Detalhes',
+        style: TextStyle(color: Color(0xFFDC2626)),
       ),
     );
   }
@@ -206,343 +556,6 @@ class _IndicadorConexao extends StatelessWidget {
   }
 }
 
-class _ListaColetas extends StatelessWidget {
-  const _ListaColetas();
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    return ListView(
-      padding: const EdgeInsets.only(
-        top: 16.0,
-        left: 16.0,
-        right: 16.0,
-        bottom: 96.0,
-      ),
-      children: <Widget>[
-        // 1. Nao sincronizado
-        _ColetaCard(
-          statusText: 'Não Sincronizado',
-          statusColor: const Color(0xFF475569),
-          statusBgColor: const Color(0xFFF1F5F9),
-          title: 'Sítio Arqueológico Pedra Branca',
-          location: 'Petrolina - PE',
-          date: '12/10/2023',
-          imageUrl:
-              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png', // Substitua pela imagem real
-          actionsRow: Row(
-            children: <Widget>[
-              Expanded(
-                flex: 2,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.edit_outlined,
-                    size: 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                  label: Text(
-                    'Editar',
-                    style: TextStyle(color: theme.colorScheme.primary),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                flex: 3,
-                child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.sync, size: 16, color: Colors.white),
-                  label: const Text(
-                    'Sincronizar Agora',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // 2. Pendente
-        _ColetaCard(
-          statusText: 'Pendente de Curadoria',
-          statusColor: const Color(0xFFA16207),
-          statusBgColor: const Color(0xFFFEF9C3),
-          title: 'Gruta do Eco',
-          location: 'São Raimundo Nonato - PI',
-          date: '08/10/2023',
-          imageUrl:
-              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
-          actionsRow: Row(
-            children: <Widget>[
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    context.go('/detalhes-coleta');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary.withValues(
-                      alpha: 0.1,
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Ver Detalhes',
-                    style: TextStyle(color: theme.colorScheme.primary),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.edit_outlined,
-                    size: 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                  label: Text(
-                    'Editar',
-                    style: TextStyle(color: theme.colorScheme.primary),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // 3. Aprovado
-        _ColetaCard(
-          statusText: 'Aprovado',
-          statusColor: const Color(0xFF15803D),
-          statusBgColor: const Color(0xFFDCFCE7),
-          title: 'Lapa do Sol',
-          location: 'Iraquara - BA',
-          date: '05/10/2023',
-          imageUrl:
-              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
-          actionsRow: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-              elevation: 0,
-              minimumSize: const Size(double.infinity, 40),
-            ),
-            child: Text(
-              'Ver Detalhes',
-              style: TextStyle(color: theme.colorScheme.primary),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // 4. Rejeitado
-        _ColetaCard(
-          statusText: 'Rejeitado',
-          statusColor: const Color(0xFFB91C1C),
-          statusBgColor: const Color(0xFFFEE2E2),
-          title: 'Toca do Boi',
-          location: 'Januária - MG',
-          date: '01/10/2023',
-          imageUrl:
-              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
-          actionsRow: ElevatedButton(
-            onPressed: () {
-              context.go('/motivo-rejeicao');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFEF2F2),
-              side: const BorderSide(color: Color(0xFFFECACA)),
-              elevation: 0,
-              minimumSize: const Size(double.infinity, 40),
-            ),
-            child: const Text(
-              'Ver Motivo da Rejeição',
-              style: TextStyle(color: Color(0xFFDC2626)),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ListaColetasAprovadas extends StatelessWidget {
-  const _ListaColetasAprovadas();
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    return ListView(
-      padding: const EdgeInsets.only(
-        top: 16.0,
-        left: 16.0,
-        right: 16.0,
-        bottom: 96.0,
-      ),
-      children: <Widget>[
-        // 3. Aprovado
-        _ColetaCard(
-          statusText: 'Aprovado',
-          statusColor: const Color(0xFF15803D),
-          statusBgColor: const Color(0xFFDCFCE7),
-          title: 'Lapa do Sol',
-          location: 'Iraquara - BA',
-          date: '05/10/2023',
-          imageUrl:
-              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
-          actionsRow: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-              elevation: 0,
-              minimumSize: const Size(double.infinity, 40),
-            ),
-            child: Text(
-              'Ver Detalhes',
-              style: TextStyle(color: theme.colorScheme.primary),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-}
-
-class _ListaColetasPendentes extends StatelessWidget {
-  const _ListaColetasPendentes();
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    return ListView(
-      padding: const EdgeInsets.only(
-        top: 16.0,
-        left: 16.0,
-        right: 16.0,
-        bottom: 96.0,
-      ),
-      children: <Widget>[
-        // Pendente
-        _ColetaCard(
-          statusText: 'Pendente de Curadoria',
-          statusColor: const Color(0xFFA16207),
-          statusBgColor: const Color(0xFFFEF9C3),
-          title: 'Gruta do Eco',
-          location: 'São Raimundo Nonato - PI',
-          date: '08/10/2023',
-          imageUrl:
-              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
-          actionsRow: Row(
-            children: <Widget>[
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary.withValues(
-                      alpha: 0.1,
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Ver Detalhes',
-                    style: TextStyle(color: theme.colorScheme.primary),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.edit_outlined,
-                    size: 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                  label: Text(
-                    'Editar',
-                    style: TextStyle(color: theme.colorScheme.primary),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-}
-
-class _ListaColetasRejeitadas extends StatelessWidget {
-  const _ListaColetasRejeitadas();
-
-  @override
-  Widget build(BuildContext context) {
-    // final ThemeData theme = Theme.of(context);
-
-    return ListView(
-      padding: const EdgeInsets.only(
-        top: 16.0,
-        left: 16.0,
-        right: 16.0,
-        bottom: 96.0,
-      ),
-      children: <Widget>[
-        // 4. Rejeitado
-        _ColetaCard(
-          statusText: 'Rejeitado',
-          statusColor: const Color(0xFFB91C1C),
-          statusBgColor: const Color(0xFFFEE2E2),
-          title: 'Toca do Boi',
-          location: 'Januária - MG',
-          date: '01/10/2023',
-          imageUrl:
-              'https://mfeeee.github.io/portfolio-react/assets/profile-pic-QMyQxUnT.png',
-          actionsRow: ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFEF2F2),
-              side: const BorderSide(color: Color(0xFFFECACA)),
-              elevation: 0,
-              minimumSize: const Size(double.infinity, 40),
-            ),
-            child: const Text(
-              'Ver Motivo da Rejeição',
-              style: TextStyle(color: Color(0xFFDC2626)),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-      ],
-    );
-  }
-}
-
 class _ColetaCard extends StatelessWidget {
   const _ColetaCard({
     required this.statusText,
@@ -551,8 +564,9 @@ class _ColetaCard extends StatelessWidget {
     required this.title,
     required this.location,
     required this.date,
-    required this.imageUrl,
     required this.actionsRow,
+    this.imageUrl,
+    this.onTap,
   });
 
   final String statusText;
@@ -561,14 +575,15 @@ class _ColetaCard extends StatelessWidget {
   final String title;
   final String location;
   final String date;
-  final String imageUrl;
+  final String? imageUrl;
   final Widget actionsRow;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return Container(
+    final card = Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -652,20 +667,55 @@ class _ColetaCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
-              ),
+              _ImagemColeta(imageUrl: imageUrl, theme: theme),
             ],
           ),
           const SizedBox(height: 16),
           actionsRow,
         ],
+      ),
+    );
+
+    if (onTap == null) return card;
+    return GestureDetector(onTap: onTap, child: card);
+  }
+}
+
+class _ImagemColeta extends StatelessWidget {
+  const _ImagemColeta({required this.imageUrl, required this.theme});
+
+  final String? imageUrl;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          imageUrl!,
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _placeholder(),
+        ),
+      );
+    }
+    return _placeholder();
+  }
+
+  Widget _placeholder() {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Icon(
+        Icons.image_outlined,
+        color: theme.colorScheme.primary.withValues(alpha: 0.4),
+        size: 32,
       ),
     );
   }

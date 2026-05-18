@@ -7,6 +7,9 @@ abstract class ColetaLocalDatasource {
   Future<List<ColetaModel>> getAll();
   Future<List<ColetaModel>> getPendentes();
   Future<ColetaModel?> getById(String uuid);
+  Future<int> contarTodas();
+  Future<int> contarPorStatus(StatusColeta status);
+  Future<List<ColetaModel>> getRecentes(int limite);
   Future<void> inserir(ColetaModel coleta);
   Future<void> atualizarStatus(
     String uuid,
@@ -48,6 +51,37 @@ class ColetaLocalDatasourceImpl implements ColetaLocalDatasource {
       _db.coletas,
     )..where((t) => t.uuid.equals(uuid))).getSingleOrNull();
     return row != null ? ColetaModel.fromRow(row) : null;
+  }
+
+  @override
+  Future<int> contarTodas() async {
+    final rows = await (_db.select(
+      _db.coletas,
+    )..where((t) => t.deletadoEm.isNull())).get();
+    return rows.length;
+  }
+
+  @override
+  Future<int> contarPorStatus(StatusColeta status) async {
+    final rows =
+        await (_db.select(_db.coletas)..where(
+              (t) =>
+                  t.statusSincronizacao.equalsValue(status) &
+                  t.deletadoEm.isNull(),
+            ))
+            .get();
+    return rows.length;
+  }
+
+  @override
+  Future<List<ColetaModel>> getRecentes(int limite) async {
+    final rows =
+        await (_db.select(_db.coletas)
+              ..where((t) => t.deletadoEm.isNull())
+              ..orderBy([(t) => OrderingTerm.desc(t.dataColeta)])
+              ..limit(limite))
+            .get();
+    return rows.map(ColetaModel.fromRow).toList();
   }
 
   @override

@@ -19,6 +19,17 @@ class ColetaRepositoryImpl implements ColetaRepository {
   Future<ColetaEntity?> getById(String uuid) => _localDatasource.getById(uuid);
 
   @override
+  Future<int> contarTodas() => _localDatasource.contarTodas();
+
+  @override
+  Future<int> contarPorStatus(StatusColeta status) =>
+      _localDatasource.contarPorStatus(status);
+
+  @override
+  Future<List<ColetaEntity>> getRecentes(int limite) =>
+      _localDatasource.getRecentes(limite);
+
+  @override
   Future<void> salvar(ColetaEntity coleta) {
     return _localDatasource.inserir(ColetaModel.fromEntity(coleta));
   }

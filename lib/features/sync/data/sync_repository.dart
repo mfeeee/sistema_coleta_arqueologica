@@ -106,6 +106,7 @@ class SyncRepository {
       coleta: coleta,
       bearerToken: bearerToken,
       dadosColetadosOverride: dadosFinais,
+      onTentativa: (t, max) => onProgresso?.call('Tentativa $t/$max…'),
     );
 
     switch (resultado.status) {

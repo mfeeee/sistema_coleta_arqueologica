@@ -20,6 +20,7 @@ class ColetaModel extends ColetaEntity {
     required super.versao,
     required super.updatedAt,
     required super.dadosColetados,
+    super.fotosUrls = const [],
     super.natureza,
     super.tipo,
     super.uf,
@@ -55,6 +56,7 @@ class ColetaModel extends ColetaEntity {
       versao: row.versao,
       updatedAt: row.updatedAt,
       dadosColetados: row.dadosColetados,
+      fotosUrls: row.fotosUrls,
       deletadoEm: row.deletadoEm,
     );
   }
@@ -75,6 +77,7 @@ class ColetaModel extends ColetaEntity {
       versao: entity.versao,
       updatedAt: entity.updatedAt,
       dadosColetados: entity.dadosColetados,
+      fotosUrls: entity.fotosUrls,
       deletadoEm: entity.deletadoEm,
     );
   }
@@ -112,6 +115,7 @@ class ColetaModel extends ColetaEntity {
       versao: json['versao'] as int? ?? 1,
       updatedAt: DateTime.parse(json['updated_at'] as String),
       dadosColetados: json['dados_coletados'] as Map<String, dynamic>? ?? {},
+      fotosUrls: (json['fotos_urls'] as List<dynamic>?)?.cast<String>() ?? [],
       deletadoEm: json['deletado_em'] != null
           ? DateTime.tryParse(json['deletado_em'] as String)
           : null,
@@ -134,6 +138,7 @@ class ColetaModel extends ColetaEntity {
       versao: Value(versao),
       updatedAt: Value(updatedAt),
       dadosColetados: dadosColetados,
+      fotosUrls: Value(fotosUrls),
       deletadoEm: Value(deletadoEm),
     );
   }

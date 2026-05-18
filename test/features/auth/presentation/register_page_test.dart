@@ -57,6 +57,12 @@ class _StubColetaRepository implements ColetaRepository {
   @override
   Future<ColetaEntity?> getById(String uuid) async => null;
   @override
+  Future<int> contarTodas() async => 0;
+  @override
+  Future<int> contarPorStatus(dynamic status) async => 0;
+  @override
+  Future<List<ColetaEntity>> getRecentes(int limite) async => [];
+  @override
   Future<void> salvar(ColetaEntity coleta) async {}
   @override
   Future<void> atualizarStatus(
@@ -93,6 +99,12 @@ class _StubColetaLocalDatasource implements ColetaLocalDatasource {
   Future<List<ColetaModel>> getPendentes() async => [];
   @override
   Future<ColetaModel?> getById(String uuid) async => null;
+  @override
+  Future<int> contarTodas() async => 0;
+  @override
+  Future<int> contarPorStatus(dynamic status) async => 0;
+  @override
+  Future<List<ColetaModel>> getRecentes(int limite) async => [];
   @override
   Future<void> inserir(ColetaModel coleta) async {}
   @override

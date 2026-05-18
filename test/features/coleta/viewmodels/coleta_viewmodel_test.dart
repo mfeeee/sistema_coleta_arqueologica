@@ -34,6 +34,13 @@ class _FakeColetaRepository implements ColetaRepository {
   @override
   Future<ColetaEntity?> getById(String uuid) async => null;
   @override
+  Future<int> contarTodas() async => _coletas.length;
+  @override
+  Future<int> contarPorStatus(dynamic status) async => 0;
+  @override
+  Future<List<ColetaEntity>> getRecentes(int limite) async =>
+      _coletas.take(limite).toList();
+  @override
   Future<void> salvar(ColetaEntity coleta) async {}
   @override
   Future<void> atualizarStatus(

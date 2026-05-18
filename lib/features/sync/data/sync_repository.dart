@@ -87,6 +87,13 @@ class SyncRepository {
             onProgresso?.call('Enviando foto $atual/$total…'),
       );
 
+      if (uploadResult.uploadedUrls.isNotEmpty) {
+        await _coletaDatasource.salvarFotosUrls(
+          coleta.id,
+          uploadResult.uploadedUrls,
+        );
+      }
+
       if (uploadResult.failedPaths.isNotEmpty) {
         log(
           'Fotos não enviadas para coleta ${coleta.id}: '

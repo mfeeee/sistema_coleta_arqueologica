@@ -160,6 +160,16 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   ).withConverter<Map<String, Object?>>($ColetasTable.$converterdadosColetados);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> fotosUrls =
+      GeneratedColumn<String>(
+        'fotos_urls',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      ).withConverter<List<String>>($ColetasTable.$converterfotosUrls);
   static const VerificationMeta _deletadoEmMeta = const VerificationMeta(
     'deletadoEm',
   );
@@ -187,6 +197,7 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
     versao,
     updatedAt,
     dadosColetados,
+    fotosUrls,
     deletadoEm,
   ];
   @override
@@ -345,6 +356,12 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
           data['${effectivePrefix}dados_coletados'],
         )!,
       ),
+      fotosUrls: $ColetasTable.$converterfotosUrls.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}fotos_urls'],
+        )!,
+      ),
       deletadoEm: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}deletado_em'],
@@ -363,6 +380,8 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
       const StringListConverter();
   static TypeConverter<Map<String, Object?>, String> $converterdadosColetados =
       const JsonMapConverter();
+  static TypeConverter<List<String>, String> $converterfotosUrls =
+      const StringListConverter();
 }
 
 class Coleta extends DataClass implements Insertable<Coleta> {
@@ -380,6 +399,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
   final int versao;
   final DateTime updatedAt;
   final Map<String, Object?> dadosColetados;
+  final List<String> fotosUrls;
   final DateTime? deletadoEm;
   const Coleta({
     required this.uuid,
@@ -396,6 +416,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     required this.versao,
     required this.updatedAt,
     required this.dadosColetados,
+    required this.fotosUrls,
     this.deletadoEm,
   });
   @override
@@ -433,6 +454,11 @@ class Coleta extends DataClass implements Insertable<Coleta> {
         $ColetasTable.$converterdadosColetados.toSql(dadosColetados),
       );
     }
+    {
+      map['fotos_urls'] = Variable<String>(
+        $ColetasTable.$converterfotosUrls.toSql(fotosUrls),
+      );
+    }
     if (!nullToAbsent || deletadoEm != null) {
       map['deletado_em'] = Variable<DateTime>(deletadoEm);
     }
@@ -457,6 +483,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       versao: Value(versao),
       updatedAt: Value(updatedAt),
       dadosColetados: Value(dadosColetados),
+      fotosUrls: Value(fotosUrls),
       deletadoEm: deletadoEm == null && nullToAbsent
           ? const Value.absent()
           : Value(deletadoEm),
@@ -487,6 +514,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       dadosColetados: serializer.fromJson<Map<String, Object?>>(
         json['dadosColetados'],
       ),
+      fotosUrls: serializer.fromJson<List<String>>(json['fotosUrls']),
       deletadoEm: serializer.fromJson<DateTime?>(json['deletadoEm']),
     );
   }
@@ -510,6 +538,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       'versao': serializer.toJson<int>(versao),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'dadosColetados': serializer.toJson<Map<String, Object?>>(dadosColetados),
+      'fotosUrls': serializer.toJson<List<String>>(fotosUrls),
       'deletadoEm': serializer.toJson<DateTime?>(deletadoEm),
     };
   }
@@ -529,6 +558,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     int? versao,
     DateTime? updatedAt,
     Map<String, Object?>? dadosColetados,
+    List<String>? fotosUrls,
     Value<DateTime?> deletadoEm = const Value.absent(),
   }) => Coleta(
     uuid: uuid ?? this.uuid,
@@ -545,6 +575,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     versao: versao ?? this.versao,
     updatedAt: updatedAt ?? this.updatedAt,
     dadosColetados: dadosColetados ?? this.dadosColetados,
+    fotosUrls: fotosUrls ?? this.fotosUrls,
     deletadoEm: deletadoEm.present ? deletadoEm.value : this.deletadoEm,
   );
   Coleta copyWithCompanion(ColetasCompanion data) {
@@ -569,6 +600,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       dadosColetados: data.dadosColetados.present
           ? data.dadosColetados.value
           : this.dadosColetados,
+      fotosUrls: data.fotosUrls.present ? data.fotosUrls.value : this.fotosUrls,
       deletadoEm: data.deletadoEm.present
           ? data.deletadoEm.value
           : this.deletadoEm,
@@ -592,6 +624,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
           ..write('versao: $versao, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('dadosColetados: $dadosColetados, ')
+          ..write('fotosUrls: $fotosUrls, ')
           ..write('deletadoEm: $deletadoEm')
           ..write(')'))
         .toString();
@@ -613,6 +646,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     versao,
     updatedAt,
     dadosColetados,
+    fotosUrls,
     deletadoEm,
   );
   @override
@@ -633,6 +667,7 @@ class Coleta extends DataClass implements Insertable<Coleta> {
           other.versao == this.versao &&
           other.updatedAt == this.updatedAt &&
           other.dadosColetados == this.dadosColetados &&
+          other.fotosUrls == this.fotosUrls &&
           other.deletadoEm == this.deletadoEm);
 }
 
@@ -651,6 +686,7 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
   final Value<int> versao;
   final Value<DateTime> updatedAt;
   final Value<Map<String, Object?>> dadosColetados;
+  final Value<List<String>> fotosUrls;
   final Value<DateTime?> deletadoEm;
   final Value<int> rowid;
   const ColetasCompanion({
@@ -668,6 +704,7 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     this.versao = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.dadosColetados = const Value.absent(),
+    this.fotosUrls = const Value.absent(),
     this.deletadoEm = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -686,6 +723,7 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     this.versao = const Value.absent(),
     this.updatedAt = const Value.absent(),
     required Map<String, Object?> dadosColetados,
+    this.fotosUrls = const Value.absent(),
     this.deletadoEm = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : uuid = Value(uuid),
@@ -706,6 +744,7 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     Expression<int>? versao,
     Expression<DateTime>? updatedAt,
     Expression<String>? dadosColetados,
+    Expression<String>? fotosUrls,
     Expression<DateTime>? deletadoEm,
     Expression<int>? rowid,
   }) {
@@ -725,6 +764,7 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
       if (versao != null) 'versao': versao,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (dadosColetados != null) 'dados_coletados': dadosColetados,
+      if (fotosUrls != null) 'fotos_urls': fotosUrls,
       if (deletadoEm != null) 'deletado_em': deletadoEm,
       if (rowid != null) 'rowid': rowid,
     });
@@ -745,6 +785,7 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     Value<int>? versao,
     Value<DateTime>? updatedAt,
     Value<Map<String, Object?>>? dadosColetados,
+    Value<List<String>>? fotosUrls,
     Value<DateTime?>? deletadoEm,
     Value<int>? rowid,
   }) {
@@ -763,6 +804,7 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
       versao: versao ?? this.versao,
       updatedAt: updatedAt ?? this.updatedAt,
       dadosColetados: dadosColetados ?? this.dadosColetados,
+      fotosUrls: fotosUrls ?? this.fotosUrls,
       deletadoEm: deletadoEm ?? this.deletadoEm,
       rowid: rowid ?? this.rowid,
     );
@@ -821,6 +863,11 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
         $ColetasTable.$converterdadosColetados.toSql(dadosColetados.value),
       );
     }
+    if (fotosUrls.present) {
+      map['fotos_urls'] = Variable<String>(
+        $ColetasTable.$converterfotosUrls.toSql(fotosUrls.value),
+      );
+    }
     if (deletadoEm.present) {
       map['deletado_em'] = Variable<DateTime>(deletadoEm.value);
     }
@@ -847,6 +894,7 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
           ..write('versao: $versao, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('dadosColetados: $dadosColetados, ')
+          ..write('fotosUrls: $fotosUrls, ')
           ..write('deletadoEm: $deletadoEm, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -4707,6 +4755,7 @@ typedef $$ColetasTableCreateCompanionBuilder =
       Value<int> versao,
       Value<DateTime> updatedAt,
       required Map<String, Object?> dadosColetados,
+      Value<List<String>> fotosUrls,
       Value<DateTime?> deletadoEm,
       Value<int> rowid,
     });
@@ -4726,6 +4775,7 @@ typedef $$ColetasTableUpdateCompanionBuilder =
       Value<int> versao,
       Value<DateTime> updatedAt,
       Value<Map<String, Object?>> dadosColetados,
+      Value<List<String>> fotosUrls,
       Value<DateTime?> deletadoEm,
       Value<int> rowid,
     });
@@ -4854,6 +4904,12 @@ class $$ColetasTableFilterComposer
   >
   get dadosColetados => $composableBuilder(
     column: $table.dadosColetados,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String>
+  get fotosUrls => $composableBuilder(
+    column: $table.fotosUrls,
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
@@ -4992,6 +5048,11 @@ class $$ColetasTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get fotosUrls => $composableBuilder(
+    column: $table.fotosUrls,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get deletadoEm => $composableBuilder(
     column: $table.deletadoEm,
     builder: (column) => ColumnOrderings(column),
@@ -5056,6 +5117,9 @@ class $$ColetasTableAnnotationComposer
     column: $table.dadosColetados,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get fotosUrls =>
+      $composableBuilder(column: $table.fotosUrls, builder: (column) => column);
 
   GeneratedColumn<DateTime> get deletadoEm => $composableBuilder(
     column: $table.deletadoEm,
@@ -5156,6 +5220,7 @@ class $$ColetasTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<Map<String, Object?>> dadosColetados =
                     const Value.absent(),
+                Value<List<String>> fotosUrls = const Value.absent(),
                 Value<DateTime?> deletadoEm = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ColetasCompanion(
@@ -5173,6 +5238,7 @@ class $$ColetasTableTableManager
                 versao: versao,
                 updatedAt: updatedAt,
                 dadosColetados: dadosColetados,
+                fotosUrls: fotosUrls,
                 deletadoEm: deletadoEm,
                 rowid: rowid,
               ),
@@ -5192,6 +5258,7 @@ class $$ColetasTableTableManager
                 Value<int> versao = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 required Map<String, Object?> dadosColetados,
+                Value<List<String>> fotosUrls = const Value.absent(),
                 Value<DateTime?> deletadoEm = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ColetasCompanion.insert(
@@ -5209,6 +5276,7 @@ class $$ColetasTableTableManager
                 versao: versao,
                 updatedAt: updatedAt,
                 dadosColetados: dadosColetados,
+                fotosUrls: fotosUrls,
                 deletadoEm: deletadoEm,
                 rowid: rowid,
               ),

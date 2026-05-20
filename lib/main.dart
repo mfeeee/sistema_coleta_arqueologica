@@ -8,6 +8,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqlite3/open.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:sistema_coleta_arqueologica/core/services/background_sync_service.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/log_capture.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
@@ -45,6 +47,7 @@ Future<void> main() async {
   );
 
   if (Platform.isAndroid) {
+    await Workmanager().initialize(callbackDispatcher);
     await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
     open.overrideFor(OperatingSystem.android, openCipherOnAndroid);
   }
@@ -95,6 +98,11 @@ Future<void> main() async {
       headers: {'Accept': 'application/json'},
     ),
   );
+
+  // Agenda sync em background se já há sessão ativa.
+  if ((await secureStorage.getJwt()) != null) {
+    await BackgroundSyncService.agendar();
+  }
 
   final router = createAppRouter(authNotifier);
 

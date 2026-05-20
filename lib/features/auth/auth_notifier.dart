@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import '../../core/services/auth_service.dart';
+import '../../core/services/background_sync_service.dart';
 
 enum AuthStatus { idle, loading, authenticated, unauthenticated, error }
 
@@ -65,6 +66,9 @@ class AuthNotifier extends ChangeNotifier {
         _pullService.sincronizarPull().catchError(
           (e) => log('Pull falhou silenciosamente: $e', name: 'AuthNotifier'),
         );
+        BackgroundSyncService.agendar().catchError(
+          (e) => log('Agendamento background falhou: $e', name: 'AuthNotifier'),
+        );
       case AuthFailure(:final message):
         _status = AuthStatus.error;
         _errorMessage = message;
@@ -101,6 +105,9 @@ class AuthNotifier extends ChangeNotifier {
         _userName = nomeRetornado;
         _userEmail = emailRetornado;
         _userClassificacao = classifRetornada;
+        BackgroundSyncService.agendar().catchError(
+          (e) => log('Agendamento background falhou: $e', name: 'AuthNotifier'),
+        );
       case AuthFailure(:final message):
         _status = AuthStatus.error;
         _errorMessage = message;
@@ -141,6 +148,9 @@ class AuthNotifier extends ChangeNotifier {
 
   Future<void> logout() async {
     await authService.logout();
+    BackgroundSyncService.cancelar().catchError(
+      (e) => log('Cancelamento background falhou: $e', name: 'AuthNotifier'),
+    );
     _status = AuthStatus.unauthenticated;
     _userName = null;
     _userId = null;

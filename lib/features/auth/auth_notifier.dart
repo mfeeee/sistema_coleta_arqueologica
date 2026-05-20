@@ -6,6 +6,8 @@ import '../../core/services/auth_service.dart';
 
 enum AuthStatus { idle, loading, authenticated, unauthenticated, error }
 
+enum RecuperacaoStatus { idle, carregando, sucesso, erro }
+
 class AuthNotifier extends ChangeNotifier {
   AuthNotifier({
     required this.authService,
@@ -25,6 +27,9 @@ class AuthNotifier extends ChangeNotifier {
   String? _userEmail;
   String? _userClassificacao;
 
+  RecuperacaoStatus _recuperacaoStatus = RecuperacaoStatus.idle;
+  String? _recuperacaoErro;
+
   AuthStatus get status => _status;
   String? get errorMessage => _errorMessage;
   String? get userName => _userName;
@@ -32,6 +37,11 @@ class AuthNotifier extends ChangeNotifier {
   String? get userEmail => _userEmail;
   String? get userClassificacao => _userClassificacao;
   bool get isLoading => _status == AuthStatus.loading;
+
+  RecuperacaoStatus get recuperacaoStatus => _recuperacaoStatus;
+  String? get recuperacaoErro => _recuperacaoErro;
+  bool get recuperacaoCarregando =>
+      _recuperacaoStatus == RecuperacaoStatus.carregando;
 
   Future<void> login(String email, String password) async {
     _status = AuthStatus.loading;
@@ -98,6 +108,30 @@ class AuthNotifier extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  Future<void> solicitarRecuperacaoSenha(String email) async {
+    _recuperacaoStatus = RecuperacaoStatus.carregando;
+    _recuperacaoErro = null;
+    notifyListeners();
+
+    final result = await authService.solicitarRecuperacaoSenha(email);
+
+    switch (result) {
+      case RecuperacaoSucesso():
+        _recuperacaoStatus = RecuperacaoStatus.sucesso;
+      case RecuperacaoFalha(:final message):
+        _recuperacaoStatus = RecuperacaoStatus.erro;
+        _recuperacaoErro = message;
+        log('Recuperação de senha falhou: $message', name: 'AuthNotifier');
+    }
+
+    notifyListeners();
+  }
+
+  void resetarEstadoRecuperacao() {
+    _recuperacaoStatus = RecuperacaoStatus.idle;
+    _recuperacaoErro = null;
   }
 
   Future<bool> podeDeslogar() async {

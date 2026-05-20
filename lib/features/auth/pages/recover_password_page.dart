@@ -1,8 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 
-class RecoverPasswordPage extends StatelessWidget {
+class RecoverPasswordPage extends StatefulWidget {
   const RecoverPasswordPage({super.key});
+
+  @override
+  State<RecoverPasswordPage> createState() => _RecoverPasswordPageState();
+}
+
+class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
+  late final AuthNotifier _notifier;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _notifier = AppScope.of(context).authNotifier;
+  }
+
+  @override
+  void dispose() {
+    _notifier.resetarEstadoRecuperacao();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,17 +43,82 @@ class RecoverPasswordPage extends StatelessWidget {
             ),
             child: Container(
               constraints: const BoxConstraints(maxWidth: 480),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  _HeaderArea(theme: theme),
-                  const _RecoverPasswordForm(),
-                ],
+              child: ListenableBuilder(
+                listenable: _notifier,
+                builder: (context, _) {
+                  if (_notifier.recuperacaoStatus ==
+                      RecuperacaoStatus.sucesso) {
+                    return _SucessoEnvio(theme: theme);
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _HeaderArea(theme: theme),
+                      _RecoverPasswordForm(notifier: _notifier),
+                    ],
+                  );
+                },
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SucessoEnvio extends StatelessWidget {
+  const _SucessoEnvio({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 40),
+        Icon(
+          Icons.mark_email_read_outlined,
+          size: 72,
+          color: theme.colorScheme.primary,
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'E-mail Enviado',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.displayLarge?.copyWith(
+            fontSize: 28,
+            letterSpacing: -0.7,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Verifique seu e-mail para redefinir a senha.',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyMedium?.copyWith(fontSize: 16),
+        ),
+        const SizedBox(height: 40),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 54),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/login');
+            }
+          },
+          child: const Text(
+            'Voltar ao Login',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -64,7 +150,7 @@ class _HeaderArea extends StatelessWidget {
         const SizedBox(height: 16),
         Text(
           'Recuperar Senha',
-          textAlign: TextAlign.justify,
+          textAlign: TextAlign.center,
           style: theme.textTheme.displayLarge?.copyWith(
             fontSize: 30,
             letterSpacing: -0.7,
@@ -82,14 +168,21 @@ class _HeaderArea extends StatelessWidget {
 }
 
 class _RecoverPasswordForm extends StatefulWidget {
-  const _RecoverPasswordForm();
+  const _RecoverPasswordForm({required this.notifier});
+
+  final AuthNotifier notifier;
 
   @override
   State<_RecoverPasswordForm> createState() => _RecoverPasswordFormState();
 }
 
 class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
+  static final _regexEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+
+  bool get _podeSubmeter => _regexEmail.hasMatch(_emailController.text.trim());
 
   @override
   void dispose() {
@@ -97,74 +190,103 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
     super.dispose();
   }
 
+  Future<void> _handleEnviar() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    await widget.notifier.solicitarRecuperacaoSenha(
+      _emailController.text.trim(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final notifier = widget.notifier;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 278.5, top: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          // E-mail
-          Text(
-            'E-mail',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.primary,
+      padding: const EdgeInsets.only(top: 24.0),
+      child: Form(
+        key: _formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'E-mail',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              hintText: 'exemplo@instituicao.br',
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              onChanged: (_) => setState(() {}),
+              decoration: const InputDecoration(
+                hintText: 'exemplo@instituicao.br',
+              ),
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Informe seu e-mail';
+                if (!_regexEmail.hasMatch(v.trim())) return 'E-mail inválido';
+                return null;
+              },
             ),
-          ),
-          const SizedBox(height: 16),
-
-          // --- Action Buttons ---
-          ElevatedButton(
-            onPressed: () {
-              // TODO: Lógica envio do link de recuperação
-            },
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Enviar Link',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(width: 8),
-              ],
-            ),
-          ),
-          const SizedBox(height: 48),
-
-          // --- Footer Info ---
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text('Lembrou sua senha?', style: theme.textTheme.bodyMedium),
-              TextButton(
-                onPressed: () {
-                  // Remove a rota atual do navegador para retornar ao login
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/login');
-                  }
-                },
-                child: const Text(
-                  'Fazer login',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+            if (notifier.recuperacaoStatus == RecuperacaoStatus.erro &&
+                notifier.recuperacaoErro != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                notifier.recuperacaoErro!,
+                style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
+                textAlign: TextAlign.center,
               ),
             ],
-          ),
-        ],
+            const SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 54),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: (notifier.recuperacaoCarregando || !_podeSubmeter)
+                  ? null
+                  : _handleEnviar,
+              child: notifier.recuperacaoCarregando
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text(
+                      'Enviar Link',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Lembrou sua senha?', style: theme.textTheme.bodyMedium),
+                TextButton(
+                  onPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/login');
+                    }
+                  },
+                  child: const Text(
+                    'Fazer login',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

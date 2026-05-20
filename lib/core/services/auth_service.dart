@@ -12,6 +12,19 @@ sealed class AuthResult {
   const AuthResult();
 }
 
+sealed class RecuperacaoResult {
+  const RecuperacaoResult();
+}
+
+final class RecuperacaoSucesso extends RecuperacaoResult {
+  const RecuperacaoSucesso();
+}
+
+final class RecuperacaoFalha extends RecuperacaoResult {
+  const RecuperacaoFalha(this.message);
+  final String message;
+}
+
 final class AuthSuccess extends AuthResult {
   AuthSuccess({
     required this.userName,
@@ -157,6 +170,40 @@ class AuthService {
     } catch (e) {
       log('Erro desconhecido no registro', error: e, name: 'AuthService');
       return const AuthFailure(TratadorDeErros.erroInesperado);
+    }
+  }
+
+  Future<RecuperacaoResult> solicitarRecuperacaoSenha(String email) async {
+    try {
+      final response = await httpClient
+          .post(
+            Uri.parse('$baseUrl/auth/forgot-password'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode({'email': email}),
+          )
+          .timeout(_kTimeoutRequisicao);
+
+      // 200 e 404 retornam sucesso por segurança (não revelar se e-mail existe)
+      if (response.statusCode == 200 || response.statusCode == 404) {
+        return const RecuperacaoSucesso();
+      }
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final msg = body['message'] as String?;
+      return RecuperacaoFalha(msg ?? TratadorDeErros.erroInesperado);
+    } on SocketException {
+      return const RecuperacaoFalha(TratadorDeErros.semConexao);
+    } on TimeoutException {
+      return const RecuperacaoFalha(TratadorDeErros.timeout);
+    } on http.ClientException catch (e) {
+      log('Erro HTTP na recuperação de senha', error: e, name: 'AuthService');
+      return const RecuperacaoFalha(TratadorDeErros.erroComunicacao);
+    } catch (e) {
+      log('Erro desconhecido na recuperação', error: e, name: 'AuthService');
+      return const RecuperacaoFalha(TratadorDeErros.erroInesperado);
     }
   }
 

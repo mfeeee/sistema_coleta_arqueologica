@@ -21,6 +21,7 @@ import 'core/theme/app_theme.dart';
 import 'core/database/app_database.dart';
 import 'core/services/secure_storage_service.dart';
 import 'core/services/auth_service.dart';
+import 'core/services/authenticated_http_client.dart';
 import 'package:http/http.dart' as http;
 import 'features/auth/auth_notifier.dart';
 import 'core/di/app_scope.dart';
@@ -70,8 +71,13 @@ Future<void> main() async {
     baseUrl: _baseUrl,
   );
 
+  final authenticatedClient = AuthenticatedHttpClient(
+    secureStorage: secureStorage,
+    authService: authService,
+  );
+
   final coletaApiDatasource = ColetaApiDatasourceImpl(
-    httpClient: plainHttpClient,
+    httpClient: authenticatedClient,
     secureStorage: secureStorage,
     baseUrl: _baseUrl,
   );
@@ -89,6 +95,8 @@ Future<void> main() async {
     coletaRepository: coletaRepository,
     pullService: pullService,
   );
+
+  authenticatedClient.onSessaoExpirada = authNotifier.sairPorSessaoExpirada;
 
   final dio = Dio(
     BaseOptions(

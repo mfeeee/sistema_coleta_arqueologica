@@ -19,6 +19,7 @@ class ColetaEntity {
   final DateTime updatedAt;
   final Map<String, dynamic> dadosColetados;
   final List<String> fotosUrls;
+  final bool sincronizado;
   final DateTime? deletadoEm;
 
   const ColetaEntity({
@@ -34,6 +35,7 @@ class ColetaEntity {
     required this.updatedAt,
     required this.dadosColetados,
     this.fotosUrls = const [],
+    this.sincronizado = false,
     this.natureza,
     this.tipo,
     this.uf,

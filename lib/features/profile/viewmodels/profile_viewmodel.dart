@@ -44,6 +44,7 @@ class ProfileViewModel {
   final ValueNotifier<bool> temPendentesSemSync = ValueNotifier(false);
   final ValueNotifier<int> totalColetas = ValueNotifier(0);
   final ValueNotifier<int> coletasPendentes = ValueNotifier(0);
+  final ValueNotifier<String?> erroAtual = ValueNotifier(null);
 
   String get nome => _authNotifier.userName ?? 'Usuário';
   String get email => _authNotifier.userEmail ?? '';
@@ -73,10 +74,21 @@ class ProfileViewModel {
   }
 
   Future<void> carregarEstatisticas() async {
-    totalColetas.value = await _coletaRepository.contarTodas();
-    coletasPendentes.value = await _coletaRepository.contarPorStatus(
-      StatusColeta.pendente,
-    );
+    erroAtual.value = null;
+    try {
+      totalColetas.value = await _coletaRepository.contarTodas();
+      coletasPendentes.value = await _coletaRepository.contarPorStatus(
+        StatusColeta.pendente,
+      );
+    } catch (e, st) {
+      log(
+        'Erro ao carregar estatísticas do perfil',
+        error: e,
+        stackTrace: st,
+        name: 'ProfileViewModel',
+      );
+      erroAtual.value = 'Não foi possível carregar as estatísticas.';
+    }
   }
 
   void _salvarAlertasSincronizacao() =>
@@ -185,5 +197,6 @@ class ProfileViewModel {
     temPendentesSemSync.dispose();
     totalColetas.dispose();
     coletasPendentes.dispose();
+    erroAtual.dispose();
   }
 }

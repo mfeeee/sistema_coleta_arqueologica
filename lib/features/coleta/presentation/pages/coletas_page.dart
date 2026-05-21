@@ -134,6 +134,9 @@ class _ColetasPageState extends State<ColetasPage> {
                         coletas: _viewModel.coletas.value,
                         carregando: carregando,
                         erro: erro,
+                        mensagemVazia:
+                            'Registre sua primeira coleta arqueológica.',
+                        exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
                       ),
@@ -141,6 +144,8 @@ class _ColetasPageState extends State<ColetasPage> {
                         coletas: _viewModel.pendentes,
                         carregando: carregando,
                         erro: erro,
+                        mensagemVazia: 'Nenhuma coleta pendente.',
+                        exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
                       ),
@@ -148,6 +153,8 @@ class _ColetasPageState extends State<ColetasPage> {
                         coletas: _viewModel.sincronizadas,
                         carregando: carregando,
                         erro: erro,
+                        mensagemVazia: 'Nenhuma coleta aprovada.',
+                        exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
                       ),
@@ -155,6 +162,8 @@ class _ColetasPageState extends State<ColetasPage> {
                         coletas: _viewModel.conflitos,
                         carregando: carregando,
                         erro: erro,
+                        mensagemVazia: 'Nenhuma coleta rejeitada.',
+                        exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
                       ),
@@ -260,6 +269,8 @@ class _ListaColetasFiltrada extends StatelessWidget {
     required this.coletas,
     required this.carregando,
     required this.erro,
+    required this.mensagemVazia,
+    required this.exibirBotaoNovaColeta,
     required this.onRefresh,
     required this.onVerDetalhes,
   });
@@ -267,6 +278,8 @@ class _ListaColetasFiltrada extends StatelessWidget {
   final List<ColetaEntity> coletas;
   final bool carregando;
   final String? erro;
+  final String mensagemVazia;
+  final bool exibirBotaoNovaColeta;
   final Future<void> Function() onRefresh;
   final void Function(String id) onVerDetalhes;
 
@@ -288,7 +301,12 @@ class _ListaColetasFiltrada extends StatelessWidget {
     if (coletas.isEmpty) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        children: const [_EstadoVazio()],
+        children: [
+          _EstadoVazio(
+            mensagem: mensagemVazia,
+            exibirBotaoNovaColeta: exibirBotaoNovaColeta,
+          ),
+        ],
       );
     }
     return ListView.builder(
@@ -307,7 +325,13 @@ class _ListaColetasFiltrada extends StatelessWidget {
 }
 
 class _EstadoVazio extends StatelessWidget {
-  const _EstadoVazio();
+  const _EstadoVazio({
+    required this.mensagem,
+    required this.exibirBotaoNovaColeta,
+  });
+
+  final String mensagem;
+  final bool exibirBotaoNovaColeta;
 
   @override
   Widget build(BuildContext context) {
@@ -325,32 +349,26 @@ class _EstadoVazio extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Nenhuma coleta encontrada',
+            mensagem,
             style: theme.textTheme.titleMedium?.copyWith(
               color: const Color(0xFF64748B),
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Registre sua primeira coleta arqueológica.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF94A3B8),
+          if (exibirBotaoNovaColeta) ...<Widget>[
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => context.push('/nova-coleta'),
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text(
+                'Nova Coleta',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => context.push('/nova-coleta'),
-            icon: const Icon(Icons.add, color: Colors.white),
-            label: const Text(
-              'Nova Coleta',
-              style: TextStyle(color: Colors.white),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-            ),
-          ),
+          ],
         ],
       ),
     );

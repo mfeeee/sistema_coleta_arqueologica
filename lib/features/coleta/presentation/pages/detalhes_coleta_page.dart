@@ -1,31 +1,117 @@
 import 'package:flutter/material.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 
-class DetalhesColetaPage extends StatelessWidget {
-  const DetalhesColetaPage({super.key});
+import '../viewmodels/detalhes_coleta_viewmodel.dart';
+
+class DetalhesColetaPage extends StatefulWidget {
+  const DetalhesColetaPage({super.key, required this.id});
+
+  final String? id;
+
+  @override
+  State<DetalhesColetaPage> createState() => _DetalhesColetaPageState();
+}
+
+class _DetalhesColetaPageState extends State<DetalhesColetaPage> {
+  DetalhesColetaViewModel? _viewModel;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      final id = widget.id;
+      if (id != null) {
+        final scope = AppScope.of(context);
+        _viewModel = DetalhesColetaViewModel(
+          coletaRepository: scope.coletaRepository,
+          id: id,
+        );
+        _viewModel!.carregar();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _viewModel?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final vm = _viewModel;
     return Scaffold(
-      appBar: AppBar(title: const Text('Detalhes da Coleta')),
-      body: const SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _StatusColeta(),
-              SizedBox(height: 16),
-              _SecaoIdentificacao(),
-              SizedBox(height: 16),
-              _SecaoDadosTecnicos(),
-              SizedBox(height: 16),
-              _SecaoDescricao(),
-              SizedBox(height: 16),
-              _SecaoGaleria(),
-              SizedBox(height: 24),
-            ],
-          ),
+      appBar: AppBar(
+        title: const Text('Detalhes da Coleta'),
+        leading: const BackButton(),
+      ),
+      body: vm == null
+          ? const _ErroColeta(mensagem: 'Coleta não encontrada.')
+          : ListenableBuilder(
+              listenable: Listenable.merge([vm.carregando, vm.erro, vm.coleta]),
+              builder: (context, _) {
+                if (vm.carregando.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (vm.erro.value != null) {
+                  return _ErroColeta(mensagem: vm.erro.value!);
+                }
+                final coleta = vm.coleta.value;
+                if (coleta == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        _StatusColeta(status: coleta.syncStatus),
+                        const SizedBox(height: 16),
+                        _SecaoIdentificacao(coleta: coleta),
+                        const SizedBox(height: 16),
+                        _SecaoDadosTecnicos(coleta: coleta),
+                        const SizedBox(height: 16),
+                        _SecaoDescricao(dadosColetados: coleta.dadosColetados),
+                        const SizedBox(height: 16),
+                        _SecaoGaleria(fotosUrls: coleta.fotosUrls),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+class _ErroColeta extends StatelessWidget {
+  const _ErroColeta({required this.mensagem});
+
+  final String mensagem;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
+            const SizedBox(height: 16),
+            Text(mensagem, textAlign: TextAlign.center),
+          ],
         ),
       ),
     );
@@ -33,11 +119,26 @@ class DetalhesColetaPage extends StatelessWidget {
 }
 
 class _StatusColeta extends StatelessWidget {
-  const _StatusColeta();
+  const _StatusColeta({required this.status});
+
+  final StatusColeta status;
+
+  Color _cor() => switch (status) {
+    StatusColeta.sincronizado => AppColors.success,
+    StatusColeta.conflito => AppColors.error,
+    StatusColeta.pendente => AppColors.warning,
+  };
+
+  String _label() => switch (status) {
+    StatusColeta.sincronizado => 'Sincronizado',
+    StatusColeta.conflito => 'Conflito',
+    StatusColeta.pendente => 'Pendente',
+  };
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final cor = _cor();
 
     return Container(
       width: double.infinity,
@@ -56,7 +157,7 @@ class _StatusColeta extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Text(
             'STATUS DA COLETA',
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -68,15 +169,15 @@ class _StatusColeta extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Icon(Icons.circle, color: AppColors.success, size: 9),
+            children: <Widget>[
+              Icon(Icons.circle, color: cor, size: 9),
               const SizedBox(width: 6),
               Text(
-                'Aprovado',
+                _label(),
                 style: theme.textTheme.bodyLarge?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.success,
+                  color: cor,
                 ),
               ),
             ],
@@ -88,15 +189,26 @@ class _StatusColeta extends StatelessWidget {
 }
 
 class _SecaoIdentificacao extends StatelessWidget {
-  const _SecaoIdentificacao();
+  const _SecaoIdentificacao({required this.coleta});
+
+  final ColetaEntity coleta;
+
+  String _formatarData(DateTime data) =>
+      '${data.day.toString().padLeft(2, '0')}/'
+      '${data.month.toString().padLeft(2, '0')}/'
+      '${data.year}';
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final localizacao =
+        coleta.uf ??
+        '${coleta.latitude.toStringAsFixed(5)}, '
+            '${coleta.longitude.toStringAsFixed(5)}';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         _TituloSecao(titulo: 'IDENTIFICAÇÃO', theme: theme),
         const SizedBox(height: 8),
         Container(
@@ -106,17 +218,25 @@ class _SecaoIdentificacao extends StatelessWidget {
             border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
-            children: [
-              _LinhaInfo(rotulo: 'Nome', valor: 'Lapa do Sol', theme: theme),
+            children: <Widget>[
+              _LinhaInfo(
+                rotulo: 'Nome',
+                valor: coleta.nomeBem.isNotEmpty ? coleta.nomeBem : '—',
+                theme: theme,
+              ),
               Divider(height: 1, color: theme.colorScheme.outlineVariant),
               _LinhaInfo(
                 rotulo: 'Localização',
-                valor: 'Iraquara - BA',
+                valor: localizacao,
                 theme: theme,
                 destaque: true,
               ),
               Divider(height: 1, color: theme.colorScheme.outlineVariant),
-              _LinhaInfo(rotulo: 'Data', valor: '05/10/2023', theme: theme),
+              _LinhaInfo(
+                rotulo: 'Data',
+                valor: _formatarData(coleta.dataColeta),
+                theme: theme,
+              ),
             ],
           ),
         ),
@@ -126,30 +246,36 @@ class _SecaoIdentificacao extends StatelessWidget {
 }
 
 class _SecaoDadosTecnicos extends StatelessWidget {
-  const _SecaoDadosTecnicos();
+  const _SecaoDadosTecnicos({required this.coleta});
+
+  final ColetaEntity coleta;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         _TituloSecao(titulo: 'DADOS TÉCNICOS', theme: theme),
         const SizedBox(height: 8),
         Row(
-          children: [
+          children: <Widget>[
             _CartaoDadoTecnico(
               rotulo: 'NATUREZA',
-              valor: 'Bem\nArqueológico',
+              valor: coleta.natureza?.label ?? '—',
               theme: theme,
             ),
             const SizedBox(width: 8),
-            _CartaoDadoTecnico(rotulo: 'TIPO', valor: 'Sítio', theme: theme),
+            _CartaoDadoTecnico(
+              rotulo: 'TIPO',
+              valor: coleta.tipo?.label ?? '—',
+              theme: theme,
+            ),
             const SizedBox(width: 8),
             _CartaoDadoTecnico(
-              rotulo: 'CONSERVAÇÃO',
-              valor: 'Excelente',
+              rotulo: 'ARTEFATOS',
+              valor: coleta.artefatos.length.toString(),
               theme: theme,
             ),
           ],
@@ -160,15 +286,21 @@ class _SecaoDadosTecnicos extends StatelessWidget {
 }
 
 class _SecaoDescricao extends StatelessWidget {
-  const _SecaoDescricao();
+  const _SecaoDescricao({required this.dadosColetados});
+
+  final Map<String, dynamic> dadosColetados;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final descricao = dadosColetados['descricao'] as String?;
+    final texto = (descricao != null && descricao.isNotEmpty)
+        ? descricao
+        : 'Sem descrição disponível.';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         _TituloSecao(titulo: 'DESCRIÇÃO', theme: theme),
         const SizedBox(height: 8),
         Container(
@@ -180,9 +312,7 @@ class _SecaoDescricao extends StatelessWidget {
             border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Text(
-            'Sítio com painéis de gravuras rupestres de grande porte, '
-            'associado a fontes de água. Apresenta excelente preservação '
-            'das camadas estratigráficas e vestígios líticos em superfície.',
+            texto,
             style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
           ),
         ),
@@ -192,20 +322,25 @@ class _SecaoDescricao extends StatelessWidget {
 }
 
 class _SecaoGaleria extends StatelessWidget {
-  const _SecaoGaleria();
+  const _SecaoGaleria({required this.fotosUrls});
+
+  final List<String> fotosUrls;
 
   static const int _fotosVisiveis = 4;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final count = fotosUrls.length;
+    final exibir = count.clamp(0, _fotosVisiveis);
+    final extras = count > _fotosVisiveis ? count - _fotosVisiveis + 1 : 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+          children: <Widget>[
             _TituloSecao(titulo: 'GALERIA DE MÍDIA', theme: theme),
             TextButton(
               onPressed: () {},
@@ -225,43 +360,63 @@ class _SecaoGaleria extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _fotosVisiveis,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemBuilder: (BuildContext context, int index) {
-            final bool isUltima = index == _fotosVisiveis - 1;
-
-            return ClipRRect(
+        if (fotosUrls.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(color: theme.colorScheme.surfaceContainerHighest),
-                  if (isUltima)
-                    const ColoredBox(
-                      color: Colors.black54,
-                      child: Center(
-                        child: Text(
-                          '+5',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+            ),
+            child: Text(
+              'Sem fotos disponíveis.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium,
+            ),
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: exibir,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemBuilder: (BuildContext context, int index) {
+              final isUltima = index == exibir - 1 && extras > 0;
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    Image.network(
+                      fotosUrls[index],
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                      ),
+                    ),
+                    if (isUltima)
+                      ColoredBox(
+                        color: Colors.black54,
+                        child: Center(
+                          child: Text(
+                            '+$extras',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                ],
-              ),
-            );
-          },
-        ),
+                  ],
+                ),
+              );
+            },
+          ),
       ],
     );
   }
@@ -305,17 +460,20 @@ class _LinhaInfo extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
+        children: <Widget>[
           Text(
             rotulo,
             style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
           ),
-          Text(
-            valor,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              fontSize: 14,
-              fontWeight: destaque ? FontWeight.w600 : FontWeight.w400,
-              color: destaque ? theme.colorScheme.primary : null,
+          Flexible(
+            child: Text(
+              valor,
+              textAlign: TextAlign.end,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontSize: 14,
+                fontWeight: destaque ? FontWeight.w600 : FontWeight.w400,
+                color: destaque ? theme.colorScheme.primary : null,
+              ),
             ),
           ),
         ],
@@ -347,7 +505,7 @@ class _CartaoDadoTecnico extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: <Widget>[
             Text(
               rotulo,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -359,6 +517,8 @@ class _CartaoDadoTecnico extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               valor,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyLarge?.copyWith(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

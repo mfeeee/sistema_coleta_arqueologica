@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
@@ -10,6 +12,8 @@ import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
 import '../../domain/entities/coleta_entity.dart';
 import 'package:uuid/uuid.dart';
+
+const _kChaveRascunho = 'rascunho_coleta';
 
 class ColetaFormResult {
   final ColetaEntity coleta;
@@ -120,6 +124,97 @@ class ColetaFormNotifier extends ChangeNotifier {
       nome.trim().isNotEmpty && natureza != null && tipo != null;
 
   bool get passo2Valido => _artefatos.isNotEmpty;
+
+  bool get temDadosRascunho =>
+      nome.isNotEmpty || natureza != null || _artefatos.isNotEmpty;
+
+  int get passoRestauracao {
+    if (passo1Valido && passo2Valido) return 2;
+    if (passo1Valido) return 1;
+    return 0;
+  }
+
+  // Rascunho
+  Map<String, dynamic> toMap() => {
+    'nome': nome,
+    'nomes_populares': nomesPopulares,
+    'natureza': natureza?.name,
+    'tipo': tipo?.name,
+    'artefatos': _artefatos.map((a) => a.name).toList(),
+    'meios_acesso': meiosAcesso,
+    'foto_paths': fotoPaths,
+  };
+
+  void _restaurarDeMap(Map<String, dynamic> map) {
+    nome = map['nome'] as String? ?? '';
+    nomesPopulares = (map['nomes_populares'] as List?)?.cast<String>() ?? [];
+
+    final naturezaStr = map['natureza'] as String?;
+    if (naturezaStr != null) {
+      try {
+        natureza = NaturezaBem.fromString(naturezaStr);
+      } catch (_) {
+        natureza = null;
+      }
+    }
+
+    final tipoStr = map['tipo'] as String?;
+    if (tipoStr != null) {
+      try {
+        tipo = TipoBem.fromString(tipoStr);
+      } catch (_) {
+        tipo = null;
+      }
+    }
+
+    _artefatos.clear();
+    for (final a in (map['artefatos'] as List?)?.cast<String>() ?? []) {
+      final artefato = ArtefatoBem.tryFromString(a);
+      if (artefato != null) _artefatos.add(artefato);
+    }
+
+    meiosAcesso = map['meios_acesso'] as String?;
+    // foto_paths: file paths são mantidos na serialização, mas File objects
+    // não são restaurados para evitar acesso a arquivos possivelmente ausentes.
+  }
+
+  void restaurarDePrefs(SharedPreferences prefs) {
+    final json = prefs.getString(_kChaveRascunho);
+    if (json == null) return;
+    try {
+      final map = jsonDecode(json) as Map<String, dynamic>;
+      _restaurarDeMap(map);
+      notifyListeners();
+      log('Rascunho restaurado', name: 'ColetaFormNotifier');
+    } catch (e, st) {
+      log(
+        'Erro ao restaurar rascunho',
+        error: e,
+        stackTrace: st,
+        name: 'ColetaFormNotifier',
+      );
+    }
+  }
+
+  Future<void> salvarRascunho(SharedPreferences prefs) async {
+    if (!temDadosRascunho) return;
+    try {
+      await prefs.setString(_kChaveRascunho, jsonEncode(toMap()));
+      log('Rascunho salvo', name: 'ColetaFormNotifier');
+    } catch (e, st) {
+      log(
+        'Erro ao salvar rascunho',
+        error: e,
+        stackTrace: st,
+        name: 'ColetaFormNotifier',
+      );
+    }
+  }
+
+  Future<void> descartarRascunho(SharedPreferences prefs) async {
+    await prefs.remove(_kChaveRascunho);
+    log('Rascunho descartado', name: 'ColetaFormNotifier');
+  }
 
   ColetaFormResult toResult({
     required double lat,

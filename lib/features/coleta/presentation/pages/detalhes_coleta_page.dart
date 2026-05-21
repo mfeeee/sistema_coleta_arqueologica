@@ -127,12 +127,14 @@ class _StatusColeta extends StatelessWidget {
     StatusColeta.sincronizado => AppColors.success,
     StatusColeta.conflito => AppColors.error,
     StatusColeta.pendente => AppColors.warning,
+    StatusColeta.rascunho => const Color(0xFF6B7280),
   };
 
   String _label() => switch (status) {
     StatusColeta.sincronizado => 'Sincronizado',
     StatusColeta.conflito => 'Conflito',
     StatusColeta.pendente => 'Pendente',
+    StatusColeta.rascunho => 'Rascunho',
   };
 
   @override

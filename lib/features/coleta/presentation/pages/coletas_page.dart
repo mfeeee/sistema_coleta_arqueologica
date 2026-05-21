@@ -15,14 +15,17 @@ class ColetasPage extends StatefulWidget {
 class _ColetasPageState extends State<ColetasPage> {
   late final ColetasViewModel _viewModel;
   bool _initialized = false;
+  bool _temRascunho = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
       _initialized = true;
-      _viewModel = ColetasViewModel(AppScope.of(context).coletaRepository);
+      final scope = AppScope.of(context);
+      _viewModel = ColetasViewModel(scope.coletaRepository);
       _viewModel.carregarColetas();
+      _temRascunho = scope.prefs.containsKey('rascunho_coleta');
     }
   }
 
@@ -33,6 +36,23 @@ class _ColetasPageState extends State<ColetasPage> {
   }
 
   void _verDetalhes(String id) => context.push('/detalhes-coleta', extra: id);
+
+  Future<void> _continuarRascunho() async {
+    await context.push('/nova-coleta');
+    if (mounted) {
+      setState(() {
+        _temRascunho = AppScope.of(
+          context,
+        ).prefs.containsKey('rascunho_coleta');
+      });
+      _viewModel.atualizar();
+    }
+  }
+
+  Future<void> _descartarRascunho() async {
+    await AppScope.of(context).prefs.remove('rascunho_coleta');
+    if (mounted) setState(() => _temRascunho = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,58 +110,146 @@ class _ColetasPageState extends State<ColetasPage> {
             ),
           ),
         ),
-        body: ListenableBuilder(
-          listenable: Listenable.merge([
-            _viewModel.coletas,
-            _viewModel.carregando,
-            _viewModel.erro,
-          ]),
-          builder: (context, _) {
-            final carregando = _viewModel.carregando.value;
-            final erro = _viewModel.erro.value;
+        body: Column(
+          children: <Widget>[
+            if (_temRascunho)
+              _BannerRascunho(
+                onContinuar: _continuarRascunho,
+                onDescartar: _descartarRascunho,
+              ),
+            Expanded(
+              child: ListenableBuilder(
+                listenable: Listenable.merge([
+                  _viewModel.coletas,
+                  _viewModel.carregando,
+                  _viewModel.erro,
+                ]),
+                builder: (context, _) {
+                  final carregando = _viewModel.carregando.value;
+                  final erro = _viewModel.erro.value;
 
-            return TabBarView(
-              children: <Widget>[
-                _ListaColetasFiltrada(
-                  coletas: _viewModel.coletas.value,
-                  carregando: carregando,
-                  erro: erro,
-                  onRefresh: _viewModel.atualizar,
-                  onVerDetalhes: _verDetalhes,
-                ),
-                _ListaColetasFiltrada(
-                  coletas: _viewModel.pendentes,
-                  carregando: carregando,
-                  erro: erro,
-                  onRefresh: _viewModel.atualizar,
-                  onVerDetalhes: _verDetalhes,
-                ),
-                _ListaColetasFiltrada(
-                  coletas: _viewModel.sincronizadas,
-                  carregando: carregando,
-                  erro: erro,
-                  onRefresh: _viewModel.atualizar,
-                  onVerDetalhes: _verDetalhes,
-                ),
-                _ListaColetasFiltrada(
-                  coletas: _viewModel.conflitos,
-                  carregando: carregando,
-                  erro: erro,
-                  onRefresh: _viewModel.atualizar,
-                  onVerDetalhes: _verDetalhes,
-                ),
-              ],
-            );
-          },
+                  return TabBarView(
+                    children: <Widget>[
+                      _ListaColetasFiltrada(
+                        coletas: _viewModel.coletas.value,
+                        carregando: carregando,
+                        erro: erro,
+                        onRefresh: _viewModel.atualizar,
+                        onVerDetalhes: _verDetalhes,
+                      ),
+                      _ListaColetasFiltrada(
+                        coletas: _viewModel.pendentes,
+                        carregando: carregando,
+                        erro: erro,
+                        onRefresh: _viewModel.atualizar,
+                        onVerDetalhes: _verDetalhes,
+                      ),
+                      _ListaColetasFiltrada(
+                        coletas: _viewModel.sincronizadas,
+                        carregando: carregando,
+                        erro: erro,
+                        onRefresh: _viewModel.atualizar,
+                        onVerDetalhes: _verDetalhes,
+                      ),
+                      _ListaColetasFiltrada(
+                        coletas: _viewModel.conflitos,
+                        carregando: carregando,
+                        erro: erro,
+                        onRefresh: _viewModel.atualizar,
+                        onVerDetalhes: _verDetalhes,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
             await context.push('/nova-coleta');
-            if (mounted) _viewModel.atualizar();
+            if (mounted) {
+              setState(() {
+                _temRascunho = AppScope.of(
+                  context,
+                ).prefs.containsKey('rascunho_coleta');
+              });
+              _viewModel.atualizar();
+            }
           },
           backgroundColor: theme.colorScheme.primary,
           child: const Icon(Icons.add, color: Colors.white),
         ),
+      ),
+    );
+  }
+}
+
+class _BannerRascunho extends StatelessWidget {
+  const _BannerRascunho({required this.onContinuar, required this.onDescartar});
+
+  final VoidCallback onContinuar;
+  final VoidCallback onDescartar;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      color: theme.colorScheme.primaryContainer,
+      child: Row(
+        children: <Widget>[
+          Icon(
+            Icons.edit_note_outlined,
+            color: theme.colorScheme.primary,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Você tem um rascunho salvo. Continuar?',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: onDescartar,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              'Descartar',
+              style: TextStyle(
+                color: theme.colorScheme.error,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: onContinuar,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              'Continuar',
+              style: TextStyle(
+                color: theme.colorScheme.primary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

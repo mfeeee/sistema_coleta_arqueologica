@@ -10,6 +10,7 @@ class ColetaWizardWidget extends StatefulWidget {
   final ColetaFormNotifier formNotifier;
   final VoidCallback onFinalizar;
   final VoidCallback onCancelar;
+  final int initialPage;
 
   const ColetaWizardWidget({
     super.key,
@@ -18,6 +19,7 @@ class ColetaWizardWidget extends StatefulWidget {
     required this.formNotifier,
     required this.onFinalizar,
     required this.onCancelar,
+    this.initialPage = 0,
   });
 
   @override
@@ -25,10 +27,16 @@ class ColetaWizardWidget extends StatefulWidget {
 }
 
 class _ColetaWizardWidgetState extends State<ColetaWizardWidget> {
-  final PageController _pageController = PageController(initialPage: 0);
+  late final PageController _pageController;
 
   final GlobalKey<FormState> _formKeyPasso1 = GlobalKey<FormState>();
   final GlobalKey<FormState> _formKeyPasso3 = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: widget.initialPage);
+  }
 
   void _irParaPagina(int index) {
     FocusScope.of(context).unfocus();

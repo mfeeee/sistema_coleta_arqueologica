@@ -265,7 +265,7 @@ class _SyncProgressCard extends StatelessWidget {
                     ),
                   ),
                   FractionallySizedBox(
-                    widthFactor: 0.65,
+                    widthFactor: value,
                     child: Container(
                       height: 12,
                       decoration: BoxDecoration(

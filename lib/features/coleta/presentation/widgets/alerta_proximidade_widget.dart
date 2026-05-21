@@ -288,7 +288,7 @@ class _BotoesAcao extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          onPressed: () => context.go('/detalhes-coleta'),
+          onPressed: () => context.push('/detalhes-coleta', extra: sitioId),
           icon: const Icon(Icons.open_in_new, size: 18),
           label: const Text(
             'Ver Detalhes do Sítio',

@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
+import 'package:sistema_coleta_arqueologica/core/utils/tratador_de_erros.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import '../../core/services/auth_service.dart';
@@ -157,6 +158,20 @@ class AuthNotifier extends ChangeNotifier {
     _userEmail = null;
     _userClassificacao = null;
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  Future<void> sairPorSessaoExpirada() async {
+    await authService.logout();
+    BackgroundSyncService.cancelar().catchError(
+      (e) => log('Cancelamento background falhou: $e', name: 'AuthNotifier'),
+    );
+    _status = AuthStatus.unauthenticated;
+    _userName = null;
+    _userId = null;
+    _userEmail = null;
+    _userClassificacao = null;
+    _errorMessage = TratadorDeErros.sessaoExpirada;
     notifyListeners();
   }
 }

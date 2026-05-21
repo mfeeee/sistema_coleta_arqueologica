@@ -28,6 +28,7 @@ class AuthNotifier extends ChangeNotifier {
   String? _userId;
   String? _userEmail;
   String? _userClassificacao;
+  String? _avisoSistema;
 
   RecuperacaoStatus _recuperacaoStatus = RecuperacaoStatus.idle;
   String? _recuperacaoErro;
@@ -38,12 +39,17 @@ class AuthNotifier extends ChangeNotifier {
   String? get userId => _userId;
   String? get userEmail => _userEmail;
   String? get userClassificacao => _userClassificacao;
+  String? get avisoSistema => _avisoSistema;
   bool get isLoading => _status == AuthStatus.loading;
 
   RecuperacaoStatus get recuperacaoStatus => _recuperacaoStatus;
   String? get recuperacaoErro => _recuperacaoErro;
   bool get recuperacaoCarregando =>
       _recuperacaoStatus == RecuperacaoStatus.carregando;
+
+  void limparAviso() {
+    _avisoSistema = null;
+  }
 
   Future<void> login(String email, String password) async {
     _status = AuthStatus.loading;
@@ -64,11 +70,28 @@ class AuthNotifier extends ChangeNotifier {
         _userId = idRetornado;
         _userEmail = emailRetornado;
         _userClassificacao = classifRetornada;
-        _pullService.sincronizarPull().catchError(
-          (e) => log('Pull falhou silenciosamente: $e', name: 'AuthNotifier'),
+        _pullService.sincronizarPull().then(
+          (_) {},
+          onError: (Object e, StackTrace st) {
+            log(
+              'Pull pós-login falhou',
+              error: e,
+              stackTrace: st,
+              name: 'AuthNotifier',
+            );
+            _avisoSistema =
+                'Dados recentes não carregados. Verifique sua conexão.';
+            notifyListeners();
+          },
         );
-        BackgroundSyncService.agendar().catchError(
-          (e) => log('Agendamento background falhou: $e', name: 'AuthNotifier'),
+        BackgroundSyncService.agendar().then(
+          (_) {},
+          onError: (Object e, StackTrace st) => log(
+            'Agendamento background falhou',
+            error: e,
+            stackTrace: st,
+            name: 'AuthNotifier',
+          ),
         );
       case AuthFailure(:final message):
         _status = AuthStatus.error;
@@ -106,8 +129,14 @@ class AuthNotifier extends ChangeNotifier {
         _userName = nomeRetornado;
         _userEmail = emailRetornado;
         _userClassificacao = classifRetornada;
-        BackgroundSyncService.agendar().catchError(
-          (e) => log('Agendamento background falhou: $e', name: 'AuthNotifier'),
+        BackgroundSyncService.agendar().then(
+          (_) {},
+          onError: (Object e, StackTrace st) => log(
+            'Agendamento background falhou',
+            error: e,
+            stackTrace: st,
+            name: 'AuthNotifier',
+          ),
         );
       case AuthFailure(:final message):
         _status = AuthStatus.error;
@@ -149,8 +178,14 @@ class AuthNotifier extends ChangeNotifier {
 
   Future<void> logout() async {
     await authService.logout();
-    BackgroundSyncService.cancelar().catchError(
-      (e) => log('Cancelamento background falhou: $e', name: 'AuthNotifier'),
+    BackgroundSyncService.cancelar().then(
+      (_) {},
+      onError: (Object e, StackTrace st) => log(
+        'Cancelamento background falhou',
+        error: e,
+        stackTrace: st,
+        name: 'AuthNotifier',
+      ),
     );
     _status = AuthStatus.unauthenticated;
     _userName = null;
@@ -158,13 +193,20 @@ class AuthNotifier extends ChangeNotifier {
     _userEmail = null;
     _userClassificacao = null;
     _errorMessage = null;
+    _avisoSistema = null;
     notifyListeners();
   }
 
   Future<void> sairPorSessaoExpirada() async {
     await authService.logout();
-    BackgroundSyncService.cancelar().catchError(
-      (e) => log('Cancelamento background falhou: $e', name: 'AuthNotifier'),
+    BackgroundSyncService.cancelar().then(
+      (_) {},
+      onError: (Object e, StackTrace st) => log(
+        'Cancelamento background falhou',
+        error: e,
+        stackTrace: st,
+        name: 'AuthNotifier',
+      ),
     );
     _status = AuthStatus.unauthenticated;
     _userName = null;
@@ -172,6 +214,7 @@ class AuthNotifier extends ChangeNotifier {
     _userEmail = null;
     _userClassificacao = null;
     _errorMessage = TratadorDeErros.sessaoExpirada;
+    _avisoSistema = null;
     notifyListeners();
   }
 }

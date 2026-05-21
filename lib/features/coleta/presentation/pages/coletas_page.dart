@@ -441,6 +441,11 @@ class _ColetaItem extends StatelessWidget {
       const Color(0xFFB91C1C),
       const Color(0xFFFEE2E2),
     ),
+    StatusColeta.rascunho => (
+      'Rascunho',
+      const Color(0xFF6B7280),
+      const Color(0xFFF3F4F6),
+    ),
   };
 
   String _formatarData(DateTime data) {
@@ -463,6 +468,7 @@ class _AcoesColeta extends StatelessWidget {
       StatusColeta.pendente => _acoesPendente(theme),
       StatusColeta.sincronizado => _botaoVerDetalhes(theme),
       StatusColeta.conflito => _botaoConflito(theme),
+      StatusColeta.rascunho => _botaoVerDetalhes(theme),
     };
   }
 

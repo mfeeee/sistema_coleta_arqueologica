@@ -90,14 +90,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
           IconButton(
             icon: const Icon(Icons.save_outlined),
             tooltip: 'Salvar rascunho',
-            onPressed: () async {
-              final messenger = ScaffoldMessenger.of(context);
-              await _formNotifier.salvarRascunho(_prefs);
-              if (!mounted) return;
-              messenger.showSnackBar(
-                const SnackBar(content: Text('Rascunho salvo.')),
-              );
-            },
+            onPressed: _saving ? null : _salvarRascunho,
           ),
           const SizedBox(width: 8),
         ],
@@ -181,6 +174,33 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
         onSecundario: _viewModel.tentarNovamente,
       ),
     };
+  }
+
+  Future<void> _salvarRascunho() async {
+    if (!_formNotifier.temDadosRascunho) {
+      Navigator.pop(context);
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.of(context);
+    final scope = AppScope.of(context);
+    final coord = _viewModel.coordenadaAtual;
+
+    await _formNotifier.salvarRascunho(_prefs);
+
+    final rascunho = _formNotifier.toRascunho(
+      lat: coord?.latitude ?? 0.0,
+      lng: coord?.longitude ?? 0.0,
+      usuarioId: scope.authNotifier.userId ?? '',
+    );
+    await scope.coletaRepository.salvar(rascunho);
+    _salvouComSucesso = true;
+
+    if (!mounted) return;
+    messenger.showSnackBar(
+      const SnackBar(content: Text('Rascunho salvo com sucesso.')),
+    );
+    Navigator.pop(context);
   }
 
   Future<void> _salvarColeta() async {

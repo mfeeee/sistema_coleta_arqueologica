@@ -247,14 +247,16 @@ class AuthService {
     try {
       final token = await secureStorage.getJwt();
       if (token != null) {
-        await httpClient.post(
-          Uri.parse('$baseUrl/auth/logout'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        );
+        await httpClient
+            .post(
+              Uri.parse('$baseUrl/auth/logout'),
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Bearer $token',
+              },
+            )
+            .timeout(_kTimeoutRequisicao);
       }
     } catch (e) {
       log('Falha ao chamar /auth/logout', error: e, name: 'AuthService');

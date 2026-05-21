@@ -3,7 +3,8 @@ import 'package:drift/drift.dart';
 enum StatusColeta {
   pendente,
   sincronizado,
-  conflito;
+  conflito,
+  rascunho;
 
   static StatusColeta fromString(String value) => StatusColeta.values
       .firstWhere((e) => e.name == value, orElse: () => StatusColeta.pendente);

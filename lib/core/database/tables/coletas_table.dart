@@ -66,6 +66,8 @@ class Coletas extends Table {
       .map(const StringListConverter())
       .withDefault(const Constant('[]'))();
 
+  BoolColumn get sincronizado => boolean().clientDefault(() => false)();
+
   DateTimeColumn get deletadoEm => dateTime().named('deletado_em').nullable()();
 
   @override

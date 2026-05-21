@@ -15,6 +15,8 @@ class AuthenticatedHttpClient extends http.BaseClient {
   final AuthService authService;
   final http.Client _inner;
 
+  Future<void> Function()? onSessaoExpirada;
+
   Completer<bool>? _refreshCompleter;
 
   @override
@@ -27,7 +29,7 @@ class AuthenticatedHttpClient extends http.BaseClient {
 
     final response = await _inner.send(request);
 
-    if (response.statusCode == 401) return response;
+    if (response.statusCode != 401) return response;
 
     log('JWT expirado, tentando refresh...', name: 'AuthenticatedHttpClient');
 
@@ -35,6 +37,7 @@ class AuthenticatedHttpClient extends http.BaseClient {
 
     if (!refreshed) {
       log('Refresh falhou. Sessão encerrada.', name: 'AuthenticatedHttpClient');
+      await onSessaoExpirada?.call();
       return response;
     }
 
@@ -54,7 +57,7 @@ class AuthenticatedHttpClient extends http.BaseClient {
 
     _refreshCompleter = Completer<bool>();
     try {
-      final result = await authService.refreshToken();
+      final result = await authService.renovarToken();
       _refreshCompleter!.complete(result);
       return result;
     } catch (e) {

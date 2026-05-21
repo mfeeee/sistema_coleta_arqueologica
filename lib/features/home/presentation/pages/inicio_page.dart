@@ -445,7 +445,10 @@ class _RecentActivitiesSection extends StatelessWidget {
                           ? coletas[i].nomeBem
                           : 'Coleta sem título',
                       subtitle: _formatarData(coletas[i].dataColeta),
-                      onTap: () => context.go('/detalhes-coleta'),
+                      onTap: () => context.push(
+                        '/detalhes-coleta',
+                        extra: coletas[i].id,
+                      ),
                     ),
                   ],
                 ],

@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coleta_form_notifier.dart';
 import '../../../../core/di/app_scope.dart';
@@ -20,8 +22,10 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
   late final ColetaViewModel _viewModel;
   late final ColetaFormNotifier _formNotifier;
   late final ConectividadeService _conectividadeService;
+  late final SharedPreferences _prefs;
   bool _initialized = false;
   bool _saving = false;
+  bool _salvouComSucesso = false;
 
   @override
   void didChangeDependencies() {
@@ -30,10 +34,13 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     _initialized = true;
 
     final scope = AppScope.of(context);
+    _prefs = scope.prefs;
+
     final proximidadeService = ProximidadeService(scope.coletaRepository);
     final geolocatorHelper = GeolocatorHelper();
 
     _formNotifier = ColetaFormNotifier(mediaService: scope.mediaService);
+    _formNotifier.restaurarDePrefs(_prefs);
     _conectividadeService = scope.conectividadeService;
 
     _viewModel = ColetaViewModel(
@@ -45,6 +52,17 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
 
   @override
   void dispose() {
+    if (!_salvouComSucesso && _initialized && _formNotifier.temDadosRascunho) {
+      try {
+        _prefs.setString('rascunho_coleta', jsonEncode(_formNotifier.toMap()));
+      } catch (e) {
+        log(
+          'Erro ao salvar rascunho ao fechar',
+          error: e,
+          name: 'NovaColetaPage',
+        );
+      }
+    }
     _viewModel.dispose();
     _formNotifier.dispose();
     super.dispose();
@@ -71,8 +89,14 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.save_outlined),
-            onPressed: () {
-              // TODO: Salvar rascunho
+            tooltip: 'Salvar rascunho',
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              await _formNotifier.salvarRascunho(_prefs);
+              if (!mounted) return;
+              messenger.showSnackBar(
+                const SnackBar(content: Text('Rascunho salvo.')),
+              );
             },
           ),
           const SizedBox(width: 8),
@@ -122,6 +146,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
         latitude: _viewModel.coordenadaAtual?.latitude ?? 0.0,
         longitude: _viewModel.coordenadaAtual?.longitude ?? 0.0,
         formNotifier: _formNotifier,
+        initialPage: _formNotifier.passoRestauracao,
         onCancelar: () => Navigator.pop(context),
         onFinalizar: _saving ? () {} : () => _salvarColeta(),
       ),
@@ -189,6 +214,8 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
 
       await scope.coletaRepository.salvar(resultado.coleta);
       await scope.bemMaterialRepository.salvar(resultado.bemMaterial);
+      await _formNotifier.descartarRascunho(_prefs);
+      _salvouComSucesso = true;
 
       if (!mounted) return;
 

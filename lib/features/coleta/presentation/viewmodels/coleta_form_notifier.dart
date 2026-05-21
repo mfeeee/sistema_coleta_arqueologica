@@ -216,6 +216,33 @@ class ColetaFormNotifier extends ChangeNotifier {
     log('Rascunho descartado', name: 'ColetaFormNotifier');
   }
 
+  ColetaEntity toRascunho({
+    required double lat,
+    required double lng,
+    required String usuarioId,
+  }) {
+    final agora = DateTime.now();
+    return ColetaEntity(
+      id: const Uuid().v4(),
+      usuarioId: usuarioId,
+      dataColeta: agora,
+      syncStatus: StatusColeta.rascunho,
+      nomeBem: nome.trim().isEmpty ? 'Rascunho' : nome.trim(),
+      natureza: natureza,
+      tipo: tipo,
+      artefatos: _artefatos.toList(),
+      latitude: lat,
+      longitude: lng,
+      versao: 1,
+      updatedAt: agora,
+      dadosColetados: {
+        'nomes_populares': nomesPopulares,
+        'meios_acesso': meiosAcesso,
+        'foto_paths': fotoPaths,
+      },
+    );
+  }
+
   ColetaFormResult toResult({
     required double lat,
     required double lng,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -72,15 +73,16 @@ class ColetaViewModel {
           'GPS desativado. '
           'Ative a localização nas configurações do dispositivo e tente novamente.';
       stepNotifier.value = ColetaStep.gpsDesativado;
-    } on TimeoutException {
+    } on TimeoutException catch (e) {
+      log('Timeout ao obter localização', error: e);
       errorMessage.value = TratadorDeErros.timeout;
       stepNotifier.value = ColetaStep.error;
     } on PlatformException catch (e) {
-      errorMessage.value =
-          'Não foi possível obter a localização (${e.code}). '
-          'Verifique se o GPS está ativo e tente novamente.';
+      log('Falha de plataforma ao obter localização', error: e);
+      errorMessage.value = TratadorDeErros.erroLocalizacao;
       stepNotifier.value = ColetaStep.error;
     } catch (e) {
+      log('Erro inesperado ao mapear região', error: e);
       errorMessage.value = TratadorDeErros.deExcecao(e);
       stepNotifier.value = ColetaStep.error;
     }

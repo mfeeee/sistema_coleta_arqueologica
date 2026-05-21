@@ -163,7 +163,6 @@ class _RegisterFormState extends State<_RegisterForm> {
           );
           return Form(
             key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[

@@ -127,7 +127,6 @@ class _LoginFormState extends State<_LoginForm> {
           );
           return Form(
             key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[

@@ -12,6 +12,7 @@ abstract final class TratadorDeErros {
   static const erroComunicacao = 'Falha na comunicação com o servidor.';
   static const erroInesperado = 'Ocorreu um erro inesperado. Tente novamente.';
   static const contaDesativada = 'Conta desativada. Contate o administrador.';
+  static const sessaoExpirada = 'Sessão expirada. Faça login novamente.';
 
   static String deExcecao(Object erro) {
     if (erro is SocketException) return semConexao;

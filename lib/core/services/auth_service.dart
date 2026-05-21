@@ -207,12 +207,40 @@ class AuthService {
     }
   }
 
-  Future<bool> refreshToken() async {
-    log(
-      'Sanctum não suporta refresh. Forçando novo login.',
-      name: 'AuthService',
-    );
-    return false;
+  Future<bool> renovarToken() async {
+    try {
+      final token = await secureStorage.getJwt();
+      if (token == null) return false;
+
+      final response = await httpClient
+          .post(
+            Uri.parse('$baseUrl/auth/refresh'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(_kTimeoutRequisicao);
+
+      if (response.statusCode != 200) {
+        log(
+          'Falha ao renovar token: ${response.statusCode}',
+          name: 'AuthService',
+        );
+        return false;
+      }
+
+      final body = jsonDecode(response.body) as Map<String, dynamic>;
+      final novoToken = body['token'] as String?;
+      if (novoToken == null) return false;
+
+      await secureStorage.saveJwt(novoToken);
+      return true;
+    } catch (e) {
+      log('Erro ao renovar token', error: e, name: 'AuthService');
+      return false;
+    }
   }
 
   Future<void> logout() async {

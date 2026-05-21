@@ -34,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -42,6 +42,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await customStatement(
           "ALTER TABLE coletas ADD COLUMN fotos_urls TEXT NOT NULL DEFAULT '[]'",
+        );
+      }
+      if (from < 3) {
+        await customStatement(
+          'ALTER TABLE coletas ADD COLUMN sincronizado INTEGER NOT NULL DEFAULT 0',
         );
       }
     },

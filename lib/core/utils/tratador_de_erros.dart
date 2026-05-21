@@ -11,6 +11,8 @@ abstract final class TratadorDeErros {
   static const respostaInvalida = 'Resposta inválida do servidor.';
   static const erroComunicacao = 'Falha na comunicação com o servidor.';
   static const erroInesperado = 'Ocorreu um erro inesperado. Tente novamente.';
+  static const erroLocalizacao =
+      'Não foi possível obter a localização. Tente novamente.';
   static const contaDesativada = 'Conta desativada. Contate o administrador.';
   static const sessaoExpirada = 'Sessão expirada. Faça login novamente.';
 

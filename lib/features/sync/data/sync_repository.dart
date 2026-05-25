@@ -117,12 +117,11 @@ class SyncRepository {
     );
 
     switch (resultado.status) {
+      // Sync ≠ aprovação: marcarEnviada avança o status para sincronizado,
+      // indicando que os dados foram transmitidos. O servidor pode sobrescrever
+      // esse status posteriormente via pull ou webhook (ex.: conflito).
       case SyncResultStatus.sucesso:
-        await _coletaDatasource.atualizarStatus(
-          coleta.id,
-          StatusColeta.sincronizado,
-          coleta.versao + 1,
-        );
+        await _coletaDatasource.marcarEnviada(coleta.id);
 
       case SyncResultStatus.conflito:
         await _coletaDatasource.atualizarStatus(

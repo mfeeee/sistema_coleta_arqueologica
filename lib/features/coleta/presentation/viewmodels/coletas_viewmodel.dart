@@ -18,13 +18,23 @@ class ColetasViewModel {
       .where((c) => c.syncStatus == StatusColeta.pendente)
       .toList();
 
-  List<ColetaEntity> get enviados => coletas.value
+  List<ColetaEntity> get sincronizadas => coletas.value
       .where((c) => c.syncStatus == StatusColeta.sincronizado)
       .toList();
 
   List<ColetaEntity> get conflitos => coletas.value
       .where((c) => c.syncStatus == StatusColeta.conflito)
       .toList();
+
+  int get totalColetas => coletas.value.length;
+
+  int get coletasSincronizadas => sincronizadas.length;
+
+  double get progressoSync =>
+      totalColetas == 0 ? 0.0 : coletasSincronizadas / totalColetas;
+
+  bool get todasSincronizadas =>
+      totalColetas > 0 && coletasSincronizadas == totalColetas;
 
   Future<void> carregarColetas() async {
     carregando.value = true;

@@ -3,6 +3,8 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dar
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 
+// Invariante: syncStatus é a única fonte de verdade para o estado de
+// sincronização. Não existe campo booleano `sincronizado` paralelo.
 class ColetaEntity {
   final String id;
   final String usuarioId;
@@ -19,7 +21,6 @@ class ColetaEntity {
   final DateTime updatedAt;
   final Map<String, dynamic> dadosColetados;
   final List<String> fotosUrls;
-  final bool sincronizado;
   final DateTime? deletadoEm;
 
   const ColetaEntity({
@@ -35,7 +36,6 @@ class ColetaEntity {
     required this.updatedAt,
     required this.dadosColetados,
     this.fotosUrls = const [],
-    this.sincronizado = false,
     this.natureza,
     this.tipo,
     this.uf,

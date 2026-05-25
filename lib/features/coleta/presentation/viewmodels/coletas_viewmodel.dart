@@ -18,7 +18,7 @@ class ColetasViewModel {
       .where((c) => c.syncStatus == StatusColeta.pendente)
       .toList();
 
-  List<ColetaEntity> get sincronizadas => coletas.value
+  List<ColetaEntity> get enviados => coletas.value
       .where((c) => c.syncStatus == StatusColeta.sincronizado)
       .toList();
 

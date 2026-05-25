@@ -93,8 +93,8 @@ void main() {
     });
   });
 
-  group('ColetasViewModel — getters usam apenas syncStatus', () {
-    test('enviados retorna coletas com syncStatus sincronizado', () {
+  group('ColetasViewModel — getters de progresso usam apenas syncStatus', () {
+    test('sincronizadas retorna coletas com syncStatus sincronizado', () {
       final coletas = [
         _coleta('a', StatusColeta.pendente),
         _coleta('b', StatusColeta.sincronizado),
@@ -105,8 +105,8 @@ void main() {
       final vm = ColetasViewModel(FakeColetaRepository(coletas));
       vm.coletas.value = coletas;
 
-      expect(vm.enviados, hasLength(2));
-      expect(vm.enviados.map((e) => e.id), containsAll(['b', 'c']));
+      expect(vm.sincronizadas, hasLength(2));
+      expect(vm.sincronizadas.map((e) => e.id), containsAll(['b', 'c']));
 
       vm.dispose();
     });

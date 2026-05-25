@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coletas_viewmodel.dart';
 
@@ -82,7 +83,7 @@ class _ColetasPageState extends State<ColetasPage> {
             preferredSize: const Size.fromHeight(100.0),
             child: Column(
               children: <Widget>[
-                const _SyncProgressBar(),
+                _BarraProgressoSync(viewModel: _viewModel),
                 TabBar(
                   isScrollable: true,
                   labelColor: theme.colorScheme.primary,
@@ -564,63 +565,95 @@ class _AcoesColeta extends StatelessWidget {
   }
 }
 
-class _SyncProgressBar extends StatelessWidget {
-  const _SyncProgressBar();
+class _BarraProgressoSync extends StatelessWidget {
+  const _BarraProgressoSync({required this.viewModel});
+
+  final ColetasViewModel viewModel;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    return ListenableBuilder(
+      listenable: viewModel.coletas,
+      builder: (context, _) {
+        final total = viewModel.totalColetas;
+        final progresso = viewModel.progressoSync;
+        final todas = viewModel.todasSincronizadas;
+        final sincronizadas = viewModel.coletasSincronizadas;
+        final theme = Theme.of(context);
 
-    return Padding(
-      padding: const EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        final String rotulo;
+        if (total == 0) {
+          rotulo = 'Nenhuma coleta registrada';
+        } else if (todas) {
+          rotulo = 'Dados Sincronizados';
+        } else {
+          rotulo = '$sincronizadas de $total sincronizadas';
+        }
+
+        final Color corBarra = todas
+            ? AppColors.success
+            : theme.colorScheme.primary;
+        final String porcentagem = '${(progresso * 100).round()}%';
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
             children: <Widget>[
-              const Text(
-                'SINCRONIZANDO DADOS...',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF475569),
-                  letterSpacing: 0.6,
-                ),
-              ),
-              Text(
-                '65%',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Stack(
-            children: <Widget>[
-              Container(
-                height: 6,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-              FractionallySizedBox(
-                widthFactor: 0.65,
-                child: Container(
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(999),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    rotulo.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: todas
+                          ? AppColors.success
+                          : const Color(0xFF475569),
+                      letterSpacing: 0.6,
+                    ),
                   ),
+                  Text(
+                    porcentagem,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: corBarra,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0, end: progresso),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeInOut,
+                builder: (context, valor, _) => Stack(
+                  children: <Widget>[
+                    Container(
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: corBarra.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                    FractionallySizedBox(
+                      widthFactor: valor,
+                      child: Container(
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: corBarra,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

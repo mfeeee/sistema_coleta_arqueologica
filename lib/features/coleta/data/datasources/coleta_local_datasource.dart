@@ -16,7 +16,6 @@ abstract class ColetaLocalDatasource {
     StatusColeta status,
     int novaVersao,
   );
-  Future<void> marcarEnviada(String uuid);
   Future<void> salvarFotosUrls(String uuid, List<String> urls);
   Future<void> deletar(String uuid);
 }
@@ -100,16 +99,6 @@ class ColetaLocalDatasourceImpl implements ColetaLocalDatasource {
       ColetasCompanion(
         statusSincronizacao: Value(status),
         versao: Value(novaVersao),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
-  }
-
-  @override
-  Future<void> marcarEnviada(String uuid) async {
-    await (_db.update(_db.coletas)..where((t) => t.uuid.equals(uuid))).write(
-      ColetasCompanion(
-        statusSincronizacao: const Value(StatusColeta.sincronizado),
         updatedAt: Value(DateTime.now()),
       ),
     );

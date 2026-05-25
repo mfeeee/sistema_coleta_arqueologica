@@ -19,7 +19,6 @@ class _FakeColetaLocalDatasource implements ColetaLocalDatasource {
 
   final List<ColetaModel> _pendentes;
   final Map<String, StatusColeta> statusAtualizado = {};
-  final Set<String> marcadasEnviadas = {};
 
   @override
   Future<List<ColetaModel>> getAll() async => _pendentes;
@@ -51,9 +50,6 @@ class _FakeColetaLocalDatasource implements ColetaLocalDatasource {
     StatusColeta status,
     int novaVersao,
   ) async => statusAtualizado[uuid] = status;
-
-  @override
-  Future<void> marcarEnviada(String uuid) async => marcadasEnviadas.add(uuid);
 
   @override
   Future<void> salvarFotosUrls(String uuid, List<String> urls) async {}
@@ -118,7 +114,7 @@ void main() {
       expect(datasource.statusAtualizado, isEmpty);
     });
 
-    test('coleta enviada com sucesso chama marcarEnviada', () async {
+    test('sync bem-sucedido avança status para sincronizado', () async {
       final coleta = _criarColetaPendente('coleta-ok');
       final datasource = _FakeColetaLocalDatasource(pendentes: [coleta]);
       final repo = _criarRepositorio(
@@ -131,25 +127,12 @@ void main() {
       expect(resumo.sucessos, 1);
       expect(resumo.conflitos, 0);
       expect(resumo.erros, 0);
-      expect(datasource.marcadasEnviadas, contains('coleta-ok'));
-    });
-
-    test('sync bem-sucedido não altera statusColeta no SQLite', () async {
-      final coleta = _criarColetaPendente('coleta-ok');
-      final datasource = _FakeColetaLocalDatasource(pendentes: [coleta]);
-      final repo = _criarRepositorio(
-        datasource: datasource,
-        apiDatasource: FakeSyncApiDatasource(status: SyncResultStatus.sucesso),
-      );
-
-      await repo.sincronizarTodas('token-fake');
-
       expect(
-        datasource.statusAtualizado.containsKey('coleta-ok'),
-        isFalse,
+        datasource.statusAtualizado['coleta-ok'],
+        StatusColeta.sincronizado,
         reason:
-            'sync ≠ aprovação: atualizarStatus não é chamado no sucesso; '
-            'apenas marcarEnviada é invocado',
+            'Sync ≠ aprovação: status avança para sincronizado '
+            '(dados transmitidos), não necessariamente aprovados pelo servidor',
       );
     });
 
@@ -200,9 +183,9 @@ void main() {
       final resumo = await repo.sincronizarTodas('token');
 
       expect(resumo.sucessos, 3);
-      expect(datasource.marcadasEnviadas.length, 3);
+      expect(datasource.statusAtualizado.length, 3);
       for (final id in ['c1', 'c2', 'c3']) {
-        expect(datasource.marcadasEnviadas, contains(id));
+        expect(datasource.statusAtualizado[id], StatusColeta.sincronizado);
       }
     });
   });

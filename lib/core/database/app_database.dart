@@ -34,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -44,10 +44,10 @@ class AppDatabase extends _$AppDatabase {
           "ALTER TABLE coletas ADD COLUMN fotos_urls TEXT NOT NULL DEFAULT '[]'",
         );
       }
-      if (from < 3) {
-        await customStatement(
-          'ALTER TABLE coletas ADD COLUMN sincronizado INTEGER NOT NULL DEFAULT 0',
-        );
+      // Versão 3 adicionou 'sincronizado' (redundante com status_sincronizacao).
+      // Versão 4 reverte essa coluna; usuários em v2 nunca a tiveram.
+      if (from == 3) {
+        await customStatement('ALTER TABLE coletas DROP COLUMN sincronizado');
       }
     },
     beforeOpen: (details) async {

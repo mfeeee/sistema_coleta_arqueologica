@@ -170,21 +170,6 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
         requiredDuringInsert: false,
         defaultValue: const Constant('[]'),
       ).withConverter<List<String>>($ColetasTable.$converterfotosUrls);
-  static const VerificationMeta _sincronizadoMeta = const VerificationMeta(
-    'sincronizado',
-  );
-  @override
-  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
-    'sincronizado',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("sincronizado" IN (0, 1))',
-    ),
-    clientDefault: () => false,
-  );
   static const VerificationMeta _deletadoEmMeta = const VerificationMeta(
     'deletadoEm',
   );
@@ -213,7 +198,6 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
     updatedAt,
     dadosColetados,
     fotosUrls,
-    sincronizado,
     deletadoEm,
   ];
   @override
@@ -293,15 +277,6 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
       context.handle(
         _updatedAtMeta,
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
-      );
-    }
-    if (data.containsKey('sincronizado')) {
-      context.handle(
-        _sincronizadoMeta,
-        sincronizado.isAcceptableOrUnknown(
-          data['sincronizado']!,
-          _sincronizadoMeta,
-        ),
       );
     }
     if (data.containsKey('deletado_em')) {
@@ -387,10 +362,6 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
           data['${effectivePrefix}fotos_urls'],
         )!,
       ),
-      sincronizado: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}sincronizado'],
-      )!,
       deletadoEm: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}deletado_em'],
@@ -429,7 +400,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
   final DateTime updatedAt;
   final Map<String, Object?> dadosColetados;
   final List<String> fotosUrls;
-  final bool sincronizado;
   final DateTime? deletadoEm;
   const Coleta({
     required this.uuid,
@@ -447,7 +417,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     required this.updatedAt,
     required this.dadosColetados,
     required this.fotosUrls,
-    required this.sincronizado,
     this.deletadoEm,
   });
   @override
@@ -490,7 +459,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
         $ColetasTable.$converterfotosUrls.toSql(fotosUrls),
       );
     }
-    map['sincronizado'] = Variable<bool>(sincronizado);
     if (!nullToAbsent || deletadoEm != null) {
       map['deletado_em'] = Variable<DateTime>(deletadoEm);
     }
@@ -516,7 +484,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       updatedAt: Value(updatedAt),
       dadosColetados: Value(dadosColetados),
       fotosUrls: Value(fotosUrls),
-      sincronizado: Value(sincronizado),
       deletadoEm: deletadoEm == null && nullToAbsent
           ? const Value.absent()
           : Value(deletadoEm),
@@ -548,7 +515,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
         json['dadosColetados'],
       ),
       fotosUrls: serializer.fromJson<List<String>>(json['fotosUrls']),
-      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
       deletadoEm: serializer.fromJson<DateTime?>(json['deletadoEm']),
     );
   }
@@ -573,7 +539,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'dadosColetados': serializer.toJson<Map<String, Object?>>(dadosColetados),
       'fotosUrls': serializer.toJson<List<String>>(fotosUrls),
-      'sincronizado': serializer.toJson<bool>(sincronizado),
       'deletadoEm': serializer.toJson<DateTime?>(deletadoEm),
     };
   }
@@ -594,7 +559,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     DateTime? updatedAt,
     Map<String, Object?>? dadosColetados,
     List<String>? fotosUrls,
-    bool? sincronizado,
     Value<DateTime?> deletadoEm = const Value.absent(),
   }) => Coleta(
     uuid: uuid ?? this.uuid,
@@ -612,7 +576,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     updatedAt: updatedAt ?? this.updatedAt,
     dadosColetados: dadosColetados ?? this.dadosColetados,
     fotosUrls: fotosUrls ?? this.fotosUrls,
-    sincronizado: sincronizado ?? this.sincronizado,
     deletadoEm: deletadoEm.present ? deletadoEm.value : this.deletadoEm,
   );
   Coleta copyWithCompanion(ColetasCompanion data) {
@@ -638,9 +601,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
           ? data.dadosColetados.value
           : this.dadosColetados,
       fotosUrls: data.fotosUrls.present ? data.fotosUrls.value : this.fotosUrls,
-      sincronizado: data.sincronizado.present
-          ? data.sincronizado.value
-          : this.sincronizado,
       deletadoEm: data.deletadoEm.present
           ? data.deletadoEm.value
           : this.deletadoEm,
@@ -665,7 +625,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
           ..write('updatedAt: $updatedAt, ')
           ..write('dadosColetados: $dadosColetados, ')
           ..write('fotosUrls: $fotosUrls, ')
-          ..write('sincronizado: $sincronizado, ')
           ..write('deletadoEm: $deletadoEm')
           ..write(')'))
         .toString();
@@ -688,7 +647,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     updatedAt,
     dadosColetados,
     fotosUrls,
-    sincronizado,
     deletadoEm,
   );
   @override
@@ -710,7 +668,6 @@ class Coleta extends DataClass implements Insertable<Coleta> {
           other.updatedAt == this.updatedAt &&
           other.dadosColetados == this.dadosColetados &&
           other.fotosUrls == this.fotosUrls &&
-          other.sincronizado == this.sincronizado &&
           other.deletadoEm == this.deletadoEm);
 }
 
@@ -730,7 +687,6 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
   final Value<DateTime> updatedAt;
   final Value<Map<String, Object?>> dadosColetados;
   final Value<List<String>> fotosUrls;
-  final Value<bool> sincronizado;
   final Value<DateTime?> deletadoEm;
   final Value<int> rowid;
   const ColetasCompanion({
@@ -749,7 +705,6 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     this.updatedAt = const Value.absent(),
     this.dadosColetados = const Value.absent(),
     this.fotosUrls = const Value.absent(),
-    this.sincronizado = const Value.absent(),
     this.deletadoEm = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -769,7 +724,6 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     this.updatedAt = const Value.absent(),
     required Map<String, Object?> dadosColetados,
     this.fotosUrls = const Value.absent(),
-    this.sincronizado = const Value.absent(),
     this.deletadoEm = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : uuid = Value(uuid),
@@ -791,7 +745,6 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     Expression<DateTime>? updatedAt,
     Expression<String>? dadosColetados,
     Expression<String>? fotosUrls,
-    Expression<bool>? sincronizado,
     Expression<DateTime>? deletadoEm,
     Expression<int>? rowid,
   }) {
@@ -812,7 +765,6 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (dadosColetados != null) 'dados_coletados': dadosColetados,
       if (fotosUrls != null) 'fotos_urls': fotosUrls,
-      if (sincronizado != null) 'sincronizado': sincronizado,
       if (deletadoEm != null) 'deletado_em': deletadoEm,
       if (rowid != null) 'rowid': rowid,
     });
@@ -834,7 +786,6 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     Value<DateTime>? updatedAt,
     Value<Map<String, Object?>>? dadosColetados,
     Value<List<String>>? fotosUrls,
-    Value<bool>? sincronizado,
     Value<DateTime?>? deletadoEm,
     Value<int>? rowid,
   }) {
@@ -854,7 +805,6 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
       updatedAt: updatedAt ?? this.updatedAt,
       dadosColetados: dadosColetados ?? this.dadosColetados,
       fotosUrls: fotosUrls ?? this.fotosUrls,
-      sincronizado: sincronizado ?? this.sincronizado,
       deletadoEm: deletadoEm ?? this.deletadoEm,
       rowid: rowid ?? this.rowid,
     );
@@ -918,9 +868,6 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
         $ColetasTable.$converterfotosUrls.toSql(fotosUrls.value),
       );
     }
-    if (sincronizado.present) {
-      map['sincronizado'] = Variable<bool>(sincronizado.value);
-    }
     if (deletadoEm.present) {
       map['deletado_em'] = Variable<DateTime>(deletadoEm.value);
     }
@@ -948,7 +895,6 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
           ..write('updatedAt: $updatedAt, ')
           ..write('dadosColetados: $dadosColetados, ')
           ..write('fotosUrls: $fotosUrls, ')
-          ..write('sincronizado: $sincronizado, ')
           ..write('deletadoEm: $deletadoEm, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -4810,7 +4756,6 @@ typedef $$ColetasTableCreateCompanionBuilder =
       Value<DateTime> updatedAt,
       required Map<String, Object?> dadosColetados,
       Value<List<String>> fotosUrls,
-      Value<bool> sincronizado,
       Value<DateTime?> deletadoEm,
       Value<int> rowid,
     });
@@ -4831,7 +4776,6 @@ typedef $$ColetasTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<Map<String, Object?>> dadosColetados,
       Value<List<String>> fotosUrls,
-      Value<bool> sincronizado,
       Value<DateTime?> deletadoEm,
       Value<int> rowid,
     });
@@ -4967,11 +4911,6 @@ class $$ColetasTableFilterComposer
   get fotosUrls => $composableBuilder(
     column: $table.fotosUrls,
     builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnFilters<bool> get sincronizado => $composableBuilder(
-    column: $table.sincronizado,
-    builder: (column) => ColumnFilters(column),
   );
 
   ColumnFilters<DateTime> get deletadoEm => $composableBuilder(
@@ -5114,11 +5053,6 @@ class $$ColetasTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get sincronizado => $composableBuilder(
-    column: $table.sincronizado,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get deletadoEm => $composableBuilder(
     column: $table.deletadoEm,
     builder: (column) => ColumnOrderings(column),
@@ -5186,11 +5120,6 @@ class $$ColetasTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<List<String>, String> get fotosUrls =>
       $composableBuilder(column: $table.fotosUrls, builder: (column) => column);
-
-  GeneratedColumn<bool> get sincronizado => $composableBuilder(
-    column: $table.sincronizado,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<DateTime> get deletadoEm => $composableBuilder(
     column: $table.deletadoEm,
@@ -5292,7 +5221,6 @@ class $$ColetasTableTableManager
                 Value<Map<String, Object?>> dadosColetados =
                     const Value.absent(),
                 Value<List<String>> fotosUrls = const Value.absent(),
-                Value<bool> sincronizado = const Value.absent(),
                 Value<DateTime?> deletadoEm = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ColetasCompanion(
@@ -5311,7 +5239,6 @@ class $$ColetasTableTableManager
                 updatedAt: updatedAt,
                 dadosColetados: dadosColetados,
                 fotosUrls: fotosUrls,
-                sincronizado: sincronizado,
                 deletadoEm: deletadoEm,
                 rowid: rowid,
               ),
@@ -5332,7 +5259,6 @@ class $$ColetasTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 required Map<String, Object?> dadosColetados,
                 Value<List<String>> fotosUrls = const Value.absent(),
-                Value<bool> sincronizado = const Value.absent(),
                 Value<DateTime?> deletadoEm = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ColetasCompanion.insert(
@@ -5351,7 +5277,6 @@ class $$ColetasTableTableManager
                 updatedAt: updatedAt,
                 dadosColetados: dadosColetados,
                 fotosUrls: fotosUrls,
-                sincronizado: sincronizado,
                 deletadoEm: deletadoEm,
                 rowid: rowid,
               ),

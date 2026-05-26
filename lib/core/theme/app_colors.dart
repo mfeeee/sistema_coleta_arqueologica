@@ -23,4 +23,12 @@ class AppColors {
   static const Color warning = Color(0xFFCA8A04);
   static const Color success = Color(0xFF16A34A);
   static const Color info = Color(0x66493627);
+
+  // Cores de badge (texto e fundo — contraste ≥ 4.5:1)
+  static const Color successText = Color(0xFF15803D);
+  static const Color warningText = Color(0xFF92400E);
+  static const Color errorText = Color(0xFFB91C1C);
+  static const Color successBg = Color(0xFFDCFCE7);
+  static const Color warningBg = Color(0xFFFEF3C7);
+  static const Color errorBg = Color(0xFFFEE2E2);
 }

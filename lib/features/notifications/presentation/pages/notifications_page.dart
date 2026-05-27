@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -42,9 +43,9 @@ class NotificationsPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
         children: <Widget>[
           const _NotificationCard(
-            borderColor: Color(0xFF22C55E),
-            iconBgColor: Color(0xFFDCFCE7),
-            iconColor: Color(0xFF16A34A),
+            borderColor: AppColors.successBright,
+            iconBgColor: AppColors.successBg,
+            iconColor: AppColors.success,
             icon: Icons.check_circle_outline,
             badgeText: 'SUCESSO',
             title: 'Coleta "Sítio Lapa do Sol" foi aprovada!',
@@ -54,9 +55,9 @@ class NotificationsPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const _NotificationCard(
-            borderColor: Color(0xFFEAB308),
-            iconBgColor: Color(0xFFFEF9C3),
-            iconColor: Color(0xFFCA8A04),
+            borderColor: AppColors.notifYellowBorder,
+            iconBgColor: AppColors.notifYellowBg,
+            iconColor: AppColors.notifYellowIcon,
             icon: Icons.sync_problem,
             badgeText: 'SISTEMA',
             title: 'Sincronização pendente: 3 registros aguardando conexão.',
@@ -66,9 +67,9 @@ class NotificationsPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const _NotificationCard(
-            borderColor: Color(0xFFF97316),
-            iconBgColor: Color(0xFFFFEDD5),
-            iconColor: Color(0xFFEA580C),
+            borderColor: AppColors.notifOrangeBorder,
+            iconBgColor: AppColors.notifOrangeBg,
+            iconColor: AppColors.notifOrangeIcon,
             icon: Icons.location_on_outlined,
             badgeText: 'AVISO',
             title:
@@ -118,13 +119,14 @@ class _NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: cs.shadow.withValues(alpha: 0.05),
             blurRadius: 2,
             offset: const Offset(0, 1),
           ),
@@ -162,10 +164,10 @@ class _NotificationCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A),
+                            color: cs.onSurface,
                             height: 1.3,
                           ),
                         ),
@@ -173,10 +175,10 @@ class _NotificationCard extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         badgeText,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF94A3B8),
+                          color: cs.outline,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -187,9 +189,9 @@ class _NotificationCard extends StatelessWidget {
                   // Descrição
                   Text(
                     description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF64748B),
+                      color: cs.onSurfaceVariant,
                       height: 1.4,
                     ),
                   ),
@@ -198,10 +200,10 @@ class _NotificationCard extends StatelessWidget {
                   // Timestamp
                   Text(
                     timestamp,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: Color(0x99493627), // rgba(73, 54, 39, 0.6)
+                      color: cs.outline.withValues(alpha: 0.6),
                     ),
                   ),
                 ],

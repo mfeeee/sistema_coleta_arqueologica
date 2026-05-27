@@ -84,9 +84,21 @@ class ColetaModel extends ColetaEntity {
 
   factory ColetaModel.fromJson(Map<String, dynamic> json) {
     return ColetaModel(
-      id: json['uuid'] as String,
-      usuarioId: json['usuario_id'] as String,
-      dataColeta: DateTime.parse(json['data_coleta'] as String),
+      id:
+          (json['uuid'] as String?) ??
+          (json['id'] as String?) ??
+          (throw const FormatException('uuid ausente na coleta')),
+      usuarioId:
+          (json['usuario_id'] as String?) ??
+          (throw const FormatException('usuario_id ausente na coleta')),
+      dataColeta:
+          DateTime.tryParse(
+            json['data_coleta'] as String? ??
+                (throw const FormatException('data_coleta ausente na coleta')),
+          ) ??
+          (throw FormatException(
+            "data_coleta inválida: ${json['data_coleta']}",
+          )),
       syncStatus: StatusColeta.values.byName(
         json['status_sincronizacao'] as String? ?? StatusColeta.pendente.name,
       ),
@@ -104,8 +116,12 @@ class ColetaModel extends ColetaEntity {
             )
           : null,
       uf: json['uf'] as String?,
-      latitude: (json['latitude'] as num).toDouble(),
-      longitude: (json['longitude'] as num).toDouble(),
+      latitude:
+          (json['latitude'] as num?)?.toDouble() ??
+          (throw const FormatException('latitude ausente na coleta')),
+      longitude:
+          (json['longitude'] as num?)?.toDouble() ??
+          (throw const FormatException('longitude ausente na coleta')),
       artefatos:
           (json['artefatos'] as List<dynamic>?)
               ?.map((e) => ArtefatoBem.tryFromString(e as String))
@@ -113,7 +129,12 @@ class ColetaModel extends ColetaEntity {
               .toList() ??
           [],
       versao: json['versao'] as int? ?? 1,
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      updatedAt:
+          DateTime.tryParse(
+            json['updated_at'] as String? ??
+                (throw const FormatException('updated_at ausente na coleta')),
+          ) ??
+          (throw FormatException("updated_at inválido: ${json['updated_at']}")),
       dadosColetados: json['dados_coletados'] as Map<String, dynamic>? ?? {},
       fotosUrls: (json['fotos_urls'] as List<dynamic>?)?.cast<String>() ?? [],
       deletadoEm: json['deletado_em'] != null

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/viewmodels/home_viewmodel.dart';
 
@@ -13,6 +14,7 @@ class InicioPage extends StatefulWidget {
 
 class _InicioPageState extends State<InicioPage> {
   late final HomeViewModel _viewModel;
+  late final AuthNotifier _authNotifier;
   bool _initialized = false;
 
   @override
@@ -21,16 +23,25 @@ class _InicioPageState extends State<InicioPage> {
     if (!_initialized) {
       _initialized = true;
       final scope = AppScope.of(context);
+      _authNotifier = scope.authNotifier;
       _viewModel = HomeViewModel(
         coletaRepository: scope.coletaRepository,
         authNotifier: scope.authNotifier,
       );
+      _viewModel.carregarDados();
+      _authNotifier.addListener(_onAuthAlterado);
+    }
+  }
+
+  void _onAuthAlterado() {
+    if (_authNotifier.status == AuthStatus.authenticated) {
       _viewModel.carregarDados();
     }
   }
 
   @override
   void dispose() {
+    _authNotifier.removeListener(_onAuthAlterado);
     _viewModel.dispose();
     super.dispose();
   }
@@ -86,6 +97,13 @@ class _InicioPageState extends State<InicioPage> {
           child: Column(
             children: <Widget>[
               _WelcomeSection(nomeUsuario: _viewModel.nomeUsuario),
+              ValueListenableBuilder<int>(
+                valueListenable: _viewModel.coletasPendentes,
+                builder: (context, qtd, _) {
+                  if (qtd == 0) return const SizedBox.shrink();
+                  return _BannerPendentes(quantidade: qtd);
+                },
+              ),
               const SizedBox(height: 32.0),
               _QuickActionsSection(onNovaColeta: _irParaNovaColeta),
               const SizedBox(height: 32.0),
@@ -101,6 +119,46 @@ class _InicioPageState extends State<InicioPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _BannerPendentes extends StatelessWidget {
+  const _BannerPendentes({required this.quantidade});
+
+  final int quantidade;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.errorContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            Icons.sync_problem_outlined,
+            color: theme.colorScheme.onErrorContainer,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '$quantidade coleta${quantidade > 1 ? 's' : ''} '
+              'aguardando envio',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onErrorContainer,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

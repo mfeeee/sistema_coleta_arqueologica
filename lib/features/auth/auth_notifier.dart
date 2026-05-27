@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/tratador_de_erros.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/background_sync_service.dart';
 
@@ -15,12 +16,18 @@ class AuthNotifier extends ChangeNotifier {
     required this.authService,
     required ColetaRepository coletaRepository,
     required PullService pullService,
+    required ObterColetasPendentesUseCase obterColetasPendentesUseCase,
+    Future<void> Function() agendarSync = BackgroundSyncService.agendar,
   }) : _coletaRepository = coletaRepository,
-       _pullService = pullService;
+       _pullService = pullService,
+       _obterColetasPendentesUseCase = obterColetasPendentesUseCase,
+       _agendarSync = agendarSync;
 
   final AuthService authService;
   final ColetaRepository _coletaRepository;
   final PullService _pullService;
+  final ObterColetasPendentesUseCase _obterColetasPendentesUseCase;
+  final Future<void> Function() _agendarSync;
 
   AuthStatus _status = AuthStatus.idle;
   String? _errorMessage;
@@ -84,6 +91,7 @@ class AuthNotifier extends ChangeNotifier {
             notifyListeners();
           },
         );
+        _pushPendentesPoLogin();
         BackgroundSyncService.agendar().then(
           (_) {},
           onError: (Object e, StackTrace st) => log(
@@ -100,6 +108,35 @@ class AuthNotifier extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  void _pushPendentesPoLogin() {
+    _obterColetasPendentesUseCase.call().then(
+      (pendentes) {
+        if (pendentes.isEmpty) return;
+        log(
+          '${pendentes.length} coleta(s) pendente(s) encontrada(s) pós-login',
+          name: 'AuthNotifier',
+        );
+        _agendarSync().then(
+          (_) {},
+          onError: (Object e, StackTrace st) => log(
+            'Agendamento background falhou (push pendentes)',
+            error: e,
+            stackTrace: st,
+            name: 'AuthNotifier',
+          ),
+        );
+      },
+      onError: (Object e, StackTrace st) {
+        log(
+          'Erro ao verificar pendentes pós-login',
+          error: e,
+          stackTrace: st,
+          name: 'AuthNotifier',
+        );
+      },
+    );
   }
 
   Future<void> register({

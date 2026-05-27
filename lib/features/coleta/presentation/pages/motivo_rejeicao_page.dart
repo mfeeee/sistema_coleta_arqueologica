@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 
 class MotivoRejeicaoPage extends StatelessWidget {
   const MotivoRejeicaoPage({super.key});
@@ -191,8 +190,8 @@ class _BotaoEditarColeta extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: 0.5),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryLight,
-          foregroundColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

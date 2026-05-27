@@ -528,10 +528,16 @@ class _ActivityListItem extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  color: theme.colorScheme.onPrimaryContainer.withValues(
+                    alpha: 0.15,
+                  ),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Icon(icon, color: theme.colorScheme.primary, size: 24),
+                child: Icon(
+                  icon,
+                  color: theme.colorScheme.onPrimaryContainer,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 16.0),
               Expanded(
@@ -542,7 +548,7 @@ class _ActivityListItem extends StatelessWidget {
                       title,
                       style: theme.textTheme.bodyLarge?.copyWith(
                         fontSize: 16,
-                        color: theme.colorScheme.onSurface,
+                        color: theme.colorScheme.onPrimaryContainer,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -552,7 +558,9 @@ class _ActivityListItem extends StatelessWidget {
                       subtitle,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontSize: 12,
-                        color: theme.colorScheme.onSurface,
+                        color: theme.colorScheme.onPrimaryContainer.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -562,7 +570,7 @@ class _ActivityListItem extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right,
-                color: theme.colorScheme.error,
+                color: theme.colorScheme.onPrimaryContainer,
                 size: 20,
               ),
             ],

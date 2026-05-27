@@ -178,6 +178,9 @@ class AuthNotifier extends ChangeNotifier {
 
   Future<void> logout() async {
     await authService.logout();
+    // INTENCIONAL: SharedPreferences não é limpo no logout.
+    // Rascunhos de coleta (chave 'rascunho_coleta') devem sobreviver
+    // à sessão para serem restaurados no próximo login.
     BackgroundSyncService.cancelar().then(
       (_) {},
       onError: (Object e, StackTrace st) => log(
@@ -199,6 +202,9 @@ class AuthNotifier extends ChangeNotifier {
 
   Future<void> sairPorSessaoExpirada() async {
     await authService.logout();
+    // INTENCIONAL: SharedPreferences não é limpo no logout por sessão expirada.
+    // Rascunhos de coleta (chave 'rascunho_coleta') devem sobreviver
+    // à sessão para serem restaurados no próximo login.
     BackgroundSyncService.cancelar().then(
       (_) {},
       onError: (Object e, StackTrace st) => log(

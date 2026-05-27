@@ -157,8 +157,8 @@ class _ArqueoAppState extends State<_ArqueoApp> {
     return MaterialApp.router(
       title: 'Sistema de Coleta Arqueológica',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: widget.temaModo.value,
       routerConfig: widget.router,
     );

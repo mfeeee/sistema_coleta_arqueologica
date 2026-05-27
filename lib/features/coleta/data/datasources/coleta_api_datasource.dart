@@ -65,7 +65,7 @@ class ColetaApiDatasourceImpl implements ColetaApiDatasource {
       throw const ErroDeRede();
     } on TimeoutException catch (e) {
       log('Timeout em fetchMinhas', error: e, name: 'ColetaApiDatasource');
-      return [];
+      throw const ErroDeRede(TratadorDeErros.erroComunicacao);
     } on http.ClientException catch (e, st) {
       log(
         'Erro HTTP em fetchMinhas',

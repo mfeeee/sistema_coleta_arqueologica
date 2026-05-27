@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,15 +53,9 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
   @override
   void dispose() {
     if (!_salvouComSucesso && _initialized && _formNotifier.temDadosRascunho) {
-      try {
-        _prefs.setString('rascunho_coleta', jsonEncode(_formNotifier.toMap()));
-      } catch (e) {
-        log(
-          'Erro ao salvar rascunho ao fechar',
-          error: e,
-          name: 'NovaColetaPage',
-        );
-      }
+      // Snapshot das fotos é capturado sincronamente dentro de salvarRascunho()
+      // antes do primeiro await — seguro como fire-and-forget em dispose().
+      _formNotifier.salvarRascunho(_prefs);
     }
     _viewModel.dispose();
     _formNotifier.dispose();

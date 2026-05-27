@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 
 class RegisterPage extends StatelessWidget {
@@ -188,7 +189,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                                 ? Icons.check_circle_outline
                                 : Icons.cancel_outlined,
                             color: _nameController.text.trim().isNotEmpty
-                                ? Colors.green
+                                ? AppColors.success
                                 : theme.colorScheme.error,
                             size: 20,
                           ),
@@ -220,7 +221,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                                 ? Icons.check_circle_outline
                                 : Icons.cancel_outlined,
                             color: emailValido
-                                ? Colors.green
+                                ? AppColors.success
                                 : theme.colorScheme.error,
                             size: 20,
                           ),

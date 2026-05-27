@@ -157,7 +157,7 @@ class _ColetaCard extends StatelessWidget {
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 2,
             offset: const Offset(0, 1),
           ),
@@ -180,7 +180,7 @@ class _ColetaCard extends StatelessWidget {
                       title,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0F172A),
+                        color: theme.colorScheme.onSurface,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -189,24 +189,24 @@ class _ColetaCard extends StatelessWidget {
                     Text(
                       location,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF64748B),
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontSize: 12,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: <Widget>[
-                        const Icon(
+                        Icon(
                           Icons.calendar_today_outlined,
                           size: 10,
-                          color: Color(0xFF94A3B8),
+                          color: theme.colorScheme.outline,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Coletado em: $date',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
-                            color: Color(0xFF94A3B8),
+                            color: theme.colorScheme.outline,
                           ),
                         ),
                       ],
@@ -274,10 +274,14 @@ class _AcoesColeta extends StatelessWidget {
           flex: 3,
           child: ElevatedButton.icon(
             onPressed: () {},
-            icon: const Icon(Icons.sync, size: 16, color: Colors.white),
-            label: const Text(
+            icon: Icon(
+              Icons.sync,
+              size: 16,
+              color: theme.colorScheme.onPrimary,
+            ),
+            label: Text(
               'Sincronizar Agora',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: theme.colorScheme.onPrimary),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.colorScheme.primary,
@@ -307,14 +311,14 @@ class _AcoesColeta extends StatelessWidget {
     return ElevatedButton(
       onPressed: onVerDetalhes,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFFEF2F2),
-        side: const BorderSide(color: Color(0xFFFECACA)),
+        backgroundColor: theme.colorScheme.errorContainer,
+        side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.3)),
         elevation: 0,
         minimumSize: const Size(double.infinity, 40),
       ),
-      child: const Text(
+      child: Text(
         'Ver Detalhes',
-        style: TextStyle(color: Color(0xFFDC2626)),
+        style: TextStyle(color: theme.colorScheme.error),
       ),
     );
   }

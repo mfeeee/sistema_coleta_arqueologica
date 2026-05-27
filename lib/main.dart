@@ -15,6 +15,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/col
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/repositories/coleta_repository_impl.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -90,10 +91,15 @@ Future<void> main() async {
     localRepository: coletaRepository,
   );
 
+  final obterColetasPendentesUseCase = ObterColetasPendentesUseCase(
+    coletaRepository,
+  );
+
   final authNotifier = AuthNotifier(
     authService: authService,
     coletaRepository: coletaRepository,
     pullService: pullService,
+    obterColetasPendentesUseCase: obterColetasPendentesUseCase,
   );
 
   authenticatedClient.onSessaoExpirada = authNotifier.sairPorSessaoExpirada;

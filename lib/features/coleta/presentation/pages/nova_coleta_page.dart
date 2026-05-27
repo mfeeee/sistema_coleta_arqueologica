@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coleta_form_notifier.dart';
 import '../../../../core/di/app_scope.dart';
@@ -242,7 +243,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Coleta salva com sucesso!'),
-          backgroundColor: Color(0xFF16A34A),
+          backgroundColor: AppColors.success,
         ),
       );
       Navigator.pop(context);
@@ -255,9 +256,9 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erro ao salvar. Tente novamente.'),
-          backgroundColor: Color(0xFFDC2626),
+        SnackBar(
+          content: const Text('Erro ao salvar. Tente novamente.'),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     } finally {
@@ -273,18 +274,18 @@ class _BannerOffline extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: const Color(0xFFFEF3C7),
+      color: AppColors.warningBg,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: const Row(
         children: <Widget>[
-          Icon(Icons.wifi_off, size: 16, color: Color(0xFF92400E)),
+          Icon(Icons.wifi_off, size: 16, color: AppColors.warningText),
           SizedBox(width: 8),
           Expanded(
             child: Text(
               'Você está offline. A coleta será salva localmente.',
               style: TextStyle(
                 fontSize: 12,
-                color: Color(0xFF92400E),
+                color: AppColors.warningText,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -338,7 +339,7 @@ class _PainelErroGps extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icone, size: 64, color: Colors.orange),
+            Icon(icone, size: 64, color: AppColors.warning),
             const SizedBox(height: 16),
             Text(mensagem, textAlign: TextAlign.center),
             const SizedBox(height: 24),

@@ -123,11 +123,11 @@ class _StatusColeta extends StatelessWidget {
 
   final StatusColeta status;
 
-  Color _cor() => switch (status) {
+  Color _cor(ColorScheme cs) => switch (status) {
     StatusColeta.sincronizado => AppColors.success,
-    StatusColeta.conflito => AppColors.error,
+    StatusColeta.conflito => cs.error,
     StatusColeta.pendente => AppColors.warning,
-    StatusColeta.rascunho => const Color(0xFF6B7280),
+    StatusColeta.rascunho => cs.onSurfaceVariant,
   };
 
   String _label() => switch (status) {
@@ -140,7 +140,7 @@ class _StatusColeta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cor = _cor();
+    final cor = _cor(theme.colorScheme);
 
     return Container(
       width: double.infinity,
@@ -148,11 +148,11 @@ class _StatusColeta extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border.all(color: theme.colorScheme.outlineVariant),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x0D000000),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 2,
-            offset: Offset(0, 1),
+            offset: const Offset(0, 1),
           ),
         ],
         borderRadius: BorderRadius.circular(12),
@@ -402,12 +402,12 @@ class _SecaoGaleria extends StatelessWidget {
                     ),
                     if (isUltima)
                       ColoredBox(
-                        color: Colors.black54,
+                        color: theme.colorScheme.scrim.withValues(alpha: 0.54),
                         child: Center(
                           child: Text(
                             '+$extras',
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: theme.colorScheme.onInverseSurface,
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                             ),

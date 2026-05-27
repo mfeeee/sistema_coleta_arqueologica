@@ -95,49 +95,56 @@ void main() {
   });
 
   group('ColetaFormNotifier.toResult', () {
-    test('retorna entity com todos os campos preenchidos corretamente', () {
-      final notifier = _criarNotifier();
-      notifier.setNome('Sítio das Pedras');
-      notifier.setNatureza(NaturezaBem.bemArqueologico);
-      notifier.setTipo(TipoBem.sitio);
-      notifier.toggleArtefato(ArtefatoBem.ceramica);
-      notifier.toggleArtefato(ArtefatoBem.litico);
-      notifier.setMeiosAcesso('A pé, 30 min');
-      notifier.setNomesPopulares('Pedreira, Sítio da Serra');
+    test(
+      'retorna entity com todos os campos preenchidos corretamente',
+      () async {
+        final notifier = _criarNotifier();
+        notifier.setNome('Sítio das Pedras');
+        notifier.setNatureza(NaturezaBem.bemArqueologico);
+        notifier.setTipo(TipoBem.sitio);
+        notifier.toggleArtefato(ArtefatoBem.ceramica);
+        notifier.toggleArtefato(ArtefatoBem.litico);
+        notifier.setMeiosAcesso('A pé, 30 min');
+        notifier.setNomesPopulares('Pedreira, Sítio da Serra');
 
-      final result = notifier.toResult(
-        lat: -2.9078,
-        lng: -41.7722,
-        usuarioId: 'usuario-42',
-      );
+        final result = await notifier.toResult(
+          lat: -2.9078,
+          lng: -41.7722,
+          usuarioId: 'usuario-42',
+        );
 
-      expect(result.coleta.nomeBem, 'Sítio das Pedras');
-      expect(result.coleta.natureza, NaturezaBem.bemArqueologico);
-      expect(result.coleta.tipo, TipoBem.sitio);
-      expect(
-        result.coleta.artefatos,
-        containsAll([ArtefatoBem.ceramica, ArtefatoBem.litico]),
-      );
-      expect(result.coleta.latitude, closeTo(-2.9078, 0.0001));
-      expect(result.coleta.longitude, closeTo(-41.7722, 0.0001));
-      expect(result.coleta.usuarioId, 'usuario-42');
-      expect(result.coleta.syncStatus, StatusColeta.pendente);
-      expect(result.coleta.versao, 1);
-      expect(result.coleta.id, isNotEmpty);
+        expect(result.coleta.nomeBem, 'Sítio das Pedras');
+        expect(result.coleta.natureza, NaturezaBem.bemArqueologico);
+        expect(result.coleta.tipo, TipoBem.sitio);
+        expect(
+          result.coleta.artefatos,
+          containsAll([ArtefatoBem.ceramica, ArtefatoBem.litico]),
+        );
+        expect(result.coleta.latitude, closeTo(-2.9078, 0.0001));
+        expect(result.coleta.longitude, closeTo(-41.7722, 0.0001));
+        expect(result.coleta.usuarioId, 'usuario-42');
+        expect(result.coleta.syncStatus, StatusColeta.pendente);
+        expect(result.coleta.versao, 1);
+        expect(result.coleta.id, isNotEmpty);
 
-      expect(result.bemMaterial.nomeBem, 'Sítio das Pedras');
-      expect(result.bemMaterial.meiosAcesso, 'A pé, 30 min');
-      expect(result.bemMaterial.nomesPopulares, contains('Pedreira'));
-    });
+        expect(result.bemMaterial.nomeBem, 'Sítio das Pedras');
+        expect(result.bemMaterial.meiosAcesso, 'A pé, 30 min');
+        expect(result.bemMaterial.nomesPopulares, contains('Pedreira'));
+      },
+    );
 
-    test('id da coleta e do bemMaterial são UUIDs distintos', () {
+    test('id da coleta e do bemMaterial são UUIDs distintos', () async {
       final notifier = _criarNotifier();
       notifier.setNome('Sítio X');
       notifier.setNatureza(NaturezaBem.bemArqueologico);
       notifier.setTipo(TipoBem.sitio);
       notifier.toggleArtefato(ArtefatoBem.ceramica);
 
-      final result = notifier.toResult(lat: -3.0, lng: -42.0, usuarioId: 'u1');
+      final result = await notifier.toResult(
+        lat: -3.0,
+        lng: -42.0,
+        usuarioId: 'u1',
+      );
 
       expect(result.coleta.id, isNotEmpty);
       expect(result.bemMaterial.id, isNotEmpty);

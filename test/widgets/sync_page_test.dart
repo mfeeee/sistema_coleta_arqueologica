@@ -17,6 +17,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_m
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
 import 'package:dio/dio.dart';
@@ -196,6 +197,10 @@ AuthNotifier _criarStubAuthNotifier() {
       apiDatasource: _StubColetaApiDatasource(),
       localRepository: _StubColetaRepository(),
     ),
+    obterColetasPendentesUseCase: ObterColetasPendentesUseCase(
+      _StubColetaRepository(),
+    ),
+    agendarSync: () async {},
   );
 }
 

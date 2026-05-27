@@ -10,6 +10,7 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/draft_photo_storage.dart';
 import '../../domain/entities/coleta_entity.dart';
 import 'package:uuid/uuid.dart';
 
@@ -23,9 +24,13 @@ class ColetaFormResult {
 
 class ColetaFormNotifier extends ChangeNotifier {
   final MediaService _mediaService;
+  final DraftPhotoStorage _draftPhotoStorage;
 
-  ColetaFormNotifier({required MediaService mediaService})
-    : _mediaService = mediaService;
+  ColetaFormNotifier({
+    required MediaService mediaService,
+    DraftPhotoStorage draftPhotoStorage = const DraftPhotoStorageImpl(),
+  }) : _mediaService = mediaService,
+       _draftPhotoStorage = draftPhotoStorage;
 
   // Passo 1
   String nome = '';
@@ -174,8 +179,10 @@ class ColetaFormNotifier extends ChangeNotifier {
     }
 
     meiosAcesso = map['meios_acesso'] as String?;
-    // foto_paths: file paths são mantidos na serialização, mas File objects
-    // não são restaurados para evitar acesso a arquivos possivelmente ausentes.
+
+    _fotos.clear();
+    final paths = (map['foto_paths'] as List?)?.cast<String>() ?? [];
+    _fotos.addAll(_draftPhotoStorage.restaurar(paths));
   }
 
   void restaurarDePrefs(SharedPreferences prefs) {
@@ -199,8 +206,16 @@ class ColetaFormNotifier extends ChangeNotifier {
   Future<void> salvarRascunho(SharedPreferences prefs) async {
     if (!temDadosRascunho) return;
     try {
-      await prefs.setString(_kChaveRascunho, jsonEncode(toMap()));
-      log('Rascunho salvo', name: 'ColetaFormNotifier');
+      final fotosSnapshot = List.of(_fotos);
+      final pathsPersistentes = await _draftPhotoStorage.persistir(
+        fotosSnapshot,
+      );
+      final map = toMap()..['foto_paths'] = pathsPersistentes;
+      await prefs.setString(_kChaveRascunho, jsonEncode(map));
+      log(
+        'Rascunho salvo (${pathsPersistentes.length} fotos)',
+        name: 'ColetaFormNotifier',
+      );
     } catch (e, st) {
       log(
         'Erro ao salvar rascunho',

@@ -182,7 +182,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
 
     await _formNotifier.salvarRascunho(_prefs);
 
-    final rascunho = _formNotifier.toRascunho(
+    final rascunho = await _formNotifier.toRascunho(
       lat: coord?.latitude ?? 0.0,
       lng: coord?.longitude ?? 0.0,
       usuarioId: scope.authNotifier.userId ?? '',
@@ -220,7 +220,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     setState(() => _saving = true);
 
     try {
-      final resultado = _formNotifier.toResult(
+      final resultado = await _formNotifier.toResult(
         lat: coord.latitude,
         lng: coord.longitude,
         usuarioId: usuarioId,

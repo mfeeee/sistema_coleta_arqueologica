@@ -21,6 +21,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_m
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:dio/dio.dart';
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
@@ -154,6 +155,10 @@ class _FakeAuthNotifier extends AuthNotifier {
         authService: _stubAuthService,
         coletaRepository: _StubColetaRepository(),
         pullService: _stubPullService,
+        obterColetasPendentesUseCase: ObterColetasPendentesUseCase(
+          _StubColetaRepository(),
+        ),
+        agendarSync: () async {},
       );
 
   bool loginChamado = false;

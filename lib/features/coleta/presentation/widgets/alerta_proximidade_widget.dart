@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/proximidade_service.dart';
 
@@ -92,8 +93,8 @@ class _CabecalhoAlerta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const corAlerta = Color(0xFFD97706);
-    const corAlertaBg = Color(0xFFFEF3C7);
+    const corAlerta = AppColors.warningAlt;
+    const corAlertaBg = AppColors.warningBg;
 
     return Container(
       padding: const EdgeInsets.all(24.0),
@@ -103,7 +104,7 @@ class _CabecalhoAlerta extends StatelessWidget {
         border: Border.all(color: corAlerta.withValues(alpha: 0.4)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

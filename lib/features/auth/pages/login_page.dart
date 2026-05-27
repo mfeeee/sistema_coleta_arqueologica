@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
+import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -28,7 +29,7 @@ class LoginPage extends StatelessWidget {
                 ),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: theme.colorScheme.shadow.withValues(alpha: 0.05),
                     blurRadius: 25,
                     offset: const Offset(0, 10),
                   ),
@@ -160,7 +161,7 @@ class _LoginFormState extends State<_LoginForm> {
                                 ? Icons.check_circle_outline
                                 : Icons.cancel_outlined,
                             color: emailValido
-                                ? Colors.green
+                                ? AppColors.success
                                 : theme.colorScheme.error,
                             size: 20,
                           ),

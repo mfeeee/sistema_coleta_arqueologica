@@ -231,11 +231,14 @@ class ColetaFormNotifier extends ChangeNotifier {
     log('Rascunho descartado', name: 'ColetaFormNotifier');
   }
 
-  ColetaEntity toRascunho({
+  Future<ColetaEntity> toRascunho({
     required double lat,
     required double lng,
     required String usuarioId,
-  }) {
+  }) async {
+    final pathsPersistentes = await _draftPhotoStorage.persistir(
+      List.of(_fotos),
+    );
     final agora = DateTime.now();
     return ColetaEntity(
       id: const Uuid().v4(),
@@ -253,19 +256,22 @@ class ColetaFormNotifier extends ChangeNotifier {
       dadosColetados: {
         'nomes_populares': nomesPopulares,
         'meios_acesso': meiosAcesso,
-        'foto_paths': fotoPaths,
+        'foto_paths': pathsPersistentes,
       },
     );
   }
 
-  ColetaFormResult toResult({
+  Future<ColetaFormResult> toResult({
     required double lat,
     required double lng,
     required String usuarioId,
-  }) {
+  }) async {
     assert(passo1Valido, 'toResult() chamado com Passo 1 inválido');
     assert(passo2Valido, 'toResult() chamado com nenhum artefato selecionado');
 
+    final pathsPersistentes = await _draftPhotoStorage.persistir(
+      List.of(_fotos),
+    );
     final coletaId = const Uuid().v4();
     final agora = DateTime.now();
 
@@ -285,7 +291,7 @@ class ColetaFormNotifier extends ChangeNotifier {
       dadosColetados: {
         'nomes_populares': nomesPopulares,
         'meios_acesso': meiosAcesso,
-        'foto_paths': fotoPaths,
+        'foto_paths': pathsPersistentes,
       },
     );
 

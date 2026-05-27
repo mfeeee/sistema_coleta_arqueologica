@@ -14,15 +14,12 @@ class Passo2ArtefatosWidget extends StatelessWidget {
     required this.onAvancar,
   });
 
-  static const Color _bgColor = Color(0xFF1C1916);
-  static const Color _primaryBrown = Color(0xFF493627);
-  static const Color _textLight = Color(0xFFF1F5F9);
-  static const Color _textMuted = Color(0xFF94A3B8);
-
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: _bgColor,
+      backgroundColor: cs.surface,
       body: Column(
         children: [
           Padding(
@@ -30,11 +27,15 @@ class Passo2ArtefatosWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _ProgressStep(color: _primaryBrown.withValues(alpha: 0.25)),
+                _ProgressStep(
+                  color: cs.primaryContainer.withValues(alpha: 0.25),
+                ),
                 const SizedBox(width: 12),
-                const _ProgressStep(color: _primaryBrown),
+                _ProgressStep(color: cs.primaryContainer),
                 const SizedBox(width: 12),
-                _ProgressStep(color: _primaryBrown.withValues(alpha: 0.25)),
+                _ProgressStep(
+                  color: cs.primaryContainer.withValues(alpha: 0.25),
+                ),
               ],
             ),
           ),
@@ -43,19 +44,19 @@ class Passo2ArtefatosWidget extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 48),
               children: [
-                const Text(
+                Text(
                   'TIPOS DE ARTEFATO',
                   style: TextStyle(
-                    color: _textLight,
+                    color: cs.onSurface,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.7,
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Selecione todos os que foram identificados no campo.',
-                  style: TextStyle(color: _textMuted, fontSize: 13),
+                  style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
                 ),
                 const SizedBox(height: 20),
 
@@ -74,11 +75,13 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                           selected: selecionado,
                           onSelected: (_) =>
                               formNotifier.toggleArtefato(artefato),
-                          backgroundColor: _bgColor,
-                          selectedColor: _primaryBrown,
-                          checkmarkColor: Colors.white,
+                          backgroundColor: cs.surface,
+                          selectedColor: cs.primaryContainer,
+                          checkmarkColor: cs.onPrimaryContainer,
                           labelStyle: TextStyle(
-                            color: selecionado ? Colors.white : _textMuted,
+                            color: selecionado
+                                ? cs.onPrimaryContainer
+                                : cs.onSurfaceVariant,
                             fontSize: 16,
                             fontWeight: selecionado
                                 ? FontWeight.bold
@@ -86,8 +89,8 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                           ),
                           side: BorderSide(
                             color: selecionado
-                                ? _primaryBrown
-                                : _primaryBrown.withValues(alpha: 0.25),
+                                ? cs.primaryContainer
+                                : cs.primaryContainer.withValues(alpha: 0.25),
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -107,13 +110,14 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                 ElevatedButton(
                   onPressed: onAvancar,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryBrown,
+                    backgroundColor: cs.primaryContainer,
+                    foregroundColor: cs.onPrimaryContainer,
                     minimumSize: const Size(double.infinity, 56),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
@@ -121,11 +125,15 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: cs.onPrimaryContainer,
                         ),
                       ),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.arrow_forward,
+                        color: cs.onPrimaryContainer,
+                        size: 20,
+                      ),
                     ],
                   ),
                 ),
@@ -135,10 +143,10 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                   style: TextButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
                   ),
-                  child: const Text(
+                  child: Text(
                     'VOLTAR',
                     style: TextStyle(
-                      color: _textMuted,
+                      color: cs.onSurfaceVariant,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,

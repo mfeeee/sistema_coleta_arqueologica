@@ -177,6 +177,8 @@ class _QuickActionsSection extends StatelessWidget {
           ElevatedButton(
             onPressed: onNovaColeta,
             style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
               minimumSize: const Size(double.infinity, 72),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadiusGeometry.circular(12),
@@ -195,7 +197,7 @@ class _QuickActionsSection extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: theme.textTheme.displayLarge?.color,
+                    color: theme.colorScheme.onPrimary,
                   ),
                 ),
               ],
@@ -259,7 +261,7 @@ class _SquareActionCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Icon(icon, color: theme.colorScheme.primary, size: 24),
+              Icon(icon, color: theme.colorScheme.onPrimaryContainer, size: 24),
               const SizedBox(height: 8.0),
               Text(
                 label,
@@ -267,7 +269,7 @@ class _SquareActionCard extends StatelessWidget {
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
-                  color: theme.colorScheme.onSurface,
+                  color: theme.colorScheme.onPrimaryContainer,
                   height: 1.2,
                 ),
               ),

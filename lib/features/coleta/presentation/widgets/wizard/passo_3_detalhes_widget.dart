@@ -43,22 +43,15 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
     super.dispose();
   }
 
-  final Color bgColor = const Color(0xFF1C1916);
-  final Color primaryBrown = const Color(0xFF493627);
-  final Color textLight = const Color(0xFFF1F5F9);
-  final Color textMuted = const Color(0xFF94A3B8);
-  final Color inputText = const Color(0xFFE2E8F0);
-
-  Color get borderColor => const Color(0xFF493627).withValues(alpha: 0.2);
-
   void _alternarGravacao() {
     setState(() => _gravandoAudio = !_gravandoAudio);
   }
 
   void _escolherFonte() {
+    final cs = Theme.of(context).colorScheme;
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: primaryBrown,
+      backgroundColor: cs.primaryContainer,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -67,10 +60,10 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt, color: Colors.white),
-              title: const Text(
+              leading: Icon(Icons.camera_alt, color: cs.onPrimaryContainer),
+              title: Text(
                 'Câmera',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: cs.onPrimaryContainer),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -78,10 +71,10 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library, color: Colors.white),
-              title: const Text(
+              leading: Icon(Icons.photo_library, color: cs.onPrimaryContainer),
+              title: Text(
                 'Galeria',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: cs.onPrimaryContainer),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -96,8 +89,11 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final borderColor = cs.primaryContainer.withValues(alpha: 0.2);
+
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: cs.surface,
       body: Column(
         children: [
           Padding(
@@ -105,11 +101,15 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _ProgressStep(color: primaryBrown.withValues(alpha: 0.2)),
+                _ProgressStep(
+                  color: cs.primaryContainer.withValues(alpha: 0.2),
+                ),
                 const SizedBox(width: 12),
-                _ProgressStep(color: primaryBrown.withValues(alpha: 0.2)),
+                _ProgressStep(
+                  color: cs.primaryContainer.withValues(alpha: 0.2),
+                ),
                 const SizedBox(width: 12),
-                _ProgressStep(color: primaryBrown),
+                _ProgressStep(color: cs.primaryContainer),
               ],
             ),
           ),
@@ -122,31 +122,31 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                   _CabecalhoSecao(
                     titulo: 'Meios de Acesso',
                     badgeTexto: 'ÁUDIO',
-                    textLight: textLight,
-                    primaryBrown: primaryBrown,
+                    textLight: cs.onSurface,
+                    primaryBrown: cs.primaryContainer,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Toque no microfone para descrever os meios de acesso.',
-                    style: TextStyle(color: textMuted, fontSize: 13),
+                    style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
                   ),
                   const SizedBox(height: 20),
                   _BotaoMicrofone(
                     gravando: _gravandoAudio,
-                    primaryBrown: primaryBrown,
-                    textMuted: textMuted,
+                    primaryBrown: cs.primaryContainer,
+                    textMuted: cs.onSurfaceVariant,
                     onTap: _alternarGravacao,
                   ),
                   const SizedBox(height: 20),
                   _RotuloSecao(
                     'TRANSCRIÇÃO OU NOTAS MANUAIS (OPCIONAL)',
-                    textColor: textLight,
+                    textColor: cs.onSurface,
                   ),
                   const SizedBox(height: 8),
                   _CampoTexto(
                     controller: _meiosAcessoController,
                     borderColor: borderColor,
-                    textColor: inputText,
+                    textColor: cs.onSurface,
                     hintText:
                         'Insira notas adicionais sobre os meios de '
                         'acesso...',
@@ -156,13 +156,13 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                   _CabecalhoSecao(
                     titulo: 'Evidências Visuais',
                     badgeTexto: 'CÂMERA',
-                    textLight: textLight,
-                    primaryBrown: primaryBrown,
+                    textLight: cs.onSurface,
+                    primaryBrown: cs.primaryContainer,
                   ),
                   const SizedBox(height: 16),
                   _BotaoCapturar(
-                    primaryBrown: primaryBrown,
-                    textMuted: textMuted,
+                    primaryBrown: cs.primaryContainer,
+                    textMuted: cs.onSurfaceVariant,
                     onTap: _escolherFonte,
                   ),
                   if (widget.formNotifier.totalFotos > 0) ...[
@@ -175,27 +175,28 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                   const SizedBox(height: 48),
                   ElevatedButton.icon(
                     onPressed: widget.onFinalizar,
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.check_circle_outline,
-                      color: Colors.white,
+                      color: cs.onPrimaryContainer,
                       size: 20,
                     ),
-                    label: const Text(
+                    label: Text(
                       'Finalizar e Salvar Coleta',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: cs.onPrimaryContainer,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryBrown,
+                      backgroundColor: cs.primaryContainer,
+                      foregroundColor: cs.onPrimaryContainer,
                       minimumSize: const Size(double.infinity, 56),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 4,
-                      shadowColor: primaryBrown.withValues(alpha: 0.3),
+                      shadowColor: cs.primaryContainer.withValues(alpha: 0.3),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -204,7 +205,7 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                     'SINCRONIZAÇÃO SERÁ ENVIADA.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: textMuted,
+                      color: cs.onSurfaceVariant,
                       fontSize: 11,
                       letterSpacing: 0.5,
                     ),
@@ -218,7 +219,7 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                     child: Text(
                       'VOLTAR',
                       style: TextStyle(
-                        color: textMuted,
+                        color: cs.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
@@ -337,7 +338,7 @@ class _BotaoMicrofone extends StatelessWidget {
               ),
               child: Icon(
                 gravando ? Icons.stop_rounded : Icons.mic,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
                 size: 32,
               ),
             ),
@@ -400,7 +401,9 @@ class _CampoTexto extends StatelessWidget {
       style: TextStyle(color: textColor, fontSize: 16),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: Color(0xFF6B7280)),
+        hintStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
@@ -496,12 +499,14 @@ class _GradeMiniaturas extends StatelessWidget {
                 Image.file(fotos[index], fit: BoxFit.cover),
                 if (isUltima)
                   ColoredBox(
-                    color: Colors.black54,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.scrim.withValues(alpha: 0.54),
                     child: Center(
                       child: Text(
                         '+$extras',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onInverseSurface,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),

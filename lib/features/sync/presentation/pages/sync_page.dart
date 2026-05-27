@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/domain/sync_notifier.dart';
 
 class SyncPage extends StatefulWidget {
@@ -112,11 +113,11 @@ class _ConexaoCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     final Color iconColor = online
-        ? const Color(0xFF16A34A)
-        : const Color(0xFF64748B);
+        ? AppColors.success
+        : theme.colorScheme.onSurfaceVariant;
     final Color iconBgColor = online
-        ? const Color(0xFFDCFCE7)
-        : const Color(0xFFF1F5F9);
+        ? AppColors.successBg
+        : theme.colorScheme.surfaceContainerHigh;
     final IconData icone = online ? Icons.wifi : Icons.wifi_off;
     final String rotulo = online ? 'Você está Online' : 'Você está Offline';
 
@@ -129,7 +130,7 @@ class _ConexaoCard extends StatelessWidget {
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 2,
             offset: const Offset(0, 1),
           ),
@@ -152,12 +153,12 @@ class _ConexaoCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text(
+                Text(
                   'Status da Conexão',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF64748B),
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Text(
@@ -205,7 +206,7 @@ class _SyncProgressCard extends StatelessWidget {
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 2,
             offset: const Offset(0, 1),
           ),
@@ -231,10 +232,10 @@ class _SyncProgressCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
-                      color: Color(0xFF64748B),
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -295,12 +296,12 @@ class _DetailedBreakdownSection extends StatelessWidget {
 
     final resumo = notifier.ultimoResumo;
 
-    const okColor = Color(0xFF16A34A);
-    const okBgColor = Color(0xFFF0FDF4);
+    const okColor = AppColors.success;
+    const okBgColor = AppColors.successBgAlt;
     final pendColor = theme.colorScheme.primary;
     final pendBgColor = theme.colorScheme.primary.withValues(alpha: 0.1);
-    const conflictColor = Color(0xFFDC2626);
-    const conflictBgColor = Color(0xFFFEF2F2);
+    final conflictColor = theme.colorScheme.error;
+    final conflictBgColor = theme.colorScheme.errorContainer;
 
     Widget pendentesChip() {
       final count = notifier.pendentes;
@@ -426,32 +427,32 @@ class _ActionSection extends StatelessWidget {
     final resumo = notifier.ultimoResumo;
 
     String? feedbackMsg;
-    Color feedbackColor = const Color(0xFF64748B);
+    Color feedbackColor = theme.colorScheme.onSurfaceVariant;
 
     switch (notifier.state) {
       case SyncState.concluido:
         if (resumo != null && resumo.totalOk) {
           feedbackMsg = 'Tudo sincronizado com sucesso!';
-          feedbackColor = const Color(0xFF16A34A);
+          feedbackColor = AppColors.success;
         } else {
           feedbackMsg =
               '${resumo?.conflitos ?? 0} conflito(s) precisam de revisão.';
-          feedbackColor = const Color(0xFFDC2626);
+          feedbackColor = theme.colorScheme.error;
         }
       case SyncState.semToken:
         feedbackMsg = 'Sessão expirada. Faça login novamente.';
-        feedbackColor = const Color(0xFFDC2626);
+        feedbackColor = theme.colorScheme.error;
       case SyncState.semConexao:
         feedbackMsg =
             notifier.mensagemErro ??
             'Sem conexão. Conecte-se à internet para sincronizar.';
-        feedbackColor = const Color(0xFFD97706);
+        feedbackColor = AppColors.warningAlt;
       case SyncState.sincronizando:
         feedbackMsg = notifier.mensagemProgresso ?? 'Sincronizando…';
-        feedbackColor = const Color(0xFF64748B);
+        feedbackColor = theme.colorScheme.onSurfaceVariant;
       case SyncState.erro:
         feedbackMsg = notifier.mensagemErro ?? 'Erro inesperado.';
-        feedbackColor = const Color(0xFFDC2626);
+        feedbackColor = theme.colorScheme.error;
       default:
         feedbackMsg = 'Última sincronização: --';
     }
@@ -468,25 +469,29 @@ class _ActionSection extends StatelessWidget {
             shadowColor: theme.colorScheme.primary.withValues(alpha: 0.2),
           ),
           child: sincronizando
-              ? const SizedBox(
+              ? SizedBox(
                   width: 22,
                   height: 22,
                   child: CircularProgressIndicator(
-                    color: Colors.white,
+                    color: theme.colorScheme.onPrimary,
                     strokeWidth: 2.5,
                   ),
                 )
-              : const Row(
+              : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Icon(Icons.sync, color: Colors.white, size: 20),
-                    SizedBox(width: 8),
+                    Icon(
+                      Icons.sync,
+                      color: theme.colorScheme.onPrimary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
                     Text(
                       'Iniciar Sincronização Total',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: theme.colorScheme.onPrimary,
                       ),
                     ),
                   ],

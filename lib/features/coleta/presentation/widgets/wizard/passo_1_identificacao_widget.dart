@@ -27,21 +27,13 @@ class Passo1IdentificacaoWidget extends StatefulWidget {
 }
 
 class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
-  // Controle local para os novos campos do design
-  // Valor inicial simulando o design
-
-  // Cores do Design (Figma)
-  final Color bgColor = const Color(0xFF1C1916);
-  final Color primaryBrown = const Color(0xFF493627);
-  final Color borderColor = const Color(0xFF493627).withValues(alpha: 0.2);
-  final Color textLight = const Color(0xFFF1F5F9);
-  final Color textMuted = const Color(0xFF94A3B8);
-  final Color inputText = const Color(0xFFE2E8F0);
-
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final borderColor = cs.primaryContainer.withValues(alpha: 0.2);
+
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: cs.surface,
       body: Column(
         children: [
           // Barra de Progresso (Passos)
@@ -50,16 +42,16 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _ProgressStep(isActive: true, color: primaryBrown),
+                _ProgressStep(isActive: true, color: cs.primaryContainer),
                 const SizedBox(width: 12),
                 _ProgressStep(
                   isActive: false,
-                  color: primaryBrown.withValues(alpha: 0.2),
+                  color: cs.primaryContainer.withValues(alpha: 0.2),
                 ),
                 const SizedBox(width: 12),
                 _ProgressStep(
                   isActive: false,
-                  color: primaryBrown.withValues(alpha: 0.2),
+                  color: cs.primaryContainer.withValues(alpha: 0.2),
                 ),
               ],
             ),
@@ -73,7 +65,7 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                 padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 48.0),
                 children: [
                   // --- COORDENADAS GPS ---
-                  _SectionLabel('COORDENADAS GPS', textColor: textLight),
+                  _SectionLabel('COORDENADAS GPS', textColor: cs.onSurface),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -97,13 +89,13 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                   const SizedBox(height: 24),
 
                   // --- NOME DO BEM ---
-                  _SectionLabel('NOME DO BEM', textColor: textLight),
+                  _SectionLabel('NOME DO BEM', textColor: cs.onSurface),
                   const SizedBox(height: 8),
                   _CustomTextField(
                     initialValue: widget.formNotifier.nome,
                     onChanged: widget.formNotifier.setNome,
                     borderColor: borderColor,
-                    textColor: inputText,
+                    textColor: cs.onSurface,
                     hintText: 'Ex: Muro de Arrimo - Setor A',
                   ),
                   const SizedBox(height: 24),
@@ -113,12 +105,12 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      _SectionLabel('NOMES POPULARES', textColor: textLight),
+                      _SectionLabel('NOMES POPULARES', textColor: cs.onSurface),
                       const SizedBox(width: 8),
                       Text(
                         '(opcional)',
                         style: TextStyle(
-                          color: textLight.withValues(alpha: 0.6),
+                          color: cs.onSurface.withValues(alpha: 0.6),
                           fontSize: 12,
                         ),
                       ),
@@ -129,34 +121,34 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                     initialValue: widget.formNotifier.nomesPopulares.join(', '),
                     onChanged: widget.formNotifier.setNomesPopulares,
                     borderColor: borderColor,
-                    textColor: inputText,
+                    textColor: cs.onSurface,
                     hintText: 'Como a comunidade local se refere a este bem?',
-                    maxLines: 2, // Altura maior conforme o Figma (68px)
+                    maxLines: 2,
                   ),
                   const SizedBox(height: 24),
 
                   // --- NATUREZA ---
-                  _SectionLabel('NATUREZA', textColor: textLight),
+                  _SectionLabel('NATUREZA', textColor: cs.onSurface),
                   const SizedBox(height: 8),
                   _CustomDropdown<NaturezaBem>(
                     value: widget.formNotifier.natureza,
                     items: NaturezaBem.values,
                     labelBuilder: (e) => e.label,
                     borderColor: borderColor,
-                    textColor: inputText,
+                    textColor: cs.onSurface,
                     onChanged: widget.formNotifier.setNatureza,
                   ),
                   const SizedBox(height: 24),
 
                   // --- TIPO ---
-                  _SectionLabel('TIPO', textColor: textLight),
+                  _SectionLabel('TIPO', textColor: cs.onSurface),
                   const SizedBox(height: 8),
                   _CustomDropdown<TipoBem>(
                     value: widget.formNotifier.tipo,
                     items: TipoBem.values,
                     labelBuilder: (e) => e.label,
                     borderColor: borderColor,
-                    textColor: inputText,
+                    textColor: cs.onSurface,
                     onChanged: widget.formNotifier.setTipo,
                   ),
 
@@ -166,15 +158,16 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                   ElevatedButton(
                     onPressed: widget.onAvancar,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryBrown,
+                      backgroundColor: cs.primaryContainer,
+                      foregroundColor: cs.onPrimaryContainer,
                       minimumSize: const Size(double.infinity, 56),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 4,
-                      shadowColor: primaryBrown.withValues(alpha: 0.2),
+                      shadowColor: cs.primaryContainer.withValues(alpha: 0.2),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
@@ -182,13 +175,13 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: cs.onPrimaryContainer,
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Icon(
                           Icons.arrow_forward,
-                          color: Colors.white,
+                          color: cs.onPrimaryContainer,
                           size: 20,
                         ),
                       ],
@@ -203,7 +196,7 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                     child: Text(
                       'CANCELAR COLETA',
                       style: TextStyle(
-                        color: textMuted,
+                        color: cs.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
@@ -285,10 +278,8 @@ class _GpsBox extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: Color(
-                0xFF493627,
-              ), // Cor pedida no Figma para a label do GPS
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primaryContainer,
               fontSize: 10,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
@@ -297,11 +288,10 @@ class _GpsBox extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
-              color: Color(0xFFE2E8F0),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 14,
-              fontFamily:
-                  'Liberation Mono', // Fonte monoespaçada para coordenadas
+              fontFamily: 'Liberation Mono',
             ),
           ),
         ],
@@ -336,7 +326,9 @@ class _CustomTextField extends StatelessWidget {
       style: TextStyle(color: textColor, fontSize: 16),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: Color(0xFF6B7280)),
+        hintStyle: TextStyle(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
@@ -375,8 +367,11 @@ class _CustomDropdown<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T>(
       initialValue: value,
-      dropdownColor: const Color(0xFF1C1916), // Fundo do menu aberto
-      icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF6B7280)),
+      dropdownColor: Theme.of(context).colorScheme.surfaceContainer,
+      icon: Icon(
+        Icons.keyboard_arrow_down,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
       style: TextStyle(color: textColor, fontSize: 16),
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(

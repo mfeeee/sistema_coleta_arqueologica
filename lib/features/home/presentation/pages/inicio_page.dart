@@ -185,7 +185,10 @@ class _QuickActionsSection extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Icon(Icons.add_circle_outline, color: Colors.white),
+                Icon(
+                  Icons.add_circle_outline,
+                  color: theme.colorScheme.onPrimary,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Nova Coleta',
@@ -297,7 +300,7 @@ class _ActivitySummarySection extends StatelessWidget {
           Text(
             'Resumo das Atividades',
             style: theme.textTheme.titleSmall?.copyWith(
-              color: const Color(0xFF64748B),
+              color: theme.colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.bold,
               fontSize: 18,
               letterSpacing: 0.7,
@@ -408,7 +411,7 @@ class _RecentActivitiesSection extends StatelessWidget {
               Text(
                 'Atividades Recentes',
                 style: theme.textTheme.titleSmall?.copyWith(
-                  color: const Color(0xFF64748B),
+                  color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                   letterSpacing: 0.7,

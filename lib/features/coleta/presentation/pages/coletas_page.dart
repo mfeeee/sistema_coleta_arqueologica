@@ -87,7 +87,7 @@ class _ColetasPageState extends State<ColetasPage> {
                 TabBar(
                   isScrollable: true,
                   labelColor: theme.colorScheme.primary,
-                  unselectedLabelColor: const Color(0xFF64748B),
+                  unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
                   labelStyle: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
@@ -188,7 +188,7 @@ class _ColetasPageState extends State<ColetasPage> {
             }
           },
           backgroundColor: theme.colorScheme.primary,
-          child: const Icon(Icons.add, color: Colors.white),
+          child: Icon(Icons.add, color: theme.colorScheme.onPrimary),
         ),
       ),
     );
@@ -352,7 +352,7 @@ class _EstadoVazio extends StatelessWidget {
           Text(
             mensagem,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: const Color(0xFF64748B),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -360,10 +360,10 @@ class _EstadoVazio extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () => context.push('/nova-coleta'),
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
+              icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
+              label: Text(
                 'Nova Coleta',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: theme.colorScheme.onPrimary),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
@@ -400,7 +400,7 @@ class _EstadoErro extends StatelessWidget {
           Text(
             mensagem,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF64748B),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -460,7 +460,7 @@ class _BarraProgressoSync extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                       color: todas
                           ? AppColors.success
-                          : const Color(0xFF475569),
+                          : theme.colorScheme.onSurfaceVariant,
                       letterSpacing: 0.6,
                     ),
                   ),
@@ -532,11 +532,11 @@ class _IndicadorConexao extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color cor = online
-        ? const Color(0xFF22C55E)
-        : const Color(0xFF94A3B8);
+        ? AppColors.successBright
+        : theme.colorScheme.outline;
     final Color corHalo = online
-        ? const Color(0xFF4ADE80)
-        : const Color(0xFFCBD5E1);
+        ? AppColors.successHalo
+        : theme.colorScheme.outlineVariant;
     final String rotulo = online ? 'Online' : 'Offline';
 
     return Row(
@@ -564,7 +564,9 @@ class _IndicadorConexao extends StatelessWidget {
           rotulo,
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: online ? theme.colorScheme.primary : const Color(0xFF64748B),
+            color: online
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],

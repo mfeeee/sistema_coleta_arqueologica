@@ -207,8 +207,8 @@ class _UserInfoSection extends StatelessWidget {
             ),
             child: Text(
               badge,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: theme.colorScheme.onPrimary,
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.6,

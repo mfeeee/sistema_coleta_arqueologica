@@ -4,6 +4,7 @@ import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 import '../../features/auth/pages/login_page.dart';
 import '../../features/auth/pages/recover_password_page.dart';
 import '../../features/auth/pages/register_page.dart';
+import '../../features/auth/pages/reset_password_page.dart';
 import '../../features/coleta/presentation/pages/coletas_page.dart';
 import '../../features/home/presentation/pages/inicio_page.dart';
 import '../../features/sync/presentation/pages/sync_page.dart';
@@ -15,7 +16,12 @@ import '../../features/coleta/presentation/pages/motivo_rejeicao_page.dart';
 
 import '../navigation/main_page.dart';
 
-const _publicRoutes = {'/login', '/register', '/recover-password'};
+const _publicRoutes = {
+  '/login',
+  '/register',
+  '/recover-password',
+  '/reset-password',
+};
 
 GoRouter createAppRouter(AuthNotifier authNotifier) {
   return GoRouter(
@@ -37,6 +43,10 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
       GoRoute(
         path: '/recover-password',
         builder: (_, __) => const RecoverPasswordPage(),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        builder: (_, __) => const ResetPasswordPage(),
       ),
 
       GoRoute(

@@ -5,6 +5,7 @@ import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coleta_form_notifier.dart';
 import '../../../../core/di/app_scope.dart';
+import '../../data/draft_photo_storage.dart';
 import '../../../../core/utils/geolocator_helper.dart';
 import '../../domain/services/proximidade_service.dart';
 import '../viewmodels/coleta_viewmodel.dart';
@@ -39,7 +40,10 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     final proximidadeService = ProximidadeService(scope.coletaRepository);
     final geolocatorHelper = GeolocatorHelper();
 
-    _formNotifier = ColetaFormNotifier(mediaService: scope.mediaService);
+    _formNotifier = ColetaFormNotifier(
+      mediaService: scope.mediaService,
+      draftPhotoStorage: const DraftPhotoStorageImpl(),
+    );
     _formNotifier.restaurarDePrefs(_prefs);
     _conectividadeService = scope.conectividadeService;
 

@@ -17,6 +17,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/data/repositories/co
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
 
+import 'core/constants/api_constants.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/database/app_database.dart';
@@ -26,8 +27,6 @@ import 'core/services/authenticated_http_client.dart';
 import 'package:http/http.dart' as http;
 import 'features/auth/auth_notifier.dart';
 import 'core/di/app_scope.dart';
-
-const _baseUrl = 'https://sistemaarqueologicoapi-production.up.railway.app/api';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,7 +68,7 @@ Future<void> main() async {
   final authService = AuthService(
     secureStorage: secureStorage,
     httpClient: plainHttpClient,
-    baseUrl: _baseUrl,
+    baseUrl: kApiBaseUrl,
   );
 
   final authenticatedClient = AuthenticatedHttpClient(
@@ -80,7 +79,7 @@ Future<void> main() async {
   final coletaApiDatasource = ColetaApiDatasourceImpl(
     httpClient: authenticatedClient,
     secureStorage: secureStorage,
-    baseUrl: _baseUrl,
+    baseUrl: kApiBaseUrl,
   );
 
   final coletaLocalDatasource = ColetaLocalDatasourceImpl(db);
@@ -106,7 +105,7 @@ Future<void> main() async {
 
   final dio = Dio(
     BaseOptions(
-      baseUrl: _baseUrl,
+      baseUrl: kApiBaseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
       headers: {'Accept': 'application/json'},

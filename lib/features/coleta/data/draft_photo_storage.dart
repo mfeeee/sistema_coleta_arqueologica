@@ -43,6 +43,10 @@ class DraftPhotoStorageImpl implements DraftPhotoStorage {
     return files;
   }
 
+  // Gap conhecido: arquivos com mesmo basename mas caminhos de origem
+  // distintos colidem aqui. O risco é baixo porque o image_picker gera
+  // nomes com timestamp; uma task de acompanhamento deve avaliar o uso
+  // de hash do srcPath como desambiguador.
   String _buildDestPath(String dirPath, String srcPath) =>
       p.join(dirPath, '$_prefixo${p.basename(srcPath)}');
 

@@ -43,7 +43,7 @@ class NotificacaoApiDatasourceImpl implements NotificacaoApiDatasource {
     try {
       final response = await httpClient
           .get(
-            Uri.parse('$baseUrl/v1/mobile/notifications'),
+            Uri.parse('$baseUrl/v1/mobile/notificacoes'),
             headers: {
               'Accept': 'application/json',
               'Authorization': 'Bearer $token',
@@ -94,7 +94,7 @@ class NotificacaoApiDatasourceImpl implements NotificacaoApiDatasource {
     try {
       final response = await httpClient
           .patch(
-            Uri.parse('$baseUrl/v1/mobile/notifications/$id/read'),
+            Uri.parse('$baseUrl/v1/mobile/notificacoes/$id/lida'),
             headers: {
               'Accept': 'application/json',
               'Authorization': 'Bearer $token',

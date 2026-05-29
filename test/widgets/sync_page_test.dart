@@ -26,6 +26,8 @@ import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasour
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/domain/sync_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/presentation/pages/sync_page.dart';
+import 'package:sistema_coleta_arqueologica/features/notifications/data/models/notificacao_model.dart';
+import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
 import 'package:http/http.dart' as http;
 
 // ---------------------------------------------------------------------------
@@ -87,6 +89,13 @@ class _StubBemMaterialRepository implements BemMaterialRepository {
   Future<void> salvar(BemMaterialEntity bem) async {}
   @override
   Future<void> deletar(String uuid) async {}
+}
+
+class _StubNotificacaoRepository implements NotificacaoRepository {
+  @override
+  Future<List<NotificacaoModel>> buscarNotificacoes() async => [];
+  @override
+  Future<void> marcarComoLida(int id) async {}
 }
 
 class _StubColetaApiDatasource implements ColetaApiDatasource {
@@ -218,6 +227,7 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     syncNotifier: syncNotifier,
     coletaRepository: _StubColetaRepository(),
     bemMaterialRepository: _StubBemMaterialRepository(),
+    notificacaoRepository: _StubNotificacaoRepository(),
     mediaService: MediaService(ImagePicker()),
     conectividadeService: ConectividadeService(),
     prefs: prefs,

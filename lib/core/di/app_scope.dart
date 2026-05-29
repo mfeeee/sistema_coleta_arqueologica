@@ -8,6 +8,7 @@ import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
+import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
 
 import '../../features/sync/domain/sync_notifier.dart';
 import '../../features/auth/auth_notifier.dart';
@@ -26,6 +27,7 @@ class AppScope extends InheritedWidget {
     required this.syncNotifier,
     required this.coletaRepository,
     required this.bemMaterialRepository,
+    required this.notificacaoRepository,
     required this.mediaService,
     required this.conectividadeService,
     required this.prefs,
@@ -37,6 +39,7 @@ class AppScope extends InheritedWidget {
   final SyncNotifier syncNotifier;
   final ColetaRepository coletaRepository;
   final BemMaterialRepository bemMaterialRepository;
+  final NotificacaoRepository notificacaoRepository;
   final MediaService mediaService;
   final ConectividadeService conectividadeService;
   final SharedPreferences prefs;
@@ -49,6 +52,7 @@ class AppScope extends InheritedWidget {
     required Dio dio,
     required SharedPreferences prefs,
     required ValueNotifier<ThemeMode> temaModo,
+    required NotificacaoRepository notificacaoRepository,
     required Widget child,
   }) {
     final coletaDatasource = ColetaLocalDatasourceImpl(database);
@@ -81,6 +85,7 @@ class AppScope extends InheritedWidget {
       syncNotifier: syncNotifier,
       coletaRepository: coletaRepository,
       bemMaterialRepository: bemMaterialRepository,
+      notificacaoRepository: notificacaoRepository,
       mediaService: mediaService,
       conectividadeService: conectividadeService,
       prefs: prefs,
@@ -101,6 +106,7 @@ class AppScope extends InheritedWidget {
       syncNotifier != oldWidget.syncNotifier ||
       coletaRepository != oldWidget.coletaRepository ||
       bemMaterialRepository != oldWidget.bemMaterialRepository ||
+      notificacaoRepository != oldWidget.notificacaoRepository ||
       mediaService != oldWidget.mediaService ||
       conectividadeService != oldWidget.conectividadeService ||
       prefs != oldWidget.prefs ||

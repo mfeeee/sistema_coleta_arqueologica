@@ -10,6 +10,7 @@ import '../../features/home/presentation/pages/inicio_page.dart';
 import '../../features/sync/presentation/pages/sync_page.dart';
 import '../../features/profile/pages/profile_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../features/profile/presentation/pages/preferencias_notificacao_page.dart';
 import '../../features/coleta/presentation/pages/nova_coleta_page.dart';
 import '../../features/coleta/presentation/pages/detalhes_coleta_page.dart';
 import '../../features/coleta/presentation/pages/motivo_rejeicao_page.dart';
@@ -52,6 +53,10 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
       GoRoute(
         path: '/notificacoes',
         builder: (_, __) => const NotificationsPage(),
+      ),
+      GoRoute(
+        path: '/perfil/preferencias-notificacao',
+        builder: (_, __) => const PreferenciasNotificacaoPage(),
       ),
       GoRoute(path: '/nova-coleta', builder: (_, __) => const NovaColetaPage()),
       GoRoute(

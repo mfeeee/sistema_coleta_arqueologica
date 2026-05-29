@@ -16,6 +16,8 @@ import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/col
 import 'package:sistema_coleta_arqueologica/features/coleta/data/repositories/coleta_repository_impl.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
+import 'package:sistema_coleta_arqueologica/features/notifications/data/datasources/notificacao_api_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
 
 import 'core/constants/api_constants.dart';
 import 'core/router/app_router.dart';
@@ -112,6 +114,15 @@ Future<void> main() async {
     ),
   );
 
+  final notificacaoApiDatasource = NotificacaoApiDatasourceImpl(
+    httpClient: authenticatedClient,
+    secureStorage: secureStorage,
+    baseUrl: kApiBaseUrl,
+  );
+  final notificacaoRepository = NotificacaoRepositoryImpl(
+    notificacaoApiDatasource,
+  );
+
   // Agenda sync em background se já há sessão ativa.
   if ((await secureStorage.getJwt()) != null) {
     await BackgroundSyncService.agendar();
@@ -127,6 +138,7 @@ Future<void> main() async {
       dio: dio,
       prefs: prefs,
       temaModo: temaModo,
+      notificacaoRepository: notificacaoRepository,
       child: _ArqueoApp(router: router, temaModo: temaModo),
     ),
   );

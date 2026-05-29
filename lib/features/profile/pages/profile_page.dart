@@ -350,6 +350,16 @@ class _NotificationSection extends StatelessWidget {
                     ),
                   ),
                 ),
+                const Divider(height: 1, indent: 48),
+                _SettingsTile(
+                  icon: Icons.tune_outlined,
+                  title: 'Preferências de Notificação',
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: theme.colorScheme.outline,
+                  ),
+                  onTap: () => context.push('/perfil/preferencias-notificacao'),
+                ),
               ],
             ),
           ),
@@ -597,32 +607,38 @@ class _SettingsTile extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.trailing,
+    this.onTap,
   });
 
   final IconData icon;
   final String title;
   final Widget trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        children: <Widget>[
-          Icon(icon, color: theme.colorScheme.primary, size: 20),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Row(
+          children: <Widget>[
+            Icon(icon, color: theme.colorScheme.primary, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-          ),
-          trailing,
-        ],
+            trailing,
+          ],
+        ),
       ),
     );
   }

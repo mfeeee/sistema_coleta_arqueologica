@@ -30,6 +30,8 @@ import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.d
 import 'package:sistema_coleta_arqueologica/features/sync/domain/sync_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/models/notificacao_model.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
+import 'package:sistema_coleta_arqueologica/features/profile/data/models/preferencias_notificacao.dart';
+import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
 import 'package:http/http.dart' as http;
 
 // ---------------------------------------------------------------------------
@@ -98,6 +100,14 @@ class _StubNotificacaoRepository implements NotificacaoRepository {
   Future<List<NotificacaoModel>> buscarNotificacoes() async => [];
   @override
   Future<void> marcarComoLida(int id) async {}
+}
+
+class _StubPreferenciasRepository implements PreferenciasNotificacaoRepository {
+  @override
+  Future<PreferenciasNotificacao> carregar() async =>
+      const PreferenciasNotificacao();
+  @override
+  Future<void> salvar(PreferenciasNotificacao prefs) async {}
 }
 
 class _StubColetaApiDatasource implements ColetaApiDatasource {
@@ -241,6 +251,7 @@ Future<Widget> _montarLoginPage(_FakeAuthNotifier notifier) async {
     coletaRepository: _StubColetaRepository(),
     bemMaterialRepository: _StubBemMaterialRepository(),
     notificacaoRepository: _StubNotificacaoRepository(),
+    preferenciasRepository: _StubPreferenciasRepository(),
     mediaService: MediaService(ImagePicker()),
     conectividadeService: ConectividadeService(),
     prefs: prefs,

@@ -32,6 +32,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         repository: scope.notificacaoRepository,
       );
       _viewModel.carregar();
+      _viewModel.iniciarPolling();
     }
   }
 

@@ -9,6 +9,7 @@ import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
+import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
 
 import '../../features/sync/domain/sync_notifier.dart';
 import '../../features/auth/auth_notifier.dart';
@@ -28,6 +29,7 @@ class AppScope extends InheritedWidget {
     required this.coletaRepository,
     required this.bemMaterialRepository,
     required this.notificacaoRepository,
+    required this.preferenciasRepository,
     required this.mediaService,
     required this.conectividadeService,
     required this.prefs,
@@ -40,6 +42,7 @@ class AppScope extends InheritedWidget {
   final ColetaRepository coletaRepository;
   final BemMaterialRepository bemMaterialRepository;
   final NotificacaoRepository notificacaoRepository;
+  final PreferenciasNotificacaoRepository preferenciasRepository;
   final MediaService mediaService;
   final ConectividadeService conectividadeService;
   final SharedPreferences prefs;
@@ -53,6 +56,7 @@ class AppScope extends InheritedWidget {
     required SharedPreferences prefs,
     required ValueNotifier<ThemeMode> temaModo,
     required NotificacaoRepository notificacaoRepository,
+    required PreferenciasNotificacaoRepository preferenciasRepository,
     required Widget child,
   }) {
     final coletaDatasource = ColetaLocalDatasourceImpl(database);
@@ -86,6 +90,7 @@ class AppScope extends InheritedWidget {
       coletaRepository: coletaRepository,
       bemMaterialRepository: bemMaterialRepository,
       notificacaoRepository: notificacaoRepository,
+      preferenciasRepository: preferenciasRepository,
       mediaService: mediaService,
       conectividadeService: conectividadeService,
       prefs: prefs,
@@ -107,6 +112,7 @@ class AppScope extends InheritedWidget {
       coletaRepository != oldWidget.coletaRepository ||
       bemMaterialRepository != oldWidget.bemMaterialRepository ||
       notificacaoRepository != oldWidget.notificacaoRepository ||
+      preferenciasRepository != oldWidget.preferenciasRepository ||
       mediaService != oldWidget.mediaService ||
       conectividadeService != oldWidget.conectividadeService ||
       prefs != oldWidget.prefs ||

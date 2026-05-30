@@ -24,9 +24,7 @@ class _PreferenciasNotificacaoPageState
     super.didChangeDependencies();
     if (!_initialized) {
       _initialized = true;
-      _repository = PreferenciasNotificacaoRepositoryImpl(
-        AppScope.of(context).prefs,
-      );
+      _repository = AppScope.of(context).preferenciasRepository;
       _preferencias = ValueNotifier(const PreferenciasNotificacao());
       _carregar();
     }

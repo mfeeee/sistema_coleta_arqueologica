@@ -1,13 +1,17 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import '../data/models/notificacao_model.dart';
 import '../data/repositories/notificacao_repository.dart';
+
+const _kIntervaloPolling = Duration(seconds: 30);
 
 class NotificacoesViewModel {
   NotificacoesViewModel({required NotificacaoRepository repository})
     : _repository = repository;
 
   final NotificacaoRepository _repository;
+  Timer? _timer;
 
   final ValueNotifier<bool> carregando = ValueNotifier(false);
   final ValueNotifier<String?> erro = ValueNotifier(null);
@@ -41,6 +45,16 @@ class NotificacoesViewModel {
     }
   }
 
+  void iniciarPolling() {
+    _timer?.cancel();
+    _timer = Timer.periodic(_kIntervaloPolling, (_) => carregar());
+  }
+
+  void pararPolling() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
   void definirFiltro(String? tipo) {
     filtroAtivo.value = tipo;
   }
@@ -62,6 +76,7 @@ class NotificacoesViewModel {
   }
 
   void dispose() {
+    pararPolling();
     carregando.dispose();
     erro.dispose();
     notificacoes.dispose();

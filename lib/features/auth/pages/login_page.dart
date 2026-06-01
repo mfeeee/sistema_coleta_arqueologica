@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 
@@ -117,6 +118,7 @@ class _LoginFormState extends State<_LoginForm> {
   Widget build(BuildContext context) {
     final notifier = AppScope.of(context).authNotifier;
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.all(24.0),
@@ -132,7 +134,7 @@ class _LoginFormState extends State<_LoginForm> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Text(
-                  'Acesso ao Sistema',
+                  l10n.loginSystemTitle,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.displayLarge?.copyWith(
                     fontSize: 28,
@@ -141,7 +143,7 @@ class _LoginFormState extends State<_LoginForm> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Plataforma de Coleta de Dados Arqueológicos',
+                  l10n.loginPlatformDesc,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
                 ),
@@ -151,8 +153,8 @@ class _LoginFormState extends State<_LoginForm> {
                   keyboardType: TextInputType.emailAddress,
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
-                    labelText: 'E-mail',
-                    hintText: 'exemplo@arqueo.org',
+                    labelText: l10n.loginEmailLabel,
+                    hintText: l10n.loginEmailHint,
                     prefixIcon: const Icon(Icons.email_outlined),
                     suffixIcon: _emailController.text.isEmpty
                         ? null
@@ -168,10 +170,10 @@ class _LoginFormState extends State<_LoginForm> {
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
-                      return 'Informe seu e-mail';
+                      return l10n.loginEmailRequired;
                     }
                     if (!_regexEmail.hasMatch(v.trim())) {
-                      return 'E-mail inválido';
+                      return l10n.commonInvalidEmail;
                     }
                     return null;
                   },
@@ -182,8 +184,8 @@ class _LoginFormState extends State<_LoginForm> {
                   obscureText: _hidePassword,
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
-                    labelText: 'Senha',
-                    hintText: 'Digite sua senha',
+                    labelText: l10n.loginPasswordLabel,
+                    hintText: l10n.loginPasswordHint,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -196,8 +198,9 @@ class _LoginFormState extends State<_LoginForm> {
                       },
                     ),
                   ),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'Informe sua senha' : null,
+                  validator: (v) => (v == null || v.isEmpty)
+                      ? l10n.loginPasswordRequired
+                      : null,
                 ),
                 if (notifier.errorMessage != null) ...[
                   const SizedBox(height: 8),
@@ -226,7 +229,10 @@ class _LoginFormState extends State<_LoginForm> {
                           dimension: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Entrar', style: TextStyle(fontSize: 16)),
+                      : Text(
+                          l10n.loginButton,
+                          style: const TextStyle(fontSize: 16),
+                        ),
                 ),
                 const SizedBox(height: 12),
                 OutlinedButton(
@@ -240,9 +246,9 @@ class _LoginFormState extends State<_LoginForm> {
                     ),
                   ),
                   onPressed: () => context.go('/register'),
-                  child: const Text(
-                    'Criar Conta',
-                    style: TextStyle(fontSize: 16),
+                  child: Text(
+                    l10n.loginCreateAccount,
+                    style: const TextStyle(fontSize: 16),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -250,9 +256,9 @@ class _LoginFormState extends State<_LoginForm> {
                   alignment: Alignment.center,
                   child: TextButton(
                     onPressed: () => context.go('/recover-password'),
-                    child: const Text(
-                      'Esqueceu sua senha?',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.loginForgotPassword,
+                      style: const TextStyle(
                         fontSize: 12,
                         decoration: TextDecoration.underline,
                       ),

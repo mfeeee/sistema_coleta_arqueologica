@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'core/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -185,12 +187,19 @@ class _ArqueoAppState extends State<_ArqueoApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Sistema de Coleta Arqueológica',
+      title: 'ArqueoData',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: widget.temaModo.value,
       routerConfig: widget.router,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
     );
   }
 }

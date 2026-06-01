@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
+import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/viewmodels/home_viewmodel.dart';
@@ -150,8 +152,7 @@ class _BannerPendentes extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              '$quantidade coleta${quantidade > 1 ? 's' : ''} '
-              'aguardando envio',
+              context.l10n.homePendingBanner(quantidade),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onErrorContainer,
                 fontWeight: FontWeight.w500,
@@ -172,6 +173,7 @@ class _WelcomeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -201,13 +203,15 @@ class _WelcomeSection extends StatelessWidget {
                 ValueListenableBuilder<String>(
                   valueListenable: nomeUsuario,
                   builder: (context, nome, _) => Text(
-                    'Olá, ${nome.isNotEmpty ? nome : 'Pesquisador'}',
+                    l10n.homeGreeting(
+                      nome.isNotEmpty ? nome : l10n.homeResearcher,
+                    ),
                     style: theme.textTheme.displayLarge?.copyWith(fontSize: 20),
                   ),
                 ),
                 const SizedBox(height: 4.0),
                 Text(
-                  'Pronto para novas descobertas hoje?',
+                  l10n.homeSubtitle,
                   style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
                 ),
               ],
@@ -227,6 +231,7 @@ class _QuickActionsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -251,7 +256,7 @@ class _QuickActionsSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Nova Coleta',
+                  l10n.homeNewCollection,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -267,7 +272,7 @@ class _QuickActionsSection extends StatelessWidget {
               Expanded(
                 child: _SquareActionCard(
                   icon: Icons.folder_open_outlined,
-                  label: 'Ver Minhas Coletas',
+                  label: l10n.homeViewCollections,
                   onTap: () => context.go('/coletas'),
                 ),
               ),
@@ -275,7 +280,7 @@ class _QuickActionsSection extends StatelessWidget {
               Expanded(
                 child: _SquareActionCard(
                   icon: Icons.sync,
-                  label: 'Sincronizar Agora',
+                  label: l10n.homeSyncNow,
                   onTap: () => context.go('/sincronizar'),
                 ),
               ),
@@ -351,6 +356,7 @@ class _ActivitySummarySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -358,7 +364,7 @@ class _ActivitySummarySection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Resumo das Atividades',
+            l10n.homeActivitySummary,
             style: theme.textTheme.titleSmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.bold,
@@ -397,7 +403,7 @@ class _ActivitySummarySection extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'TOTAL',
+                                l10n.homeTotal,
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w500,
@@ -429,7 +435,7 @@ class _ActivitySummarySection extends StatelessWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'PENDENTES',
+                                l10n.homePendingLabel,
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w500,
@@ -460,6 +466,7 @@ class _RecentActivitiesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -469,7 +476,7 @@ class _RecentActivitiesSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
-                'Atividades Recentes',
+                l10n.homeRecentActivities,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
@@ -480,7 +487,7 @@ class _RecentActivitiesSection extends StatelessWidget {
               TextButton(
                 onPressed: () => context.go('/coletas'),
                 child: Text(
-                  'Ver tudo',
+                  l10n.homeViewAll,
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: theme.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -506,8 +513,8 @@ class _RecentActivitiesSection extends StatelessWidget {
                       icon: Icons.location_on_outlined,
                       title: coletas[i].nomeBem.isNotEmpty
                           ? coletas[i].nomeBem
-                          : 'Coleta sem título',
-                      subtitle: _formatarData(coletas[i].dataColeta),
+                          : l10n.homeNoTitle,
+                      subtitle: _formatarData(coletas[i].dataColeta, l10n),
                       onTap: () => context.push(
                         '/detalhes-coleta',
                         extra: coletas[i].id,
@@ -541,7 +548,7 @@ class _EmptyActivities extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Nenhuma coleta registrada ainda.',
+            context.l10n.homeNoCollections,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -641,7 +648,7 @@ class _ActivityListItem extends StatelessWidget {
   }
 }
 
-String _formatarData(DateTime data) {
+String _formatarData(DateTime data, AppLocalizations l10n) {
   final agora = DateTime.now();
   final hoje = DateTime(agora.year, agora.month, agora.day);
   final ontem = hoje.subtract(const Duration(days: 1));
@@ -650,8 +657,8 @@ String _formatarData(DateTime data) {
       '${data.hour.toString().padLeft(2, '0')}:'
       '${data.minute.toString().padLeft(2, '0')}';
 
-  if (diaColeta == hoje) return 'Hoje, às $hora';
-  if (diaColeta == ontem) return 'Ontem, às $hora';
+  if (diaColeta == hoje) return l10n.homeTodayAt(hora);
+  if (diaColeta == ontem) return l10n.homeYesterdayAt(hora);
   return '${data.day.toString().padLeft(2, '0')}/'
       '${data.month.toString().padLeft(2, '0')}/'
       '${data.year}';

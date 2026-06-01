@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -256,7 +258,17 @@ Future<Widget> _montarLoginPage(_FakeAuthNotifier notifier) async {
     conectividadeService: ConectividadeService(),
     prefs: prefs,
     temaModo: ValueNotifier(ThemeMode.light),
-    child: MaterialApp.router(routerConfig: router),
+    child: MaterialApp.router(
+      routerConfig: router,
+      locale: const Locale('pt', 'BR'),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
+    ),
   );
 }
 

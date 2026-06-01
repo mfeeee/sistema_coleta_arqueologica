@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -243,7 +245,17 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     conectividadeService: ConectividadeService(),
     prefs: prefs,
     temaModo: ValueNotifier(ThemeMode.light),
-    child: MaterialApp.router(routerConfig: router),
+    child: MaterialApp.router(
+      routerConfig: router,
+      locale: const Locale('pt', 'BR'),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
+    ),
   );
 }
 
@@ -289,7 +301,7 @@ void main() {
       fakeResumo: const SyncResumo(sucessos: 3, conflitos: 0, erros: 0),
     );
     await tester.pumpWidget(await _montarSyncPage(notifier));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Tudo sincronizado com sucesso!'), findsOneWidget);
   });
@@ -302,7 +314,7 @@ void main() {
       fakeResumo: const SyncResumo(sucessos: 1, conflitos: 2, erros: 0),
     );
     await tester.pumpWidget(await _montarSyncPage(notifier));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.textContaining('2 conflito(s)'), findsWidgets);
   });

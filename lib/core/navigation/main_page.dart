@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key, required this.navigationShell});
@@ -15,16 +16,29 @@ class MainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (int index) => _onTap(context, index),
-        destinations: const <NavigationDestination>[
-          NavigationDestination(icon: Icon(Icons.home), label: 'Início'),
-          NavigationDestination(icon: Icon(Icons.list), label: 'Coletas'),
-          NavigationDestination(icon: Icon(Icons.sync), label: 'Sincronizar'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Perfil'),
+        destinations: <NavigationDestination>[
+          NavigationDestination(
+            icon: const Icon(Icons.home),
+            label: l10n.navHome,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.list),
+            label: l10n.navCollections,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.sync),
+            label: l10n.navSync,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.person),
+            label: l10n.navProfile,
+          ),
         ],
       ),
     );

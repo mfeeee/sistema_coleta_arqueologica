@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/viewmodels/profile_viewmodel.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -37,22 +38,20 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _confirmarLogout() async {
+    final l10n = context.l10n;
     final confirmado = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Sair da conta'),
-        content: const Text(
-          'Deseja encerrar a sessão? Coletas não sincronizadas '
-          'precisam ser enviadas antes de sair.',
-        ),
+        title: Text(l10n.profileLogoutTitle),
+        content: Text(l10n.profileLogoutContent),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(l10n.profileLogoutCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Sair'),
+            child: Text(l10n.profileLogoutConfirm),
           ),
         ],
       ),
@@ -67,12 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (_viewModel.temPendentesSemSync.value) {
       _viewModel.temPendentesSemSync.value = false;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Você tem coletas pendentes de sincronização. '
-            'Sincronize antes de sair.',
-          ),
-        ),
+        SnackBar(content: Text(context.l10n.profilePendingWarning)),
       );
     }
     // GoRouter redireciona automaticamente via refreshListenable após logout.
@@ -81,6 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -96,7 +91,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         title: Text(
-          'Perfil',
+          l10n.profileTitle,
           style: theme.textTheme.displayLarge?.copyWith(
             fontSize: 18,
             height: 1.2,
@@ -150,9 +145,10 @@ class _UserInfoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
     final String badge = viewModel.classificacao.isNotEmpty
         ? viewModel.classificacao.toUpperCase()
-        : 'USUÁRIO';
+        : l10n.profileUserBadge;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -233,6 +229,7 @@ class _MetricsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -240,7 +237,7 @@ class _MetricsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Estatísticas de Campo',
+            l10n.profileFieldStats,
             style: theme.textTheme.titleSmall?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
@@ -256,14 +253,14 @@ class _MetricsSection extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: _MetricCard(
-                      title: 'COLETAS REGISTRADAS',
+                      title: l10n.profileRegisteredCollections,
                       value: '${totalColetas.value}',
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: _MetricCard(
-                      title: 'PENDENTES SYNC',
+                      title: l10n.profilePendingSyncLabel,
                       value: '${coletasPendentes.value}',
                     ),
                   ),
@@ -285,6 +282,7 @@ class _NotificationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -292,7 +290,7 @@ class _NotificationSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Notificações',
+            l10n.profileNotificationsSection,
             style: theme.textTheme.titleSmall?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
@@ -313,7 +311,7 @@ class _NotificationSection extends StatelessWidget {
               children: <Widget>[
                 _SettingsTile(
                   icon: Icons.notifications_active_outlined,
-                  title: 'Alertas de Sincronização',
+                  title: l10n.profileSyncAlerts,
                   trailing: ValueListenableBuilder<bool>(
                     valueListenable: viewModel.alertasSincronizacao,
                     builder: (_, valor, __) => Switch(
@@ -327,7 +325,7 @@ class _NotificationSection extends StatelessWidget {
                 const Divider(height: 1, indent: 48),
                 _SettingsTile(
                   icon: Icons.fact_check_outlined,
-                  title: 'Status de Curadoria',
+                  title: l10n.profileCurationStatus,
                   trailing: ValueListenableBuilder<bool>(
                     valueListenable: viewModel.statusCuradoria,
                     builder: (_, valor, __) => Switch(
@@ -340,7 +338,7 @@ class _NotificationSection extends StatelessWidget {
                 const Divider(height: 1, indent: 48),
                 _SettingsTile(
                   icon: Icons.location_on_outlined,
-                  title: 'Avisos de Proximidade',
+                  title: l10n.profileProximityAlerts,
                   trailing: ValueListenableBuilder<bool>(
                     valueListenable: viewModel.avisosProximidade,
                     builder: (_, valor, __) => Switch(
@@ -353,7 +351,7 @@ class _NotificationSection extends StatelessWidget {
                 const Divider(height: 1, indent: 48),
                 _SettingsTile(
                   icon: Icons.tune_outlined,
-                  title: 'Preferências de Notificação',
+                  title: l10n.profileNotificationPrefs,
                   trailing: Icon(
                     Icons.chevron_right,
                     color: theme.colorScheme.outline,
@@ -377,6 +375,7 @@ class _AppPreferencesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -384,7 +383,7 @@ class _AppPreferencesSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'Preferências do App',
+            l10n.profileAppPreferences,
             style: theme.textTheme.titleSmall?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
@@ -405,7 +404,7 @@ class _AppPreferencesSection extends StatelessWidget {
               children: <Widget>[
                 _SettingsTile(
                   icon: Icons.dark_mode_outlined,
-                  title: 'Modo Escuro',
+                  title: l10n.profileDarkMode,
                   trailing: ValueListenableBuilder<bool>(
                     valueListenable: viewModel.modoEscuro,
                     builder: (_, valor, __) => Switch(
@@ -418,9 +417,9 @@ class _AppPreferencesSection extends StatelessWidget {
                 const Divider(height: 1, indent: 48),
                 _SettingsTile(
                   icon: Icons.straighten_outlined,
-                  title: 'Unidades de Medida',
+                  title: l10n.profileUnits,
                   trailing: Text(
-                    'Métrico',
+                    l10n.profileMetric,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
@@ -430,9 +429,9 @@ class _AppPreferencesSection extends StatelessWidget {
                 const Divider(height: 1, indent: 48),
                 _SettingsTile(
                   icon: Icons.language_outlined,
-                  title: 'Idioma',
+                  title: l10n.profileLanguage,
                   trailing: Text(
-                    'Português',
+                    l10n.profileLanguageValue,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: theme.colorScheme.primary,
@@ -460,6 +459,7 @@ class _ActionButtonsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -498,7 +498,7 @@ class _ActionButtonsSection extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Exportar logs de erro',
+                          l10n.profileExportLogs,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -541,7 +541,7 @@ class _ActionButtonsSection extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Sair da conta',
+                          l10n.profileLogoutButton,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

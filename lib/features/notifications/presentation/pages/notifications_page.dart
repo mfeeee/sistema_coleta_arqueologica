@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
+import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import '../../data/models/notificacao_model.dart';
 import '../../domain/notificacoes_viewmodel.dart';
 
-const _kFiltros = <({String? tipo, String rotulo})>[
-  (tipo: null, rotulo: 'Todos'),
-  (tipo: 'coleta', rotulo: 'Coleta'),
-  (tipo: 'sync', rotulo: 'Sync'),
-  (tipo: 'sistema', rotulo: 'Sistema'),
+List<({String? tipo, String rotulo})> _filtros(AppLocalizations l10n) => [
+  (tipo: null, rotulo: l10n.notificationsFilterAll),
+  (tipo: 'coleta', rotulo: l10n.notificationsFilterColeta),
+  (tipo: 'sync', rotulo: l10n.notificationsFilterSync),
+  (tipo: 'sistema', rotulo: l10n.notificationsFilterSystem),
 ];
 
 class NotificationsPage extends StatefulWidget {
@@ -45,6 +47,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -69,7 +72,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ),
         ),
         title: Text(
-          'Notificações',
+          l10n.notificationsTitle,
           style: theme.textTheme.displayLarge?.copyWith(
             fontSize: 20,
             letterSpacing: -0.5,
@@ -122,7 +125,9 @@ class _BarraFiltros extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final filtroAtivo = viewModel.filtroAtivo.value;
+    final listaFiltros = _filtros(l10n);
 
     return Container(
       color: theme.scaffoldBackgroundColor,
@@ -130,12 +135,12 @@ class _BarraFiltros extends StatelessWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-          children: _kFiltros.map((f) {
+          children: listaFiltros.map((f) {
             final selecionado = filtroAtivo == f.tipo;
             return Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: Semantics(
-                label: 'Filtrar por ${f.rotulo}',
+                label: l10n.notificationsFilterLabel(f.rotulo),
                 selected: selecionado,
                 child: FilterChip(
                   label: Text(f.rotulo),
@@ -315,7 +320,7 @@ class _ConteudoTile extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          _formatarData(notificacao.criadaEm),
+          _formatarData(notificacao.criadaEm, context.l10n),
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w500,
@@ -362,7 +367,7 @@ class _EstadoVazio extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Nenhuma notificação encontrada.',
+            context.l10n.notificationsEmpty,
             style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
           ),
         ],
@@ -380,6 +385,7 @@ class _EstadoErro extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32.0),
@@ -401,7 +407,7 @@ class _EstadoErro extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: aoTentar,
               icon: const Icon(Icons.refresh),
-              label: const Text('Tentar novamente'),
+              label: Text(l10n.notificationsRetry),
             ),
           ],
         ),
@@ -438,12 +444,12 @@ _configPorTipo(String tipo, ColorScheme cs) => switch (tipo) {
   ),
 };
 
-String _formatarData(DateTime data) {
+String _formatarData(DateTime data, AppLocalizations l10n) {
   final agora = DateTime.now();
   final diff = agora.difference(data);
 
-  if (diff.inMinutes < 60) return 'Há ${diff.inMinutes} min';
-  if (diff.inHours < 24) return 'Há ${diff.inHours}h';
-  if (diff.inDays == 1) return 'Ontem';
-  return 'Há ${diff.inDays} dias';
+  if (diff.inMinutes < 60) return l10n.notificationsMinutesAgo(diff.inMinutes);
+  if (diff.inHours < 24) return l10n.notificationsHoursAgo(diff.inHours);
+  if (diff.inDays == 1) return l10n.notificationsYesterday;
+  return l10n.notificationsDaysAgo(diff.inDays);
 }

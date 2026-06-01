@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coletas_viewmodel.dart';
@@ -58,6 +59,7 @@ class _ColetasPageState extends State<ColetasPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return DefaultTabController(
       length: 4,
@@ -70,7 +72,7 @@ class _ColetasPageState extends State<ColetasPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
-                'Minhas Coletas',
+                l10n.coletasTitle,
                 style: theme.textTheme.displayLarge?.copyWith(
                   fontSize: 18,
                   height: 1.2,
@@ -100,11 +102,11 @@ class _ColetasPageState extends State<ColetasPage> {
                   ),
                   indicatorColor: theme.colorScheme.primary,
                   indicatorWeight: 2.0,
-                  tabs: const <Widget>[
-                    Tab(text: 'TODOS'),
-                    Tab(text: 'PENDENTES'),
-                    Tab(text: 'APROVADOS'),
-                    Tab(text: 'REJEITADOS'),
+                  tabs: <Widget>[
+                    Tab(text: l10n.coletasTabAll),
+                    Tab(text: l10n.coletasTabPending),
+                    Tab(text: l10n.coletasTabApproved),
+                    Tab(text: l10n.coletasTabRejected),
                   ],
                 ),
               ],
@@ -135,8 +137,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         coletas: _viewModel.coletas.value,
                         carregando: carregando,
                         erro: erro,
-                        mensagemVazia:
-                            'Registre sua primeira coleta arqueológica.',
+                        mensagemVazia: l10n.coletasEmptyFirst,
                         exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
@@ -145,7 +146,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         coletas: _viewModel.pendentes,
                         carregando: carregando,
                         erro: erro,
-                        mensagemVazia: 'Nenhuma coleta pendente.',
+                        mensagemVazia: l10n.coletasEmptyPending,
                         exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
@@ -154,7 +155,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         coletas: _viewModel.sincronizadas,
                         carregando: carregando,
                         erro: erro,
-                        mensagemVazia: 'Nenhuma coleta aprovada.',
+                        mensagemVazia: l10n.coletasEmptyApproved,
                         exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
@@ -163,7 +164,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         coletas: _viewModel.conflitos,
                         carregando: carregando,
                         erro: erro,
-                        mensagemVazia: 'Nenhuma coleta rejeitada.',
+                        mensagemVazia: l10n.coletasEmptyRejected,
                         exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
@@ -204,6 +205,7 @@ class _BannerRascunho extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Container(
       width: double.infinity,
@@ -219,7 +221,7 @@ class _BannerRascunho extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Você tem um rascunho salvo. Continuar?',
+              l10n.coletasDraftBanner,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -235,7 +237,7 @@ class _BannerRascunho extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
-              'Descartar',
+              l10n.coletasDraftDiscard,
               style: TextStyle(
                 color: theme.colorScheme.error,
                 fontSize: 12,
@@ -251,7 +253,7 @@ class _BannerRascunho extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
-              'Continuar',
+              l10n.coletasDraftContinue,
               style: TextStyle(
                 color: theme.colorScheme.primary,
                 fontSize: 12,
@@ -337,6 +339,7 @@ class _EstadoVazio extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 64, horizontal: 32),
@@ -362,7 +365,7 @@ class _EstadoVazio extends StatelessWidget {
               onPressed: () => context.push('/nova-coleta'),
               icon: Icon(Icons.add, color: theme.colorScheme.onPrimary),
               label: Text(
-                'Nova Coleta',
+                l10n.homeNewCollection,
                 style: TextStyle(color: theme.colorScheme.onPrimary),
               ),
               style: ElevatedButton.styleFrom(
@@ -408,7 +411,7 @@ class _EstadoErro extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onTentarNovamente,
             icon: const Icon(Icons.refresh),
-            label: const Text('Tentar novamente'),
+            label: Text(context.l10n.coletasRetry),
           ),
         ],
       ),
@@ -431,14 +434,15 @@ class _BarraProgressoSync extends StatelessWidget {
         final todas = viewModel.todasSincronizadas;
         final sincronizadas = viewModel.coletasSincronizadas;
         final theme = Theme.of(context);
+        final l10n = context.l10n;
 
         final String rotulo;
         if (total == 0) {
-          rotulo = 'Nenhuma coleta registrada';
+          rotulo = l10n.coletasNoRegistered;
         } else if (todas) {
-          rotulo = 'Dados Sincronizados';
+          rotulo = l10n.coletasDataSynced;
         } else {
-          rotulo = '$sincronizadas de $total sincronizadas';
+          rotulo = l10n.coletasSyncProgress(sincronizadas, total);
         }
 
         final Color corBarra = todas
@@ -531,13 +535,14 @@ class _IndicadorConexao extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
     final Color cor = online
         ? AppColors.successBright
         : theme.colorScheme.outline;
     final Color corHalo = online
         ? AppColors.successHalo
         : theme.colorScheme.outlineVariant;
-    final String rotulo = online ? 'Online' : 'Offline';
+    final String rotulo = online ? l10n.syncOnlineLabel : l10n.syncOfflineLabel;
 
     return Row(
       children: <Widget>[

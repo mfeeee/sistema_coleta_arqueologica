@@ -1,0 +1,273 @@
+{
+  "@@locale": "pt",
+
+  "loginTitle": "Entrar",
+  "loginSystemTitle": "Acesso ao Sistema",
+  "loginPlatformDesc": "Plataforma de Coleta de Dados Arqueológicos",
+  "loginEmailLabel": "E-mail",
+  "loginEmailHint": "exemplo@arqueo.org",
+  "loginPasswordLabel": "Senha",
+  "loginPasswordHint": "Digite sua senha",
+  "loginButton": "Entrar",
+  "loginCreateAccount": "Criar Conta",
+  "loginForgotPassword": "Esqueceu sua senha?",
+  "loginNoAccount": "Não tem uma conta? Cadastre-se",
+  "loginEmailRequired": "Informe seu e-mail",
+  "loginPasswordRequired": "Informe sua senha",
+
+  "registerTitle": "Criar Conta",
+  "registerSubtitle": "Junte-se à nossa comunidade de exploração arqueológica.",
+  "registerFullName": "Nome Completo",
+  "registerFullNameHint": "Digite seu nome completo",
+  "registerFullNameRequired": "Informe seu nome",
+  "registerEmailHint": "exemplo@instituicao.br",
+  "registerClassification": "Classificação",
+  "registerClassificationHint": "Selecione seu perfil",
+  "registerClassStudent": "Estudante",
+  "registerClassTeacher": "Professor",
+  "registerClassArchaeologist": "Arqueólogo",
+  "registerPasswordLabel": "Senha",
+  "registerPasswordHint": "Crie uma senha",
+  "registerPasswordMin": "Mínimo 8 caracteres",
+  "registerConfirmPassword": "Confirmar Senha",
+  "registerConfirmPasswordHint": "Repita a senha",
+  "registerPasswordMismatch": "Senhas não coincidem",
+  "registerButton": "Criar Conta",
+  "registerHaveAccount": "Já tenho uma conta, entrar",
+  "registerTermsText": "Ao se cadastrar, você concorda com nossos",
+  "registerTermsService": "Termos de Serviço",
+  "registerTermsAnd": "e",
+  "registerPrivacyPolicy": "Política de Privacidade",
+
+  "recoverPasswordTitle": "Recuperar Senha",
+  "recoverPasswordSubtitle": "Insira o e-mail cadastrado para receber as instruções de recuperação.",
+  "recoverPasswordEmailSent": "E-mail Enviado",
+  "recoverPasswordEmailSentDesc": "Verifique seu e-mail para redefinir a senha.",
+  "recoverPasswordBackToLogin": "Voltar ao Login",
+  "recoverPasswordEnterCode": "Inserir Código",
+  "recoverPasswordSendLink": "Enviar Link",
+  "recoverPasswordRemember": "Lembrou sua senha?",
+  "recoverPasswordDoLogin": "Fazer login",
+
+  "homeTitle": "Início",
+  "homeGreeting": "Olá, {nome}",
+  "@homeGreeting": {
+    "placeholders": {
+      "nome": { "type": "String" }
+    }
+  },
+  "homeResearcher": "Pesquisador",
+  "homeSubtitle": "Pronto para novas descobertas hoje?",
+  "homeWelcome": "Bem-vindo(a)",
+  "homePendingBanner": "{count, plural, one{{count} coleta aguardando envio} other{{count} coletas aguardando envio}}",
+  "@homePendingBanner": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "homeNewCollection": "Nova Coleta",
+  "homeViewCollections": "Ver Minhas Coletas",
+  "homeSyncNow": "Sincronizar Agora",
+  "homeActivitySummary": "Resumo das Atividades",
+  "homeTotal": "TOTAL",
+  "homePendingLabel": "PENDENTES",
+  "homeRecentActivities": "Atividades Recentes",
+  "homeViewAll": "Ver tudo",
+  "homeRecentCollections": "Coletas Recentes",
+  "homeNoCollections": "Nenhuma coleta registrada ainda.",
+  "homeNoTitle": "Coleta sem título",
+  "homeTodayAt": "Hoje, às {hora}",
+  "@homeTodayAt": {
+    "placeholders": {
+      "hora": { "type": "String" }
+    }
+  },
+  "homeYesterdayAt": "Ontem, às {hora}",
+  "@homeYesterdayAt": {
+    "placeholders": {
+      "hora": { "type": "String" }
+    }
+  },
+
+  "coletaTitle": "Coleta",
+  "coletaNewTitle": "Nova Coleta",
+  "coletaEditTitle": "Editar Coleta",
+  "coletaFieldLocation": "Localização",
+  "coletaFieldDate": "Data",
+  "coletaFieldDescription": "Descrição",
+  "coletaSaveButton": "Salvar",
+  "coletaCancelButton": "Cancelar",
+  "coletaDeleteButton": "Excluir",
+  "coletaDeleteConfirm": "Tem certeza que deseja excluir esta coleta?",
+  "coletaSuccess": "Coleta salva com sucesso!",
+
+  "coletasTitle": "Minhas Coletas",
+  "coletasTabAll": "TODOS",
+  "coletasTabPending": "PENDENTES",
+  "coletasTabApproved": "APROVADOS",
+  "coletasTabRejected": "REJEITADOS",
+  "coletasDraftBanner": "Você tem um rascunho salvo. Continuar?",
+  "coletasDraftDiscard": "Descartar",
+  "coletasDraftContinue": "Continuar",
+  "coletasEmptyFirst": "Registre sua primeira coleta arqueológica.",
+  "coletasEmptyPending": "Nenhuma coleta pendente.",
+  "coletasEmptyApproved": "Nenhuma coleta aprovada.",
+  "coletasEmptyRejected": "Nenhuma coleta rejeitada.",
+  "coletasRetry": "Tentar novamente",
+  "coletasNoRegistered": "Nenhuma coleta registrada",
+  "coletasDataSynced": "Dados Sincronizados",
+  "coletasSyncProgress": "{synced} de {total} sincronizadas",
+  "@coletasSyncProgress": {
+    "placeholders": {
+      "synced": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "bemMaterialTitle": "Bem Material",
+  "bemMaterialNewTitle": "Novo Bem",
+  "bemMaterialEditTitle": "Editar Bem",
+  "bemMaterialFieldName": "Nome",
+  "bemMaterialFieldCode": "Código",
+  "bemMaterialFieldCategory": "Categoria",
+  "bemMaterialSaveButton": "Salvar",
+  "bemMaterialDeleteConfirm": "Confirmar exclusão do bem?",
+
+  "profileTitle": "Perfil",
+  "profileUserBadge": "USUÁRIO",
+  "profileFieldStats": "Estatísticas de Campo",
+  "profileRegisteredCollections": "COLETAS REGISTRADAS",
+  "profilePendingSyncLabel": "PENDENTES SYNC",
+  "profileNotificationsSection": "Notificações",
+  "profileSyncAlerts": "Alertas de Sincronização",
+  "profileCurationStatus": "Status de Curadoria",
+  "profileProximityAlerts": "Avisos de Proximidade",
+  "profileNotificationPrefs": "Preferências de Notificação",
+  "profileAppPreferences": "Preferências do App",
+  "profileDarkMode": "Modo Escuro",
+  "profileUnits": "Unidades de Medida",
+  "profileMetric": "Métrico",
+  "profileLanguage": "Idioma",
+  "profileLanguageValue": "Português",
+  "profileExportLogs": "Exportar logs de erro",
+  "profileLogoutButton": "Sair da conta",
+  "profileLogoutTitle": "Sair da conta",
+  "profileLogoutContent": "Deseja encerrar a sessão? Coletas não sincronizadas precisam ser enviadas antes de sair.",
+  "profileLogoutCancel": "Cancelar",
+  "profileLogoutConfirm": "Sair",
+  "profilePendingWarning": "Você tem coletas pendentes de sincronização. Sincronize antes de sair.",
+  "profileEditButton": "Editar Perfil",
+  "profileFieldName": "Nome",
+  "profileFieldEmail": "E-mail",
+
+  "notificationsTitle": "Notificações",
+  "notificationsEmpty": "Nenhuma notificação encontrada.",
+  "notificationsMarkAllRead": "Marcar todas como lidas",
+  "notificationsRetry": "Tentar novamente",
+  "notificationsFilterAll": "Todos",
+  "notificationsFilterColeta": "Coleta",
+  "notificationsFilterSync": "Sync",
+  "notificationsFilterSystem": "Sistema",
+  "notificationsFilterLabel": "Filtrar por {name}",
+  "@notificationsFilterLabel": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "notificationsMinutesAgo": "Há {min} min",
+  "@notificationsMinutesAgo": {
+    "placeholders": {
+      "min": { "type": "int" }
+    }
+  },
+  "notificationsHoursAgo": "Há {hours}h",
+  "@notificationsHoursAgo": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "notificationsYesterday": "Ontem",
+  "notificationsDaysAgo": "Há {days} dias",
+  "@notificationsDaysAgo": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+
+  "syncTitle": "Sincronização",
+  "syncPageTitle": "Sincronizar",
+  "syncConnectionStatus": "Status da Conexão",
+  "syncOnline": "Você está Online",
+  "syncOffline": "Você está Offline",
+  "syncOnlineLabel": "Online",
+  "syncOfflineLabel": "Offline",
+  "syncGeneralProgress": "Progresso Geral",
+  "syncPercentLabel": "{percent}% sincronizado",
+  "@syncPercentLabel": {
+    "placeholders": {
+      "percent": { "type": "int" }
+    }
+  },
+  "syncPendingItems": "Itens pendentes",
+  "syncPendingCountLabel": "{count} pendente(s)",
+  "@syncPendingCountLabel": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "syncDetails": "DETALHAMENTO",
+  "syncGpsData": "Dados de GPS",
+  "syncPendingForms": "Formulários Pendentes",
+  "syncConflictsLabel": "Conflitos",
+  "syncSendErrors": "Erros de Envio",
+  "syncConflictCount": "{count} conflito(s)",
+  "@syncConflictCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "syncErrorCount": "{count} erro(s)",
+  "@syncErrorCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "syncButton": "Sincronizar agora",
+  "syncStartButton": "Iniciar Sincronização Total",
+  "syncSuccess": "Sincronizado com sucesso!",
+  "syncSuccessAll": "Tudo sincronizado com sucesso!",
+  "syncError": "Erro ao sincronizar. Tente novamente.",
+  "syncNeedsReview": "{count} conflito(s) precisam de revisão.",
+  "@syncNeedsReview": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "syncExpiredSession": "Sessão expirada. Faça login novamente.",
+  "syncNoConnection": "Sem conexão. Conecte-se à internet para sincronizar.",
+  "syncInProgress": "Sincronizando…",
+  "syncUnexpectedError": "Erro inesperado.",
+  "syncLastSync": "Última sincronização",
+  "syncLastSyncNever": "Última sincronização: --",
+  "syncOk": "OK",
+
+  "commonConfirm": "Confirmar",
+  "commonCancel": "Cancelar",
+  "commonYes": "Sim",
+  "commonNo": "Não",
+  "commonError": "Ocorreu um erro inesperado.",
+  "commonLoading": "Carregando...",
+  "commonSave": "Salvar",
+  "commonDelete": "Excluir",
+  "commonEdit": "Editar",
+  "commonSearch": "Buscar",
+  "commonBack": "Voltar",
+  "commonRequired": "Campo obrigatório",
+  "commonInvalidEmail": "E-mail inválido",
+  "commonRetry": "Tentar novamente",
+
+  "navHome": "Início",
+  "navCollections": "Coletas",
+  "navSync": "Sincronizar",
+  "navProfile": "Perfil"
+}

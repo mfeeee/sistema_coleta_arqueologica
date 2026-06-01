@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 
 class RecoverPasswordPage extends StatefulWidget {
@@ -74,6 +75,7 @@ class _SucessoEnvio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -85,7 +87,7 @@ class _SucessoEnvio extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'E-mail Enviado',
+          l10n.recoverPasswordEmailSent,
           textAlign: TextAlign.center,
           style: theme.textTheme.displayLarge?.copyWith(
             fontSize: 28,
@@ -94,7 +96,7 @@ class _SucessoEnvio extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          'Verifique seu e-mail para redefinir a senha.',
+          l10n.recoverPasswordEmailSentDesc,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(fontSize: 16),
         ),
@@ -113,9 +115,9 @@ class _SucessoEnvio extends StatelessWidget {
               context.go('/login');
             }
           },
-          child: const Text(
-            'Voltar ao Login',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          child: Text(
+            l10n.recoverPasswordBackToLogin,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 12),
@@ -127,9 +129,9 @@ class _SucessoEnvio extends StatelessWidget {
             ),
           ),
           onPressed: () => context.go('/reset-password'),
-          child: const Text(
-            'Inserir Código',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          child: Text(
+            l10n.recoverPasswordEnterCode,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
       ],
@@ -144,6 +146,7 @@ class _HeaderArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       children: [
         Container(
@@ -163,7 +166,7 @@ class _HeaderArea extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'Recuperar Senha',
+          l10n.recoverPasswordTitle,
           textAlign: TextAlign.center,
           style: theme.textTheme.displayLarge?.copyWith(
             fontSize: 30,
@@ -172,7 +175,7 @@ class _HeaderArea extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Insira o e-mail cadastrado para receber as instruções de recuperação.',
+          l10n.recoverPasswordSubtitle,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(fontSize: 16),
         ),
@@ -215,6 +218,7 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final notifier = widget.notifier;
+    final l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.only(top: 24.0),
@@ -225,7 +229,7 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'E-mail',
+              l10n.loginEmailLabel,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -237,12 +241,14 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(
-                hintText: 'exemplo@instituicao.br',
-              ),
+              decoration: InputDecoration(hintText: l10n.registerEmailHint),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Informe seu e-mail';
-                if (!_regexEmail.hasMatch(v.trim())) return 'E-mail inválido';
+                if (v == null || v.trim().isEmpty) {
+                  return l10n.loginEmailRequired;
+                }
+                if (!_regexEmail.hasMatch(v.trim())) {
+                  return l10n.commonInvalidEmail;
+                }
                 return null;
               },
             ),
@@ -271,9 +277,9 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
                       dimension: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text(
-                      'Enviar Link',
-                      style: TextStyle(
+                  : Text(
+                      l10n.recoverPasswordSendLink,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -283,7 +289,10 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Lembrou sua senha?', style: theme.textTheme.bodyMedium),
+                Text(
+                  l10n.recoverPasswordRemember,
+                  style: theme.textTheme.bodyMedium,
+                ),
                 TextButton(
                   onPressed: () {
                     if (context.canPop()) {
@@ -292,9 +301,9 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
                       context.go('/login');
                     }
                   },
-                  child: const Text(
-                    'Fazer login',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Text(
+                    l10n.recoverPasswordDoLogin,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],

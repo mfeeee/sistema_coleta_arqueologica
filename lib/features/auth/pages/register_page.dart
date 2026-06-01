@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
+import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 
@@ -10,6 +12,7 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -24,7 +27,7 @@ class RegisterPage extends StatelessWidget {
           ),
         ),
         title: Text(
-          'Criar Conta',
+          l10n.registerTitle,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -82,7 +85,7 @@ class _HeaderArea extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          'Junte-se à nossa comunidade de exploração arqueológica.',
+          context.l10n.registerSubtitle,
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
         ),
@@ -110,13 +113,7 @@ class _RegisterFormState extends State<_RegisterForm> {
   bool _hidePassword = true;
   bool _hideConfirmPassword = true;
 
-  static const _classifications = [
-    ('estudante', 'Estudante'),
-    ('professor', 'Professor'),
-    ('arqueologo', 'Arqueólogo'),
-  ];
-
-  String _selectedClassification = _classifications.first.$1;
+  String _selectedClassification = 'estudante';
 
   bool get _podeSubmeter =>
       _nameController.text.trim().isNotEmpty &&
@@ -132,6 +129,12 @@ class _RegisterFormState extends State<_RegisterForm> {
     _confirmPasswordController.dispose();
     super.dispose();
   }
+
+  List<(String, String)> _classificacoes(AppLocalizations l10n) => [
+    ('estudante', l10n.registerClassStudent),
+    ('professor', l10n.registerClassTeacher),
+    ('arqueologo', l10n.registerClassArchaeologist),
+  ];
 
   Future<void> _handleRegister(AuthNotifier notifier) async {
     if (!_formKey.currentState!.validate()) return;
@@ -153,6 +156,8 @@ class _RegisterFormState extends State<_RegisterForm> {
   Widget build(BuildContext context) {
     final notifier = AppScope.of(context).authNotifier;
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
+    final classificacoes = _classificacoes(l10n);
 
     return Padding(
       padding: const EdgeInsets.all(32.0),
@@ -168,7 +173,7 @@ class _RegisterFormState extends State<_RegisterForm> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Text(
-                  'Nome Completo',
+                  l10n.registerFullName,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
@@ -181,7 +186,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                   textCapitalization: TextCapitalization.words,
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
-                    hintText: 'Digite seu nome completo',
+                    hintText: l10n.registerFullNameHint,
                     suffixIcon: _nameController.text.isEmpty
                         ? null
                         : Icon(
@@ -195,12 +200,12 @@ class _RegisterFormState extends State<_RegisterForm> {
                           ),
                   ),
                   validator: (v) => (v == null || v.trim().isEmpty)
-                      ? 'Informe seu nome'
+                      ? l10n.registerFullNameRequired
                       : null,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'E-mail',
+                  l10n.loginEmailLabel,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
@@ -213,7 +218,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                   keyboardType: TextInputType.emailAddress,
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
-                    hintText: 'exemplo@instituicao.br',
+                    hintText: l10n.registerEmailHint,
                     suffixIcon: _emailController.text.isEmpty
                         ? null
                         : Icon(
@@ -228,17 +233,17 @@ class _RegisterFormState extends State<_RegisterForm> {
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) {
-                      return 'Informe seu e-mail';
+                      return l10n.loginEmailRequired;
                     }
                     if (!_regexEmail.hasMatch(v.trim())) {
-                      return 'E-mail inválido';
+                      return l10n.commonInvalidEmail;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Classificação',
+                  l10n.registerClassification,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
@@ -248,10 +253,10 @@ class _RegisterFormState extends State<_RegisterForm> {
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   initialValue: _selectedClassification,
-                  decoration: const InputDecoration(
-                    hintText: 'Selecione seu perfil',
+                  decoration: InputDecoration(
+                    hintText: l10n.registerClassificationHint,
                   ),
-                  items: _classifications
+                  items: classificacoes
                       .map(
                         (e) => DropdownMenuItem(value: e.$1, child: Text(e.$2)),
                       )
@@ -264,7 +269,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Senha',
+                  l10n.registerPasswordLabel,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
@@ -277,7 +282,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                   obscureText: _hidePassword,
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
-                    hintText: 'Crie uma senha',
+                    hintText: l10n.registerPasswordHint,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -291,12 +296,12 @@ class _RegisterFormState extends State<_RegisterForm> {
                     ),
                   ),
                   validator: (v) => (v == null || v.length < 8)
-                      ? 'Mínimo 8 caracteres'
+                      ? l10n.registerPasswordMin
                       : null,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Confirmar Senha',
+                  l10n.registerConfirmPassword,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
@@ -309,7 +314,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                   obscureText: _hideConfirmPassword,
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
-                    hintText: 'Repita a senha',
+                    hintText: l10n.registerConfirmPasswordHint,
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -325,7 +330,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                     ),
                   ),
                   validator: (v) => v != _passwordController.text
-                      ? 'Senhas não coincidem'
+                      ? l10n.registerPasswordMismatch
                       : null,
                 ),
                 if (notifier.errorMessage != null) ...[
@@ -352,9 +357,9 @@ class _RegisterFormState extends State<_RegisterForm> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
-                              'Criar Conta',
-                              style: TextStyle(
+                            Text(
+                              l10n.registerButton,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -383,7 +388,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                     context.canPop() ? context.pop() : context.go('/login');
                   },
                   child: Text(
-                    'Já tenho uma conta, entrar',
+                    l10n.registerHaveAccount,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -393,7 +398,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Ao se cadastrar, você concorda com nossos',
+                  l10n.registerTermsText,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
                 ),
@@ -409,7 +414,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                         }
                       },
                       child: Text(
-                        'Termos de Serviço',
+                        l10n.registerTermsService,
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.colorScheme.surfaceTint,
@@ -418,7 +423,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                       ),
                     ),
                     Text(
-                      'e',
+                      l10n.registerTermsAnd,
                       style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
                     ),
                     TextButton(
@@ -430,7 +435,7 @@ class _RegisterFormState extends State<_RegisterForm> {
                         }
                       },
                       child: Text(
-                        'Política de Privacidade',
+                        l10n.registerPrivacyPolicy,
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.colorScheme.surfaceTint,

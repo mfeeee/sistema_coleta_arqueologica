@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/domain/sync_notifier.dart';
 
@@ -24,6 +25,7 @@ class _SyncPageState extends State<SyncPage> {
   Widget build(BuildContext context) {
     final syncNotifier = AppScope.of(context).syncNotifier;
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -40,7 +42,7 @@ class _SyncPageState extends State<SyncPage> {
           ),
         ),
         title: Text(
-          'Sincronizar',
+          l10n.syncPageTitle,
           style: theme.textTheme.displayLarge?.copyWith(
             fontSize: 18,
             letterSpacing: -0.45,
@@ -111,6 +113,7 @@ class _ConexaoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     final Color iconColor = online
         ? AppColors.success
@@ -119,7 +122,7 @@ class _ConexaoCard extends StatelessWidget {
         ? AppColors.successBg
         : theme.colorScheme.surfaceContainerHigh;
     final IconData icone = online ? Icons.wifi : Icons.wifi_off;
-    final String rotulo = online ? 'Você está Online' : 'Você está Offline';
+    final String rotulo = online ? l10n.syncOnline : l10n.syncOffline;
 
     return Container(
       padding: const EdgeInsets.all(20.0),
@@ -154,7 +157,7 @@ class _ConexaoCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Status da Conexão',
+                  l10n.syncConnectionStatus,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -186,6 +189,7 @@ class _SyncProgressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     final resumo = notifier.ultimoResumo;
     final total = resumo?.total ?? 0;
@@ -194,8 +198,8 @@ class _SyncProgressCard extends StatelessWidget {
     final porcentagem = (progresso * 100).toInt();
 
     final label = resumo != null
-        ? '$porcentagem% sincronizado'
-        : '${notifier.pendentes} pendente(s)';
+        ? l10n.syncPercentLabel(porcentagem)
+        : l10n.syncPendingCountLabel(notifier.pendentes);
 
     return Container(
       padding: const EdgeInsets.all(20.0),
@@ -223,7 +227,7 @@ class _SyncProgressCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Progresso Geral',
+                    l10n.syncGeneralProgress,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -293,6 +297,7 @@ class _DetailedBreakdownSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
 
     final resumo = notifier.ultimoResumo;
 
@@ -306,14 +311,14 @@ class _DetailedBreakdownSection extends StatelessWidget {
     Widget pendentesChip() {
       final count = notifier.pendentes;
       if (count == 0) {
-        return const _StatusChip(
-          text: 'OK',
+        return _StatusChip(
+          text: l10n.syncOk,
           textColor: okColor,
           bgColor: okBgColor,
         );
       }
       return _StatusChip(
-        text: '$count pendente(s)',
+        text: l10n.syncPendingCountLabel(count),
         textColor: pendColor,
         bgColor: pendBgColor,
       );
@@ -322,14 +327,14 @@ class _DetailedBreakdownSection extends StatelessWidget {
     Widget conflitosChip() {
       final count = resumo?.conflitos ?? 0;
       if (count == 0) {
-        return const _StatusChip(
-          text: 'OK',
+        return _StatusChip(
+          text: l10n.syncOk,
           textColor: okColor,
           bgColor: okBgColor,
         );
       }
       return _StatusChip(
-        text: '$count conflito(s)',
+        text: l10n.syncConflictCount(count),
         textColor: conflictColor,
         bgColor: conflictBgColor,
       );
@@ -338,14 +343,14 @@ class _DetailedBreakdownSection extends StatelessWidget {
     Widget errosChip() {
       final count = resumo?.erros ?? 0;
       if (count == 0) {
-        return const _StatusChip(
-          text: 'OK',
+        return _StatusChip(
+          text: l10n.syncOk,
           textColor: okColor,
           bgColor: okBgColor,
         );
       }
       return _StatusChip(
-        text: '$count erro(s)',
+        text: l10n.syncErrorCount(count),
         textColor: conflictColor,
         bgColor: conflictBgColor,
       );
@@ -354,11 +359,11 @@ class _DetailedBreakdownSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Padding(
-          padding: EdgeInsets.only(left: 4.0, bottom: 12.0),
+        Padding(
+          padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
           child: Text(
-            'DETALHAMENTO',
-            style: TextStyle(
+            l10n.syncDetails,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.7,
@@ -375,13 +380,12 @@ class _DetailedBreakdownSection extends StatelessWidget {
           ),
           child: Column(
             children: <Widget>[
-              const _BreakdownTile(
+              _BreakdownTile(
                 icon: Icons.location_on_outlined,
                 iconColor: okColor,
-                title: 'Dados de GPS',
-                // Chip verde
+                title: l10n.syncGpsData,
                 trailingChip: _StatusChip(
-                  text: 'OK',
+                  text: l10n.syncOk,
                   textColor: okColor,
                   bgColor: okBgColor,
                 ),
@@ -390,21 +394,21 @@ class _DetailedBreakdownSection extends StatelessWidget {
               _BreakdownTile(
                 icon: Icons.description_outlined,
                 iconColor: theme.colorScheme.primary,
-                title: 'Formulários Pendentes',
+                title: l10n.syncPendingForms,
                 trailingChip: pendentesChip(),
               ),
               const Divider(height: 1, indent: 48),
               _BreakdownTile(
                 icon: Icons.warning_amber_outlined,
                 iconColor: conflictColor,
-                title: 'Conflitos',
+                title: l10n.syncConflictsLabel,
                 trailingChip: conflitosChip(),
               ),
               const Divider(height: 1, indent: 48),
               _BreakdownTile(
                 icon: Icons.cloud_off_outlined,
                 iconColor: conflictColor,
-                title: 'Erros de Envio',
+                title: l10n.syncSendErrors,
                 trailingChip: errosChip(),
               ),
             ],
@@ -423,38 +427,36 @@ class _ActionSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final l10n = context.l10n;
     final sincronizando = notifier.sincronizando;
     final resumo = notifier.ultimoResumo;
 
-    String? feedbackMsg;
+    String feedbackMsg = l10n.syncLastSyncNever;
     Color feedbackColor = theme.colorScheme.onSurfaceVariant;
 
     switch (notifier.state) {
       case SyncState.concluido:
         if (resumo != null && resumo.totalOk) {
-          feedbackMsg = 'Tudo sincronizado com sucesso!';
+          feedbackMsg = l10n.syncSuccessAll;
           feedbackColor = AppColors.success;
         } else {
-          feedbackMsg =
-              '${resumo?.conflitos ?? 0} conflito(s) precisam de revisão.';
+          feedbackMsg = l10n.syncNeedsReview(resumo?.conflitos ?? 0);
           feedbackColor = theme.colorScheme.error;
         }
       case SyncState.semToken:
-        feedbackMsg = 'Sessão expirada. Faça login novamente.';
+        feedbackMsg = l10n.syncExpiredSession;
         feedbackColor = theme.colorScheme.error;
       case SyncState.semConexao:
-        feedbackMsg =
-            notifier.mensagemErro ??
-            'Sem conexão. Conecte-se à internet para sincronizar.';
+        feedbackMsg = notifier.mensagemErro ?? l10n.syncNoConnection;
         feedbackColor = AppColors.warningAlt;
       case SyncState.sincronizando:
-        feedbackMsg = notifier.mensagemProgresso ?? 'Sincronizando…';
+        feedbackMsg = notifier.mensagemProgresso ?? l10n.syncInProgress;
         feedbackColor = theme.colorScheme.onSurfaceVariant;
       case SyncState.erro:
-        feedbackMsg = notifier.mensagemErro ?? 'Erro inesperado.';
+        feedbackMsg = notifier.mensagemErro ?? l10n.syncUnexpectedError;
         feedbackColor = theme.colorScheme.error;
       default:
-        feedbackMsg = 'Última sincronização: --';
+        break;
     }
 
     return Column(
@@ -487,7 +489,7 @@ class _ActionSection extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Iniciar Sincronização Total',
+                      l10n.syncStartButton,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

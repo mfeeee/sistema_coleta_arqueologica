@@ -177,7 +177,7 @@ class AuthService {
     try {
       final response = await httpClient
           .post(
-            Uri.parse('$baseUrl/auth/forgot-password'),
+            Uri.parse('$baseUrl/auth/password-reset'),
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',

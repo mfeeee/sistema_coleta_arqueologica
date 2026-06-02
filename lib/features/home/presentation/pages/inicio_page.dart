@@ -20,6 +20,7 @@ import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/a
 import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/map_legend.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/pino_marker.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/recent_activities_section.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class InicioPage extends StatefulWidget {
   const InicioPage({super.key});
@@ -372,6 +373,7 @@ class _FloatingSearchBarState extends State<_FloatingSearchBar> {
   final _overlayController = OverlayPortalController();
   final _layerLink = LayerLink();
   List<PinoMapa> _sugestoes = [];
+  bool _estaGravando = false;
 
   static final _regexCoordenada = RegExp(
     r'^([-+]?\d+(?:\.\d+)?)\s*[,;]\s*([-+]?\d+(?:\.\d+)?)$',
@@ -491,16 +493,24 @@ class _FloatingSearchBarState extends State<_FloatingSearchBar> {
                   ),
                   ValueListenableBuilder<TextEditingValue>(
                     valueListenable: _controller,
-                    builder: (context, value, _) => value.text.isNotEmpty
-                        ? GestureDetector(
-                            onTap: _limpar,
-                            child: Icon(
-                              Icons.close,
-                              color: theme.colorScheme.onSurfaceVariant,
-                              size: 20,
-                            ),
-                          )
-                        : const _AudioSlot(),
+                    builder: (context, value, _) {
+                      if (value.text.isNotEmpty && !_estaGravando) {
+                        return GestureDetector(
+                          onTap: _limpar,
+                          child: Icon(
+                            Icons.close,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            size: 20,
+                          ),
+                        );
+                      }
+                      return _BotaoMicrofone(
+                        controller: _controller,
+                        onTextoReconhecido: _aoMudar,
+                        onGravandoMudou: (gravando) =>
+                            setState(() => _estaGravando = gravando),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -512,15 +522,94 @@ class _FloatingSearchBarState extends State<_FloatingSearchBar> {
   }
 }
 
-class _AudioSlot extends StatelessWidget {
-  const _AudioSlot();
+class _BotaoMicrofone extends StatefulWidget {
+  const _BotaoMicrofone({
+    required this.controller,
+    required this.onTextoReconhecido,
+    required this.onGravandoMudou,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onTextoReconhecido;
+  final ValueChanged<bool> onGravandoMudou;
+
+  @override
+  State<_BotaoMicrofone> createState() => _BotaoMicrofoneState();
+}
+
+class _BotaoMicrofoneState extends State<_BotaoMicrofone> {
+  final _stt = SpeechToText();
+  bool _disponivel = false;
+  bool _ouvindo = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _inicializar();
+  }
+
+  @override
+  void dispose() {
+    _stt.cancel();
+    super.dispose();
+  }
+
+  Future<void> _inicializar() async {
+    final disponivel = await _stt.initialize(
+      onError: (e) {
+        log('STT erro: ${e.errorMsg}', name: '_BotaoMicrofone');
+        if (mounted) {
+          setState(() => _ouvindo = false);
+          widget.onGravandoMudou(false);
+        }
+      },
+      onStatus: (status) {
+        if (!mounted) return;
+        final gravando = _stt.isListening;
+        if (_ouvindo != gravando) {
+          setState(() => _ouvindo = gravando);
+          widget.onGravandoMudou(gravando);
+        }
+      },
+    );
+    if (mounted) setState(() => _disponivel = disponivel);
+  }
+
+  Future<void> _alternar() async {
+    if (_ouvindo) {
+      await _stt.stop();
+      return;
+    }
+    await _stt.listen(
+      onResult: (resultado) {
+        if (!mounted) return;
+        final texto = resultado.recognizedWords;
+        widget.controller.value = TextEditingValue(
+          text: texto,
+          selection: TextSelection.collapsed(offset: texto.length),
+        );
+        widget.onTextoReconhecido(texto);
+      },
+      listenOptions: SpeechListenOptions(
+        pauseFor: const Duration(seconds: 3),
+        localeId: 'pt_BR',
+        enableHapticFeedback: false,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Icon(
-      Icons.mic_none,
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
-      size: 20,
+    if (!_disponivel) return const SizedBox.shrink();
+    return GestureDetector(
+      onTap: _alternar,
+      child: Icon(
+        _ouvindo ? Icons.mic : Icons.mic_none,
+        color: _ouvindo
+            ? AppColors.warningAlt
+            : Theme.of(context).colorScheme.onSurfaceVariant,
+        size: 20,
+      ),
     );
   }
 }

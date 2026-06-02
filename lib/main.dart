@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer';
@@ -143,6 +144,16 @@ Future<void> main() async {
   }
 
   final router = createAppRouter(authNotifier);
+
+  AppLinks().uriLinkStream.listen((uri) {
+    if (uri.scheme == 'arqueopi' && uri.path == '/reset-password') {
+      final token = uri.queryParameters['token'];
+      final email = uri.queryParameters['email'];
+      if (token != null && email != null) {
+        router.go('/reset-password', extra: {'token': token, 'email': email});
+      }
+    }
+  });
 
   runApp(
     AppScope.create(

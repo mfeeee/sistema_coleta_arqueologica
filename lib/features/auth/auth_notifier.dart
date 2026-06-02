@@ -119,18 +119,18 @@ class AuthNotifier extends ChangeNotifier {
             notifyListeners();
           },
         );
-        _bemMaterialRepository.sincronizarBens().then(
-          (_) => contadorSyncBens.value++,
-          onError: (Object e, StackTrace st) {
-            log(
-              'Sync bens pós-login falhou',
-              error: e,
-              stackTrace: st,
-              name: 'AuthNotifier',
-            );
-            contadorSyncBens.value++;
-          },
-        );
+        _bemMaterialRepository
+            .sincronizarBens()
+            .then((_) => contadorSyncBens.value++)
+            .catchError((Object e, StackTrace st) {
+              log(
+                'Sync bens pós-login falhou',
+                error: e,
+                stackTrace: st,
+                name: 'AuthNotifier',
+              );
+              return contadorSyncBens.value++;
+            });
         _pushPendentesPoLogin();
         BackgroundSyncService.agendar().then(
           (_) {},

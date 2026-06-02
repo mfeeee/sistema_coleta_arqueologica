@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:drift/drift.dart';
 import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
@@ -6,7 +9,6 @@ import '../../domain/entities/bem_material_entity.dart';
 class BemMaterialModel extends BemMaterialEntity {
   const BemMaterialModel({
     required super.id,
-    required super.coletaId,
     required super.nomeBem,
     required super.natureza,
     required super.tipo,
@@ -15,6 +17,7 @@ class BemMaterialModel extends BemMaterialEntity {
     required super.publicado,
     required super.criadoEm,
     required super.atualizadoEm,
+    super.coletaId,
     super.codigoIphan,
     super.meiosAcesso,
     super.uf,
@@ -87,36 +90,84 @@ class BemMaterialModel extends BemMaterialEntity {
     );
   }
 
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  static List<String> _parseStringList(dynamic value) {
+    if (value is List) return value.cast<String>();
+    if (value is String && value.isNotEmpty) {
+      return value.split(',').map((e) => e.trim()).toList();
+    }
+    return [];
+  }
+
+  static List<ArtefatoBem> _parseArtefatos(dynamic value) {
+    late final List<dynamic> list;
+    if (value is List) {
+      list = value;
+    } else if (value is String && value.isNotEmpty) {
+      final decoded = jsonDecode(value);
+      list = decoded is List ? decoded : [];
+    } else {
+      return [];
+    }
+    return list
+        .map((e) {
+          final nome = e is Map ? e['value'] as String? : e as String?;
+          if (nome == null) return null;
+          try {
+            return ArtefatoBem.values.byName(nome);
+          } catch (_) {
+            return null;
+          }
+        })
+        .whereType<ArtefatoBem>()
+        .toList();
+  }
+
   factory BemMaterialModel.fromJson(Map<String, dynamic> json) {
+    log(
+      'BemMaterialModel.fromJson — chaves: ${json.keys.toList()}',
+      name: 'BemMaterialModel',
+    );
+
+    String enumStr(dynamic value) {
+      if (value is Map) return (value['value'] as String?) ?? '';
+      return value as String? ?? '';
+    }
+
     return BemMaterialModel(
-      id: json['uuid'] as String,
-      coletaId: json['coleta_id'] as String,
+      id: json['id'] as String,
+      coletaId: json['coleta_id'] as String?,
       codigoIphan: json['codigo_iphan'] as String?,
       nomeBem: json['nome_bem'] as String,
-      nomesPopulares:
-          (json['nomes_populares'] as List<dynamic>?)?.cast<String>() ?? [],
-      natureza: json['natureza'] as String,
-      tipo: json['tipo'] as String,
+      nomesPopulares: _parseStringList(json['nomes_populares']),
+      natureza: enumStr(json['natureza']),
+      tipo: enumStr(json['tipo']),
       meiosAcesso: json['meios_acesso'] as String?,
-      artefatos:
-          (json['artefatos'] as List<dynamic>?)
-              ?.map((e) => ArtefatoBem.values.byName(e as String))
-              .toList() ??
-          [],
+      artefatos: _parseArtefatos(json['artefatos']),
       publicado: json['publicado'] as bool? ?? false,
       uf: json['uf'] as String?,
       municipio: json['municipio'] as String?,
       cep: json['cep'] as String?,
       endereco: json['endereco'] as String?,
-      latitude: (json['latitude'] as num?)?.toDouble(),
-      longitude: (json['longitude'] as num?)?.toDouble(),
-      geojson: json['geojson'] as String?,
+      latitude: _parseDouble(json['latitude']),
+      longitude: _parseDouble(json['longitude']),
+      geojson: json['geojson'] is String
+          ? json['geojson'] as String
+          : json['geojson'] != null
+          ? jsonEncode(json['geojson'])
+          : null,
       anoRegistro: json['ano_registro'] as int?,
       descricaoAtualizacao: json['descricao_atualizacao'] as String?,
-      criadoEm: DateTime.parse(json['criado_em'] as String),
-      atualizadoEm: DateTime.parse(json['atualizado_em'] as String),
-      deletadoEm: json['deletado_em'] != null
-          ? DateTime.tryParse(json['deletado_em'] as String)
+      criadoEm: DateTime.parse(json['created_at'] as String),
+      atualizadoEm: DateTime.parse(json['updated_at'] as String),
+      deletadoEm: json['deleted_at'] != null
+          ? DateTime.tryParse(json['deleted_at'] as String)
           : null,
     );
   }
@@ -124,7 +175,7 @@ class BemMaterialModel extends BemMaterialEntity {
   BensMateriaisCompanion toCompanion() {
     return BensMateriaisCompanion.insert(
       uuid: id,
-      coletaId: coletaId,
+      coletaId: coletaId ?? '',
       nomeBem: nomeBem,
       natureza: natureza,
       tipo: tipo,

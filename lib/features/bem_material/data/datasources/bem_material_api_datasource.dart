@@ -43,10 +43,28 @@ class BemMaterialApiDatasourceImpl implements BemMaterialApiDatasource {
           .timeout(_kTimeout);
 
       if (response.statusCode == 200) {
-        final body = jsonDecode(response.body) as Map<String, dynamic>;
-        final data = body['data'] as List<dynamic>? ?? [];
+        log(
+          'fetchBens p$page — body(500): ${response.body.substring(0, response.body.length.clamp(0, 500))}',
+          name: 'BemMaterialApiDatasource',
+        );
+        final decoded = jsonDecode(response.body);
+        final data = _extrairLista(decoded);
         return data
-            .map((e) => BemMaterialModel.fromJson(e as Map<String, dynamic>))
+            .whereType<Map<String, dynamic>>()
+            .map((e) {
+              try {
+                return BemMaterialModel.fromJson(e);
+              } catch (err, st) {
+                log(
+                  'fromJson falhou — id: ${e['id']} — $err',
+                  name: 'BemMaterialApiDatasource',
+                  error: err,
+                  stackTrace: st,
+                );
+                return null;
+              }
+            })
+            .whereType<BemMaterialModel>()
             .toList();
       }
 
@@ -82,5 +100,39 @@ class BemMaterialApiDatasourceImpl implements BemMaterialApiDatasource {
       );
       throw const ErroDeRede(TratadorDeErros.erroInesperado);
     }
+  }
+
+  /// Extrai a lista de bens de qualquer formato de envelope que a API retorne.
+  ///
+  /// Suporta:
+  ///   - `[{...}]`                           → resposta direta como lista
+  ///   - `{"data": [{...}]}`                 → envelope simples
+  ///   - `{"data": {"data": [{...}], ...}}`  → Laravel paginate com wrapper
+  ///   - `{"data": "[{...}]"}`               → JSON double-encoded
+  static List<dynamic> _extrairLista(dynamic decoded) {
+    if (decoded is List) return decoded;
+
+    if (decoded is Map<String, dynamic>) {
+      final raw = decoded['data'];
+
+      if (raw is List) return raw;
+
+      if (raw is Map<String, dynamic>) {
+        final inner = raw['data'];
+        if (inner is List) return inner;
+      }
+
+      if (raw is String) {
+        final inner = jsonDecode(raw);
+        if (inner is List) return inner;
+      }
+
+      log(
+        'fetchBens — estrutura inesperada em data: ${raw?.runtimeType}',
+        name: 'BemMaterialApiDatasource',
+      );
+    }
+
+    return [];
   }
 }

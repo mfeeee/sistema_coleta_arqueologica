@@ -8,6 +8,8 @@ abstract class BemMaterialLocalDatasource {
   Future<BemMaterialModel?> getById(String uuid);
   Future<void> inserir(BemMaterialModel bemMaterial);
   Future<void> deletar(String uuid);
+  Future<int> count();
+  Future<int> countPublicados();
 }
 
 class BemMaterialLocalDatasourceImpl implements BemMaterialLocalDatasource {
@@ -50,5 +52,21 @@ class BemMaterialLocalDatasourceImpl implements BemMaterialLocalDatasource {
   Future<void> deletar(String uuid) async {
     await (_db.update(_db.bensMateriais)..where((t) => t.uuid.equals(uuid)))
         .write(BensMateriaisCompanion(deletadoEm: Value(DateTime.now())));
+  }
+
+  @override
+  Future<int> count() async {
+    final rows = await (_db.select(
+      _db.bensMateriais,
+    )..where((t) => t.deletadoEm.isNull())).get();
+    return rows.length;
+  }
+
+  @override
+  Future<int> countPublicados() async {
+    final rows = await (_db.select(
+      _db.bensMateriais,
+    )..where((t) => t.publicado.equals(true) & t.deletadoEm.isNull())).get();
+    return rows.length;
   }
 }

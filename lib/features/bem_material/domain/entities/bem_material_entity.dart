@@ -1,4 +1,7 @@
+import 'package:latlong2/latlong.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
+import 'package:sistema_coleta_arqueologica/features/home/domain/entities/pino_mapa.dart';
+import 'package:sistema_coleta_arqueologica/features/home/domain/entities/tipo_pino.dart';
 
 class BemMaterialEntity {
   final String id;
@@ -52,4 +55,18 @@ class BemMaterialEntity {
     this.descricaoAtualizacao,
     this.deletadoEm,
   });
+}
+
+extension BemParaMapa on BemMaterialEntity {
+  PinoMapa? get paraMapa {
+    final lat = latitude;
+    final lng = longitude;
+    if (lat == null || lng == null) return null;
+    return PinoMapa(
+      id: id,
+      nomeBem: nomeBem,
+      posicao: LatLng(lat, lng),
+      tipo: TipoPino.bemPublicado,
+    );
+  }
 }

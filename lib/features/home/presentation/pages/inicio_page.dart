@@ -1,18 +1,23 @@
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
-import 'package:sistema_coleta_arqueologica/features/home/domain/entities/sitio_mapa_entity.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:sistema_coleta_arqueologica/features/home/domain/entities/pino_mapa.dart';
+import 'package:sistema_coleta_arqueologica/features/home/domain/entities/tipo_pino.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/viewmodels/home_viewmodel.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/activity_summary_section.dart';
+import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/map_legend.dart';
+import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/pino_marker.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/recent_activities_section.dart';
-import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/sitio_marker.dart';
 
 class InicioPage extends StatefulWidget {
   const InicioPage({super.key});
@@ -37,6 +42,7 @@ class _InicioPageState extends State<InicioPage> {
       _estaOnline = scope.conectividadeService.estaOnline;
       _viewModel = HomeViewModel(
         coletaRepository: scope.coletaRepository,
+        bemMaterialRepository: scope.bemMaterialRepository,
         authNotifier: scope.authNotifier,
       );
       _viewModel.carregarDados();
@@ -65,11 +71,14 @@ class _InicioPageState extends State<InicioPage> {
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.paddingOf(context).top;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final peekBottom = screenHeight * 0.175 + 16.0;
 
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          _MapaLayer(sitiosNoMapa: _viewModel.sitiosNoMapa),
+          _MapaLayer(pinosNoMapa: _viewModel.pinosNoMapa),
+          Positioned(left: 16.0, bottom: peekBottom, child: const MapLegend()),
           DraggableScrollableSheet(
             initialChildSize: 0.175,
             minChildSize: 0.175,
@@ -105,20 +114,70 @@ class _InicioPageState extends State<InicioPage> {
 
 // ── Camada do mapa ────────────────────────────────────────────────────────────
 
-class _MapaLayer extends StatelessWidget {
-  const _MapaLayer({required this.sitiosNoMapa});
+class _MapaLayer extends StatefulWidget {
+  const _MapaLayer({required this.pinosNoMapa});
 
-  final ValueNotifier<List<SitioMapaEntity>> sitiosNoMapa;
+  final ValueNotifier<List<PinoMapa>> pinosNoMapa;
 
-  // Parnaíba, PI — coordenada fixa até geolocator real ser integrado.
+  @override
+  State<_MapaLayer> createState() => _MapaLayerState();
+}
+
+class _MapaLayerState extends State<_MapaLayer> {
+  final MapController _mapController = MapController();
+
   static const LatLng _centroInicial = LatLng(-2.905, -41.776);
 
   @override
+  void initState() {
+    super.initState();
+    _inicializarLocalizacao();
+  }
+
+  @override
+  void dispose() {
+    _mapController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _inicializarLocalizacao() async {
+    try {
+      var permissao = await Geolocator.checkPermission();
+      if (permissao == LocationPermission.denied) {
+        permissao = await Geolocator.requestPermission();
+      }
+      if (permissao == LocationPermission.denied ||
+          permissao == LocationPermission.deniedForever) {
+        return;
+      }
+      final posicao = await Geolocator.getCurrentPosition().timeout(
+        const Duration(seconds: 8),
+      );
+      if (mounted) {
+        _mapController.move(LatLng(posicao.latitude, posicao.longitude), 15.0);
+      }
+    } catch (e) {
+      log('Geolocalização indisponível', name: '_MapaLayer', error: e);
+    }
+  }
+
+  static void _navegarParaPino(BuildContext context, PinoMapa pino) {
+    switch (pino.tipo) {
+      case TipoPino.bemPublicado:
+        context.push('/bem-material/${pino.id}');
+      case TipoPino.coleta:
+      case TipoPino.padrao:
+        context.push('/detalhes-coleta', extra: pino.id);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<SitioMapaEntity>>(
-      valueListenable: sitiosNoMapa,
-      builder: (context, sitios, _) {
+    return ValueListenableBuilder<List<PinoMapa>>(
+      valueListenable: widget.pinosNoMapa,
+      builder: (context, pinos, _) {
         return FlutterMap(
+          mapController: _mapController,
           options: const MapOptions(
             initialCenter: _centroInicial,
             initialZoom: 13.0,
@@ -127,15 +186,23 @@ class _MapaLayer extends StatelessWidget {
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'br.edu.ifpi.arqueadata',
+              tileProvider: FMTCTileProvider(
+                stores: const {
+                  'arqueologico': BrowseStoreStrategy.readUpdateCreate,
+                },
+              ),
             ),
             MarkerLayer(
-              markers: sitios
+              markers: pinos
                   .map(
-                    (s) => Marker(
-                      point: s.posicao,
+                    (p) => Marker(
+                      point: p.posicao,
                       width: 16,
                       height: 16,
-                      child: const SitioMarker(),
+                      child: GestureDetector(
+                        onTap: () => _navegarParaPino(context, p),
+                        child: PinoMarker(tipo: p.tipo),
+                      ),
                     ),
                   )
                   .toList(),

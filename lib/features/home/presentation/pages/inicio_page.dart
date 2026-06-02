@@ -1,8 +1,6 @@
 import 'dart:developer';
-import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -327,10 +325,10 @@ class _FloatingHeader extends StatelessWidget {
                     ]),
                     builder: (context, _) {
                       final caminho = fotoPerfilPath.value;
-                      if (!kIsWeb && caminho != null) {
+                      if (caminho != null) {
                         return CircleAvatar(
                           radius: 18,
-                          backgroundImage: FileImage(File(caminho)),
+                          backgroundImage: NetworkImage(caminho),
                         );
                       }
                       return CircleAvatar(
@@ -896,8 +894,8 @@ class _WelcomeSection extends StatelessWidget {
                   ),
                 ),
                 padding: const EdgeInsets.all(2.0),
-                child: !kIsWeb && caminho != null
-                    ? CircleAvatar(backgroundImage: FileImage(File(caminho)))
+                child: caminho != null
+                    ? CircleAvatar(backgroundImage: NetworkImage(caminho))
                     : CircleAvatar(
                         backgroundColor: theme.colorScheme.primaryContainer,
                         child: Text(

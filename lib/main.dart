@@ -32,6 +32,7 @@ import 'core/database/app_database.dart';
 import 'core/services/secure_storage_service.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/authenticated_http_client.dart';
+import 'core/services/profile_service.dart';
 import 'package:http/http.dart' as http;
 import 'features/auth/auth_notifier.dart';
 import 'core/di/app_scope.dart';
@@ -88,6 +89,11 @@ Future<void> main() async {
   final authenticatedClient = AuthenticatedHttpClient(
     secureStorage: secureStorage,
     authService: authService,
+  );
+
+  final profileService = ProfileService(
+    httpClient: authenticatedClient,
+    baseUrl: kApiBaseUrl,
   );
 
   final coletaApiDatasource = ColetaApiDatasourceImpl(
@@ -173,6 +179,7 @@ Future<void> main() async {
       idiomaAtual: idiomaAtual,
       notificacaoRepository: notificacaoRepository,
       preferenciasRepository: preferenciasRepository,
+      profileService: profileService,
       child: _ArqueoApp(
         router: router,
         temaModo: temaModo,

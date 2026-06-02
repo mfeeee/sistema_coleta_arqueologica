@@ -60,6 +60,7 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
         path: '/notificacoes',
         builder: (_, __) => const NotificationsPage(),
       ),
+      GoRoute(path: '/perfil', builder: (_, __) => const ProfilePage()),
       GoRoute(
         path: '/perfil/preferencias-notificacao',
         builder: (_, __) => const PreferenciasNotificacaoPage(),
@@ -97,14 +98,6 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
               GoRoute(
                 path: '/sincronizar',
                 builder: (_, __) => const SyncPage(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(
-                path: '/perfil',
-                builder: (_, GoRouterState state) => const ProfilePage(),
               ),
             ],
           ),

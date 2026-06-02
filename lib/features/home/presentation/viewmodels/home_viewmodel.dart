@@ -42,7 +42,8 @@ class HomeViewModel {
           .map((c) => c.paraMapa)
           .toList();
 
-      final bens = await _bemMaterialRepository.getAll();
+      final List<BemMaterialEntity> bens =
+          await _bemMaterialRepository.getAll();
       final pinosBem = bens
           .where((b) => b.publicado)
           .map((b) => b.paraMapa)

@@ -101,6 +101,7 @@ class _InicioPageState extends State<InicioPage> {
               viewModel: _viewModel,
               onNovaColeta: _irParaNovaColeta,
               estaOnline: _estaOnline,
+              fotoPerfilPath: _fotoPerfilPath,
             ),
           ),
           Positioned(
@@ -230,6 +231,13 @@ class _MapaLayerState extends State<_MapaLayer> {
 
 // ── Elementos flutuantes ──────────────────────────────────────────────────────
 
+String _iniciais(String? nome) {
+  if (nome == null || nome.isEmpty) return '?';
+  final partes = nome.trim().split(RegExp(r'\s+'));
+  if (partes.length == 1) return partes[0][0].toUpperCase();
+  return '${partes.first[0]}${partes.last[0]}'.toUpperCase();
+}
+
 class _FloatingHeader extends StatelessWidget {
   const _FloatingHeader({
     required this.topPadding,
@@ -240,13 +248,6 @@ class _FloatingHeader extends StatelessWidget {
   final double topPadding;
   final AuthNotifier authNotifier;
   final ValueNotifier<String?> fotoPerfilPath;
-
-  static String _iniciais(String? nome) {
-    if (nome == null || nome.isEmpty) return '?';
-    final partes = nome.trim().split(RegExp(r'\s+'));
-    if (partes.length == 1) return partes[0][0].toUpperCase();
-    return '${partes.first[0]}${partes.last[0]}'.toUpperCase();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -318,7 +319,7 @@ class _FloatingHeader extends StatelessWidget {
                 label: 'Ir para perfil',
                 button: true,
                 child: GestureDetector(
-                  onTap: () => context.go('/perfil'),
+                  onTap: () => context.push('/perfil'),
                   child: ListenableBuilder(
                     listenable: Listenable.merge([
                       authNotifier,
@@ -699,12 +700,14 @@ class _BottomSheetContent extends StatelessWidget {
     required this.viewModel,
     required this.onNovaColeta,
     required this.estaOnline,
+    required this.fotoPerfilPath,
   });
 
   final ScrollController scrollController;
   final HomeViewModel viewModel;
   final VoidCallback onNovaColeta;
   final ValueNotifier<bool> estaOnline;
+  final ValueNotifier<String?> fotoPerfilPath;
 
   @override
   Widget build(BuildContext context) {
@@ -738,7 +741,10 @@ class _BottomSheetContent extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _WelcomeSection(nomeUsuario: viewModel.nomeUsuario),
+          _WelcomeSection(
+            nomeUsuario: viewModel.nomeUsuario,
+            fotoPerfilPath: fotoPerfilPath,
+          ),
           ValueListenableBuilder<int>(
             valueListenable: viewModel.coletasPendentes,
             builder: (context, qtd, _) {
@@ -858,9 +864,13 @@ class _BannerPendentes extends StatelessWidget {
 }
 
 class _WelcomeSection extends StatelessWidget {
-  const _WelcomeSection({required this.nomeUsuario});
+  const _WelcomeSection({
+    required this.nomeUsuario,
+    required this.fotoPerfilPath,
+  });
 
   final ValueNotifier<String> nomeUsuario;
+  final ValueNotifier<String?> fotoPerfilPath;
 
   @override
   Widget build(BuildContext context) {
@@ -871,21 +881,35 @@ class _WelcomeSection extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Row(
         children: <Widget>[
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                width: 2.0,
-              ),
-            ),
-            padding: const EdgeInsets.all(2.0),
-            child: CircleAvatar(
-              backgroundColor: theme.colorScheme.primaryContainer,
-              child: Icon(Icons.person, color: theme.colorScheme.primary),
-            ),
+          ListenableBuilder(
+            listenable: Listenable.merge([nomeUsuario, fotoPerfilPath]),
+            builder: (context, _) {
+              final caminho = fotoPerfilPath.value;
+              return Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                    width: 2.0,
+                  ),
+                ),
+                padding: const EdgeInsets.all(2.0),
+                child: !kIsWeb && caminho != null
+                    ? CircleAvatar(backgroundImage: FileImage(File(caminho)))
+                    : CircleAvatar(
+                        backgroundColor: theme.colorScheme.primaryContainer,
+                        child: Text(
+                          _iniciais(nomeUsuario.value),
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+              );
+            },
           ),
           const SizedBox(width: 16),
           Expanded(

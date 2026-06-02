@@ -57,7 +57,7 @@ class _LegendaItem extends StatelessWidget {
             decoration: BoxDecoration(
               color: cor,
               shape: BoxShape.circle,
-              border: Border.all(color: colorScheme.onPrimary, width: 1.5),
+              border: Border.all(color: Colors.white, width: 1.5),
             ),
           ),
           const SizedBox(width: 8),

@@ -36,6 +36,15 @@ class HomeViewModel {
     nomeUsuario.value = _authNotifier.userName ?? '';
   }
 
+  static bool _coordsValidas(double? lat, double? lng) =>
+      lat != null &&
+      lng != null &&
+      lat >= -90.0 &&
+      lat <= 90.0 &&
+      lng >= -180.0 &&
+      lng <= 180.0 &&
+      !(lat == 0.0 && lng == 0.0);
+
   Future<void> carregarDados() async {
     erroAtual.value = null;
     try {
@@ -46,17 +55,22 @@ class HomeViewModel {
       coletasRecentes.value = await _coletaRepository.getRecentes(5);
 
       final pinosColeta = coletasRecentes.value
-          .where((c) => c.latitude != 0.0 || c.longitude != 0.0)
+          .where((c) => _coordsValidas(c.latitude, c.longitude))
           .map((c) => c.paraMapa)
           .toList();
 
       final List<BemMaterialEntity> bens = await _bemMaterialRepository
           .getAll();
-      final pinosBem = bens
-          .where((b) => b.publicado)
+      final bensPublicados = bens.where((b) => b.publicado).toList();
+      final pinosBem = bensPublicados
+          .where((b) => _coordsValidas(b.latitude, b.longitude))
           .map((b) => b.paraMapa)
           .whereType<PinoMapa>()
           .toList();
+      log(
+        'bens no DB: ${bens.length} | publicados: ${bensPublicados.length} | com coords: ${pinosBem.length}',
+        name: 'HomeViewModel',
+      );
 
       pinosNoMapa.value = [...pinosColeta, ...pinosBem];
     } catch (e, st) {

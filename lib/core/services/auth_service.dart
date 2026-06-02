@@ -31,11 +31,13 @@ final class AuthSuccess extends AuthResult {
     required this.userId,
     this.email,
     this.classificacao,
+    this.avatarUrl,
   });
   final String userName;
   final String userId;
   final String? email;
   final String? classificacao;
+  final String? avatarUrl;
 }
 
 final class AuthFailure extends AuthResult {
@@ -82,6 +84,7 @@ class AuthService {
             userId: user?['id']?.toString() ?? '',
             email: user?['email'] as String?,
             classificacao: user?['classificacao'] as String?,
+            avatarUrl: user?['avatar_url'] as String?,
           );
 
         case 401:
@@ -146,6 +149,7 @@ class AuthService {
             userId: userBody?['id']?.toString() ?? '',
             email: email,
             classificacao: classificacao,
+            avatarUrl: null,
           );
 
         case 422:

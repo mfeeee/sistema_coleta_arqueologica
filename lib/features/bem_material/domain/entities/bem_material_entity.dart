@@ -5,7 +5,7 @@ import 'package:sistema_coleta_arqueologica/features/home/domain/entities/tipo_p
 
 class BemMaterialEntity {
   final String id;
-  final String coletaId;
+  final String? coletaId;
 
   final String? codigoIphan;
   final String nomeBem;
@@ -33,7 +33,6 @@ class BemMaterialEntity {
 
   const BemMaterialEntity({
     required this.id,
-    required this.coletaId,
     required this.nomeBem,
     required this.natureza,
     required this.tipo,
@@ -42,6 +41,7 @@ class BemMaterialEntity {
     required this.publicado,
     required this.criadoEm,
     required this.atualizadoEm,
+    this.coletaId,
     this.codigoIphan,
     this.meiosAcesso,
     this.uf,

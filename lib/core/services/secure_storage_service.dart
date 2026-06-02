@@ -12,6 +12,7 @@ class SecureStorageService {
   static const _keyJwt = 'jwt_token';
   static const _keyRefreshToken = 'refresh_token';
   static const _keyDbPassphrase = 'db_passphrase';
+  static const _keyUltimoSyncBens = 'ultimo_sync_bens';
 
   Future<void> _safeWrite(String key, String value) async {
     try {
@@ -48,6 +49,14 @@ class SecureStorageService {
 
   Future<void> saveJwt(String token) => _safeWrite(_keyJwt, token);
   Future<String?> getJwt() => _safeRead(_keyJwt);
+
+  Future<DateTime?> getUltimoSyncBens() async {
+    final valor = await _safeRead(_keyUltimoSyncBens);
+    return valor != null ? DateTime.tryParse(valor) : null;
+  }
+
+  Future<void> setUltimoSyncBens(DateTime data) =>
+      _safeWrite(_keyUltimoSyncBens, data.toIso8601String());
 
   Future<void> saveRefreshToken(String token) =>
       _safeWrite(_keyRefreshToken, token);

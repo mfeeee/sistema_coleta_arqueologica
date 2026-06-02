@@ -15,6 +15,9 @@ import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:sistema_coleta_arqueologica/core/services/background_sync_service.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/log_capture.dart';
+import 'package:sistema_coleta_arqueologica/features/bem_material/data/datasources/bem_material_api_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/bem_material/data/datasources/bem_material_local_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/bem_material/data/repositories/bem_material_repository_impl.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/repositories/coleta_repository_impl.dart';
@@ -114,11 +117,23 @@ Future<void> main() async {
     coletaRepository,
   );
 
+  final bemMaterialApiDatasource = BemMaterialApiDatasourceImpl(
+    httpClient: authenticatedClient,
+    secureStorage: secureStorage,
+    baseUrl: kApiBaseUrl,
+  );
+  final bemMaterialRepository = BemMaterialRepositoryImpl(
+    local: BemMaterialLocalDatasourceImpl(db),
+    api: bemMaterialApiDatasource,
+    secureStorage: secureStorage,
+  );
+
   final authNotifier = AuthNotifier(
     authService: authService,
     coletaRepository: coletaRepository,
     pullService: pullService,
     obterColetasPendentesUseCase: obterColetasPendentesUseCase,
+    bemMaterialRepository: bemMaterialRepository,
   );
 
   authenticatedClient.onSessaoExpirada = authNotifier.sairPorSessaoExpirada;
@@ -180,6 +195,7 @@ Future<void> main() async {
       notificacaoRepository: notificacaoRepository,
       preferenciasRepository: preferenciasRepository,
       profileService: profileService,
+      bemMaterialRepository: bemMaterialRepository,
       child: _ArqueoApp(
         router: router,
         temaModo: temaModo,

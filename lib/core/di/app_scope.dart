@@ -15,9 +15,7 @@ import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/p
 import '../../features/sync/domain/sync_notifier.dart';
 import '../../features/auth/auth_notifier.dart';
 import '../../features/coleta/data/datasources/coleta_local_datasource.dart';
-import '../../features/bem_material/data/datasources/bem_material_local_datasource.dart';
 import '../../features/coleta/data/repositories/coleta_repository_impl.dart';
-import '../../features/bem_material/data/repositories/bem_material_repository_impl.dart';
 import '../../features/sync/data/sync_api_datasource.dart';
 import '../../features/sync/data/sync_repository.dart';
 import '../../core/database/app_database.dart';
@@ -66,15 +64,11 @@ class AppScope extends InheritedWidget {
     required NotificacaoRepository notificacaoRepository,
     required PreferenciasNotificacaoRepository preferenciasRepository,
     required ProfileService profileService,
+    required BemMaterialRepository bemMaterialRepository,
     required Widget child,
   }) {
     final coletaDatasource = ColetaLocalDatasourceImpl(database);
-    final bemMaterialDatasource = BemMaterialLocalDatasourceImpl(database);
-
     final coletaRepository = ColetaRepositoryImpl(coletaDatasource);
-    final bemMaterialRepository = BemMaterialRepositoryImpl(
-      bemMaterialDatasource,
-    );
 
     final syncApiDatasource = SyncApiDatasourceImpl(dio);
     final fotoUploadService = FotoUploadService(dio);

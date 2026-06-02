@@ -35,6 +35,7 @@ class AppScope extends InheritedWidget {
     required this.prefs,
     required this.temaModo,
     required this.idiomaAtual,
+    required this.fotoPerfilPath,
     required super.child,
   });
 
@@ -49,6 +50,7 @@ class AppScope extends InheritedWidget {
   final SharedPreferences prefs;
   final ValueNotifier<ThemeMode> temaModo;
   final ValueNotifier<Locale> idiomaAtual;
+  final ValueNotifier<String?> fotoPerfilPath;
 
   factory AppScope.create({
     required AppDatabase database,
@@ -99,6 +101,7 @@ class AppScope extends InheritedWidget {
       prefs: prefs,
       temaModo: temaModo,
       idiomaAtual: idiomaAtual,
+      fotoPerfilPath: ValueNotifier<String?>(null),
       child: child,
     );
   }
@@ -121,5 +124,6 @@ class AppScope extends InheritedWidget {
       conectividadeService != oldWidget.conectividadeService ||
       prefs != oldWidget.prefs ||
       temaModo != oldWidget.temaModo ||
-      idiomaAtual != oldWidget.idiomaAtual;
+      idiomaAtual != oldWidget.idiomaAtual ||
+      fotoPerfilPath != oldWidget.fotoPerfilPath;
 }

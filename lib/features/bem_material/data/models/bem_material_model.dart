@@ -45,7 +45,18 @@ class BemMaterialModel extends BemMaterialEntity {
       tipo: row.tipo,
       meiosAcesso: row.meiosAcesso,
       artefatos: row.artefatos
-          .map((e) => ArtefatoBem.values.byName(e))
+          .map((e) {
+            try {
+              return ArtefatoBem.values.byName(e);
+            } catch (_) {
+              log(
+                'fromRow: artefato desconhecido "$e" — ignorando',
+                name: 'BemMaterialModel',
+              );
+              return null;
+            }
+          })
+          .whereType<ArtefatoBem>()
           .toList(),
       publicado: row.publicado,
       uf: row.uf,

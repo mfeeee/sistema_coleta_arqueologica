@@ -31,6 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
         prefs: scope.prefs,
         temaModo: scope.temaModo,
         idiomaAtual: scope.idiomaAtual,
+        fotoPerfilPath: scope.fotoPerfilPath,
       );
       _viewModel.carregarEstatisticas();
     }

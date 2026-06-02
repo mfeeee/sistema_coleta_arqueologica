@@ -1,6 +1,8 @@
 import 'dart:developer';
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -30,6 +32,7 @@ class _InicioPageState extends State<InicioPage> {
   late final HomeViewModel _viewModel;
   late final AuthNotifier _authNotifier;
   late final ValueNotifier<bool> _estaOnline;
+  late final ValueNotifier<String?> _fotoPerfilPath;
   bool _initialized = false;
 
   @override
@@ -40,6 +43,7 @@ class _InicioPageState extends State<InicioPage> {
       final scope = AppScope.of(context);
       _authNotifier = scope.authNotifier;
       _estaOnline = scope.conectividadeService.estaOnline;
+      _fotoPerfilPath = scope.fotoPerfilPath;
       _viewModel = HomeViewModel(
         coletaRepository: scope.coletaRepository,
         bemMaterialRepository: scope.bemMaterialRepository,
@@ -98,7 +102,11 @@ class _InicioPageState extends State<InicioPage> {
             right: 0,
             child: Column(
               children: <Widget>[
-                _FloatingHeader(topPadding: topPadding),
+                _FloatingHeader(
+                  topPadding: topPadding,
+                  authNotifier: _authNotifier,
+                  fotoPerfilPath: _fotoPerfilPath,
+                ),
                 const Padding(
                   padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
                   child: _FloatingSearchBar(),
@@ -217,9 +225,22 @@ class _MapaLayerState extends State<_MapaLayer> {
 // ── Elementos flutuantes ──────────────────────────────────────────────────────
 
 class _FloatingHeader extends StatelessWidget {
-  const _FloatingHeader({required this.topPadding});
+  const _FloatingHeader({
+    required this.topPadding,
+    required this.authNotifier,
+    required this.fotoPerfilPath,
+  });
 
   final double topPadding;
+  final AuthNotifier authNotifier;
+  final ValueNotifier<String?> fotoPerfilPath;
+
+  static String _iniciais(String? nome) {
+    if (nome == null || nome.isEmpty) return '?';
+    final partes = nome.trim().split(RegExp(r'\s+'));
+    if (partes.length == 1) return partes[0][0].toUpperCase();
+    return '${partes.first[0]}${partes.last[0]}'.toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -287,13 +308,37 @@ class _FloatingHeader extends StatelessWidget {
                 constraints: const BoxConstraints(),
               ),
               const SizedBox(width: 12),
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: theme.colorScheme.primaryContainer,
-                child: Icon(
-                  Icons.person,
-                  color: theme.colorScheme.onPrimaryContainer,
-                  size: 20,
+              Semantics(
+                label: 'Ir para perfil',
+                button: true,
+                child: GestureDetector(
+                  onTap: () => context.go('/perfil'),
+                  child: ListenableBuilder(
+                    listenable: Listenable.merge([
+                      authNotifier,
+                      fotoPerfilPath,
+                    ]),
+                    builder: (context, _) {
+                      final caminho = fotoPerfilPath.value;
+                      if (!kIsWeb && caminho != null) {
+                        return CircleAvatar(
+                          radius: 18,
+                          backgroundImage: FileImage(File(caminho)),
+                        );
+                      }
+                      return CircleAvatar(
+                        radius: 18,
+                        backgroundColor: theme.colorScheme.primaryContainer,
+                        child: Text(
+                          _iniciais(authNotifier.userName),
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

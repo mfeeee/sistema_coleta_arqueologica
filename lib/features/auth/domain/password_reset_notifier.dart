@@ -34,11 +34,15 @@ class PasswordResetNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> confirmarReset(String token, String novaSenha) async {
+  Future<void> confirmarReset(
+    String email,
+    String token,
+    String novaSenha,
+  ) async {
     _estado = const PasswordResetLoading();
     notifyListeners();
 
-    final resultado = await _repositorio.confirmReset(token, novaSenha);
+    final resultado = await _repositorio.confirmReset(email, token, novaSenha);
 
     switch (resultado) {
       case ConfirmResetSucesso():

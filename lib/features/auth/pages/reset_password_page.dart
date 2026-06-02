@@ -7,7 +7,10 @@ import 'package:sistema_coleta_arqueologica/features/auth/domain/password_reset_
 import 'package:sistema_coleta_arqueologica/features/auth/domain/password_reset_state.dart';
 
 class ResetPasswordPage extends StatefulWidget {
-  const ResetPasswordPage({super.key});
+  const ResetPasswordPage({super.key, this.token, this.email});
+
+  final String? token;
+  final String? email;
 
   @override
   State<ResetPasswordPage> createState() => _ResetPasswordPageState();
@@ -78,7 +81,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _HeaderRedefinicao(theme: theme),
-                      _ResetForm(notifier: _notifier),
+                      _ResetForm(
+                        notifier: _notifier,
+                        tokenInicial: widget.token,
+                        emailInicial: widget.email,
+                      ),
                     ],
                   );
                 },
@@ -186,9 +193,15 @@ class _HeaderRedefinicao extends StatelessWidget {
 }
 
 class _ResetForm extends StatefulWidget {
-  const _ResetForm({required this.notifier});
+  const _ResetForm({
+    required this.notifier,
+    this.tokenInicial,
+    this.emailInicial,
+  });
 
   final PasswordResetNotifier notifier;
+  final String? tokenInicial;
+  final String? emailInicial;
 
   @override
   State<_ResetForm> createState() => _ResetFormState();
@@ -196,11 +209,17 @@ class _ResetForm extends StatefulWidget {
 
 class _ResetFormState extends State<_ResetForm> {
   final _formKey = GlobalKey<FormState>();
-  final _tokenController = TextEditingController();
+  late final TextEditingController _tokenController;
   final _senhaController = TextEditingController();
   final _confirmacaoController = TextEditingController();
   bool _senhaOculta = true;
   bool _confirmacaoOculta = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _tokenController = TextEditingController(text: widget.tokenInicial ?? '');
+  }
 
   @override
   void dispose() {
@@ -213,6 +232,7 @@ class _ResetFormState extends State<_ResetForm> {
   Future<void> _handleConfirmar() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     await widget.notifier.confirmarReset(
+      widget.emailInicial ?? '',
       _tokenController.text.trim(),
       _senhaController.text,
     );

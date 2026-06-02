@@ -80,6 +80,7 @@ class PasswordResetRepository {
   }
 
   Future<ConfirmResetResult> confirmReset(
+    String email,
     String token,
     String novaSenha,
   ) async {
@@ -92,6 +93,7 @@ class PasswordResetRepository {
               'Accept': 'application/json',
             },
             body: jsonEncode({
+              'email': email,
               'token': token,
               'password': novaSenha,
               'password_confirmation': novaSenha,

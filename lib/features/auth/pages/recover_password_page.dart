@@ -13,6 +13,7 @@ class RecoverPasswordPage extends StatefulWidget {
 
 class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
   late final AuthNotifier _notifier;
+  String _emailDigitado = '';
 
   @override
   void didChangeDependencies() {
@@ -49,13 +50,17 @@ class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
                 builder: (context, _) {
                   if (_notifier.recuperacaoStatus ==
                       RecuperacaoStatus.sucesso) {
-                    return _SucessoEnvio(theme: theme);
+                    return _SucessoEnvio(theme: theme, email: _emailDigitado);
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _HeaderArea(theme: theme),
-                      _RecoverPasswordForm(notifier: _notifier),
+                      _RecoverPasswordForm(
+                        notifier: _notifier,
+                        onEmailEnviado: (email) =>
+                            setState(() => _emailDigitado = email),
+                      ),
                     ],
                   );
                 },
@@ -69,9 +74,10 @@ class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
 }
 
 class _SucessoEnvio extends StatelessWidget {
-  const _SucessoEnvio({required this.theme});
+  const _SucessoEnvio({required this.theme, required this.email});
 
   final ThemeData theme;
+  final String email;
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +134,8 @@ class _SucessoEnvio extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          onPressed: () => context.go('/reset-password'),
+          onPressed: () =>
+              context.go('/reset-password', extra: {'email': email}),
           child: Text(
             l10n.recoverPasswordEnterCode,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -185,9 +192,13 @@ class _HeaderArea extends StatelessWidget {
 }
 
 class _RecoverPasswordForm extends StatefulWidget {
-  const _RecoverPasswordForm({required this.notifier});
+  const _RecoverPasswordForm({
+    required this.notifier,
+    required this.onEmailEnviado,
+  });
 
   final AuthNotifier notifier;
+  final void Function(String email) onEmailEnviado;
 
   @override
   State<_RecoverPasswordForm> createState() => _RecoverPasswordFormState();
@@ -209,9 +220,9 @@ class _RecoverPasswordFormState extends State<_RecoverPasswordForm> {
 
   Future<void> _handleEnviar() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    await widget.notifier.solicitarRecuperacaoSenha(
-      _emailController.text.trim(),
-    );
+    final email = _emailController.text.trim();
+    widget.onEmailEnviado(email);
+    await widget.notifier.solicitarRecuperacaoSenha(email);
   }
 
   @override

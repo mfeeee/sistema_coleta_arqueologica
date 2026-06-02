@@ -53,6 +53,9 @@ Future<void> main() async {
   final temaModo = ValueNotifier<ThemeMode>(
     modoEscuroSalvo ? ThemeMode.dark : ThemeMode.light,
   );
+  final idiomaAtual = ValueNotifier<Locale>(
+    _localeSalva(prefs.getString('pref_idioma')),
+  );
 
   if (Platform.isAndroid) {
     await Workmanager().initialize(callbackDispatcher);
@@ -163,18 +166,33 @@ Future<void> main() async {
       dio: dio,
       prefs: prefs,
       temaModo: temaModo,
+      idiomaAtual: idiomaAtual,
       notificacaoRepository: notificacaoRepository,
       preferenciasRepository: preferenciasRepository,
-      child: _ArqueoApp(router: router, temaModo: temaModo),
+      child: _ArqueoApp(
+        router: router,
+        temaModo: temaModo,
+        idiomaAtual: idiomaAtual,
+      ),
     ),
   );
 }
 
+Locale _localeSalva(String? salvo) {
+  if (salvo == 'en_US') return const Locale('en', 'US');
+  return const Locale('pt', 'BR');
+}
+
 class _ArqueoApp extends StatefulWidget {
-  const _ArqueoApp({required this.router, required this.temaModo});
+  const _ArqueoApp({
+    required this.router,
+    required this.temaModo,
+    required this.idiomaAtual,
+  });
 
   final GoRouter router;
   final ValueNotifier<ThemeMode> temaModo;
+  final ValueNotifier<Locale> idiomaAtual;
 
   @override
   State<_ArqueoApp> createState() => _ArqueoAppState();
@@ -185,15 +203,18 @@ class _ArqueoAppState extends State<_ArqueoApp> {
   void initState() {
     super.initState();
     widget.temaModo.addListener(_onTemaAlterado);
+    widget.idiomaAtual.addListener(_onIdiomaAlterado);
   }
 
   @override
   void dispose() {
     widget.temaModo.removeListener(_onTemaAlterado);
+    widget.idiomaAtual.removeListener(_onIdiomaAlterado);
     super.dispose();
   }
 
   void _onTemaAlterado() => setState(() {});
+  void _onIdiomaAlterado() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
@@ -203,6 +224,7 @@ class _ArqueoAppState extends State<_ArqueoApp> {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: widget.temaModo.value,
+      locale: widget.idiomaAtual.value,
       routerConfig: widget.router,
       localizationsDelegates: const [
         AppLocalizations.delegate,

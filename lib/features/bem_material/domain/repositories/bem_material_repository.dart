@@ -10,5 +10,5 @@ abstract class BemMaterialRepository {
   /// Busca todas as páginas da API e persiste localmente.
   /// Só executa se o banco estiver vazio ou o último sync tiver >30 dias.
   /// Retorna o total de bens importados (0 se o sync foi ignorado).
-  Future<int> sincronizarBens();
+  Future<int> sincronizarBens({bool forcar = false});
 }

@@ -39,21 +39,24 @@ class BemMaterialRepositoryImpl implements BemMaterialRepository {
   Future<void> deletar(String uuid) => _localDatasource.deletar(uuid);
 
   @override
-  Future<int> sincronizarBens() async {
-    final publicados = await _localDatasource.countPublicados();
-    final ultimoSync = await _secureStorage.getUltimoSyncBens();
+  Future<int> sincronizarBens({bool forcar = false}) async {
     final agora = DateTime.now();
-    final deveSync =
-        publicados == 0 ||
-        ultimoSync == null ||
-        agora.difference(ultimoSync).inDays > 30;
 
-    if (!deveSync) {
-      log(
-        'Bens já sincronizados recentemente ($publicados publicados) — ignorando',
-        name: 'BemMaterialRepository',
-      );
-      return 0;
+    if (!forcar) {
+      final publicados = await _localDatasource.countPublicados();
+      final ultimoSync = await _secureStorage.getUltimoSyncBens();
+      final deveSync =
+          publicados == 0 ||
+          ultimoSync == null ||
+          agora.difference(ultimoSync).inDays > 30;
+
+      if (!deveSync) {
+        log(
+          'Bens já sincronizados recentemente ($publicados publicados) — ignorando',
+          name: 'BemMaterialRepository',
+        );
+        return 0;
+      }
     }
 
     int importados = 0;

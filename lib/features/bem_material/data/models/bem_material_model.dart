@@ -141,11 +141,6 @@ class BemMaterialModel extends BemMaterialEntity {
   }
 
   factory BemMaterialModel.fromJson(Map<String, dynamic> json) {
-    log(
-      'BemMaterialModel.fromJson — chaves: ${json.keys.toList()}',
-      name: 'BemMaterialModel',
-    );
-
     String enumStr(dynamic value) {
       if (value is Map) return (value['value'] as String?) ?? '';
       return value as String? ?? '';

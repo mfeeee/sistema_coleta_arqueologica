@@ -246,6 +246,7 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     prefs: prefs,
     temaModo: ValueNotifier(ThemeMode.light),
     idiomaAtual: ValueNotifier(const Locale('pt', 'BR')),
+    fotoPerfilPath: ValueNotifier(null),
     child: MaterialApp.router(
       routerConfig: router,
       locale: const Locale('pt', 'BR'),

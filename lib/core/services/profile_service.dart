@@ -48,6 +48,7 @@ class ProfileService {
     String? email,
     String? password,
     String? passwordConfirmation,
+    String? classificacao,
   }) async {
     final payload = <String, String>{};
     if (name != null) payload['name'] = name;
@@ -56,6 +57,7 @@ class ProfileService {
     if (passwordConfirmation != null) {
       payload['password_confirmation'] = passwordConfirmation;
     }
+    if (classificacao != null) payload['classificacao'] = classificacao;
     try {
       final response = await httpClient
           .patch(

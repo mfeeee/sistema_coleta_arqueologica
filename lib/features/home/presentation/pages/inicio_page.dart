@@ -33,6 +33,7 @@ class _InicioPageState extends State<InicioPage> {
   late final AuthNotifier _authNotifier;
   late final ValueNotifier<bool> _estaOnline;
   late final ValueNotifier<String?> _fotoPerfilPath;
+  late final MapController _mapController;
   bool _initialized = false;
 
   @override
@@ -44,6 +45,7 @@ class _InicioPageState extends State<InicioPage> {
       _authNotifier = scope.authNotifier;
       _estaOnline = scope.conectividadeService.estaOnline;
       _fotoPerfilPath = scope.fotoPerfilPath;
+      _mapController = MapController();
       _viewModel = HomeViewModel(
         coletaRepository: scope.coletaRepository,
         bemMaterialRepository: scope.bemMaterialRepository,
@@ -64,6 +66,7 @@ class _InicioPageState extends State<InicioPage> {
   void dispose() {
     _authNotifier.removeListener(_onAuthAlterado);
     _viewModel.dispose();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -81,7 +84,10 @@ class _InicioPageState extends State<InicioPage> {
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          _MapaLayer(pinosNoMapa: _viewModel.pinosNoMapa),
+          _MapaLayer(
+            pinosNoMapa: _viewModel.pinosNoMapa,
+            mapController: _mapController,
+          ),
           Positioned(left: 16.0, bottom: peekBottom, child: const MapLegend()),
           DraggableScrollableSheet(
             initialChildSize: 0.175,
@@ -107,9 +113,12 @@ class _InicioPageState extends State<InicioPage> {
                   authNotifier: _authNotifier,
                   fotoPerfilPath: _fotoPerfilPath,
                 ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
-                  child: _FloatingSearchBar(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: _FloatingSearchBar(
+                    mapController: _mapController,
+                    pinosNoMapa: _viewModel.pinosNoMapa,
+                  ),
                 ),
               ],
             ),
@@ -123,29 +132,22 @@ class _InicioPageState extends State<InicioPage> {
 // ── Camada do mapa ────────────────────────────────────────────────────────────
 
 class _MapaLayer extends StatefulWidget {
-  const _MapaLayer({required this.pinosNoMapa});
+  const _MapaLayer({required this.pinosNoMapa, required this.mapController});
 
   final ValueNotifier<List<PinoMapa>> pinosNoMapa;
+  final MapController mapController;
 
   @override
   State<_MapaLayer> createState() => _MapaLayerState();
 }
 
 class _MapaLayerState extends State<_MapaLayer> {
-  final MapController _mapController = MapController();
-
   static const LatLng _centroInicial = LatLng(-2.905, -41.776);
 
   @override
   void initState() {
     super.initState();
     _inicializarLocalizacao();
-  }
-
-  @override
-  void dispose() {
-    _mapController.dispose();
-    super.dispose();
   }
 
   Future<void> _inicializarLocalizacao() async {
@@ -162,7 +164,10 @@ class _MapaLayerState extends State<_MapaLayer> {
         const Duration(seconds: 8),
       );
       if (mounted) {
-        _mapController.move(LatLng(posicao.latitude, posicao.longitude), 15.0);
+        widget.mapController.move(
+          LatLng(posicao.latitude, posicao.longitude),
+          15.0,
+        );
       }
     } catch (e) {
       log('Geolocalização indisponível', name: '_MapaLayer', error: e);
@@ -185,7 +190,7 @@ class _MapaLayerState extends State<_MapaLayer> {
       valueListenable: widget.pinosNoMapa,
       builder: (context, pinos, _) {
         return FlutterMap(
-          mapController: _mapController,
+          mapController: widget.mapController,
           options: const MapOptions(
             initialCenter: _centroInicial,
             initialZoom: 13.0,
@@ -349,48 +354,248 @@ class _FloatingHeader extends StatelessWidget {
   }
 }
 
-class _FloatingSearchBar extends StatelessWidget {
-  const _FloatingSearchBar();
+class _FloatingSearchBar extends StatefulWidget {
+  const _FloatingSearchBar({
+    required this.mapController,
+    required this.pinosNoMapa,
+  });
+
+  final MapController mapController;
+  final ValueNotifier<List<PinoMapa>> pinosNoMapa;
+
+  @override
+  State<_FloatingSearchBar> createState() => _FloatingSearchBarState();
+}
+
+class _FloatingSearchBarState extends State<_FloatingSearchBar> {
+  final _controller = TextEditingController();
+  final _overlayController = OverlayPortalController();
+  final _layerLink = LayerLink();
+  List<PinoMapa> _sugestoes = [];
+
+  static final _regexCoordenada = RegExp(
+    r'^([-+]?\d+(?:\.\d+)?)\s*[,;]\s*([-+]?\d+(?:\.\d+)?)$',
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _aoMudar(String texto) {
+    final trimmed = texto.trim();
+    if (trimmed.isEmpty) {
+      _overlayController.hide();
+      setState(() => _sugestoes = []);
+      return;
+    }
+
+    final match = _regexCoordenada.firstMatch(trimmed);
+    if (match != null) {
+      final lat = double.tryParse(match.group(1)!);
+      final lng = double.tryParse(match.group(2)!);
+      if (lat != null && lng != null) {
+        widget.mapController.move(LatLng(lat, lng), 15.0);
+        _overlayController.hide();
+        setState(() => _sugestoes = []);
+        return;
+      }
+    }
+
+    final lower = trimmed.toLowerCase();
+    final resultados = widget.pinosNoMapa.value
+        .where((p) => p.nomeBem.toLowerCase().contains(lower))
+        .take(5)
+        .toList();
+    setState(() => _sugestoes = resultados);
+    if (resultados.isNotEmpty) {
+      _overlayController.show();
+    } else {
+      _overlayController.hide();
+    }
+  }
+
+  void _selecionarPino(PinoMapa pino) {
+    widget.mapController.move(pino.posicao, 15.0);
+    _controller.clear();
+    _overlayController.hide();
+    setState(() => _sugestoes = []);
+  }
+
+  void _limpar() {
+    _controller.clear();
+    _overlayController.hide();
+    setState(() => _sugestoes = []);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: OverlayPortal(
+        controller: _overlayController,
+        overlayChildBuilder: (context) {
+          final width = MediaQuery.sizeOf(context).width - 32;
+          return CompositedTransformFollower(
+            link: _layerLink,
+            showWhenUnlinked: false,
+            targetAnchor: Alignment.bottomLeft,
+            followerAnchor: Alignment.topLeft,
+            offset: const Offset(0, 4),
+            child: SizedBox(
+              width: width,
+              child: _ListaSugestoes(
+                sugestoes: _sugestoes,
+                onSelecionar: _selecionarPino,
+              ),
+            ),
+          );
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.4,
+                  ),
+                ),
+              ),
+              child: Row(
+                children: <Widget>[
+                  Icon(
+                    Icons.search,
+                    color: theme.colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      onChanged: _aoMudar,
+                      style: theme.textTheme.bodyMedium,
+                      decoration: InputDecoration.collapsed(
+                        hintText: 'Buscar sítio ou coordenada...',
+                        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ),
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _controller,
+                    builder: (context, value, _) => value.text.isNotEmpty
+                        ? GestureDetector(
+                            onTap: _limpar,
+                            child: Icon(
+                              Icons.close,
+                              color: theme.colorScheme.onSurfaceVariant,
+                              size: 20,
+                            ),
+                          )
+                        : const _AudioSlot(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AudioSlot extends StatelessWidget {
+  const _AudioSlot();
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(
+      Icons.mic_none,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      size: 20,
+    );
+  }
+}
+
+class _ListaSugestoes extends StatelessWidget {
+  const _ListaSugestoes({required this.sugestoes, required this.onSelecionar});
+
+  final List<PinoMapa> sugestoes;
+  final ValueChanged<PinoMapa> onSelecionar;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.85),
-            borderRadius: BorderRadius.circular(28),
+            color: theme.colorScheme.surface.withValues(alpha: 0.95),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
             ),
           ),
-          child: Row(
-            children: <Widget>[
-              Icon(
-                Icons.search,
-                color: theme.colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Buscar sítio ou coordenada...',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.mic_none,
-                color: theme.colorScheme.onSurfaceVariant,
-                size: 20,
-              ),
-            ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: sugestoes
+                .map((p) => _SugestaoItem(pino: p, onTap: onSelecionar))
+                .toList(),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SugestaoItem extends StatelessWidget {
+  const _SugestaoItem({required this.pino, required this.onTap});
+
+  final PinoMapa pino;
+  final ValueChanged<PinoMapa> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cor = PinoMarker.corPorTipo(pino.tipo, theme.colorScheme);
+    return InkWell(
+      onTap: () => onTap(pino),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: <Widget>[
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(color: cor, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                pino.nomeBem,
+                style: theme.textTheme.bodyMedium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              pino.tipo.rotulo,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
       ),
     );

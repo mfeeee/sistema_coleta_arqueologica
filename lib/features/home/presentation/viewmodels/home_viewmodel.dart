@@ -12,6 +12,7 @@ import 'package:sistema_coleta_arqueologica/features/home/domain/entities/pino_m
 class HomeViewModel {
   final ColetaRepository _coletaRepository;
   final BemMaterialRepository _bemMaterialRepository;
+  final AuthNotifier _authNotifier;
 
   final ValueNotifier<int> totalColetas = ValueNotifier(0);
   final ValueNotifier<int> coletasPendentes = ValueNotifier(0);
@@ -26,7 +27,14 @@ class HomeViewModel {
     required AuthNotifier authNotifier,
   }) : _coletaRepository = coletaRepository,
        _bemMaterialRepository = bemMaterialRepository,
-       nomeUsuario = ValueNotifier(authNotifier.userName ?? '');
+       _authNotifier = authNotifier,
+       nomeUsuario = ValueNotifier(authNotifier.userName ?? '') {
+    _authNotifier.addListener(_onAuthAlterado);
+  }
+
+  void _onAuthAlterado() {
+    nomeUsuario.value = _authNotifier.userName ?? '';
+  }
 
   Future<void> carregarDados() async {
     erroAtual.value = null;
@@ -63,6 +71,7 @@ class HomeViewModel {
   }
 
   void dispose() {
+    _authNotifier.removeListener(_onAuthAlterado);
     totalColetas.dispose();
     coletasPendentes.dispose();
     coletasRecentes.dispose();

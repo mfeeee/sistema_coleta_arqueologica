@@ -27,6 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
       final scope = AppScope.of(context);
       _viewModel = ProfileViewModel(
         authNotifier: scope.authNotifier,
+        profileService: scope.profileService,
         coletaRepository: scope.coletaRepository,
         prefs: scope.prefs,
         temaModo: scope.temaModo,
@@ -145,7 +146,7 @@ class _FotoSectionState extends State<_FotoSection> {
       maxHeight: 512,
     );
     if (arquivo == null || !mounted) return;
-    await widget.viewModel.atualizarFotoLocal(arquivo.path);
+    await widget.viewModel.atualizarFoto(File(arquivo.path));
   }
 
   @override
@@ -154,12 +155,12 @@ class _FotoSectionState extends State<_FotoSection> {
 
     return ListenableBuilder(
       listenable: Listenable.merge([
-        widget.viewModel.fotoLocalPath,
+        widget.viewModel.avatarUrl,
         widget.viewModel.fotoCarregando,
         widget.viewModel.nomeAtual,
       ]),
       builder: (context, _) {
-        final caminho = widget.viewModel.fotoLocalPath.value;
+        final url = widget.viewModel.avatarUrl.value;
         final carregando = widget.viewModel.fotoCarregando.value;
 
         return Center(
@@ -178,8 +179,8 @@ class _FotoSectionState extends State<_FotoSection> {
                       ),
                     ),
                     child: ClipOval(
-                      child: !kIsWeb && caminho != null
-                          ? Image.file(File(caminho), fit: BoxFit.cover)
+                      child: url != null
+                          ? Image.network(url, fit: BoxFit.cover)
                           : ColoredBox(
                               color: theme.colorScheme.primaryContainer,
                               child: Center(

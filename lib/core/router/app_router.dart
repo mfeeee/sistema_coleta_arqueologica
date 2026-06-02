@@ -47,7 +47,13 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
       ),
       GoRoute(
         path: '/reset-password',
-        builder: (_, __) => const ResetPasswordPage(),
+        builder: (_, GoRouterState state) {
+          final extra = state.extra as Map<String, String>?;
+          return ResetPasswordPage(
+            token: extra?['token'],
+            email: extra?['email'],
+          );
+        },
       ),
 
       GoRoute(

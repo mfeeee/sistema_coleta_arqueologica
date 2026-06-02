@@ -258,6 +258,7 @@ Future<Widget> _montarLoginPage(_FakeAuthNotifier notifier) async {
     conectividadeService: ConectividadeService(),
     prefs: prefs,
     temaModo: ValueNotifier(ThemeMode.light),
+    idiomaAtual: ValueNotifier(const Locale('pt', 'BR')),
     child: MaterialApp.router(
       routerConfig: router,
       locale: const Locale('pt', 'BR'),

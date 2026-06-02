@@ -245,6 +245,7 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     conectividadeService: ConectividadeService(),
     prefs: prefs,
     temaModo: ValueNotifier(ThemeMode.light),
+    idiomaAtual: ValueNotifier(const Locale('pt', 'BR')),
     child: MaterialApp.router(
       routerConfig: router,
       locale: const Locale('pt', 'BR'),

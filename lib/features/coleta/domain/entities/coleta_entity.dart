@@ -3,7 +3,8 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dar
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
-import 'package:sistema_coleta_arqueologica/features/home/domain/entities/sitio_mapa_entity.dart';
+import 'package:sistema_coleta_arqueologica/features/home/domain/entities/pino_mapa.dart';
+import 'package:sistema_coleta_arqueologica/features/home/domain/entities/tipo_pino.dart';
 
 // Invariante: syncStatus é a única fonte de verdade para o estado de
 // sincronização. Não existe campo booleano `sincronizado` paralelo.
@@ -46,10 +47,10 @@ class ColetaEntity {
 }
 
 extension ColetaParaMapa on ColetaEntity {
-  SitioMapaEntity get paraMapa => SitioMapaEntity(
+  PinoMapa get paraMapa => PinoMapa(
     id: id,
     nomeBem: nomeBem,
     posicao: LatLng(latitude, longitude),
-    tipoIcone: tipo?.name ?? 'padrao',
+    tipo: TipoPino.coleta,
   );
 }

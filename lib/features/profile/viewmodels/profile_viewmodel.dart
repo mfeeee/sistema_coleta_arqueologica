@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/log_capture.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
@@ -14,12 +15,14 @@ import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/
 class ProfileViewModel {
   ProfileViewModel({
     required AuthNotifier authNotifier,
+    required ProfileService profileService,
     required ColetaRepository coletaRepository,
     required SharedPreferences prefs,
     required ValueNotifier<ThemeMode> temaModo,
     required ValueNotifier<Locale> idiomaAtual,
     required ValueNotifier<String?> fotoPerfilPath,
   }) : _authNotifier = authNotifier,
+       _profileService = profileService,
        _coletaRepository = coletaRepository,
        _prefs = prefs,
        _temaModoApp = temaModo,
@@ -29,6 +32,7 @@ class ProfileViewModel {
   }
 
   final AuthNotifier _authNotifier;
+  final ProfileService _profileService;
   final ColetaRepository _coletaRepository;
   final SharedPreferences _prefs;
   final ValueNotifier<ThemeMode> _temaModoApp;
@@ -44,10 +48,10 @@ class ProfileViewModel {
   late final ValueNotifier<String> nomeAtual;
   late final ValueNotifier<String> emailAtual;
   late final ValueNotifier<String> classificacaoAtual;
+  late final ValueNotifier<String?> avatarUrl;
 
   ValueNotifier<Locale> get idiomaAtual => _idiomaApp;
 
-  final ValueNotifier<String?> fotoLocalPath = ValueNotifier(null);
   final ValueNotifier<bool> salvandoDados = ValueNotifier(false);
   final ValueNotifier<bool> fotoCarregando = ValueNotifier(false);
   final ValueNotifier<String?> erroSalvamento = ValueNotifier(null);
@@ -75,6 +79,8 @@ class ProfileViewModel {
     classificacaoAtual = ValueNotifier(
       _authNotifier.userClassificacao ?? 'estudante',
     );
+    avatarUrl = ValueNotifier(_authNotifier.userAvatarUrl);
+    _fotoPerfilPath.value = _authNotifier.userAvatarUrl;
 
     final modoEscuroSalvo =
         _prefs.getBool(_keyModoEscuro) ??
@@ -115,16 +121,60 @@ class ProfileViewModel {
     }
   }
 
-  Future<void> atualizarFotoLocal(String caminhoOrigem) async {
+  Future<bool> atualizarFoto(File arquivo) async {
     fotoCarregando.value = true;
+    erroSalvamento.value = null;
     try {
-      // TODO: fazer upload da foto para a API quando o endpoint estiver disponível
-      fotoLocalPath.value = caminhoOrigem;
-      _fotoPerfilPath.value = caminhoOrigem;
+      final result = await _profileService.uploadAvatar(arquivo);
+      switch (result) {
+        case ProfileSuccess(:final data):
+          final url = data['avatar_url'] as String?;
+          avatarUrl.value = url;
+          _fotoPerfilPath.value = url;
+          _authNotifier.atualizarDadosPerfil(avatarUrl: url);
+          return true;
+        case ProfileFailure(:final message):
+          erroSalvamento.value = message;
+          return false;
+      }
+    } catch (e, st) {
       log(
-        'atualizarFotoLocal: foto salva localmente (upload pendente)',
+        'Erro ao enviar foto',
+        error: e,
+        stackTrace: st,
         name: 'ProfileViewModel',
       );
+      erroSalvamento.value = 'Não foi possível enviar a foto.';
+      return false;
+    } finally {
+      fotoCarregando.value = false;
+    }
+  }
+
+  Future<bool> removerFoto() async {
+    fotoCarregando.value = true;
+    erroSalvamento.value = null;
+    try {
+      final result = await _profileService.deleteAvatar();
+      switch (result) {
+        case ProfileSuccess():
+          avatarUrl.value = null;
+          _fotoPerfilPath.value = null;
+          _authNotifier.atualizarDadosPerfil(removerAvatar: true);
+          return true;
+        case ProfileFailure(:final message):
+          erroSalvamento.value = message;
+          return false;
+      }
+    } catch (e, st) {
+      log(
+        'Erro ao remover foto',
+        error: e,
+        stackTrace: st,
+        name: 'ProfileViewModel',
+      );
+      erroSalvamento.value = 'Não foi possível remover a foto.';
+      return false;
     } finally {
       fotoCarregando.value = false;
     }
@@ -138,16 +188,25 @@ class ProfileViewModel {
     salvandoDados.value = true;
     erroSalvamento.value = null;
     try {
-      // TODO: chamar PUT /api/profile quando endpoint disponível
-      await Future.delayed(const Duration(milliseconds: 400));
-      nomeAtual.value = nome;
-      emailAtual.value = email;
-      classificacaoAtual.value = classificacao;
-      log(
-        'salvarDadosPessoais: stub - dados atualizados localmente',
-        name: 'ProfileViewModel',
+      final result = await _profileService.updateProfile(
+        name: nome,
+        email: email,
       );
-      return true;
+      switch (result) {
+        case ProfileSuccess(:final data):
+          nomeAtual.value = data['name'] as String? ?? nome;
+          emailAtual.value = data['email'] as String? ?? email;
+          classificacaoAtual.value =
+              data['classificacao'] as String? ?? classificacao;
+          _authNotifier.atualizarDadosPerfil(
+            nome: nomeAtual.value,
+            email: emailAtual.value,
+          );
+          return true;
+        case ProfileFailure(:final message):
+          erroSalvamento.value = message;
+          return false;
+      }
     } catch (e, st) {
       log(
         'Erro ao salvar dados pessoais',
@@ -169,13 +228,17 @@ class ProfileViewModel {
     salvandoDados.value = true;
     erroSalvamento.value = null;
     try {
-      // TODO: chamar PUT /api/profile/password quando endpoint disponível
-      await Future.delayed(const Duration(milliseconds: 400));
-      log(
-        'alterarSenha: stub - não integrado com API',
-        name: 'ProfileViewModel',
+      final result = await _profileService.updateProfile(
+        password: novaSenha,
+        passwordConfirmation: novaSenha,
       );
-      return true;
+      switch (result) {
+        case ProfileSuccess():
+          return true;
+        case ProfileFailure(:final message):
+          erroSalvamento.value = message;
+          return false;
+      }
     } catch (e, st) {
       log(
         'Erro ao alterar senha',
@@ -293,7 +356,7 @@ class ProfileViewModel {
     nomeAtual.dispose();
     emailAtual.dispose();
     classificacaoAtual.dispose();
-    fotoLocalPath.dispose();
+    avatarUrl.dispose();
     salvandoDados.dispose();
     fotoCarregando.dispose();
     erroSalvamento.dispose();

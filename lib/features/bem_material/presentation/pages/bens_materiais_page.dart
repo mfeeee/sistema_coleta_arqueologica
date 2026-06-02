@@ -146,13 +146,15 @@ class _CartaoBem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      bem.natureza,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                    if (bem.natureza != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        bem.natureza!,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
+                    ],
                     if (bem.codigoIphan != null) ...[
                       const SizedBox(height: 2),
                       Text(

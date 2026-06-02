@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'coletas_table.dart';
+import '../converters/string_list_converter.dart';
 
 @TableIndex(name: 'bens_coleta_idx', columns: {#coletaId})
 @TableIndex(name: 'municipio', columns: {#municipio})
@@ -9,14 +9,16 @@ import 'coletas_table.dart';
 class BensMateriais extends Table {
   TextColumn get uuid => text()();
 
-  TextColumn get coletaId =>
-      text().named('coleta_id').references(Coletas, #uuid)();
+  // Bens públicos não têm coleta associada; FK removida para permitir null.
+  TextColumn get coletaId => text().named('coleta_id').nullable()();
+  TextColumn get curadorResponsavelId =>
+      text().named('curador_responsavel_id').nullable()();
 
   TextColumn get codigoIphan => text().named('codigo_iphan').nullable()();
   TextColumn get nomeBem => text().named('nome_bem')();
   TextColumn get nomesPopulares => text().named('nomes_populares').nullable()();
-  TextColumn get natureza => text()();
-  TextColumn get tipo => text()();
+  TextColumn get natureza => text().nullable()();
+  TextColumn get tipo => text().nullable()();
   TextColumn get meiosAcesso => text().named('meios_acesso').nullable()();
   TextColumn get artefatos => text()
       .named('artefatos')
@@ -27,8 +29,9 @@ class BensMateriais extends Table {
   TextColumn get municipio => text().nullable()();
   TextColumn get cep => text().nullable()();
   TextColumn get endereco => text().nullable()();
-  RealColumn get latitude => real().nullable()();
-  RealColumn get longitude => real().nullable()();
+  // TEXT preserva decimal(10,7) exato; REAL seria float32 (~10m de erro).
+  TextColumn get latitude => text().named('latitude').nullable()();
+  TextColumn get longitude => text().named('longitude').nullable()();
   TextColumn get geojson => text().nullable()();
   IntColumn get anoRegistro => integer().named('ano_registro').nullable()();
   TextColumn get descricaoAtualizacao =>

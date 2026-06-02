@@ -6,12 +6,13 @@ import 'package:sistema_coleta_arqueologica/features/home/domain/entities/tipo_p
 class BemMaterialEntity {
   final String id;
   final String? coletaId;
+  final String? curadorResponsavelId;
 
   final String? codigoIphan;
   final String nomeBem;
   final List<String> nomesPopulares;
-  final String natureza;
-  final String tipo;
+  final String? natureza;
+  final String? tipo;
   final String? meiosAcesso;
   final List<ArtefatoBem> artefatos;
   final bool publicado;
@@ -34,14 +35,15 @@ class BemMaterialEntity {
   const BemMaterialEntity({
     required this.id,
     required this.nomeBem,
-    required this.natureza,
-    required this.tipo,
+    this.natureza,
+    this.tipo,
     required this.artefatos,
     required this.nomesPopulares,
     required this.publicado,
     required this.criadoEm,
     required this.atualizadoEm,
     this.coletaId,
+    this.curadorResponsavelId,
     this.codigoIphan,
     this.meiosAcesso,
     this.uf,

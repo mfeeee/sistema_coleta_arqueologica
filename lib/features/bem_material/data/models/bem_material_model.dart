@@ -10,14 +10,15 @@ class BemMaterialModel extends BemMaterialEntity {
   const BemMaterialModel({
     required super.id,
     required super.nomeBem,
-    required super.natureza,
-    required super.tipo,
+    super.natureza,
+    super.tipo,
     required super.artefatos,
     required super.nomesPopulares,
     required super.publicado,
     required super.criadoEm,
     required super.atualizadoEm,
     super.coletaId,
+    super.curadorResponsavelId,
     super.codigoIphan,
     super.meiosAcesso,
     super.uf,
@@ -36,6 +37,7 @@ class BemMaterialModel extends BemMaterialEntity {
     return BemMaterialModel(
       id: row.uuid,
       coletaId: row.coletaId,
+      curadorResponsavelId: row.curadorResponsavelId,
       codigoIphan: row.codigoIphan,
       nomeBem: row.nomeBem,
       nomesPopulares: row.nomesPopulares != null
@@ -63,8 +65,8 @@ class BemMaterialModel extends BemMaterialEntity {
       municipio: row.municipio,
       cep: row.cep,
       endereco: row.endereco,
-      latitude: row.latitude,
-      longitude: row.longitude,
+      latitude: _parseDouble(row.latitude),
+      longitude: _parseDouble(row.longitude),
       geojson: row.geojson,
       anoRegistro: row.anoRegistro,
       descricaoAtualizacao: row.descricaoAtualizacao,
@@ -78,6 +80,7 @@ class BemMaterialModel extends BemMaterialEntity {
     return BemMaterialModel(
       id: entity.id,
       coletaId: entity.coletaId,
+      curadorResponsavelId: entity.curadorResponsavelId,
       codigoIphan: entity.codigoIphan,
       nomeBem: entity.nomeBem,
       nomesPopulares: entity.nomesPopulares,
@@ -141,14 +144,17 @@ class BemMaterialModel extends BemMaterialEntity {
   }
 
   factory BemMaterialModel.fromJson(Map<String, dynamic> json) {
-    String enumStr(dynamic value) {
-      if (value is Map) return (value['value'] as String?) ?? '';
-      return value as String? ?? '';
+    String? enumStr(dynamic value) {
+      if (value == null) return null;
+      if (value is Map) return value['value'] as String?;
+      final s = value as String?;
+      return (s == null || s.isEmpty) ? null : s;
     }
 
     return BemMaterialModel(
       id: json['id'] as String,
       coletaId: json['coleta_id'] as String?,
+      curadorResponsavelId: json['curador_responsavel_id'] as String?,
       codigoIphan: json['codigo_iphan'] as String?,
       nomeBem: json['nome_bem'] as String,
       nomesPopulares: _parseStringList(json['nomes_populares']),
@@ -181,10 +187,11 @@ class BemMaterialModel extends BemMaterialEntity {
   BensMateriaisCompanion toCompanion() {
     return BensMateriaisCompanion.insert(
       uuid: id,
-      coletaId: coletaId ?? '',
+      coletaId: Value(coletaId),
+      curadorResponsavelId: Value(curadorResponsavelId),
       nomeBem: nomeBem,
-      natureza: natureza,
-      tipo: tipo,
+      natureza: Value(natureza),
+      tipo: Value(tipo),
       artefatos: Value(artefatos.map((e) => e.name).toList()),
       publicado: Value(publicado),
       codigoIphan: Value(codigoIphan),
@@ -194,8 +201,8 @@ class BemMaterialModel extends BemMaterialEntity {
       municipio: Value(municipio),
       cep: Value(cep),
       endereco: Value(endereco),
-      latitude: Value(latitude),
-      longitude: Value(longitude),
+      latitude: Value(latitude?.toStringAsFixed(7)),
+      longitude: Value(longitude?.toStringAsFixed(7)),
       geojson: Value(geojson),
       anoRegistro: Value(anoRegistro),
       descricaoAtualizacao: Value(descricaoAtualizacao),

@@ -34,6 +34,7 @@ class AppScope extends InheritedWidget {
     required this.conectividadeService,
     required this.prefs,
     required this.temaModo,
+    required this.idiomaAtual,
     required super.child,
   });
 
@@ -47,6 +48,7 @@ class AppScope extends InheritedWidget {
   final ConectividadeService conectividadeService;
   final SharedPreferences prefs;
   final ValueNotifier<ThemeMode> temaModo;
+  final ValueNotifier<Locale> idiomaAtual;
 
   factory AppScope.create({
     required AppDatabase database,
@@ -55,6 +57,7 @@ class AppScope extends InheritedWidget {
     required Dio dio,
     required SharedPreferences prefs,
     required ValueNotifier<ThemeMode> temaModo,
+    required ValueNotifier<Locale> idiomaAtual,
     required NotificacaoRepository notificacaoRepository,
     required PreferenciasNotificacaoRepository preferenciasRepository,
     required Widget child,
@@ -95,6 +98,7 @@ class AppScope extends InheritedWidget {
       conectividadeService: conectividadeService,
       prefs: prefs,
       temaModo: temaModo,
+      idiomaAtual: idiomaAtual,
       child: child,
     );
   }
@@ -116,5 +120,6 @@ class AppScope extends InheritedWidget {
       mediaService != oldWidget.mediaService ||
       conectividadeService != oldWidget.conectividadeService ||
       prefs != oldWidget.prefs ||
-      temaModo != oldWidget.temaModo;
+      temaModo != oldWidget.temaModo ||
+      idiomaAtual != oldWidget.idiomaAtual;
 }

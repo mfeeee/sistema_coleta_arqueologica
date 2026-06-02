@@ -10,6 +10,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   geolocator_windows
   objectbox_flutter_libs
   share_plus
+  speech_to_text_windows
   sqlcipher_flutter_libs
   url_launcher_windows
 )

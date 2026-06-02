@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'core/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +38,9 @@ import 'core/di/app_scope.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await FMTCObjectBoxBackend().initialise();
+  await const FMTCStore('arqueologico').manage.create();
 
   FlutterError.onError = (FlutterErrorDetails details) {
     LogCapture.registrar(

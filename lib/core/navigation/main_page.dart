@@ -24,20 +24,18 @@ class MainPage extends StatelessWidget {
         onDestinationSelected: (int index) => _onTap(context, index),
         destinations: <NavigationDestination>[
           NavigationDestination(
-            icon: const Icon(Icons.home),
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
             label: l10n.navHome,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.list),
+            icon: const Icon(Icons.list_alt_outlined),
+            selectedIcon: const Icon(Icons.list_alt),
             label: l10n.navCollections,
           ),
           NavigationDestination(
             icon: const Icon(Icons.sync),
             label: l10n.navSync,
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person),
-            label: l10n.navProfile,
           ),
         ],
       ),

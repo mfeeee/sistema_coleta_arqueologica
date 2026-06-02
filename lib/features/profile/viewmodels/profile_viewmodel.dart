@@ -18,11 +18,13 @@ class ProfileViewModel {
     required SharedPreferences prefs,
     required ValueNotifier<ThemeMode> temaModo,
     required ValueNotifier<Locale> idiomaAtual,
+    required ValueNotifier<String?> fotoPerfilPath,
   }) : _authNotifier = authNotifier,
        _coletaRepository = coletaRepository,
        _prefs = prefs,
        _temaModoApp = temaModo,
-       _idiomaApp = idiomaAtual {
+       _idiomaApp = idiomaAtual,
+       _fotoPerfilPath = fotoPerfilPath {
     _inicializar();
   }
 
@@ -31,6 +33,7 @@ class ProfileViewModel {
   final SharedPreferences _prefs;
   final ValueNotifier<ThemeMode> _temaModoApp;
   final ValueNotifier<Locale> _idiomaApp;
+  final ValueNotifier<String?> _fotoPerfilPath;
 
   static const _keyAlertasSincronizacao = 'pref_alertas_sincronizacao';
   static const _keyStatusCuradoria = 'pref_status_curadoria';
@@ -117,6 +120,7 @@ class ProfileViewModel {
     try {
       // TODO: fazer upload da foto para a API quando o endpoint estiver disponível
       fotoLocalPath.value = caminhoOrigem;
+      _fotoPerfilPath.value = caminhoOrigem;
       log(
         'atualizarFotoLocal: foto salva localmente (upload pendente)',
         name: 'ProfileViewModel',

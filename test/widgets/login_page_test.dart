@@ -34,6 +34,7 @@ import 'package:sistema_coleta_arqueologica/features/notifications/data/models/n
 import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/data/models/preferencias_notificacao.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
+import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
 import 'package:http/http.dart' as http;
 
 // ---------------------------------------------------------------------------
@@ -260,6 +261,7 @@ Future<Widget> _montarLoginPage(_FakeAuthNotifier notifier) async {
     temaModo: ValueNotifier(ThemeMode.light),
     idiomaAtual: ValueNotifier(const Locale('pt', 'BR')),
     fotoPerfilPath: ValueNotifier(null),
+    profileService: ProfileService(httpClient: http.Client(), baseUrl: ''),
     child: MaterialApp.router(
       routerConfig: router,
       locale: const Locale('pt', 'BR'),

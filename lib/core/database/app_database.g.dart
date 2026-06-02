@@ -924,13 +924,21 @@ class $BensMateriaisTable extends BensMateriais
   late final GeneratedColumn<String> coletaId = GeneratedColumn<String>(
     'coleta_id',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES coletas (uuid)',
-    ),
+    requiredDuringInsert: false,
   );
+  static const VerificationMeta _curadorResponsavelIdMeta =
+      const VerificationMeta('curadorResponsavelId');
+  @override
+  late final GeneratedColumn<String> curadorResponsavelId =
+      GeneratedColumn<String>(
+        'curador_responsavel_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _codigoIphanMeta = const VerificationMeta(
     'codigoIphan',
   );
@@ -971,18 +979,18 @@ class $BensMateriaisTable extends BensMateriais
   late final GeneratedColumn<String> natureza = GeneratedColumn<String>(
     'natureza',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _tipoMeta = const VerificationMeta('tipo');
   @override
   late final GeneratedColumn<String> tipo = GeneratedColumn<String>(
     'tipo',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _meiosAcessoMeta = const VerificationMeta(
     'meiosAcesso',
@@ -1068,22 +1076,22 @@ class $BensMateriaisTable extends BensMateriais
     'latitude',
   );
   @override
-  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+  late final GeneratedColumn<String> latitude = GeneratedColumn<String>(
     'latitude',
     aliasedName,
     true,
-    type: DriftSqlType.double,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _longitudeMeta = const VerificationMeta(
     'longitude',
   );
   @override
-  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+  late final GeneratedColumn<String> longitude = GeneratedColumn<String>(
     'longitude',
     aliasedName,
     true,
-    type: DriftSqlType.double,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _geojsonMeta = const VerificationMeta(
@@ -1158,6 +1166,7 @@ class $BensMateriaisTable extends BensMateriais
   List<GeneratedColumn> get $columns => [
     uuid,
     coletaId,
+    curadorResponsavelId,
     codigoIphan,
     nomeBem,
     nomesPopulares,
@@ -1204,8 +1213,15 @@ class $BensMateriaisTable extends BensMateriais
         _coletaIdMeta,
         coletaId.isAcceptableOrUnknown(data['coleta_id']!, _coletaIdMeta),
       );
-    } else if (isInserting) {
-      context.missing(_coletaIdMeta);
+    }
+    if (data.containsKey('curador_responsavel_id')) {
+      context.handle(
+        _curadorResponsavelIdMeta,
+        curadorResponsavelId.isAcceptableOrUnknown(
+          data['curador_responsavel_id']!,
+          _curadorResponsavelIdMeta,
+        ),
+      );
     }
     if (data.containsKey('codigo_iphan')) {
       context.handle(
@@ -1238,16 +1254,12 @@ class $BensMateriaisTable extends BensMateriais
         _naturezaMeta,
         natureza.isAcceptableOrUnknown(data['natureza']!, _naturezaMeta),
       );
-    } else if (isInserting) {
-      context.missing(_naturezaMeta);
     }
     if (data.containsKey('tipo')) {
       context.handle(
         _tipoMeta,
         tipo.isAcceptableOrUnknown(data['tipo']!, _tipoMeta),
       );
-    } else if (isInserting) {
-      context.missing(_tipoMeta);
     }
     if (data.containsKey('meios_acesso')) {
       context.handle(
@@ -1358,7 +1370,11 @@ class $BensMateriaisTable extends BensMateriais
       coletaId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}coleta_id'],
-      )!,
+      ),
+      curadorResponsavelId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}curador_responsavel_id'],
+      ),
       codigoIphan: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}codigo_iphan'],
@@ -1374,11 +1390,11 @@ class $BensMateriaisTable extends BensMateriais
       natureza: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}natureza'],
-      )!,
+      ),
       tipo: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}tipo'],
-      )!,
+      ),
       meiosAcesso: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}meios_acesso'],
@@ -1410,11 +1426,11 @@ class $BensMateriaisTable extends BensMateriais
         data['${effectivePrefix}endereco'],
       ),
       latitude: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.string,
         data['${effectivePrefix}latitude'],
       ),
       longitude: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.string,
         data['${effectivePrefix}longitude'],
       ),
       geojson: attachedDatabase.typeMapping.read(
@@ -1455,12 +1471,13 @@ class $BensMateriaisTable extends BensMateriais
 
 class BensMateriai extends DataClass implements Insertable<BensMateriai> {
   final String uuid;
-  final String coletaId;
+  final String? coletaId;
+  final String? curadorResponsavelId;
   final String? codigoIphan;
   final String nomeBem;
   final String? nomesPopulares;
-  final String natureza;
-  final String tipo;
+  final String? natureza;
+  final String? tipo;
   final String? meiosAcesso;
   final List<String> artefatos;
   final bool publicado;
@@ -1468,8 +1485,8 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
   final String? municipio;
   final String? cep;
   final String? endereco;
-  final double? latitude;
-  final double? longitude;
+  final String? latitude;
+  final String? longitude;
   final String? geojson;
   final int? anoRegistro;
   final String? descricaoAtualizacao;
@@ -1478,12 +1495,13 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
   final DateTime? deletadoEm;
   const BensMateriai({
     required this.uuid,
-    required this.coletaId,
+    this.coletaId,
+    this.curadorResponsavelId,
     this.codigoIphan,
     required this.nomeBem,
     this.nomesPopulares,
-    required this.natureza,
-    required this.tipo,
+    this.natureza,
+    this.tipo,
     this.meiosAcesso,
     required this.artefatos,
     required this.publicado,
@@ -1504,7 +1522,12 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['uuid'] = Variable<String>(uuid);
-    map['coleta_id'] = Variable<String>(coletaId);
+    if (!nullToAbsent || coletaId != null) {
+      map['coleta_id'] = Variable<String>(coletaId);
+    }
+    if (!nullToAbsent || curadorResponsavelId != null) {
+      map['curador_responsavel_id'] = Variable<String>(curadorResponsavelId);
+    }
     if (!nullToAbsent || codigoIphan != null) {
       map['codigo_iphan'] = Variable<String>(codigoIphan);
     }
@@ -1512,8 +1535,12 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     if (!nullToAbsent || nomesPopulares != null) {
       map['nomes_populares'] = Variable<String>(nomesPopulares);
     }
-    map['natureza'] = Variable<String>(natureza);
-    map['tipo'] = Variable<String>(tipo);
+    if (!nullToAbsent || natureza != null) {
+      map['natureza'] = Variable<String>(natureza);
+    }
+    if (!nullToAbsent || tipo != null) {
+      map['tipo'] = Variable<String>(tipo);
+    }
     if (!nullToAbsent || meiosAcesso != null) {
       map['meios_acesso'] = Variable<String>(meiosAcesso);
     }
@@ -1536,10 +1563,10 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       map['endereco'] = Variable<String>(endereco);
     }
     if (!nullToAbsent || latitude != null) {
-      map['latitude'] = Variable<double>(latitude);
+      map['latitude'] = Variable<String>(latitude);
     }
     if (!nullToAbsent || longitude != null) {
-      map['longitude'] = Variable<double>(longitude);
+      map['longitude'] = Variable<String>(longitude);
     }
     if (!nullToAbsent || geojson != null) {
       map['geojson'] = Variable<String>(geojson);
@@ -1561,7 +1588,12 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
   BensMateriaisCompanion toCompanion(bool nullToAbsent) {
     return BensMateriaisCompanion(
       uuid: Value(uuid),
-      coletaId: Value(coletaId),
+      coletaId: coletaId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coletaId),
+      curadorResponsavelId: curadorResponsavelId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(curadorResponsavelId),
       codigoIphan: codigoIphan == null && nullToAbsent
           ? const Value.absent()
           : Value(codigoIphan),
@@ -1569,8 +1601,10 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       nomesPopulares: nomesPopulares == null && nullToAbsent
           ? const Value.absent()
           : Value(nomesPopulares),
-      natureza: Value(natureza),
-      tipo: Value(tipo),
+      natureza: natureza == null && nullToAbsent
+          ? const Value.absent()
+          : Value(natureza),
+      tipo: tipo == null && nullToAbsent ? const Value.absent() : Value(tipo),
       meiosAcesso: meiosAcesso == null && nullToAbsent
           ? const Value.absent()
           : Value(meiosAcesso),
@@ -1614,12 +1648,15 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return BensMateriai(
       uuid: serializer.fromJson<String>(json['uuid']),
-      coletaId: serializer.fromJson<String>(json['coletaId']),
+      coletaId: serializer.fromJson<String?>(json['coletaId']),
+      curadorResponsavelId: serializer.fromJson<String?>(
+        json['curadorResponsavelId'],
+      ),
       codigoIphan: serializer.fromJson<String?>(json['codigoIphan']),
       nomeBem: serializer.fromJson<String>(json['nomeBem']),
       nomesPopulares: serializer.fromJson<String?>(json['nomesPopulares']),
-      natureza: serializer.fromJson<String>(json['natureza']),
-      tipo: serializer.fromJson<String>(json['tipo']),
+      natureza: serializer.fromJson<String?>(json['natureza']),
+      tipo: serializer.fromJson<String?>(json['tipo']),
       meiosAcesso: serializer.fromJson<String?>(json['meiosAcesso']),
       artefatos: serializer.fromJson<List<String>>(json['artefatos']),
       publicado: serializer.fromJson<bool>(json['publicado']),
@@ -1627,8 +1664,8 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       municipio: serializer.fromJson<String?>(json['municipio']),
       cep: serializer.fromJson<String?>(json['cep']),
       endereco: serializer.fromJson<String?>(json['endereco']),
-      latitude: serializer.fromJson<double?>(json['latitude']),
-      longitude: serializer.fromJson<double?>(json['longitude']),
+      latitude: serializer.fromJson<String?>(json['latitude']),
+      longitude: serializer.fromJson<String?>(json['longitude']),
       geojson: serializer.fromJson<String?>(json['geojson']),
       anoRegistro: serializer.fromJson<int?>(json['anoRegistro']),
       descricaoAtualizacao: serializer.fromJson<String?>(
@@ -1644,12 +1681,13 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'uuid': serializer.toJson<String>(uuid),
-      'coletaId': serializer.toJson<String>(coletaId),
+      'coletaId': serializer.toJson<String?>(coletaId),
+      'curadorResponsavelId': serializer.toJson<String?>(curadorResponsavelId),
       'codigoIphan': serializer.toJson<String?>(codigoIphan),
       'nomeBem': serializer.toJson<String>(nomeBem),
       'nomesPopulares': serializer.toJson<String?>(nomesPopulares),
-      'natureza': serializer.toJson<String>(natureza),
-      'tipo': serializer.toJson<String>(tipo),
+      'natureza': serializer.toJson<String?>(natureza),
+      'tipo': serializer.toJson<String?>(tipo),
       'meiosAcesso': serializer.toJson<String?>(meiosAcesso),
       'artefatos': serializer.toJson<List<String>>(artefatos),
       'publicado': serializer.toJson<bool>(publicado),
@@ -1657,8 +1695,8 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       'municipio': serializer.toJson<String?>(municipio),
       'cep': serializer.toJson<String?>(cep),
       'endereco': serializer.toJson<String?>(endereco),
-      'latitude': serializer.toJson<double?>(latitude),
-      'longitude': serializer.toJson<double?>(longitude),
+      'latitude': serializer.toJson<String?>(latitude),
+      'longitude': serializer.toJson<String?>(longitude),
       'geojson': serializer.toJson<String?>(geojson),
       'anoRegistro': serializer.toJson<int?>(anoRegistro),
       'descricaoAtualizacao': serializer.toJson<String?>(descricaoAtualizacao),
@@ -1670,12 +1708,13 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
 
   BensMateriai copyWith({
     String? uuid,
-    String? coletaId,
+    Value<String?> coletaId = const Value.absent(),
+    Value<String?> curadorResponsavelId = const Value.absent(),
     Value<String?> codigoIphan = const Value.absent(),
     String? nomeBem,
     Value<String?> nomesPopulares = const Value.absent(),
-    String? natureza,
-    String? tipo,
+    Value<String?> natureza = const Value.absent(),
+    Value<String?> tipo = const Value.absent(),
     Value<String?> meiosAcesso = const Value.absent(),
     List<String>? artefatos,
     bool? publicado,
@@ -1683,8 +1722,8 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     Value<String?> municipio = const Value.absent(),
     Value<String?> cep = const Value.absent(),
     Value<String?> endereco = const Value.absent(),
-    Value<double?> latitude = const Value.absent(),
-    Value<double?> longitude = const Value.absent(),
+    Value<String?> latitude = const Value.absent(),
+    Value<String?> longitude = const Value.absent(),
     Value<String?> geojson = const Value.absent(),
     Value<int?> anoRegistro = const Value.absent(),
     Value<String?> descricaoAtualizacao = const Value.absent(),
@@ -1693,14 +1732,17 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     Value<DateTime?> deletadoEm = const Value.absent(),
   }) => BensMateriai(
     uuid: uuid ?? this.uuid,
-    coletaId: coletaId ?? this.coletaId,
+    coletaId: coletaId.present ? coletaId.value : this.coletaId,
+    curadorResponsavelId: curadorResponsavelId.present
+        ? curadorResponsavelId.value
+        : this.curadorResponsavelId,
     codigoIphan: codigoIphan.present ? codigoIphan.value : this.codigoIphan,
     nomeBem: nomeBem ?? this.nomeBem,
     nomesPopulares: nomesPopulares.present
         ? nomesPopulares.value
         : this.nomesPopulares,
-    natureza: natureza ?? this.natureza,
-    tipo: tipo ?? this.tipo,
+    natureza: natureza.present ? natureza.value : this.natureza,
+    tipo: tipo.present ? tipo.value : this.tipo,
     meiosAcesso: meiosAcesso.present ? meiosAcesso.value : this.meiosAcesso,
     artefatos: artefatos ?? this.artefatos,
     publicado: publicado ?? this.publicado,
@@ -1723,6 +1765,9 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     return BensMateriai(
       uuid: data.uuid.present ? data.uuid.value : this.uuid,
       coletaId: data.coletaId.present ? data.coletaId.value : this.coletaId,
+      curadorResponsavelId: data.curadorResponsavelId.present
+          ? data.curadorResponsavelId.value
+          : this.curadorResponsavelId,
       codigoIphan: data.codigoIphan.present
           ? data.codigoIphan.value
           : this.codigoIphan,
@@ -1765,6 +1810,7 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
     return (StringBuffer('BensMateriai(')
           ..write('uuid: $uuid, ')
           ..write('coletaId: $coletaId, ')
+          ..write('curadorResponsavelId: $curadorResponsavelId, ')
           ..write('codigoIphan: $codigoIphan, ')
           ..write('nomeBem: $nomeBem, ')
           ..write('nomesPopulares: $nomesPopulares, ')
@@ -1793,6 +1839,7 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
   int get hashCode => Object.hashAll([
     uuid,
     coletaId,
+    curadorResponsavelId,
     codigoIphan,
     nomeBem,
     nomesPopulares,
@@ -1820,6 +1867,7 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
       (other is BensMateriai &&
           other.uuid == this.uuid &&
           other.coletaId == this.coletaId &&
+          other.curadorResponsavelId == this.curadorResponsavelId &&
           other.codigoIphan == this.codigoIphan &&
           other.nomeBem == this.nomeBem &&
           other.nomesPopulares == this.nomesPopulares &&
@@ -1844,12 +1892,13 @@ class BensMateriai extends DataClass implements Insertable<BensMateriai> {
 
 class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
   final Value<String> uuid;
-  final Value<String> coletaId;
+  final Value<String?> coletaId;
+  final Value<String?> curadorResponsavelId;
   final Value<String?> codigoIphan;
   final Value<String> nomeBem;
   final Value<String?> nomesPopulares;
-  final Value<String> natureza;
-  final Value<String> tipo;
+  final Value<String?> natureza;
+  final Value<String?> tipo;
   final Value<String?> meiosAcesso;
   final Value<List<String>> artefatos;
   final Value<bool> publicado;
@@ -1857,8 +1906,8 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
   final Value<String?> municipio;
   final Value<String?> cep;
   final Value<String?> endereco;
-  final Value<double?> latitude;
-  final Value<double?> longitude;
+  final Value<String?> latitude;
+  final Value<String?> longitude;
   final Value<String?> geojson;
   final Value<int?> anoRegistro;
   final Value<String?> descricaoAtualizacao;
@@ -1869,6 +1918,7 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
   const BensMateriaisCompanion({
     this.uuid = const Value.absent(),
     this.coletaId = const Value.absent(),
+    this.curadorResponsavelId = const Value.absent(),
     this.codigoIphan = const Value.absent(),
     this.nomeBem = const Value.absent(),
     this.nomesPopulares = const Value.absent(),
@@ -1893,12 +1943,13 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
   });
   BensMateriaisCompanion.insert({
     required String uuid,
-    required String coletaId,
+    this.coletaId = const Value.absent(),
+    this.curadorResponsavelId = const Value.absent(),
     this.codigoIphan = const Value.absent(),
     required String nomeBem,
     this.nomesPopulares = const Value.absent(),
-    required String natureza,
-    required String tipo,
+    this.natureza = const Value.absent(),
+    this.tipo = const Value.absent(),
     this.meiosAcesso = const Value.absent(),
     this.artefatos = const Value.absent(),
     this.publicado = const Value.absent(),
@@ -1916,13 +1967,11 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     this.deletadoEm = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : uuid = Value(uuid),
-       coletaId = Value(coletaId),
-       nomeBem = Value(nomeBem),
-       natureza = Value(natureza),
-       tipo = Value(tipo);
+       nomeBem = Value(nomeBem);
   static Insertable<BensMateriai> custom({
     Expression<String>? uuid,
     Expression<String>? coletaId,
+    Expression<String>? curadorResponsavelId,
     Expression<String>? codigoIphan,
     Expression<String>? nomeBem,
     Expression<String>? nomesPopulares,
@@ -1935,8 +1984,8 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     Expression<String>? municipio,
     Expression<String>? cep,
     Expression<String>? endereco,
-    Expression<double>? latitude,
-    Expression<double>? longitude,
+    Expression<String>? latitude,
+    Expression<String>? longitude,
     Expression<String>? geojson,
     Expression<int>? anoRegistro,
     Expression<String>? descricaoAtualizacao,
@@ -1948,6 +1997,8 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     return RawValuesInsertable({
       if (uuid != null) 'uuid': uuid,
       if (coletaId != null) 'coleta_id': coletaId,
+      if (curadorResponsavelId != null)
+        'curador_responsavel_id': curadorResponsavelId,
       if (codigoIphan != null) 'codigo_iphan': codigoIphan,
       if (nomeBem != null) 'nome_bem': nomeBem,
       if (nomesPopulares != null) 'nomes_populares': nomesPopulares,
@@ -1975,12 +2026,13 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
 
   BensMateriaisCompanion copyWith({
     Value<String>? uuid,
-    Value<String>? coletaId,
+    Value<String?>? coletaId,
+    Value<String?>? curadorResponsavelId,
     Value<String?>? codigoIphan,
     Value<String>? nomeBem,
     Value<String?>? nomesPopulares,
-    Value<String>? natureza,
-    Value<String>? tipo,
+    Value<String?>? natureza,
+    Value<String?>? tipo,
     Value<String?>? meiosAcesso,
     Value<List<String>>? artefatos,
     Value<bool>? publicado,
@@ -1988,8 +2040,8 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     Value<String?>? municipio,
     Value<String?>? cep,
     Value<String?>? endereco,
-    Value<double?>? latitude,
-    Value<double?>? longitude,
+    Value<String?>? latitude,
+    Value<String?>? longitude,
     Value<String?>? geojson,
     Value<int?>? anoRegistro,
     Value<String?>? descricaoAtualizacao,
@@ -2001,6 +2053,7 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     return BensMateriaisCompanion(
       uuid: uuid ?? this.uuid,
       coletaId: coletaId ?? this.coletaId,
+      curadorResponsavelId: curadorResponsavelId ?? this.curadorResponsavelId,
       codigoIphan: codigoIphan ?? this.codigoIphan,
       nomeBem: nomeBem ?? this.nomeBem,
       nomesPopulares: nomesPopulares ?? this.nomesPopulares,
@@ -2033,6 +2086,11 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     }
     if (coletaId.present) {
       map['coleta_id'] = Variable<String>(coletaId.value);
+    }
+    if (curadorResponsavelId.present) {
+      map['curador_responsavel_id'] = Variable<String>(
+        curadorResponsavelId.value,
+      );
     }
     if (codigoIphan.present) {
       map['codigo_iphan'] = Variable<String>(codigoIphan.value);
@@ -2073,10 +2131,10 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
       map['endereco'] = Variable<String>(endereco.value);
     }
     if (latitude.present) {
-      map['latitude'] = Variable<double>(latitude.value);
+      map['latitude'] = Variable<String>(latitude.value);
     }
     if (longitude.present) {
-      map['longitude'] = Variable<double>(longitude.value);
+      map['longitude'] = Variable<String>(longitude.value);
     }
     if (geojson.present) {
       map['geojson'] = Variable<String>(geojson.value);
@@ -2109,6 +2167,7 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
     return (StringBuffer('BensMateriaisCompanion(')
           ..write('uuid: $uuid, ')
           ..write('coletaId: $coletaId, ')
+          ..write('curadorResponsavelId: $curadorResponsavelId, ')
           ..write('codigoIphan: $codigoIphan, ')
           ..write('nomeBem: $nomeBem, ')
           ..write('nomesPopulares: $nomesPopulares, ')
@@ -4784,24 +4843,6 @@ final class $$ColetasTableReferences
     extends BaseReferences<_$AppDatabase, $ColetasTable, Coleta> {
   $$ColetasTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$BensMateriaisTable, List<BensMateriai>>
-  _bensMateriaisRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.bensMateriais,
-    aliasName: $_aliasNameGenerator(db.coletas.uuid, db.bensMateriais.coletaId),
-  );
-
-  $$BensMateriaisTableProcessedTableManager get bensMateriaisRefs {
-    final manager = $$BensMateriaisTableTableManager(
-      $_db,
-      $_db.bensMateriais,
-    ).filter((f) => f.coletaId.uuid.sqlEquals($_itemColumn<String>('uuid')!));
-
-    final cache = $_typedResult.readTableOrNull(_bensMateriaisRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
   static MultiTypedResultKey<$CuradoriasTable, List<Curadoria>>
   _curadoriasRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.curadorias,
@@ -4917,31 +4958,6 @@ class $$ColetasTableFilterComposer
     column: $table.deletadoEm,
     builder: (column) => ColumnFilters(column),
   );
-
-  Expression<bool> bensMateriaisRefs(
-    Expression<bool> Function($$BensMateriaisTableFilterComposer f) f,
-  ) {
-    final $$BensMateriaisTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.uuid,
-      referencedTable: $db.bensMateriais,
-      getReferencedColumn: (t) => t.coletaId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BensMateriaisTableFilterComposer(
-            $db: $db,
-            $table: $db.bensMateriais,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
 
   Expression<bool> curadoriasRefs(
     Expression<bool> Function($$CuradoriasTableFilterComposer f) f,
@@ -5126,31 +5142,6 @@ class $$ColetasTableAnnotationComposer
     builder: (column) => column,
   );
 
-  Expression<T> bensMateriaisRefs<T extends Object>(
-    Expression<T> Function($$BensMateriaisTableAnnotationComposer a) f,
-  ) {
-    final $$BensMateriaisTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.uuid,
-      referencedTable: $db.bensMateriais,
-      getReferencedColumn: (t) => t.coletaId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BensMateriaisTableAnnotationComposer(
-            $db: $db,
-            $table: $db.bensMateriais,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
   Expression<T> curadoriasRefs<T extends Object>(
     Expression<T> Function($$CuradoriasTableAnnotationComposer a) f,
   ) {
@@ -5190,7 +5181,7 @@ class $$ColetasTableTableManager
           $$ColetasTableUpdateCompanionBuilder,
           (Coleta, $$ColetasTableReferences),
           Coleta,
-          PrefetchHooks Function({bool bensMateriaisRefs, bool curadoriasRefs})
+          PrefetchHooks Function({bool curadoriasRefs})
         > {
   $$ColetasTableTableManager(_$AppDatabase db, $ColetasTable table)
     : super(
@@ -5288,63 +5279,31 @@ class $$ColetasTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback:
-              ({bensMateriaisRefs = false, curadoriasRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (bensMateriaisRefs) db.bensMateriais,
-                    if (curadoriasRefs) db.curadorias,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (bensMateriaisRefs)
-                        await $_getPrefetchedData<
-                          Coleta,
-                          $ColetasTable,
-                          BensMateriai
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ColetasTableReferences
-                              ._bensMateriaisRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ColetasTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).bensMateriaisRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.coletaId == item.uuid,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (curadoriasRefs)
-                        await $_getPrefetchedData<
-                          Coleta,
-                          $ColetasTable,
-                          Curadoria
-                        >(
-                          currentTable: table,
-                          referencedTable: $$ColetasTableReferences
-                              ._curadoriasRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$ColetasTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).curadoriasRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.coletaId == item.uuid,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
+          prefetchHooksCallback: ({curadoriasRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (curadoriasRefs) db.curadorias],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (curadoriasRefs)
+                    await $_getPrefetchedData<Coleta, $ColetasTable, Curadoria>(
+                      currentTable: table,
+                      referencedTable: $$ColetasTableReferences
+                          ._curadoriasRefsTable(db),
+                      managerFromTypedResult: (p0) => $$ColetasTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).curadoriasRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.coletaId == item.uuid),
+                      typedResults: items,
+                    ),
+                ];
               },
+            );
+          },
         ),
       );
 }
@@ -5361,17 +5320,18 @@ typedef $$ColetasTableProcessedTableManager =
       $$ColetasTableUpdateCompanionBuilder,
       (Coleta, $$ColetasTableReferences),
       Coleta,
-      PrefetchHooks Function({bool bensMateriaisRefs, bool curadoriasRefs})
+      PrefetchHooks Function({bool curadoriasRefs})
     >;
 typedef $$BensMateriaisTableCreateCompanionBuilder =
     BensMateriaisCompanion Function({
       required String uuid,
-      required String coletaId,
+      Value<String?> coletaId,
+      Value<String?> curadorResponsavelId,
       Value<String?> codigoIphan,
       required String nomeBem,
       Value<String?> nomesPopulares,
-      required String natureza,
-      required String tipo,
+      Value<String?> natureza,
+      Value<String?> tipo,
       Value<String?> meiosAcesso,
       Value<List<String>> artefatos,
       Value<bool> publicado,
@@ -5379,8 +5339,8 @@ typedef $$BensMateriaisTableCreateCompanionBuilder =
       Value<String?> municipio,
       Value<String?> cep,
       Value<String?> endereco,
-      Value<double?> latitude,
-      Value<double?> longitude,
+      Value<String?> latitude,
+      Value<String?> longitude,
       Value<String?> geojson,
       Value<int?> anoRegistro,
       Value<String?> descricaoAtualizacao,
@@ -5392,12 +5352,13 @@ typedef $$BensMateriaisTableCreateCompanionBuilder =
 typedef $$BensMateriaisTableUpdateCompanionBuilder =
     BensMateriaisCompanion Function({
       Value<String> uuid,
-      Value<String> coletaId,
+      Value<String?> coletaId,
+      Value<String?> curadorResponsavelId,
       Value<String?> codigoIphan,
       Value<String> nomeBem,
       Value<String?> nomesPopulares,
-      Value<String> natureza,
-      Value<String> tipo,
+      Value<String?> natureza,
+      Value<String?> tipo,
       Value<String?> meiosAcesso,
       Value<List<String>> artefatos,
       Value<bool> publicado,
@@ -5405,8 +5366,8 @@ typedef $$BensMateriaisTableUpdateCompanionBuilder =
       Value<String?> municipio,
       Value<String?> cep,
       Value<String?> endereco,
-      Value<double?> latitude,
-      Value<double?> longitude,
+      Value<String?> latitude,
+      Value<String?> longitude,
       Value<String?> geojson,
       Value<int?> anoRegistro,
       Value<String?> descricaoAtualizacao,
@@ -5423,25 +5384,6 @@ final class $$BensMateriaisTableReferences
     super.$_table,
     super.$_typedResult,
   );
-
-  static $ColetasTable _coletaIdTable(_$AppDatabase db) =>
-      db.coletas.createAlias(
-        $_aliasNameGenerator(db.bensMateriais.coletaId, db.coletas.uuid),
-      );
-
-  $$ColetasTableProcessedTableManager get coletaId {
-    final $_column = $_itemColumn<String>('coleta_id')!;
-
-    final manager = $$ColetasTableTableManager(
-      $_db,
-      $_db.coletas,
-    ).filter((f) => f.uuid.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_coletaIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
 
   static MultiTypedResultKey<$CuradoriasTable, List<Curadoria>>
   _curadoriasRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
@@ -5528,6 +5470,16 @@ class $$BensMateriaisTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get coletaId => $composableBuilder(
+    column: $table.coletaId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get curadorResponsavelId => $composableBuilder(
+    column: $table.curadorResponsavelId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get codigoIphan => $composableBuilder(
     column: $table.codigoIphan,
     builder: (column) => ColumnFilters(column),
@@ -5589,12 +5541,12 @@ class $$BensMateriaisTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get latitude => $composableBuilder(
+  ColumnFilters<String> get latitude => $composableBuilder(
     column: $table.latitude,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get longitude => $composableBuilder(
+  ColumnFilters<String> get longitude => $composableBuilder(
     column: $table.longitude,
     builder: (column) => ColumnFilters(column),
   );
@@ -5628,29 +5580,6 @@ class $$BensMateriaisTableFilterComposer
     column: $table.deletadoEm,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$ColetasTableFilterComposer get coletaId {
-    final $$ColetasTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coletaId,
-      referencedTable: $db.coletas,
-      getReferencedColumn: (t) => t.uuid,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ColetasTableFilterComposer(
-            $db: $db,
-            $table: $db.coletas,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   Expression<bool> curadoriasRefs(
     Expression<bool> Function($$CuradoriasTableFilterComposer f) f,
@@ -5742,6 +5671,16 @@ class $$BensMateriaisTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get coletaId => $composableBuilder(
+    column: $table.coletaId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get curadorResponsavelId => $composableBuilder(
+    column: $table.curadorResponsavelId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get codigoIphan => $composableBuilder(
     column: $table.codigoIphan,
     builder: (column) => ColumnOrderings(column),
@@ -5802,12 +5741,12 @@ class $$BensMateriaisTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get latitude => $composableBuilder(
+  ColumnOrderings<String> get latitude => $composableBuilder(
     column: $table.latitude,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get longitude => $composableBuilder(
+  ColumnOrderings<String> get longitude => $composableBuilder(
     column: $table.longitude,
     builder: (column) => ColumnOrderings(column),
   );
@@ -5841,29 +5780,6 @@ class $$BensMateriaisTableOrderingComposer
     column: $table.deletadoEm,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$ColetasTableOrderingComposer get coletaId {
-    final $$ColetasTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coletaId,
-      referencedTable: $db.coletas,
-      getReferencedColumn: (t) => t.uuid,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ColetasTableOrderingComposer(
-            $db: $db,
-            $table: $db.coletas,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$BensMateriaisTableAnnotationComposer
@@ -5877,6 +5793,14 @@ class $$BensMateriaisTableAnnotationComposer
   });
   GeneratedColumn<String> get uuid =>
       $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<String> get coletaId =>
+      $composableBuilder(column: $table.coletaId, builder: (column) => column);
+
+  GeneratedColumn<String> get curadorResponsavelId => $composableBuilder(
+    column: $table.curadorResponsavelId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get codigoIphan => $composableBuilder(
     column: $table.codigoIphan,
@@ -5920,10 +5844,10 @@ class $$BensMateriaisTableAnnotationComposer
   GeneratedColumn<String> get endereco =>
       $composableBuilder(column: $table.endereco, builder: (column) => column);
 
-  GeneratedColumn<double> get latitude =>
+  GeneratedColumn<String> get latitude =>
       $composableBuilder(column: $table.latitude, builder: (column) => column);
 
-  GeneratedColumn<double> get longitude =>
+  GeneratedColumn<String> get longitude =>
       $composableBuilder(column: $table.longitude, builder: (column) => column);
 
   GeneratedColumn<String> get geojson =>
@@ -5951,29 +5875,6 @@ class $$BensMateriaisTableAnnotationComposer
     column: $table.deletadoEm,
     builder: (column) => column,
   );
-
-  $$ColetasTableAnnotationComposer get coletaId {
-    final $$ColetasTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.coletaId,
-      referencedTable: $db.coletas,
-      getReferencedColumn: (t) => t.uuid,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$ColetasTableAnnotationComposer(
-            $db: $db,
-            $table: $db.coletas,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 
   Expression<T> curadoriasRefs<T extends Object>(
     Expression<T> Function($$CuradoriasTableAnnotationComposer a) f,
@@ -6066,7 +5967,6 @@ class $$BensMateriaisTableTableManager
           (BensMateriai, $$BensMateriaisTableReferences),
           BensMateriai,
           PrefetchHooks Function({
-            bool coletaId,
             bool curadoriasRefs,
             bool midiaLinksRefs,
             bool responsaveisSitioRefs,
@@ -6086,12 +5986,13 @@ class $$BensMateriaisTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> uuid = const Value.absent(),
-                Value<String> coletaId = const Value.absent(),
+                Value<String?> coletaId = const Value.absent(),
+                Value<String?> curadorResponsavelId = const Value.absent(),
                 Value<String?> codigoIphan = const Value.absent(),
                 Value<String> nomeBem = const Value.absent(),
                 Value<String?> nomesPopulares = const Value.absent(),
-                Value<String> natureza = const Value.absent(),
-                Value<String> tipo = const Value.absent(),
+                Value<String?> natureza = const Value.absent(),
+                Value<String?> tipo = const Value.absent(),
                 Value<String?> meiosAcesso = const Value.absent(),
                 Value<List<String>> artefatos = const Value.absent(),
                 Value<bool> publicado = const Value.absent(),
@@ -6099,8 +6000,8 @@ class $$BensMateriaisTableTableManager
                 Value<String?> municipio = const Value.absent(),
                 Value<String?> cep = const Value.absent(),
                 Value<String?> endereco = const Value.absent(),
-                Value<double?> latitude = const Value.absent(),
-                Value<double?> longitude = const Value.absent(),
+                Value<String?> latitude = const Value.absent(),
+                Value<String?> longitude = const Value.absent(),
                 Value<String?> geojson = const Value.absent(),
                 Value<int?> anoRegistro = const Value.absent(),
                 Value<String?> descricaoAtualizacao = const Value.absent(),
@@ -6111,6 +6012,7 @@ class $$BensMateriaisTableTableManager
               }) => BensMateriaisCompanion(
                 uuid: uuid,
                 coletaId: coletaId,
+                curadorResponsavelId: curadorResponsavelId,
                 codigoIphan: codigoIphan,
                 nomeBem: nomeBem,
                 nomesPopulares: nomesPopulares,
@@ -6136,12 +6038,13 @@ class $$BensMateriaisTableTableManager
           createCompanionCallback:
               ({
                 required String uuid,
-                required String coletaId,
+                Value<String?> coletaId = const Value.absent(),
+                Value<String?> curadorResponsavelId = const Value.absent(),
                 Value<String?> codigoIphan = const Value.absent(),
                 required String nomeBem,
                 Value<String?> nomesPopulares = const Value.absent(),
-                required String natureza,
-                required String tipo,
+                Value<String?> natureza = const Value.absent(),
+                Value<String?> tipo = const Value.absent(),
                 Value<String?> meiosAcesso = const Value.absent(),
                 Value<List<String>> artefatos = const Value.absent(),
                 Value<bool> publicado = const Value.absent(),
@@ -6149,8 +6052,8 @@ class $$BensMateriaisTableTableManager
                 Value<String?> municipio = const Value.absent(),
                 Value<String?> cep = const Value.absent(),
                 Value<String?> endereco = const Value.absent(),
-                Value<double?> latitude = const Value.absent(),
-                Value<double?> longitude = const Value.absent(),
+                Value<String?> latitude = const Value.absent(),
+                Value<String?> longitude = const Value.absent(),
                 Value<String?> geojson = const Value.absent(),
                 Value<int?> anoRegistro = const Value.absent(),
                 Value<String?> descricaoAtualizacao = const Value.absent(),
@@ -6161,6 +6064,7 @@ class $$BensMateriaisTableTableManager
               }) => BensMateriaisCompanion.insert(
                 uuid: uuid,
                 coletaId: coletaId,
+                curadorResponsavelId: curadorResponsavelId,
                 codigoIphan: codigoIphan,
                 nomeBem: nomeBem,
                 nomesPopulares: nomesPopulares,
@@ -6193,7 +6097,6 @@ class $$BensMateriaisTableTableManager
               .toList(),
           prefetchHooksCallback:
               ({
-                coletaId = false,
                 curadoriasRefs = false,
                 midiaLinksRefs = false,
                 responsaveisSitioRefs = false,
@@ -6205,40 +6108,7 @@ class $$BensMateriaisTableTableManager
                     if (midiaLinksRefs) db.midiaLinks,
                     if (responsaveisSitioRefs) db.responsaveisSitio,
                   ],
-                  addJoins:
-                      <
-                        T extends TableManagerState<
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic,
-                          dynamic
-                        >
-                      >(state) {
-                        if (coletaId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.coletaId,
-                                    referencedTable:
-                                        $$BensMateriaisTableReferences
-                                            ._coletaIdTable(db),
-                                    referencedColumn:
-                                        $$BensMateriaisTableReferences
-                                            ._coletaIdTable(db)
-                                            .uuid,
-                                  )
-                                  as T;
-                        }
-
-                        return state;
-                      },
+                  addJoins: null,
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (curadoriasRefs)
@@ -6325,7 +6195,6 @@ typedef $$BensMateriaisTableProcessedTableManager =
       (BensMateriai, $$BensMateriaisTableReferences),
       BensMateriai,
       PrefetchHooks Function({
-        bool coletaId,
         bool curadoriasRefs,
         bool midiaLinksRefs,
         bool responsaveisSitioRefs,

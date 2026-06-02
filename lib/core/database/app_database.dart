@@ -34,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -48,6 +48,14 @@ class AppDatabase extends _$AppDatabase {
       // Versão 4 reverte essa coluna; usuários em v2 nunca a tiveram.
       if (from == 3) {
         await customStatement('ALTER TABLE coletas DROP COLUMN sincronizado');
+      }
+      // v5: coleta_id tornou-se nullable.
+      // v6: lat/lng REAL → TEXT (precisão decimal(10,7)).
+      // v7: curador_responsavel_id adicionado.
+      // SQLite não suporta ALTER COLUMN; recria a tabela (cache remoto).
+      if (from < 7) {
+        await customStatement('DROP TABLE IF EXISTS bens_materiais');
+        await m.createTable(bensMateriais);
       }
     },
     beforeOpen: (details) async {

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
+import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/home/domain/entities/sitio_mapa_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/viewmodels/home_viewmodel.dart';
@@ -23,6 +24,7 @@ class InicioPage extends StatefulWidget {
 class _InicioPageState extends State<InicioPage> {
   late final HomeViewModel _viewModel;
   late final AuthNotifier _authNotifier;
+  late final ValueNotifier<bool> _estaOnline;
   bool _initialized = false;
 
   @override
@@ -32,6 +34,7 @@ class _InicioPageState extends State<InicioPage> {
       _initialized = true;
       final scope = AppScope.of(context);
       _authNotifier = scope.authNotifier;
+      _estaOnline = scope.conectividadeService.estaOnline;
       _viewModel = HomeViewModel(
         coletaRepository: scope.coletaRepository,
         authNotifier: scope.authNotifier,
@@ -62,7 +65,6 @@ class _InicioPageState extends State<InicioPage> {
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.paddingOf(context).top;
-    final screenHeight = MediaQuery.sizeOf(context).height;
 
     return Scaffold(
       body: Stack(
@@ -78,6 +80,7 @@ class _InicioPageState extends State<InicioPage> {
               scrollController: scrollController,
               viewModel: _viewModel,
               onNovaColeta: _irParaNovaColeta,
+              estaOnline: _estaOnline,
             ),
           ),
           Positioned(
@@ -93,11 +96,6 @@ class _InicioPageState extends State<InicioPage> {
                 ),
               ],
             ),
-          ),
-          Positioned(
-            right: 16.0,
-            bottom: screenHeight * 0.175 + 16.0,
-            child: _FloatingFab(onPressed: _irParaNovaColeta),
           ),
         ],
       ),
@@ -197,13 +195,13 @@ class _FloatingHeader extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Text(
-                      'ArqueoData',
+                      'ArqueoPI',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
-                      'Field Collection v2.4',
+                      'Hub Coletas v1.0',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -287,24 +285,6 @@ class _FloatingSearchBar extends StatelessWidget {
   }
 }
 
-class _FloatingFab extends StatelessWidget {
-  const _FloatingFab({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return FloatingActionButton(
-      onPressed: onPressed,
-      backgroundColor: theme.colorScheme.primary,
-      foregroundColor: theme.colorScheme.onPrimary,
-      elevation: 4,
-      child: const Icon(Icons.add),
-    );
-  }
-}
-
 // ── Bottom sheet ──────────────────────────────────────────────────────────────
 
 class _BottomSheetContent extends StatelessWidget {
@@ -312,11 +292,13 @@ class _BottomSheetContent extends StatelessWidget {
     required this.scrollController,
     required this.viewModel,
     required this.onNovaColeta,
+    required this.estaOnline,
   });
 
   final ScrollController scrollController;
   final HomeViewModel viewModel;
   final VoidCallback onNovaColeta;
+  final ValueNotifier<bool> estaOnline;
 
   @override
   Widget build(BuildContext context) {
@@ -340,6 +322,15 @@ class _BottomSheetContent extends StatelessWidget {
         padding: EdgeInsets.only(bottom: bottomPadding + 32),
         children: <Widget>[
           const _SheetHandle(),
+          ValueListenableBuilder<bool>(
+            valueListenable: estaOnline,
+            builder: (context, online, _) => AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: online
+                  ? const SizedBox.shrink(key: ValueKey('online'))
+                  : const _OfflineBanner(key: ValueKey('offline')),
+            ),
+          ),
           const SizedBox(height: 8),
           _WelcomeSection(nomeUsuario: viewModel.nomeUsuario),
           ValueListenableBuilder<int>(
@@ -381,6 +372,41 @@ class _SheetHandle extends StatelessWidget {
           ).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(2),
         ),
+      ),
+    );
+  }
+}
+
+class _OfflineBanner extends StatelessWidget {
+  const _OfflineBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.warningAlt.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.warningAlt.withValues(alpha: 0.6),
+        ),
+      ),
+      child: Row(
+        children: <Widget>[
+          const Icon(Icons.wifi_off, color: AppColors.warningAlt, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Sem conexão — dados serão sincronizados ao reconectar',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.warningAlt,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

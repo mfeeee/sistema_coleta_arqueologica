@@ -1,7 +1,9 @@
+import 'package:latlong2/latlong.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/features/home/domain/entities/sitio_mapa_entity.dart';
 
 // Invariante: syncStatus é a única fonte de verdade para o estado de
 // sincronização. Não existe campo booleano `sincronizado` paralelo.
@@ -41,4 +43,13 @@ class ColetaEntity {
     this.uf,
     this.deletadoEm,
   });
+}
+
+extension ColetaParaMapa on ColetaEntity {
+  SitioMapaEntity get paraMapa => SitioMapaEntity(
+    id: id,
+    nomeBem: nomeBem,
+    posicao: LatLng(latitude, longitude),
+    tipoIcone: tipo?.name ?? 'padrao',
+  );
 }

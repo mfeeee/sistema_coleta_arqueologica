@@ -62,6 +62,8 @@ extension BemParaMapa on BemMaterialEntity {
     final lat = latitude;
     final lng = longitude;
     if (lat == null || lng == null) return null;
+    if (lat < -90.0 || lat > 90.0 || lng < -180.0 || lng > 180.0) return null;
+    if (lat == 0.0 && lng == 0.0) return null;
     return PinoMapa(
       id: id,
       nomeBem: nomeBem,

@@ -96,6 +96,8 @@ class _StubBemMaterialRepository implements BemMaterialRepository {
   Future<void> salvar(BemMaterialEntity bem) async {}
   @override
   Future<void> deletar(String uuid) async {}
+  @override
+  Future<int> sincronizarBens() async => 0;
 }
 
 class _StubNotificacaoRepository implements NotificacaoRepository {
@@ -180,6 +182,7 @@ class _FakeAuthNotifier extends AuthNotifier {
         obterColetasPendentesUseCase: ObterColetasPendentesUseCase(
           _StubColetaRepository(),
         ),
+        bemMaterialRepository: _StubBemMaterialRepository(),
         agendarSync: () async {},
       );
 

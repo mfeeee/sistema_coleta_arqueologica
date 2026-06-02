@@ -9,6 +9,8 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.da
 import 'package:sistema_coleta_arqueologica/core/services/auth_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
+import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
+import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
@@ -99,6 +101,21 @@ class _ErrandoObterPendentesUseCase extends ObterColetasPendentesUseCase {
   Future<List<ColetaEntity>> call() => Future.error(Exception('erro simulado'));
 }
 
+class _FakeBemMaterialRepository implements BemMaterialRepository {
+  @override
+  Future<List<BemMaterialEntity>> getAll() async => [];
+  @override
+  Future<List<BemMaterialEntity>> getByColetaId(String id) async => [];
+  @override
+  Future<BemMaterialEntity?> getById(String uuid) async => null;
+  @override
+  Future<void> salvar(BemMaterialEntity bem) async {}
+  @override
+  Future<void> deletar(String uuid) async {}
+  @override
+  Future<int> sincronizarBens() async => 0;
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -148,6 +165,7 @@ void main() {
           coletaRepository: _FakeColetaRepository(),
           pullService: _FakePullService(),
           obterColetasPendentesUseCase: spy,
+          bemMaterialRepository: _FakeBemMaterialRepository(),
           agendarSync: () async {},
         );
 
@@ -167,6 +185,7 @@ void main() {
         coletaRepository: _FakeColetaRepository(),
         pullService: _FakePullService(),
         obterColetasPendentesUseCase: spy,
+        bemMaterialRepository: _FakeBemMaterialRepository(),
         agendarSync: () async => chamouAgendar.add(true),
       );
 
@@ -185,6 +204,7 @@ void main() {
         coletaRepository: _FakeColetaRepository(),
         pullService: _FakePullService(),
         obterColetasPendentesUseCase: spy,
+        bemMaterialRepository: _FakeBemMaterialRepository(),
         agendarSync: () async => chamouAgendar.add(true),
       );
 
@@ -202,6 +222,7 @@ void main() {
           coletaRepository: _FakeColetaRepository(),
           pullService: _FakePullService(),
           obterColetasPendentesUseCase: _ErrandoObterPendentesUseCase(),
+          bemMaterialRepository: _FakeBemMaterialRepository(),
           agendarSync: () async {},
         );
 

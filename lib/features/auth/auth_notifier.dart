@@ -35,6 +35,7 @@ class AuthNotifier extends ChangeNotifier {
   String? _userId;
   String? _userEmail;
   String? _userClassificacao;
+  String? _userAvatarUrl;
   String? _avisoSistema;
 
   RecuperacaoStatus _recuperacaoStatus = RecuperacaoStatus.idle;
@@ -46,6 +47,7 @@ class AuthNotifier extends ChangeNotifier {
   String? get userId => _userId;
   String? get userEmail => _userEmail;
   String? get userClassificacao => _userClassificacao;
+  String? get userAvatarUrl => _userAvatarUrl;
   String? get avisoSistema => _avisoSistema;
   bool get isLoading => _status == AuthStatus.loading;
 
@@ -56,6 +58,22 @@ class AuthNotifier extends ChangeNotifier {
 
   void limparAviso() {
     _avisoSistema = null;
+  }
+
+  void atualizarDadosPerfil({
+    String? nome,
+    String? email,
+    String? avatarUrl,
+    bool removerAvatar = false,
+  }) {
+    if (nome != null) _userName = nome;
+    if (email != null) _userEmail = email;
+    if (removerAvatar) {
+      _userAvatarUrl = null;
+    } else if (avatarUrl != null) {
+      _userAvatarUrl = avatarUrl;
+    }
+    notifyListeners();
   }
 
   Future<void> login(String email, String password) async {
@@ -71,12 +89,14 @@ class AuthNotifier extends ChangeNotifier {
         userId: final idRetornado,
         email: final emailRetornado,
         classificacao: final classifRetornada,
+        avatarUrl: final avatarRetornado,
       ):
         _status = AuthStatus.authenticated;
         _userName = nomeRetornado;
         _userId = idRetornado;
         _userEmail = emailRetornado;
         _userClassificacao = classifRetornada;
+        _userAvatarUrl = avatarRetornado;
         _pullService.sincronizarPull().then(
           (_) {},
           onError: (Object e, StackTrace st) {
@@ -166,6 +186,7 @@ class AuthNotifier extends ChangeNotifier {
         _userName = nomeRetornado;
         _userEmail = emailRetornado;
         _userClassificacao = classifRetornada;
+        _userAvatarUrl = null;
         BackgroundSyncService.agendar().then(
           (_) {},
           onError: (Object e, StackTrace st) => log(
@@ -232,6 +253,7 @@ class AuthNotifier extends ChangeNotifier {
     _userId = null;
     _userEmail = null;
     _userClassificacao = null;
+    _userAvatarUrl = null;
     _errorMessage = null;
     _avisoSistema = null;
     notifyListeners();
@@ -256,6 +278,7 @@ class AuthNotifier extends ChangeNotifier {
     _userId = null;
     _userEmail = null;
     _userClassificacao = null;
+    _userAvatarUrl = null;
     _errorMessage = TratadorDeErros.sessaoExpirada;
     _avisoSistema = null;
     notifyListeners();

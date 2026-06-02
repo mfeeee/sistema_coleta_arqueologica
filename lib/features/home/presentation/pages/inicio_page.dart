@@ -389,9 +389,7 @@ class _OfflineBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.warningAlt.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.warningAlt.withValues(alpha: 0.6),
-        ),
+        border: Border.all(color: AppColors.warningAlt.withValues(alpha: 0.6)),
       ),
       child: Row(
         children: <Widget>[

@@ -113,7 +113,7 @@ class _FakeBemMaterialRepository implements BemMaterialRepository {
   @override
   Future<void> deletar(String uuid) async {}
   @override
-  Future<int> sincronizarBens() async => 0;
+  Future<int> sincronizarBens({bool forcar = false}) async => 0;
 }
 
 // ---------------------------------------------------------------------------

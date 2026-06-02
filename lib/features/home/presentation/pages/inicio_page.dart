@@ -1,11 +1,17 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
+import 'package:sistema_coleta_arqueologica/features/home/domain/entities/sitio_mapa_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/viewmodels/home_viewmodel.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/activity_summary_section.dart';
 import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/recent_activities_section.dart';
+import 'package:sistema_coleta_arqueologica/features/home/presentation/widgets/sitio_marker.dart';
 
 class InicioPage extends StatefulWidget {
   const InicioPage({super.key});
@@ -55,69 +61,176 @@ class _InicioPageState extends State<InicioPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final topPadding = MediaQuery.paddingOf(context).top;
+    final screenHeight = MediaQuery.sizeOf(context).height;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        elevation: 0,
-        titleSpacing: 16.0,
-        title: Row(
-          children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+      body: Stack(
+        children: <Widget>[
+          _MapaLayer(sitiosNoMapa: _viewModel.sitiosNoMapa),
+          DraggableScrollableSheet(
+            initialChildSize: 0.175,
+            minChildSize: 0.175,
+            maxChildSize: 0.92,
+            snap: true,
+            snapSizes: const [0.175, 0.5, 0.92],
+            builder: (context, scrollController) => _BottomSheetContent(
+              scrollController: scrollController,
+              viewModel: _viewModel,
+              onNovaColeta: _irParaNovaColeta,
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Column(
               children: <Widget>[
-                Text(
-                  'ArqueoData',
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.displayLarge?.copyWith(
-                    fontSize: 18,
-                    height: 1.2,
-                  ),
+                _FloatingHeader(topPadding: topPadding),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: _FloatingSearchBar(),
                 ),
               ],
             ),
-          ],
-        ),
-        actions: <Widget>[
-          Container(
-            margin: const EdgeInsets.only(right: 16.0),
-            child: IconButton(
-              icon: Icon(
-                Icons.notifications_none,
-                color: theme.colorScheme.primary,
-                size: 20,
-              ),
-              onPressed: () => context.push('/notificacoes'),
-            ),
+          ),
+          Positioned(
+            right: 16.0,
+            bottom: screenHeight * 0.175 + 16.0,
+            child: _FloatingFab(onPressed: _irParaNovaColeta),
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
+    );
+  }
+}
+
+// ── Camada do mapa ────────────────────────────────────────────────────────────
+
+class _MapaLayer extends StatelessWidget {
+  const _MapaLayer({required this.sitiosNoMapa});
+
+  final ValueNotifier<List<SitioMapaEntity>> sitiosNoMapa;
+
+  // Parnaíba, PI — coordenada fixa até geolocator real ser integrado.
+  static const LatLng _centroInicial = LatLng(-2.905, -41.776);
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<SitioMapaEntity>>(
+      valueListenable: sitiosNoMapa,
+      builder: (context, sitios, _) {
+        return FlutterMap(
+          options: const MapOptions(
+            initialCenter: _centroInicial,
+            initialZoom: 13.0,
+          ),
+          children: <Widget>[
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'br.edu.ifpi.arqueadata',
+            ),
+            MarkerLayer(
+              markers: sitios
+                  .map(
+                    (s) => Marker(
+                      point: s.posicao,
+                      width: 16,
+                      height: 16,
+                      child: const SitioMarker(),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// ── Elementos flutuantes ──────────────────────────────────────────────────────
+
+class _FloatingHeader extends StatelessWidget {
+  const _FloatingHeader({required this.topPadding});
+
+  final double topPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        child: Container(
+          padding: EdgeInsets.fromLTRB(16, topPadding + 8, 16, 10),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.85),
+            border: Border(
+              bottom: BorderSide(
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+              ),
+            ),
+          ),
+          child: Row(
             children: <Widget>[
-              _WelcomeSection(nomeUsuario: _viewModel.nomeUsuario),
-              ValueListenableBuilder<int>(
-                valueListenable: _viewModel.coletasPendentes,
-                builder: (context, qtd, _) {
-                  if (qtd == 0) return const SizedBox.shrink();
-                  return _BannerPendentes(quantidade: qtd);
-                },
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'A',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-              const SizedBox(height: 32.0),
-              _QuickActionsSection(onNovaColeta: _irParaNovaColeta),
-              const SizedBox(height: 32.0),
-              ActivitySummarySection(
-                totalColetas: _viewModel.totalColetas,
-                coletasPendentes: _viewModel.coletasPendentes,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      'ArqueoData',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Field Collection v2.4',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 32.0),
-              RecentActivitiesSection(
-                coletasRecentes: _viewModel.coletasRecentes,
+              IconButton(
+                icon: Icon(
+                  Icons.notifications_none,
+                  color: theme.colorScheme.onSurface,
+                  size: 22,
+                ),
+                onPressed: () => context.push('/notificacoes'),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
               ),
-              const SizedBox(height: 32.0),
+              const SizedBox(width: 12),
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: theme.colorScheme.primaryContainer,
+                child: Icon(
+                  Icons.person,
+                  color: theme.colorScheme.onPrimaryContainer,
+                  size: 20,
+                ),
+              ),
             ],
           ),
         ),
@@ -125,6 +238,155 @@ class _InicioPageState extends State<InicioPage> {
     );
   }
 }
+
+class _FloatingSearchBar extends StatelessWidget {
+  const _FloatingSearchBar();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Row(
+            children: <Widget>[
+              Icon(
+                Icons.search,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Buscar sítio ou coordenada...',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.mic_none,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FloatingFab extends StatelessWidget {
+  const _FloatingFab({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return FloatingActionButton(
+      onPressed: onPressed,
+      backgroundColor: theme.colorScheme.primary,
+      foregroundColor: theme.colorScheme.onPrimary,
+      elevation: 4,
+      child: const Icon(Icons.add),
+    );
+  }
+}
+
+// ── Bottom sheet ──────────────────────────────────────────────────────────────
+
+class _BottomSheetContent extends StatelessWidget {
+  const _BottomSheetContent({
+    required this.scrollController,
+    required this.viewModel,
+    required this.onNovaColeta,
+  });
+
+  final ScrollController scrollController;
+  final HomeViewModel viewModel;
+  final VoidCallback onNovaColeta;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: ListView(
+        controller: scrollController,
+        padding: EdgeInsets.only(bottom: bottomPadding + 32),
+        children: <Widget>[
+          const _SheetHandle(),
+          const SizedBox(height: 8),
+          _WelcomeSection(nomeUsuario: viewModel.nomeUsuario),
+          ValueListenableBuilder<int>(
+            valueListenable: viewModel.coletasPendentes,
+            builder: (context, qtd, _) {
+              if (qtd == 0) return const SizedBox.shrink();
+              return _BannerPendentes(quantidade: qtd);
+            },
+          ),
+          const SizedBox(height: 24),
+          _QuickActionsSection(onNovaColeta: onNovaColeta),
+          const SizedBox(height: 24),
+          ActivitySummarySection(
+            totalColetas: viewModel.totalColetas,
+            coletasPendentes: viewModel.coletasPendentes,
+          ),
+          const SizedBox(height: 24),
+          RecentActivitiesSection(coletasRecentes: viewModel.coletasRecentes),
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+}
+
+class _SheetHandle extends StatelessWidget {
+  const _SheetHandle();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Conteúdo do sheet ─────────────────────────────────────────────────────────
 
 class _BannerPendentes extends StatelessWidget {
   const _BannerPendentes({required this.quantidade});

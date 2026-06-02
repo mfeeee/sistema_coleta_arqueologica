@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
+import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
@@ -36,6 +37,7 @@ class AppScope extends InheritedWidget {
     required this.temaModo,
     required this.idiomaAtual,
     required this.fotoPerfilPath,
+    required this.profileService,
     required super.child,
   });
 
@@ -51,6 +53,7 @@ class AppScope extends InheritedWidget {
   final ValueNotifier<ThemeMode> temaModo;
   final ValueNotifier<Locale> idiomaAtual;
   final ValueNotifier<String?> fotoPerfilPath;
+  final ProfileService profileService;
 
   factory AppScope.create({
     required AppDatabase database,
@@ -62,6 +65,7 @@ class AppScope extends InheritedWidget {
     required ValueNotifier<Locale> idiomaAtual,
     required NotificacaoRepository notificacaoRepository,
     required PreferenciasNotificacaoRepository preferenciasRepository,
+    required ProfileService profileService,
     required Widget child,
   }) {
     final coletaDatasource = ColetaLocalDatasourceImpl(database);
@@ -102,6 +106,7 @@ class AppScope extends InheritedWidget {
       temaModo: temaModo,
       idiomaAtual: idiomaAtual,
       fotoPerfilPath: ValueNotifier<String?>(null),
+      profileService: profileService,
       child: child,
     );
   }
@@ -125,5 +130,6 @@ class AppScope extends InheritedWidget {
       prefs != oldWidget.prefs ||
       temaModo != oldWidget.temaModo ||
       idiomaAtual != oldWidget.idiomaAtual ||
-      fotoPerfilPath != oldWidget.fotoPerfilPath;
+      fotoPerfilPath != oldWidget.fotoPerfilPath ||
+      profileService != oldWidget.profileService;
 }

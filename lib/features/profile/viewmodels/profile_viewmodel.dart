@@ -191,13 +191,13 @@ class ProfileViewModel {
       final result = await _profileService.updateProfile(
         name: nome,
         email: email,
+        classificacao: classificacao,
       );
       switch (result) {
         case ProfileSuccess(:final data):
           nomeAtual.value = data['name'] as String? ?? nome;
           emailAtual.value = data['email'] as String? ?? email;
-          classificacaoAtual.value =
-              data['classificacao'] as String? ?? classificacao;
+          classificacaoAtual.value = classificacao;
           _authNotifier.atualizarDadosPerfil(
             nome: nomeAtual.value,
             email: emailAtual.value,

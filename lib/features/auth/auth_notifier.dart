@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/tratador_de_erros.dart';
+import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
@@ -17,17 +18,24 @@ class AuthNotifier extends ChangeNotifier {
     required ColetaRepository coletaRepository,
     required PullService pullService,
     required ObterColetasPendentesUseCase obterColetasPendentesUseCase,
+    required BemMaterialRepository bemMaterialRepository,
     Future<void> Function() agendarSync = BackgroundSyncService.agendar,
   }) : _coletaRepository = coletaRepository,
        _pullService = pullService,
        _obterColetasPendentesUseCase = obterColetasPendentesUseCase,
+       _bemMaterialRepository = bemMaterialRepository,
        _agendarSync = agendarSync;
 
   final AuthService authService;
   final ColetaRepository _coletaRepository;
   final PullService _pullService;
   final ObterColetasPendentesUseCase _obterColetasPendentesUseCase;
+  final BemMaterialRepository _bemMaterialRepository;
   final Future<void> Function() _agendarSync;
+
+  /// Incrementado sempre que sincronizarBens() termina (com ou sem erros).
+  /// Ouvintes podem reagir recarregando dados do mapa.
+  final ValueNotifier<int> contadorSyncBens = ValueNotifier(0);
 
   AuthStatus _status = AuthStatus.idle;
   String? _errorMessage;
@@ -109,6 +117,18 @@ class AuthNotifier extends ChangeNotifier {
             _avisoSistema =
                 'Dados recentes não carregados. Verifique sua conexão.';
             notifyListeners();
+          },
+        );
+        _bemMaterialRepository.sincronizarBens().then(
+          (_) => contadorSyncBens.value++,
+          onError: (Object e, StackTrace st) {
+            log(
+              'Sync bens pós-login falhou',
+              error: e,
+              stackTrace: st,
+              name: 'AuthNotifier',
+            );
+            contadorSyncBens.value++;
           },
         );
         _pushPendentesPoLogin();
@@ -282,5 +302,11 @@ class AuthNotifier extends ChangeNotifier {
     _errorMessage = TratadorDeErros.sessaoExpirada;
     _avisoSistema = null;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    contadorSyncBens.dispose();
+    super.dispose();
   }
 }

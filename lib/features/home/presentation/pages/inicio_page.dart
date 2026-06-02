@@ -52,6 +52,7 @@ class _InicioPageState extends State<InicioPage> {
       );
       _viewModel.carregarDados();
       _authNotifier.addListener(_onAuthAlterado);
+      _authNotifier.contadorSyncBens.addListener(_viewModel.carregarDados);
     }
   }
 
@@ -64,6 +65,7 @@ class _InicioPageState extends State<InicioPage> {
   @override
   void dispose() {
     _authNotifier.removeListener(_onAuthAlterado);
+    _authNotifier.contadorSyncBens.removeListener(_viewModel.carregarDados);
     _viewModel.dispose();
     _mapController.dispose();
     super.dispose();
@@ -189,6 +191,7 @@ class _MapaLayerState extends State<_MapaLayer> {
     return ValueListenableBuilder<List<PinoMapa>>(
       valueListenable: widget.pinosNoMapa,
       builder: (context, pinos, _) {
+        final colorScheme = Theme.of(context).colorScheme;
         return FlutterMap(
           mapController: widget.mapController,
           options: const MapOptions(
@@ -214,7 +217,10 @@ class _MapaLayerState extends State<_MapaLayer> {
                       height: 16,
                       child: GestureDetector(
                         onTap: () => _navegarParaPino(context, p),
-                        child: PinoMarker(tipo: p.tipo),
+                        child: PinoMarker(
+                          tipo: p.tipo,
+                          colorScheme: colorScheme,
+                        ),
                       ),
                     ),
                   )
@@ -554,24 +560,32 @@ class _BotaoMicrofoneState extends State<_BotaoMicrofone> {
   }
 
   Future<void> _inicializar() async {
-    final disponivel = await _stt.initialize(
-      onError: (e) {
-        log('STT erro: ${e.errorMsg}', name: '_BotaoMicrofone');
-        if (mounted) {
-          setState(() => _ouvindo = false);
-          widget.onGravandoMudou(false);
-        }
-      },
-      onStatus: (status) {
-        if (!mounted) return;
-        final gravando = _stt.isListening;
-        if (_ouvindo != gravando) {
-          setState(() => _ouvindo = gravando);
-          widget.onGravandoMudou(gravando);
-        }
-      },
-    );
-    if (mounted) setState(() => _disponivel = disponivel);
+    try {
+      final disponivel = await _stt.initialize(
+        onError: (e) {
+          log('STT erro: ${e.errorMsg}', name: '_BotaoMicrofone');
+          if (mounted) {
+            setState(() => _ouvindo = false);
+            widget.onGravandoMudou(false);
+          }
+        },
+        onStatus: (status) {
+          if (!mounted) return;
+          final gravando = _stt.isListening;
+          if (_ouvindo != gravando) {
+            setState(() => _ouvindo = gravando);
+            widget.onGravandoMudou(gravando);
+          }
+        },
+      );
+      if (mounted) setState(() => _disponivel = disponivel);
+    } catch (e) {
+      log(
+        'STT indisponível nesta plataforma',
+        name: '_BotaoMicrofone',
+        error: e,
+      );
+    }
   }
 
   Future<void> _alternar() async {

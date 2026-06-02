@@ -135,7 +135,9 @@ class ColetaModel extends ColetaEntity {
                 (throw const FormatException('updated_at ausente na coleta')),
           ) ??
           (throw FormatException("updated_at inválido: ${json['updated_at']}")),
-      dadosColetados: json['dados_coletados'] as Map<String, dynamic>? ?? {},
+      dadosColetados: json['dados_coletados'] is Map<String, dynamic>
+          ? json['dados_coletados'] as Map<String, dynamic>
+          : {},
       fotosUrls: (json['fotos_urls'] as List<dynamic>?)?.cast<String>() ?? [],
       deletadoEm: json['deletado_em'] != null
           ? DateTime.tryParse(json['deletado_em'] as String)

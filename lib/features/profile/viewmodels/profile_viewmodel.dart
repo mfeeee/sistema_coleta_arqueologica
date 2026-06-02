@@ -17,10 +17,12 @@ class ProfileViewModel {
     required ColetaRepository coletaRepository,
     required SharedPreferences prefs,
     required ValueNotifier<ThemeMode> temaModo,
+    required ValueNotifier<Locale> idiomaAtual,
   }) : _authNotifier = authNotifier,
        _coletaRepository = coletaRepository,
        _prefs = prefs,
-       _temaModoApp = temaModo {
+       _temaModoApp = temaModo,
+       _idiomaApp = idiomaAtual {
     _inicializar();
   }
 
@@ -28,11 +30,24 @@ class ProfileViewModel {
   final ColetaRepository _coletaRepository;
   final SharedPreferences _prefs;
   final ValueNotifier<ThemeMode> _temaModoApp;
+  final ValueNotifier<Locale> _idiomaApp;
 
   static const _keyAlertasSincronizacao = 'pref_alertas_sincronizacao';
   static const _keyStatusCuradoria = 'pref_status_curadoria';
   static const _keyAvisosProximidade = 'pref_avisos_proximidade';
   static const _keyModoEscuro = 'pref_modo_escuro';
+  static const _keyIdioma = 'pref_idioma';
+
+  late final ValueNotifier<String> nomeAtual;
+  late final ValueNotifier<String> emailAtual;
+  late final ValueNotifier<String> classificacaoAtual;
+
+  ValueNotifier<Locale> get idiomaAtual => _idiomaApp;
+
+  final ValueNotifier<String?> fotoLocalPath = ValueNotifier(null);
+  final ValueNotifier<bool> salvandoDados = ValueNotifier(false);
+  final ValueNotifier<bool> fotoCarregando = ValueNotifier(false);
+  final ValueNotifier<String?> erroSalvamento = ValueNotifier(null);
 
   late final ValueNotifier<bool> alertasSincronizacao;
   late final ValueNotifier<bool> statusCuradoria;
@@ -46,12 +61,18 @@ class ProfileViewModel {
   final ValueNotifier<int> coletasPendentes = ValueNotifier(0);
   final ValueNotifier<String?> erroAtual = ValueNotifier(null);
 
-  String get nome => _authNotifier.userName ?? 'Usuário';
-  String get email => _authNotifier.userEmail ?? '';
-  String get classificacao => _authNotifier.userClassificacao ?? '';
-  String get iniciais => _extrairIniciais(nome);
+  String get nome => nomeAtual.value;
+  String get email => emailAtual.value;
+  String get classificacao => classificacaoAtual.value;
+  String get iniciais => _extrairIniciais(nomeAtual.value);
 
   void _inicializar() {
+    nomeAtual = ValueNotifier(_authNotifier.userName ?? 'Usuário');
+    emailAtual = ValueNotifier(_authNotifier.userEmail ?? '');
+    classificacaoAtual = ValueNotifier(
+      _authNotifier.userClassificacao ?? 'estudante',
+    );
+
     final modoEscuroSalvo =
         _prefs.getBool(_keyModoEscuro) ??
         (_temaModoApp.value == ThemeMode.dark);
@@ -91,6 +112,80 @@ class ProfileViewModel {
     }
   }
 
+  Future<void> atualizarFotoLocal(String caminhoOrigem) async {
+    fotoCarregando.value = true;
+    try {
+      // TODO: fazer upload da foto para a API quando o endpoint estiver disponível
+      fotoLocalPath.value = caminhoOrigem;
+      log(
+        'atualizarFotoLocal: foto salva localmente (upload pendente)',
+        name: 'ProfileViewModel',
+      );
+    } finally {
+      fotoCarregando.value = false;
+    }
+  }
+
+  Future<bool> salvarDadosPessoais({
+    required String nome,
+    required String email,
+    required String classificacao,
+  }) async {
+    salvandoDados.value = true;
+    erroSalvamento.value = null;
+    try {
+      // TODO: chamar PUT /api/profile quando endpoint disponível
+      await Future.delayed(const Duration(milliseconds: 400));
+      nomeAtual.value = nome;
+      emailAtual.value = email;
+      classificacaoAtual.value = classificacao;
+      log(
+        'salvarDadosPessoais: stub - dados atualizados localmente',
+        name: 'ProfileViewModel',
+      );
+      return true;
+    } catch (e, st) {
+      log(
+        'Erro ao salvar dados pessoais',
+        error: e,
+        stackTrace: st,
+        name: 'ProfileViewModel',
+      );
+      erroSalvamento.value = 'Não foi possível salvar as alterações.';
+      return false;
+    } finally {
+      salvandoDados.value = false;
+    }
+  }
+
+  Future<bool> alterarSenha({
+    required String senhaAtual,
+    required String novaSenha,
+  }) async {
+    salvandoDados.value = true;
+    erroSalvamento.value = null;
+    try {
+      // TODO: chamar PUT /api/profile/password quando endpoint disponível
+      await Future.delayed(const Duration(milliseconds: 400));
+      log(
+        'alterarSenha: stub - não integrado com API',
+        name: 'ProfileViewModel',
+      );
+      return true;
+    } catch (e, st) {
+      log(
+        'Erro ao alterar senha',
+        error: e,
+        stackTrace: st,
+        name: 'ProfileViewModel',
+      );
+      erroSalvamento.value = 'Não foi possível alterar a senha.';
+      return false;
+    } finally {
+      salvandoDados.value = false;
+    }
+  }
+
   void _salvarAlertasSincronizacao() =>
       _prefs.setBool(_keyAlertasSincronizacao, alertasSincronizacao.value);
 
@@ -104,6 +199,17 @@ class ProfileViewModel {
     final novo = modoEscuro.value ? ThemeMode.dark : ThemeMode.light;
     _temaModoApp.value = novo;
     _prefs.setBool(_keyModoEscuro, modoEscuro.value);
+  }
+
+  void alternarIdioma() {
+    final novoIdioma = _idiomaApp.value.languageCode == 'pt'
+        ? const Locale('en', 'US')
+        : const Locale('pt', 'BR');
+    _idiomaApp.value = novoIdioma;
+    _prefs.setString(
+      _keyIdioma,
+      '${novoIdioma.languageCode}_${novoIdioma.countryCode}',
+    );
   }
 
   Future<void> sair() async {
@@ -180,6 +286,13 @@ class ProfileViewModel {
   }
 
   void dispose() {
+    nomeAtual.dispose();
+    emailAtual.dispose();
+    classificacaoAtual.dispose();
+    fotoLocalPath.dispose();
+    salvandoDados.dispose();
+    fotoCarregando.dispose();
+    erroSalvamento.dispose();
     alertasSincronizacao
       ..removeListener(_salvarAlertasSincronizacao)
       ..dispose();

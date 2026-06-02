@@ -12,10 +12,7 @@ class SitioMarker extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.primaryContainer,
         shape: BoxShape.circle,
-        border: Border.all(
-          color: colorScheme.onPrimary,
-          width: 2.0,
-        ),
+        border: Border.all(color: colorScheme.onPrimary, width: 2.0),
       ),
     );
   }

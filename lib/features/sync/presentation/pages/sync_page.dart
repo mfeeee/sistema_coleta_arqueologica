@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
-import 'package:sistema_coleta_arqueologica/features/sync/domain/sync_notifier.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/presentation/viewmodels/sync_notifier.dart';
 
 class SyncPage extends StatefulWidget {
   const SyncPage({super.key});

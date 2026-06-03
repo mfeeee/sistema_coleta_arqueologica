@@ -12,7 +12,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/
 import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
 
-import '../../features/sync/domain/sync_notifier.dart';
+import '../../features/sync/presentation/viewmodels/sync_notifier.dart';
 import '../../features/auth/auth_notifier.dart';
 import '../../features/coleta/data/datasources/coleta_local_datasource.dart';
 import '../../features/coleta/data/repositories/coleta_repository_impl.dart';

@@ -7,6 +7,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/col
 import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_model.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/domain/entities/sync_resumo.dart';
 import '../../helpers/fakes/fake_sync_api_datasource.dart';
 
 // ---------------------------------------------------------------------------

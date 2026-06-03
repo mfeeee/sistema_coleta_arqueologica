@@ -1,5 +1,6 @@
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/domain/entities/sync_resumo.dart';
 
 class FakeSyncApiDatasource implements SyncApiDatasource {
   FakeSyncApiDatasource({this.status = SyncResultStatus.sucesso});

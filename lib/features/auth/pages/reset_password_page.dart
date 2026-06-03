@@ -3,8 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:sistema_coleta_arqueologica/core/constants/api_constants.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/data/password_reset_repository.dart';
-import 'package:sistema_coleta_arqueologica/features/auth/domain/password_reset_notifier.dart';
-import 'package:sistema_coleta_arqueologica/features/auth/domain/password_reset_state.dart';
+import 'package:sistema_coleta_arqueologica/features/auth/presentation/viewmodels/password_reset_notifier.dart';
+import 'package:sistema_coleta_arqueologica/features/auth/presentation/viewmodels/password_reset_state.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key, this.token, this.email});

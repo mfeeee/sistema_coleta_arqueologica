@@ -1,8 +1,9 @@
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
-import '../../../core/services/conectividade_service.dart';
-import '../../../core/services/secure_storage_service.dart';
-import '../data/sync_repository.dart';
+import '../../../../core/services/conectividade_service.dart';
+import '../../../../core/services/secure_storage_service.dart';
+import '../../data/sync_repository.dart';
+import '../../domain/entities/sync_resumo.dart';
 
 enum SyncState { idle, sincronizando, concluido, semToken, semConexao, erro }
 

@@ -3,6 +3,7 @@ import '../../../core/database/enums/status_coleta.dart';
 import '../../../core/services/foto_upload_service.dart';
 import '../../coleta/data/datasources/coleta_local_datasource.dart';
 import '../../coleta/domain/entities/coleta_entity.dart';
+import '../domain/entities/sync_resumo.dart';
 import 'sync_api_datasource.dart';
 
 class SyncRepository {
@@ -139,19 +140,4 @@ class SyncRepository {
 
     return resultado.status;
   }
-}
-
-class SyncResumo {
-  final int sucessos;
-  final int conflitos;
-  final int erros;
-
-  const SyncResumo({
-    required this.sucessos,
-    required this.conflitos,
-    required this.erros,
-  });
-
-  bool get totalOk => conflitos == 0 && erros == 0;
-  int get total => sucessos + conflitos + erros;
 }

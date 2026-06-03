@@ -9,6 +9,7 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.da
 import 'package:sistema_coleta_arqueologica/core/services/auth_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
+import 'package:sistema_coleta_arqueologica/features/auth/domain/usecases/executar_sync_pos_login_use_case.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
@@ -165,11 +166,12 @@ void main() {
         final spy = _SpyObterPendentesUseCase();
         final notifier = AuthNotifier(
           authService: _authServiceOk(),
-          coletaRepository: _FakeColetaRepository(),
-          pullService: _FakePullService(),
-          obterColetasPendentesUseCase: spy,
-          bemMaterialRepository: _FakeBemMaterialRepository(),
-          agendarSync: () async {},
+          executarSyncPosLogin: ExecutarSyncPosLoginUseCase(
+            pullService: _FakePullService(),
+            bemMaterialRepository: _FakeBemMaterialRepository(),
+            obterColetasPendentesUseCase: spy,
+            agendarSync: () async {},
+          ),
         );
 
         await notifier.login('teste@arqueologia.br', 'senha123');
@@ -185,11 +187,12 @@ void main() {
 
       final notifier = AuthNotifier(
         authService: _authServiceOk(),
-        coletaRepository: _FakeColetaRepository(),
-        pullService: _FakePullService(),
-        obterColetasPendentesUseCase: spy,
-        bemMaterialRepository: _FakeBemMaterialRepository(),
-        agendarSync: () async => chamouAgendar.add(true),
+        executarSyncPosLogin: ExecutarSyncPosLoginUseCase(
+          pullService: _FakePullService(),
+          bemMaterialRepository: _FakeBemMaterialRepository(),
+          obterColetasPendentesUseCase: spy,
+          agendarSync: () async => chamouAgendar.add(true),
+        ),
       );
 
       await notifier.login('teste@arqueologia.br', 'senha123');
@@ -204,11 +207,12 @@ void main() {
 
       final notifier = AuthNotifier(
         authService: _authServiceOk(),
-        coletaRepository: _FakeColetaRepository(),
-        pullService: _FakePullService(),
-        obterColetasPendentesUseCase: spy,
-        bemMaterialRepository: _FakeBemMaterialRepository(),
-        agendarSync: () async => chamouAgendar.add(true),
+        executarSyncPosLogin: ExecutarSyncPosLoginUseCase(
+          pullService: _FakePullService(),
+          bemMaterialRepository: _FakeBemMaterialRepository(),
+          obterColetasPendentesUseCase: spy,
+          agendarSync: () async => chamouAgendar.add(true),
+        ),
       );
 
       await notifier.login('teste@arqueologia.br', 'senha123');
@@ -222,11 +226,12 @@ void main() {
       () async {
         final notifier = AuthNotifier(
           authService: _authServiceOk(),
-          coletaRepository: _FakeColetaRepository(),
-          pullService: _FakePullService(),
-          obterColetasPendentesUseCase: _ErrandoObterPendentesUseCase(),
-          bemMaterialRepository: _FakeBemMaterialRepository(),
-          agendarSync: () async {},
+          executarSyncPosLogin: ExecutarSyncPosLoginUseCase(
+            pullService: _FakePullService(),
+            bemMaterialRepository: _FakeBemMaterialRepository(),
+            obterColetasPendentesUseCase: _ErrandoObterPendentesUseCase(),
+            agendarSync: () async {},
+          ),
         );
 
         await notifier.login('teste@arqueologia.br', 'senha123');

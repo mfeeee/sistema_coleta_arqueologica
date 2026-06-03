@@ -12,6 +12,7 @@ import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
+import 'package:sistema_coleta_arqueologica/features/auth/domain/usecases/executar_sync_pos_login_use_case.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
@@ -219,17 +220,18 @@ AuthNotifier _criarStubAuthNotifier() {
   );
   return AuthNotifier(
     authService: authService,
-    coletaRepository: _StubColetaRepository(),
-    pullService: PullService(
-      apiDatasource: _StubColetaApiDatasource(),
-      localRepository: _StubColetaRepository(),
-      secureStorage: _StubSecureStorage(),
+    executarSyncPosLogin: ExecutarSyncPosLoginUseCase(
+      pullService: PullService(
+        apiDatasource: _StubColetaApiDatasource(),
+        localRepository: _StubColetaRepository(),
+        secureStorage: _StubSecureStorage(),
+      ),
+      bemMaterialRepository: _StubBemMaterialRepository(),
+      obterColetasPendentesUseCase: ObterColetasPendentesUseCase(
+        _StubColetaRepository(),
+      ),
+      agendarSync: () async {},
     ),
-    obterColetasPendentesUseCase: ObterColetasPendentesUseCase(
-      _StubColetaRepository(),
-    ),
-    bemMaterialRepository: _StubBemMaterialRepository(),
-    agendarSync: () async {},
   );
 }
 

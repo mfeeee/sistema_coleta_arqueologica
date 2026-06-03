@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
+import '../repositories/coleta_remota_repository.dart';
 import '../repositories/coleta_repository.dart';
-import '../../data/datasources/coleta_api_datasource.dart';
 
 class PullService {
   PullService({
@@ -10,7 +10,7 @@ class PullService {
     required this.secureStorage,
   });
 
-  final ColetaApiDatasource apiDatasource;
+  final ColetaRemotaRepository apiDatasource;
   final ColetaRepository localRepository;
   final SecureStorageService secureStorage;
 

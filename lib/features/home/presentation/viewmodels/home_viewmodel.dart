@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
@@ -13,6 +14,7 @@ class HomeViewModel {
   final ColetaRepository _coletaRepository;
   final BemMaterialRepository _bemMaterialRepository;
   final AuthNotifier _authNotifier;
+  final SecureStorageService _secureStorage;
 
   final ValueNotifier<int> totalColetas = ValueNotifier(0);
   final ValueNotifier<int> coletasPendentes = ValueNotifier(0);
@@ -25,9 +27,11 @@ class HomeViewModel {
     required ColetaRepository coletaRepository,
     required BemMaterialRepository bemMaterialRepository,
     required AuthNotifier authNotifier,
+    required SecureStorageService secureStorage,
   }) : _coletaRepository = coletaRepository,
        _bemMaterialRepository = bemMaterialRepository,
        _authNotifier = authNotifier,
+       _secureStorage = secureStorage,
        nomeUsuario = ValueNotifier(authNotifier.userName ?? '') {
     _authNotifier.addListener(_onAuthAlterado);
   }
@@ -48,15 +52,18 @@ class HomeViewModel {
   Future<void> carregarDados() async {
     erroAtual.value = null;
     try {
-      totalColetas.value = await _coletaRepository.contarTodas();
+      final totalRemoto = await _secureStorage.getTotalColetasRemoto();
+      totalColetas.value = totalRemoto ?? await _coletaRepository.contarTodas();
       coletasPendentes.value = await _coletaRepository.contarPorStatus(
         StatusColeta.pendente,
       );
       coletasRecentes.value = await _coletaRepository.getRecentes(5);
+      final todasColetas = await _coletaRepository.getAll();
 
-      final pinosColeta = coletasRecentes.value
+      final pinosColeta = todasColetas
           .where((c) => _coordsValidas(c.latitude, c.longitude))
           .map((c) => c.paraMapa)
+          .whereType<PinoMapa>()
           .toList();
 
       final List<BemMaterialEntity> bens = await _bemMaterialRepository

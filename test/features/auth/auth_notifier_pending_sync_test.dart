@@ -67,7 +67,8 @@ class _FakeColetaRepository implements ColetaRepository {
 
 class _FakeColetaApiDatasource implements ColetaApiDatasource {
   @override
-  Future<List<ColetaEntity>> fetchMinhas({int page = 1}) async => [];
+  Future<ColetaPage> fetchMinhas({int page = 1}) async =>
+      (items: <ColetaEntity>[], total: 0, temProxima: false);
 }
 
 class _FakePullService extends PullService {
@@ -75,10 +76,11 @@ class _FakePullService extends PullService {
     : super(
         apiDatasource: _FakeColetaApiDatasource(),
         localRepository: _FakeColetaRepository(),
+        secureStorage: _FakeSecureStorageService(),
       );
 
   @override
-  Future<void> sincronizarPull() async {}
+  Future<int> sincronizarPull(String usuarioId) async => 0;
 }
 
 class _SpyObterPendentesUseCase extends ObterColetasPendentesUseCase {

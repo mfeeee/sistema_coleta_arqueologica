@@ -115,7 +115,8 @@ class _StubPreferenciasRepository implements PreferenciasNotificacaoRepository {
 
 class _StubColetaApiDatasource implements ColetaApiDatasource {
   @override
-  Future<List<ColetaEntity>> fetchMinhas({int page = 1}) async => [];
+  Future<ColetaPage> fetchMinhas({int page = 1}) async =>
+      (items: <ColetaEntity>[], total: 0, temProxima: false);
 }
 
 class _StubColetaLocalDatasource implements ColetaLocalDatasource {
@@ -220,6 +221,7 @@ AuthNotifier _criarStubAuthNotifier() {
     pullService: PullService(
       apiDatasource: _StubColetaApiDatasource(),
       localRepository: _StubColetaRepository(),
+      secureStorage: _StubSecureStorage(),
     ),
     obterColetasPendentesUseCase: ObterColetasPendentesUseCase(
       _StubColetaRepository(),
@@ -252,6 +254,7 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     idiomaAtual: ValueNotifier(const Locale('pt', 'BR')),
     fotoPerfilPath: ValueNotifier(null),
     profileService: ProfileService(httpClient: http.Client(), baseUrl: ''),
+    secureStorage: _StubSecureStorage(),
     child: MaterialApp.router(
       routerConfig: router,
       locale: const Locale('pt', 'BR'),

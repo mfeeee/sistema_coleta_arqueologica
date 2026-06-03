@@ -447,18 +447,25 @@ class _FloatingSearchBarState extends State<_FloatingSearchBar> {
       child: OverlayPortal(
         controller: _overlayController,
         overlayChildBuilder: (context) {
-          final width = MediaQuery.sizeOf(context).width - 32;
           return CompositedTransformFollower(
             link: _layerLink,
             showWhenUnlinked: false,
-            targetAnchor: Alignment.bottomLeft,
-            followerAnchor: Alignment.topLeft,
+            targetAnchor: Alignment.bottomCenter,
+            followerAnchor: Alignment.topCenter,
             offset: const Offset(0, 4),
-            child: SizedBox(
-              width: width,
-              child: _ListaSugestoes(
-                sugestoes: _sugestoes,
-                onSelecionar: _selecionarPino,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.sizeOf(context).width - 32,
+                  ),
+                  child: _ListaSugestoes(
+                    sugestoes: _sugestoes,
+                    onSelecionar: _selecionarPino,
+                  ),
+                ),
               ),
             ),
           );
@@ -491,11 +498,17 @@ class _FloatingSearchBarState extends State<_FloatingSearchBar> {
                       controller: _controller,
                       onChanged: _aoMudar,
                       style: theme.textTheme.bodyMedium,
-                      decoration: InputDecoration.collapsed(
+                      decoration: InputDecoration(
                         hintText: 'Buscar sítio ou coordenada...',
                         hintStyle: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                        fillColor: Colors.transparent,
                       ),
                     ),
                   ),

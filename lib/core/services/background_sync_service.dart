@@ -10,6 +10,7 @@ import '../database/app_database.dart';
 import 'foto_upload_service.dart';
 import 'secure_storage_service.dart';
 import '../../features/coleta/data/datasources/coleta_local_datasource.dart';
+import '../../features/sync/data/coleta_sync_strategy.dart';
 import '../../features/sync/data/sync_api_datasource.dart';
 import '../../features/sync/data/sync_repository.dart';
 
@@ -71,8 +72,10 @@ Future<void> _executarSync() async {
 
     final syncRepository = SyncRepository(
       coletaDatasource: ColetaLocalDatasourceImpl(db),
-      apiDatasource: SyncApiDatasourceImpl(dio),
-      fotoUploadService: FotoUploadService(dio),
+      strategy: ColetaSyncStrategy(
+        apiDatasource: SyncApiDatasourceImpl(dio),
+        fotoUploadService: FotoUploadService(dio),
+      ),
     );
 
     final pendentes = await syncRepository.contarPendentes();

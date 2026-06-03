@@ -16,6 +16,7 @@ import '../../features/sync/presentation/viewmodels/sync_notifier.dart';
 import '../../features/auth/auth_notifier.dart';
 import '../../features/coleta/data/datasources/coleta_local_datasource.dart';
 import '../../features/coleta/data/repositories/coleta_repository_impl.dart';
+import '../../features/sync/data/coleta_sync_strategy.dart';
 import '../../features/sync/data/sync_api_datasource.dart';
 import '../../features/sync/data/sync_repository.dart';
 import '../../core/database/app_database.dart';
@@ -76,8 +77,10 @@ class AppScope extends InheritedWidget {
     final fotoUploadService = FotoUploadService(dio);
     final syncRepository = SyncRepository(
       coletaDatasource: coletaDatasource,
-      apiDatasource: syncApiDatasource,
-      fotoUploadService: fotoUploadService,
+      strategy: ColetaSyncStrategy(
+        apiDatasource: syncApiDatasource,
+        fotoUploadService: fotoUploadService,
+      ),
     );
     final conectividadeService = ConectividadeService();
 

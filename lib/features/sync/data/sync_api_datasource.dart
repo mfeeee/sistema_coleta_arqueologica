@@ -2,8 +2,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import '../../coleta/domain/entities/coleta_entity.dart';
 import '../../../../core/utils/retry_util.dart';
-
-enum SyncResultStatus { sucesso, erroRede, conflito }
+import '../domain/entities/sync_resumo.dart';
 
 class SyncResultado {
   final String coletaId;

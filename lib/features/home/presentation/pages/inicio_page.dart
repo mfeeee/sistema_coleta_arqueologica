@@ -49,6 +49,7 @@ class _InicioPageState extends State<InicioPage> {
         coletaRepository: scope.coletaRepository,
         bemMaterialRepository: scope.bemMaterialRepository,
         authNotifier: scope.authNotifier,
+        secureStorage: scope.secureStorage,
       );
       _viewModel.carregarDados();
       _authNotifier.addListener(_onAuthAlterado);

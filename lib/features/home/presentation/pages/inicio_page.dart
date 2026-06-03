@@ -93,20 +93,7 @@ class _InicioPageState extends State<InicioPage> {
             mapController: _mapController,
           ),
           Positioned(left: 16.0, bottom: peekBottom, child: const MapLegend()),
-          DraggableScrollableSheet(
-            initialChildSize: 0.175,
-            minChildSize: 0.175,
-            maxChildSize: 0.92,
-            snap: true,
-            snapSizes: const [0.175, 0.5, 0.92],
-            builder: (context, scrollController) => _BottomSheetContent(
-              scrollController: scrollController,
-              viewModel: _viewModel,
-              onNovaColeta: _irParaNovaColeta,
-              estaOnline: _estaOnline,
-              fotoPerfilPath: _fotoPerfilPath,
-            ),
-          ),
+          // Search bar fica abaixo do sheet no z-order: sheet cobre ao expandir.
           Positioned(
             top: 0,
             left: 0,
@@ -126,6 +113,31 @@ class _InicioPageState extends State<InicioPage> {
                   ),
                 ),
               ],
+            ),
+          ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.175,
+            minChildSize: 0.175,
+            maxChildSize: 0.92,
+            snap: true,
+            snapSizes: const [0.175, 0.5, 0.92],
+            builder: (context, scrollController) => _BottomSheetContent(
+              scrollController: scrollController,
+              viewModel: _viewModel,
+              onNovaColeta: _irParaNovaColeta,
+              estaOnline: _estaOnline,
+              fotoPerfilPath: _fotoPerfilPath,
+            ),
+          ),
+          // Header permanece acima do sheet em todos os estados.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _FloatingHeader(
+              topPadding: topPadding,
+              authNotifier: _authNotifier,
+              fotoPerfilPath: _fotoPerfilPath,
             ),
           ),
         ],

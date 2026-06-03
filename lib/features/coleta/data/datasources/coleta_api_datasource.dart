@@ -6,14 +6,13 @@ import 'package:http/http.dart' as http;
 import 'package:sistema_coleta_arqueologica/core/errors/arqueo_exceptions.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/tratador_de_erros.dart';
-import '../../domain/entities/coleta_entity.dart';
+import '../../domain/repositories/coleta_remota_repository.dart';
 import '../models/coleta_model.dart';
 
 const _kTimeoutRequisicao = Duration(seconds: 15);
 
-typedef ColetaPage = ({List<ColetaEntity> items, int total, bool temProxima});
-
-abstract interface class ColetaApiDatasource {
+abstract interface class ColetaApiDatasource implements ColetaRemotaRepository {
+  @override
   Future<ColetaPage> fetchMinhas({int page = 1});
 }
 

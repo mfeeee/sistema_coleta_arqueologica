@@ -33,9 +33,11 @@ class AuthNotifier extends ChangeNotifier {
   final BemMaterialRepository _bemMaterialRepository;
   final Future<void> Function() _agendarSync;
 
-  /// Incrementado sempre que sincronizarBens() termina (com ou sem erros).
-  /// Ouvintes podem reagir recarregando dados do mapa.
+  /// Incrementado quando sincronizarBens() termina (com ou sem erros).
   final ValueNotifier<int> contadorSyncBens = ValueNotifier(0);
+
+  /// Incrementado quando sincronizarPull() termina com sucesso.
+  final ValueNotifier<int> contadorSyncColetas = ValueNotifier(0);
 
   AuthStatus _status = AuthStatus.idle;
   String? _errorMessage;
@@ -108,7 +110,7 @@ class AuthNotifier extends ChangeNotifier {
         _pullService
             .sincronizarPull(idRetornado)
             .then(
-              (_) {},
+              (_) => contadorSyncColetas.value++,
               onError: (Object e, StackTrace st) {
                 log(
                   'Pull pós-login falhou',
@@ -309,6 +311,7 @@ class AuthNotifier extends ChangeNotifier {
   @override
   void dispose() {
     contadorSyncBens.dispose();
+    contadorSyncColetas.dispose();
     super.dispose();
   }
 }

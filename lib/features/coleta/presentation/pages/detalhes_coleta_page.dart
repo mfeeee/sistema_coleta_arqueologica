@@ -205,8 +205,10 @@ class _SecaoIdentificacao extends StatelessWidget {
     final theme = Theme.of(context);
     final localizacao =
         coleta.uf ??
-        '${coleta.latitude.toStringAsFixed(5)}, '
-            '${coleta.longitude.toStringAsFixed(5)}';
+        (coleta.latitude != null && coleta.longitude != null
+            ? '${coleta.latitude!.toStringAsFixed(5)}, '
+                  '${coleta.longitude!.toStringAsFixed(5)}'
+            : '—');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

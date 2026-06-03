@@ -52,14 +52,15 @@ class AlertaProximidadeWidget extends StatelessWidget {
   List<_SitioComDistancia> _ordenarPorDistancia(List<ColetaEntity> lista) {
     final comDistancia =
         lista
+            .where((s) => s.latitude != null && s.longitude != null)
             .map(
               (s) => _SitioComDistancia(
                 sitio: s,
                 distanciaMetros: ProximidadeService.calcularDistanciaMetros(
                   latAtual,
                   lonAtual,
-                  s.latitude,
-                  s.longitude,
+                  s.latitude!,
+                  s.longitude!,
                 ),
               ),
             )

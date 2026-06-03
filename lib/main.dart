@@ -111,6 +111,7 @@ Future<void> main() async {
   final pullService = PullService(
     apiDatasource: coletaApiDatasource,
     localRepository: coletaRepository,
+    secureStorage: secureStorage,
   );
 
   final obterColetasPendentesUseCase = ObterColetasPendentesUseCase(

@@ -19,13 +19,11 @@ class ProximidadeService {
     final sitiosProximos = <ColetaEntity>[];
 
     for (final sitio in coletas) {
-      final distancia = calcularDistanciaMetros(
-        latAtual,
-        lonAtual,
-        sitio.latitude,
-        sitio.longitude,
-      );
+      final lat = sitio.latitude;
+      final lng = sitio.longitude;
+      if (lat == null || lng == null) continue;
 
+      final distancia = calcularDistanciaMetros(latAtual, lonAtual, lat, lng);
       if (distancia <= raioMetros) {
         sitiosProximos.add(sitio);
       }

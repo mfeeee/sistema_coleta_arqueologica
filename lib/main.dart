@@ -21,6 +21,7 @@ import 'package:sistema_coleta_arqueologica/features/bem_material/data/repositor
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/repositories/coleta_repository_impl.dart';
+import 'package:sistema_coleta_arqueologica/features/auth/domain/usecases/executar_sync_pos_login_use_case.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/datasources/notificacao_api_datasource.dart';
@@ -129,12 +130,18 @@ Future<void> main() async {
     secureStorage: secureStorage,
   );
 
-  final authNotifier = AuthNotifier(
-    authService: authService,
-    coletaRepository: coletaRepository,
+  late final AuthNotifier authNotifier;
+  final executarSyncPosLogin = ExecutarSyncPosLoginUseCase(
     pullService: pullService,
-    obterColetasPendentesUseCase: obterColetasPendentesUseCase,
     bemMaterialRepository: bemMaterialRepository,
+    obterColetasPendentesUseCase: obterColetasPendentesUseCase,
+    onSyncColetasConcluido: () => authNotifier.contadorSyncColetas.value++,
+    onSyncBensConcluido: () => authNotifier.contadorSyncBens.value++,
+    onAviso: (msg) => authNotifier.setarAviso(msg),
+  );
+  authNotifier = AuthNotifier(
+    authService: authService,
+    executarSyncPosLogin: executarSyncPosLogin,
   );
 
   authenticatedClient.onSessaoExpirada = authNotifier.sairPorSessaoExpirada;

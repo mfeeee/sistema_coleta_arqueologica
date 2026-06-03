@@ -105,20 +105,22 @@ class AuthNotifier extends ChangeNotifier {
         _userEmail = emailRetornado;
         _userClassificacao = classifRetornada;
         _userAvatarUrl = avatarRetornado;
-        _pullService.sincronizarPull().then(
-          (_) {},
-          onError: (Object e, StackTrace st) {
-            log(
-              'Pull pós-login falhou',
-              error: e,
-              stackTrace: st,
-              name: 'AuthNotifier',
+        _pullService
+            .sincronizarPull(idRetornado)
+            .then(
+              (_) {},
+              onError: (Object e, StackTrace st) {
+                log(
+                  'Pull pós-login falhou',
+                  error: e,
+                  stackTrace: st,
+                  name: 'AuthNotifier',
+                );
+                _avisoSistema =
+                    'Dados recentes não carregados. Verifique sua conexão.';
+                notifyListeners();
+              },
             );
-            _avisoSistema =
-                'Dados recentes não carregados. Verifique sua conexão.';
-            notifyListeners();
-          },
-        );
         _bemMaterialRepository
             .sincronizarBens()
             .then((_) => contadorSyncBens.value++)

@@ -30,6 +30,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
 import 'package:dio/dio.dart';
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/data/coleta_sync_strategy.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/domain/entities/sync_resumo.dart';
@@ -232,8 +233,10 @@ class _FakeAuthNotifier extends AuthNotifier {
 SyncNotifier _criarStubSyncNotifier() => SyncNotifier(
   repository: SyncRepository(
     coletaDatasource: _StubColetaLocalDatasource(),
-    apiDatasource: _StubSyncApiDatasource(),
-    fotoUploadService: FotoUploadService(Dio()),
+    strategy: ColetaSyncStrategy(
+      apiDatasource: _StubSyncApiDatasource(),
+      fotoUploadService: FotoUploadService(Dio()),
+    ),
   ),
   secureStorage: _StubSecureStorage(),
   conectividadeService: ConectividadeService(),

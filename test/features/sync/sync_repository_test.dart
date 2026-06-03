@@ -5,6 +5,7 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.da
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_model.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/data/coleta_sync_strategy.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/domain/entities/sync_resumo.dart';
@@ -94,8 +95,10 @@ SyncRepository _criarRepositorio({
   SyncApiDatasource? apiDatasource,
 }) => SyncRepository(
   coletaDatasource: datasource,
-  apiDatasource: apiDatasource ?? FakeSyncApiDatasource(),
-  fotoUploadService: _FakeFotoUploadService(),
+  strategy: ColetaSyncStrategy(
+    apiDatasource: apiDatasource ?? FakeSyncApiDatasource(),
+    fotoUploadService: _FakeFotoUploadService(),
+  ),
 );
 
 // ---------------------------------------------------------------------------

@@ -54,6 +54,7 @@ class _InicioPageState extends State<InicioPage> {
       _viewModel.carregarDados();
       _authNotifier.addListener(_onAuthAlterado);
       _authNotifier.contadorSyncBens.addListener(_viewModel.carregarDados);
+      _authNotifier.contadorSyncColetas.addListener(_viewModel.carregarDados);
     }
   }
 
@@ -67,6 +68,7 @@ class _InicioPageState extends State<InicioPage> {
   void dispose() {
     _authNotifier.removeListener(_onAuthAlterado);
     _authNotifier.contadorSyncBens.removeListener(_viewModel.carregarDados);
+    _authNotifier.contadorSyncColetas.removeListener(_viewModel.carregarDados);
     _viewModel.dispose();
     _mapController.dispose();
     super.dispose();

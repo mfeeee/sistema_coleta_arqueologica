@@ -12,6 +12,7 @@ import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_remota_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';

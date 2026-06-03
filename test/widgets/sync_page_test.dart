@@ -22,6 +22,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_remota_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';

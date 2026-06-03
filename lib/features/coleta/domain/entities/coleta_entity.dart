@@ -17,8 +17,8 @@ class ColetaEntity {
   final NaturezaBem? natureza;
   final TipoBem? tipo;
   final String? uf;
-  final double latitude;
-  final double longitude;
+  final double? latitude;
+  final double? longitude;
   final List<ArtefatoBem> artefatos;
   final int versao;
   final DateTime updatedAt;
@@ -32,8 +32,8 @@ class ColetaEntity {
     required this.dataColeta,
     required this.syncStatus,
     required this.nomeBem,
-    required this.latitude,
-    required this.longitude,
+    this.latitude,
+    this.longitude,
     required this.artefatos,
     required this.versao,
     required this.updatedAt,
@@ -47,10 +47,15 @@ class ColetaEntity {
 }
 
 extension ColetaParaMapa on ColetaEntity {
-  PinoMapa get paraMapa => PinoMapa(
-    id: id,
-    nomeBem: nomeBem,
-    posicao: LatLng(latitude, longitude),
-    tipo: TipoPino.coleta,
-  );
+  PinoMapa? get paraMapa {
+    final lat = latitude;
+    final lng = longitude;
+    if (lat == null || lng == null) return null;
+    return PinoMapa(
+      id: id,
+      nomeBem: nomeBem,
+      posicao: LatLng(lat, lng),
+      tipo: TipoPino.coleta,
+    );
+  }
 }

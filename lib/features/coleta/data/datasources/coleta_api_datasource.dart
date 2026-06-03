@@ -11,8 +11,10 @@ import '../models/coleta_model.dart';
 
 const _kTimeoutRequisicao = Duration(seconds: 15);
 
+typedef ColetaPage = ({List<ColetaEntity> items, int total, bool temProxima});
+
 abstract interface class ColetaApiDatasource {
-  Future<List<ColetaEntity>> fetchMinhas({int page = 1});
+  Future<ColetaPage> fetchMinhas({int page = 1});
 }
 
 class ColetaApiDatasourceImpl implements ColetaApiDatasource {
@@ -27,7 +29,7 @@ class ColetaApiDatasourceImpl implements ColetaApiDatasource {
   final String baseUrl;
 
   @override
-  Future<List<ColetaEntity>> fetchMinhas({int page = 1}) async {
+  Future<ColetaPage> fetchMinhas({int page = 1}) async {
     final token = await secureStorage.getJwt();
     if (token == null) throw const ErroDeAutorizacao();
 
@@ -45,9 +47,15 @@ class ColetaApiDatasourceImpl implements ColetaApiDatasource {
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body) as Map<String, dynamic>;
         final data = body['data'] as List<dynamic>? ?? [];
-        return data
-            .map((e) => ColetaModel.fromJson(e as Map<String, dynamic>))
-            .toList();
+        final total = body['total'] as int? ?? 0;
+        final nextPageUrl = body['next_page_url'];
+        return (
+          items: data
+              .map((e) => ColetaModel.fromJson(e as Map<String, dynamic>))
+              .toList(),
+          total: total,
+          temProxima: nextPageUrl != null,
+        );
       }
 
       if (response.statusCode == 401 || response.statusCode == 403) {

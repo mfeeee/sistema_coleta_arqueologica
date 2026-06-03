@@ -116,12 +116,8 @@ class ColetaModel extends ColetaEntity {
             )
           : null,
       uf: json['uf'] as String?,
-      latitude:
-          (json['latitude'] as num?)?.toDouble() ??
-          (throw const FormatException('latitude ausente na coleta')),
-      longitude:
-          (json['longitude'] as num?)?.toDouble() ??
-          (throw const FormatException('longitude ausente na coleta')),
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
       artefatos:
           (json['artefatos'] as List<dynamic>?)
               ?.map((e) => ArtefatoBem.tryFromString(e as String))
@@ -155,8 +151,8 @@ class ColetaModel extends ColetaEntity {
       natureza: Value(natureza?.name),
       tipo: Value(tipo?.name),
       uf: Value(uf),
-      latitude: Value(latitude),
-      longitude: Value(longitude),
+      latitude: Value(latitude ?? 0.0),
+      longitude: Value(longitude ?? 0.0),
       artefatos: Value(artefatos.map((e) => e.name).toList()),
       versao: Value(versao),
       updatedAt: Value(updatedAt),

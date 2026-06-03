@@ -7,30 +7,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
-import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/draft_photo_storage.dart';
 import '../../domain/entities/coleta_entity.dart';
-import 'package:uuid/uuid.dart';
+import '../../domain/usecases/criar_coleta_use_case.dart';
 
 const _kChaveRascunho = 'rascunho_coleta';
-
-class ColetaFormResult {
-  final ColetaEntity coleta;
-  final BemMaterialEntity bemMaterial;
-  const ColetaFormResult({required this.coleta, required this.bemMaterial});
-}
 
 class ColetaFormNotifier extends ChangeNotifier {
   final MediaService _mediaService;
   final DraftPhotoStorage _draftPhotoStorage;
+  final CriarColetaUseCase _criarColetaUseCase;
 
   ColetaFormNotifier({
     required MediaService mediaService,
     DraftPhotoStorage draftPhotoStorage = const DraftPhotoStorageImpl(),
+    CriarColetaUseCase criarColetaUseCase = const CriarColetaUseCase(),
   }) : _mediaService = mediaService,
-       _draftPhotoStorage = draftPhotoStorage;
+       _draftPhotoStorage = draftPhotoStorage,
+       _criarColetaUseCase = criarColetaUseCase;
 
   // Passo 1
   String nome = '';
@@ -239,25 +234,19 @@ class ColetaFormNotifier extends ChangeNotifier {
     final pathsPersistentes = await _draftPhotoStorage.persistir(
       List.of(_fotos),
     );
-    final agora = DateTime.now();
-    return ColetaEntity(
-      id: const Uuid().v4(),
-      usuarioId: usuarioId,
-      dataColeta: agora,
-      syncStatus: StatusColeta.rascunho,
-      nomeBem: nome.trim().isEmpty ? 'Rascunho' : nome.trim(),
-      natureza: natureza,
-      tipo: tipo,
-      artefatos: _artefatos.toList(),
-      latitude: lat,
-      longitude: lng,
-      versao: 1,
-      updatedAt: agora,
-      dadosColetados: {
-        'nomes_populares': nomesPopulares,
-        'meios_acesso': meiosAcesso,
-        'foto_paths': pathsPersistentes,
-      },
+    return _criarColetaUseCase.criarRascunho(
+      CriarColetaInput(
+        nome: nome,
+        nomesPopulares: nomesPopulares,
+        natureza: natureza,
+        tipo: tipo,
+        artefatos: _artefatos.toList(),
+        meiosAcesso: meiosAcesso,
+        fotoPaths: pathsPersistentes,
+        lat: lat,
+        lng: lng,
+        usuarioId: usuarioId,
+      ),
     );
   }
 
@@ -272,44 +261,20 @@ class ColetaFormNotifier extends ChangeNotifier {
     final pathsPersistentes = await _draftPhotoStorage.persistir(
       List.of(_fotos),
     );
-    final coletaId = const Uuid().v4();
-    final agora = DateTime.now();
-
-    final coleta = ColetaEntity(
-      id: coletaId,
-      usuarioId: usuarioId,
-      dataColeta: agora,
-      syncStatus: StatusColeta.pendente,
-      nomeBem: nome.trim(),
-      natureza: natureza,
-      tipo: tipo,
-      artefatos: _artefatos.toList(),
-      latitude: lat,
-      longitude: lng,
-      versao: 1,
-      updatedAt: agora,
-      dadosColetados: {
-        'nomes_populares': nomesPopulares,
-        'meios_acesso': meiosAcesso,
-        'foto_paths': pathsPersistentes,
-      },
+    return _criarColetaUseCase.call(
+      CriarColetaInput(
+        nome: nome,
+        nomesPopulares: nomesPopulares,
+        natureza: natureza,
+        tipo: tipo,
+        artefatos: _artefatos.toList(),
+        meiosAcesso: meiosAcesso,
+        fotoPaths: pathsPersistentes,
+        lat: lat,
+        lng: lng,
+        usuarioId: usuarioId,
+      ),
     );
-
-    final bemMaterial = BemMaterialEntity(
-      id: const Uuid().v4(),
-      coletaId: coletaId,
-      nomeBem: nome.trim(),
-      nomesPopulares: nomesPopulares,
-      natureza: natureza!.name,
-      tipo: tipo!.name,
-      meiosAcesso: meiosAcesso?.trim(),
-      artefatos: _artefatos.toList(),
-      publicado: false,
-      criadoEm: agora,
-      atualizadoEm: agora,
-    );
-
-    return ColetaFormResult(coleta: coleta, bemMaterial: bemMaterial);
   }
 
   @override

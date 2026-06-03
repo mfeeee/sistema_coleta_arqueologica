@@ -28,8 +28,8 @@ class DetalhesItemPage extends StatelessWidget {
                   _Linha('Nome', bem.nomeBem),
                   if (bem.codigoIphan != null)
                     _Linha('Código IPHAN', bem.codigoIphan!),
-                  _Linha('Natureza', bem.natureza),
-                  _Linha('Tipo', bem.tipo),
+                  if (bem.natureza != null) _Linha('Natureza', bem.natureza!),
+                  if (bem.tipo != null) _Linha('Tipo', bem.tipo!),
                   if (bem.anoRegistro != null)
                     _Linha('Ano de Registro', '${bem.anoRegistro}'),
                 ],

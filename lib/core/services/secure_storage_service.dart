@@ -13,6 +13,7 @@ class SecureStorageService {
   static const _keyRefreshToken = 'refresh_token';
   static const _keyDbPassphrase = 'db_passphrase';
   static const _keyUltimoSyncBens = 'ultimo_sync_bens';
+  static const _keyTotalColetasRemoto = 'total_coletas_remoto';
 
   Future<void> _safeWrite(String key, String value) async {
     try {
@@ -57,6 +58,14 @@ class SecureStorageService {
 
   Future<void> setUltimoSyncBens(DateTime data) =>
       _safeWrite(_keyUltimoSyncBens, data.toIso8601String());
+
+  Future<int?> getTotalColetasRemoto() async {
+    final valor = await _safeRead(_keyTotalColetasRemoto);
+    return valor != null ? int.tryParse(valor) : null;
+  }
+
+  Future<void> setTotalColetasRemoto(int total) =>
+      _safeWrite(_keyTotalColetasRemoto, total.toString());
 
   Future<void> saveRefreshToken(String token) =>
       _safeWrite(_keyRefreshToken, token);

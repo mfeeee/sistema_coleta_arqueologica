@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
+import 'package:sistema_coleta_arqueologica/core/models/artefato_tipo_model.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_model.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coletas_viewmodel.dart';
@@ -12,13 +14,12 @@ ColetaModel _coleta(String id, StatusColeta status) => ColetaModel(
   id: id,
   usuarioId: 'u1',
   nomeBem: 'Bem $id',
-  latitude: -2.9,
-  longitude: -41.7,
+  localizacao: LocalizacaoModel(id: 'loc-$id', lat: -2.9, lng: -41.7),
   dataColeta: _data,
   updatedAt: _data,
   versao: 1,
   syncStatus: status,
-  artefatos: [ArtefatoBem.ceramica],
+  artefatoTipos: const [ArtefatoTipoModel(id: 'tipo-ceramica', nome: 'ceramica')],
   dadosColetados: {},
 );
 
@@ -29,13 +30,16 @@ void main() {
         id: 'e1',
         usuarioId: 'u1',
         nomeBem: 'Sítio X',
-        latitude: -2.9,
-        longitude: -41.7,
+        localizacao: const LocalizacaoEntity(
+          id: 'loc-e1',
+          lat: -2.9,
+          lng: -41.7,
+        ),
         dataColeta: _data,
         updatedAt: _data,
         versao: 1,
         syncStatus: StatusColeta.sincronizado,
-        artefatos: const [],
+        artefatoTipos: const [],
         dadosColetados: const {},
       );
 
@@ -50,9 +54,11 @@ void main() {
         'updated_at': '2024-01-01T00:00:00.000',
         'status_sincronizacao': 'sincronizado',
         'nome_bem': 'Bem JSON',
-        'latitude': -2.9,
-        'longitude': -41.7,
-        'artefatos': [],
+        'localizacao': {
+          'id': 'loc-j1',
+          'geom': {'lat': -2.9, 'lng': -41.7},
+        },
+        'artefato_tipos': [],
         'versao': 1,
         'dados_coletados': <String, dynamic>{},
       };
@@ -71,9 +77,11 @@ void main() {
           'data_coleta': '2024-01-01T00:00:00.000',
           'updated_at': '2024-01-01T00:00:00.000',
           'nome_bem': 'Bem JSON',
-          'latitude': -2.9,
-          'longitude': -41.7,
-          'artefatos': [],
+          'localizacao': {
+            'id': 'loc-j2',
+            'geom': {'lat': -2.9, 'lng': -41.7},
+          },
+          'artefato_tipos': [],
           'versao': 1,
           'dados_coletados': <String, dynamic>{},
         };

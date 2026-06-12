@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/geolocator_helper.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/tratador_de_erros.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
@@ -36,7 +37,7 @@ class _FakeColetaRepository implements ColetaRepository {
   @override
   Future<int> contarTodas() async => _coletas.length;
   @override
-  Future<int> contarPorStatus(dynamic status) async => 0;
+  Future<int> contarPorStatus(StatusColeta status) async => 0;
   @override
   Future<List<ColetaEntity>> getRecentes(int limite) async =>
       _coletas.take(limite).toList();
@@ -99,13 +100,16 @@ void main() {
       final sitio = ColetaEntity(
         id: 'site-1',
         nomeBem: 'Sítio Teste',
-        latitude: -8.8475,
-        longitude: -42.5480,
+        localizacao: const LocalizacaoEntity(
+          id: 'loc-1',
+          lat: -8.8475,
+          lng: -42.5480,
+        ),
         dataColeta: DateTime.now(),
         updatedAt: DateTime.now(),
         versao: 1,
         usuarioId: 'u1',
-        artefatos: [],
+        artefatoTipos: [],
         syncStatus: StatusColeta.pendente,
         dadosColetados: {},
       );
@@ -224,13 +228,16 @@ void main() {
       final sitio = ColetaEntity(
         id: 'site-1',
         nomeBem: 'Sítio Teste',
-        latitude: -8.8475,
-        longitude: -42.5480,
+        localizacao: const LocalizacaoEntity(
+          id: 'loc-1',
+          lat: -8.8475,
+          lng: -42.5480,
+        ),
         dataColeta: DateTime.now(),
         updatedAt: DateTime.now(),
         versao: 1,
         usuarioId: 'u1',
-        artefatos: [],
+        artefatoTipos: [],
         syncStatus: StatusColeta.pendente,
         dadosColetados: {},
       );

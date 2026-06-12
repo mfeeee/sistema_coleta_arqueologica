@@ -112,7 +112,7 @@ ColetaEntity _coletaPendente() => ColetaEntity(
   dataColeta: DateTime(2024),
   syncStatus: StatusColeta.pendente,
   nomeBem: 'Sítio X',
-  artefatos: const [],
+  artefatoTipos: const [],
   versao: 1,
   updatedAt: DateTime(2024),
   dadosColetados: const {},

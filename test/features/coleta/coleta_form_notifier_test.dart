@@ -117,11 +117,11 @@ void main() {
         expect(result.coleta.natureza, NaturezaBem.bemArqueologico);
         expect(result.coleta.tipo, TipoBem.sitio);
         expect(
-          result.coleta.artefatos,
-          containsAll([ArtefatoBem.ceramica, ArtefatoBem.litico]),
+          result.coleta.artefatoTipos.map((e) => e.nome),
+          containsAll([ArtefatoBem.ceramica.name, ArtefatoBem.litico.name]),
         );
-        expect(result.coleta.latitude, closeTo(-2.9078, 0.0001));
-        expect(result.coleta.longitude, closeTo(-41.7722, 0.0001));
+        expect(result.coleta.localizacao?.lat, closeTo(-2.9078, 0.0001));
+        expect(result.coleta.localizacao?.lng, closeTo(-41.7722, 0.0001));
         expect(result.coleta.usuarioId, 'usuario-42');
         expect(result.coleta.syncStatus, StatusColeta.pendente);
         expect(result.coleta.versao, 1);

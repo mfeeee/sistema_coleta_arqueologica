@@ -1,10 +1,11 @@
 import 'package:checks/checks.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/coleta_sync_strategy.dart';
@@ -59,11 +60,12 @@ ColetaEntity _criarColeta({Map<String, dynamic>? dadosColetados}) =>
       updatedAt: DateTime(2024),
       versao: 1,
       syncStatus: StatusColeta.pendente,
-      artefatos: const [ArtefatoBem.ceramica],
+      localizacao: const LocalizacaoEntity(id: 'loc-1', lat: -2.9, lng: -41.7),
+      artefatoTipos: const [
+        ArtefatoTipoEntity(id: 'tipo-ceramica', nome: 'ceramica'),
+      ],
       natureza: NaturezaBem.bemArqueologico,
       tipo: TipoBem.sitio,
-      latitude: -2.9,
-      longitude: -41.7,
       dadosColetados: dadosColetados ?? {},
     );
 

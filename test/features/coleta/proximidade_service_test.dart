@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/proximidade_service.dart';
 import '../../helpers/fakes/fake_coleta_repository.dart';
@@ -18,13 +19,12 @@ ColetaEntity _criarSitio({
   id: id,
   usuarioId: 'u1',
   nomeBem: 'Sítio $id',
-  latitude: lat,
-  longitude: lon,
+  localizacao: LocalizacaoEntity(id: 'loc-$id', lat: lat, lng: lon),
   dataColeta: DateTime(2024),
   updatedAt: DateTime(2024),
   versao: 1,
   syncStatus: StatusColeta.pendente,
-  artefatos: [],
+  artefatoTipos: const [],
   dadosColetados: {},
 );
 

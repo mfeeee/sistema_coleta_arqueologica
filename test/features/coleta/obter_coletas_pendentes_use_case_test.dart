@@ -1,7 +1,7 @@
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
@@ -55,9 +55,8 @@ ColetaEntity _coletaPendente(String id) => ColetaEntity(
   dataColeta: DateTime(2024),
   syncStatus: StatusColeta.pendente,
   nomeBem: 'Sítio $id',
-  latitude: 0,
-  longitude: 0,
-  artefatos: const <ArtefatoBem>[],
+  localizacao: LocalizacaoEntity(id: 'loc-$id', lat: 0, lng: 0),
+  artefatoTipos: const [],
   versao: 1,
   updatedAt: DateTime(2024),
   dadosColetados: const {},

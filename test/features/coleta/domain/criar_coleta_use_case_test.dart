@@ -43,9 +43,9 @@ void main() {
 
       check(coleta.nomeBem).equals('Sítio das Pedras');
       check(coleta.usuarioId).equals('usuario-42');
-      check(coleta.latitude).isNotNull();
-      check(coleta.latitude!).isCloseTo(-2.9078, 0.0001);
-      check(coleta.longitude!).isCloseTo(-41.7722, 0.0001);
+      check(coleta.localizacao?.lat).isNotNull();
+      check(coleta.localizacao!.lat!).isCloseTo(-2.9078, 0.0001);
+      check(coleta.localizacao!.lng!).isCloseTo(-41.7722, 0.0001);
       check(coleta.versao).equals(1);
       check(coleta.id).isNotEmpty();
     });

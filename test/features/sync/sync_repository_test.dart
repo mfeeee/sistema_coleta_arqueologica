@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
+import 'package:sistema_coleta_arqueologica/core/models/artefato_tipo_model.dart';
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_model.dart';
@@ -79,13 +80,12 @@ ColetaModel _criarColetaPendente(String id) => ColetaModel(
   id: id,
   usuarioId: 'usuario-1',
   nomeBem: 'Bem $id',
-  latitude: -2.9078,
-  longitude: -41.7722,
+  localizacao: LocalizacaoModel(id: 'loc-$id', lat: -2.9078, lng: -41.7722),
   dataColeta: DateTime(2024),
   updatedAt: DateTime(2024),
   versao: 1,
   syncStatus: StatusColeta.pendente,
-  artefatos: [ArtefatoBem.ceramica],
+  artefatoTipos: const [ArtefatoTipoModel(id: 'tipo-ceramica', nome: 'ceramica')],
   dadosColetados: {},
 );
 

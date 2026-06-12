@@ -23,7 +23,6 @@ class _FakeSyncApiDatasource implements SyncApiDatasource {
   @override
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
-    required String bearerToken,
     Map<String, dynamic>? dadosColetadosOverride,
     void Function(int tentativa, int max)? onTentativa,
   }) async => SyncResultado(coletaId: coleta.id, status: status);
@@ -40,7 +39,6 @@ class _SpyFotoUploadService extends FotoUploadService {
   @override
   Future<FotoUploadResult> uploadFotos({
     required List<String> localPaths,
-    required String token,
     void Function(int current, int total)? onProgress,
   }) async {
     chamouUpload = true;
@@ -84,7 +82,7 @@ void main() {
       final coleta = _criarColeta();
 
       // Act
-      final resultado = await strategy.sincronizar(coleta, 'token-fake');
+      final resultado = await strategy.sincronizar(coleta);
 
       // Assert
       check(resultado.status).equals(SyncResultStatus.sucesso);
@@ -106,7 +104,7 @@ void main() {
       );
 
       // Act
-      await strategy.sincronizar(coleta, 'token-fake');
+      await strategy.sincronizar(coleta);
 
       // Assert
       check(spy.chamouUpload).isTrue();
@@ -122,7 +120,7 @@ void main() {
       final coleta = _criarColeta(dadosColetados: {'foto_paths': <String>[]});
 
       // Act
-      await strategy.sincronizar(coleta, 'token-fake');
+      await strategy.sincronizar(coleta);
 
       // Assert
       check(spy.chamouUpload).isFalse();
@@ -140,7 +138,7 @@ void main() {
         final coleta = _criarColeta();
 
         // Act
-        await strategy.sincronizar(coleta, 'token-fake');
+        await strategy.sincronizar(coleta);
 
         // Assert
         check(spy.chamouUpload).isFalse();
@@ -166,7 +164,7 @@ void main() {
         );
 
         // Act
-        final resultado = await strategy.sincronizar(coleta, 'token-fake');
+        final resultado = await strategy.sincronizar(coleta);
 
         // Assert
         check(resultado.uploadedUrls).deepEquals(urls);
@@ -183,10 +181,7 @@ void main() {
       );
 
       // Act
-      final resultado = await strategy.sincronizar(
-        _criarColeta(),
-        'token-fake',
-      );
+      final resultado = await strategy.sincronizar(_criarColeta());
 
       // Assert
       check(resultado.status).equals(SyncResultStatus.conflito);

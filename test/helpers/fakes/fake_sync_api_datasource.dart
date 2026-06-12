@@ -10,7 +10,6 @@ class FakeSyncApiDatasource implements SyncApiDatasource {
   @override
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
-    required String bearerToken,
     Map<String, dynamic>? dadosColetadosOverride,
     void Function(int tentativa, int max)? onTentativa,
   }) async => SyncResultado(coletaId: coleta.id, status: status);

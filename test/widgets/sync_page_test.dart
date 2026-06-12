@@ -37,7 +37,6 @@ import 'package:sistema_coleta_arqueologica/features/notifications/data/reposito
 import 'package:sistema_coleta_arqueologica/features/profile/data/models/preferencias_notificacao.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
-import 'package:http/http.dart' as http;
 
 // ---------------------------------------------------------------------------
 // Stubs de infraestrutura
@@ -54,12 +53,6 @@ class _StubSecureStorage extends SecureStorageService {
 
   @override
   Future<void> clearAll() async {}
-}
-
-class _StubHttpClient extends http.BaseClient {
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) =>
-      Future.error(UnsupportedError('stub'));
 }
 
 class _StubColetaRepository implements ColetaRepository {
@@ -154,7 +147,6 @@ class _StubSyncApiDatasource implements SyncApiDatasource {
   @override
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
-    required String bearerToken,
     Map<String, dynamic>? dadosColetadosOverride,
     void Function(int tentativa, int max)? onTentativa,
   }) async =>
@@ -218,8 +210,7 @@ class _FakeSyncNotifier extends SyncNotifier {
 AuthNotifier _criarStubAuthNotifier() {
   final authService = AuthService(
     secureStorage: _StubSecureStorage(),
-    httpClient: _StubHttpClient(),
-    baseUrl: '',
+    dio: Dio(),
   );
   return AuthNotifier(
     authService: authService,
@@ -247,6 +238,8 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     routes: [GoRoute(path: '/sync', builder: (_, __) => const SyncPage())],
   );
 
+  final dio = Dio();
+
   return AppScope(
     authNotifier: _criarStubAuthNotifier(),
     syncNotifier: syncNotifier,
@@ -260,8 +253,9 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     temaModo: ValueNotifier(ThemeMode.light),
     idiomaAtual: ValueNotifier(const Locale('pt', 'BR')),
     fotoPerfilPath: ValueNotifier(null),
-    profileService: ProfileService(httpClient: http.Client(), baseUrl: ''),
+    profileService: ProfileService(dio: dio),
     secureStorage: _StubSecureStorage(),
+    dioPublic: dio,
     child: MaterialApp.router(
       routerConfig: router,
       locale: const Locale('pt', 'BR'),

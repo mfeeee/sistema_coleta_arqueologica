@@ -39,7 +39,6 @@ import 'package:sistema_coleta_arqueologica/features/notifications/data/reposito
 import 'package:sistema_coleta_arqueologica/features/profile/data/models/preferencias_notificacao.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
-import 'package:http/http.dart' as http;
 
 // ---------------------------------------------------------------------------
 // Stubs de infraestrutura
@@ -56,12 +55,6 @@ class _StubSecureStorage extends SecureStorageService {
 
   @override
   Future<void> clearAll() async {}
-}
-
-class _StubHttpClient extends http.BaseClient {
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) =>
-      Future.error(UnsupportedError('stub'));
 }
 
 class _StubColetaRepository implements ColetaRepository {
@@ -135,7 +128,7 @@ class _StubColetaLocalDatasource implements ColetaLocalDatasource {
   @override
   Future<int> contarTodas() async => 0;
   @override
-  Future<int> contarPorStatus(StatusColeta status) async => 0;
+  Future<int> contarPorStatus(dynamic status) async => 0;
   @override
   Future<List<ColetaModel>> getRecentes(int limite) async => [];
   @override
@@ -156,7 +149,6 @@ class _StubSyncApiDatasource implements SyncApiDatasource {
   @override
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
-    required String bearerToken,
     Map<String, dynamic>? dadosColetadosOverride,
     void Function(int tentativa, int max)? onTentativa,
   }) async =>
@@ -169,8 +161,7 @@ class _StubSyncApiDatasource implements SyncApiDatasource {
 
 final _stubAuthService = AuthService(
   secureStorage: _StubSecureStorage(),
-  httpClient: _StubHttpClient(),
-  baseUrl: '',
+  dio: Dio(),
 );
 
 final _stubPullService = PullService(
@@ -260,6 +251,8 @@ Future<Widget> _montarLoginPage(_FakeAuthNotifier notifier) async {
     ],
   );
 
+  final dio = Dio();
+
   return AppScope(
     authNotifier: notifier,
     syncNotifier: _criarStubSyncNotifier(),
@@ -273,8 +266,9 @@ Future<Widget> _montarLoginPage(_FakeAuthNotifier notifier) async {
     temaModo: ValueNotifier(ThemeMode.light),
     idiomaAtual: ValueNotifier(const Locale('pt', 'BR')),
     fotoPerfilPath: ValueNotifier(null),
-    profileService: ProfileService(httpClient: http.Client(), baseUrl: ''),
+    profileService: ProfileService(dio: dio),
     secureStorage: _StubSecureStorage(),
+    dioPublic: dio,
     child: MaterialApp.router(
       routerConfig: router,
       locale: const Locale('pt', 'BR'),

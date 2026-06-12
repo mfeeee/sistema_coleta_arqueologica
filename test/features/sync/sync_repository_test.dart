@@ -67,7 +67,6 @@ class _FakeFotoUploadService extends FotoUploadService {
   @override
   Future<FotoUploadResult> uploadFotos({
     required List<String> localPaths,
-    required String token,
     void Function(int current, int total)? onProgress,
   }) async => const FotoUploadResult(uploadedUrls: [], failedPaths: []);
 }
@@ -111,7 +110,7 @@ void main() {
       final datasource = _FakeColetaLocalDatasource();
       final repo = _criarRepositorio(datasource: datasource);
 
-      final resumo = await repo.sincronizarTodas('token-fake');
+      final resumo = await repo.sincronizarTodas();
 
       expect(resumo.total, 0);
       expect(resumo.totalOk, isTrue);
@@ -126,7 +125,7 @@ void main() {
         apiDatasource: FakeSyncApiDatasource(status: SyncResultStatus.sucesso),
       );
 
-      final resumo = await repo.sincronizarTodas('token-fake');
+      final resumo = await repo.sincronizarTodas();
 
       expect(resumo.sucessos, 1);
       expect(resumo.conflitos, 0);
@@ -148,7 +147,7 @@ void main() {
         apiDatasource: FakeSyncApiDatasource(status: SyncResultStatus.conflito),
       );
 
-      final resumo = await repo.sincronizarTodas('token');
+      final resumo = await repo.sincronizarTodas();
 
       expect(resumo.conflitos, 1);
       expect(resumo.sucessos, 0);
@@ -166,7 +165,7 @@ void main() {
         apiDatasource: FakeSyncApiDatasource(status: SyncResultStatus.erroRede),
       );
 
-      final resumo = await repo.sincronizarTodas('token');
+      final resumo = await repo.sincronizarTodas();
 
       expect(resumo.erros, 1);
       expect(datasource.statusAtualizado.containsKey('coleta-erro'), isFalse);
@@ -184,7 +183,7 @@ void main() {
         apiDatasource: FakeSyncApiDatasource(status: SyncResultStatus.sucesso),
       );
 
-      final resumo = await repo.sincronizarTodas('token');
+      final resumo = await repo.sincronizarTodas();
 
       expect(resumo.sucessos, 3);
       expect(datasource.statusAtualizado.length, 3);

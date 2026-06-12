@@ -19,8 +19,7 @@ class SyncRepository {
     return pendentes.length;
   }
 
-  Future<SyncResumo> sincronizarTodas(
-    String bearerToken, {
+  Future<SyncResumo> sincronizarTodas({
     void Function(String mensagem)? onProgresso,
   }) async {
     final pendentes = await _coletaDatasource.getPendentes();
@@ -35,11 +34,7 @@ class SyncRepository {
     for (var i = 0; i < pendentes.length; i++) {
       final coleta = pendentes[i];
       onProgresso?.call('Sincronizando coleta ${i + 1}/${pendentes.length}…');
-      final res = await _strategy.sincronizar(
-        coleta,
-        bearerToken,
-        onProgresso: onProgresso,
-      );
+      final res = await _strategy.sincronizar(coleta, onProgresso: onProgresso);
       if (res.uploadedUrls.isNotEmpty) {
         await _coletaDatasource.salvarFotosUrls(coleta.id, res.uploadedUrls);
       }

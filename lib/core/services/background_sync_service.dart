@@ -1,12 +1,12 @@
 import 'dart:developer';
 import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sqlite3/open.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 import 'package:workmanager/workmanager.dart';
 import '../database/app_database.dart';
+import '../network/dio_client.dart';
 import 'foto_upload_service.dart';
 import 'secure_storage_service.dart';
 import '../../features/coleta/data/datasources/coleta_local_datasource.dart';
@@ -61,20 +61,16 @@ Future<void> _executarSync() async {
   final db = await AppDatabase.open(passphrase);
 
   try {
-    final dio = Dio(
-      BaseOptions(
-        baseUrl: _kBaseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 30),
-        headers: {'Accept': 'application/json'},
-      ),
+    final dioAuth = DioClient.authenticated(
+      baseUrl: _kBaseUrl,
+      secureStorage: secureStorage,
     );
 
     final syncRepository = SyncRepository(
       coletaDatasource: ColetaLocalDatasourceImpl(db),
       strategy: ColetaSyncStrategy(
-        apiDatasource: SyncApiDatasourceImpl(dio),
-        fotoUploadService: FotoUploadService(dio),
+        apiDatasource: SyncApiDatasourceImpl(dioAuth),
+        fotoUploadService: FotoUploadService(dioAuth),
       ),
     );
 
@@ -84,7 +80,7 @@ Future<void> _executarSync() async {
       return;
     }
 
-    final resumo = await syncRepository.sincronizarTodas(token);
+    final resumo = await syncRepository.sincronizarTodas();
     log(
       'BackgroundSync concluído — '
       '✓${resumo.sucessos} ✗${resumo.conflitos} ~${resumo.erros}',

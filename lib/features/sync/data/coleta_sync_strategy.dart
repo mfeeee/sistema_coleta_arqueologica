@@ -21,8 +21,7 @@ class ColetaSyncStrategy {
   final FotoUploadService _fotoUploadService;
 
   Future<ColetaSyncResultado> sincronizar(
-    ColetaEntity coleta,
-    String bearerToken, {
+    ColetaEntity coleta, {
     void Function(String mensagem)? onProgresso,
   }) async {
     final dadosOriginais = Map<String, dynamic>.from(coleta.dadosColetados);
@@ -35,7 +34,6 @@ class ColetaSyncStrategy {
     if (fotoPaths.isNotEmpty) {
       final upload = await _fotoUploadService.uploadFotos(
         localPaths: fotoPaths,
-        token: bearerToken,
         onProgress: (atual, total) =>
             onProgresso?.call('Enviando foto $atual/$total…'),
       );
@@ -56,7 +54,6 @@ class ColetaSyncStrategy {
 
     final resultado = await _apiDatasource.enviarColeta(
       coleta: coleta,
-      bearerToken: bearerToken,
       dadosColetadosOverride: dadosFinais,
       onTentativa: (t, max) => onProgresso?.call('Tentativa $t/$max…'),
     );

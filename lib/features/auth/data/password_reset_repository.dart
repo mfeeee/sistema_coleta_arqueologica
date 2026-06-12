@@ -1,11 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/tratador_de_erros.dart';
-
-const _kTimeout = Duration(seconds: 15);
 
 sealed class RequestResetResult {
   const RequestResetResult();
@@ -34,41 +30,26 @@ final class ConfirmResetFalha extends ConfirmResetResult {
 }
 
 class PasswordResetRepository {
-  PasswordResetRepository({required this.httpClient, required this.baseUrl});
+  PasswordResetRepository({required this.dio});
 
-  final http.Client httpClient;
-  final String baseUrl;
+  final Dio dio;
 
   Future<RequestResetResult> requestReset(String email) async {
     try {
-      final response = await httpClient
-          .post(
-            Uri.parse('$baseUrl/auth/password-reset'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: jsonEncode({'email': email}),
-          )
-          .timeout(_kTimeout);
+      final response = await dio.post(
+        '/auth/password-reset',
+        data: {'email': email},
+      );
 
       if (response.statusCode == 200 || response.statusCode == 404) {
         return const RequestResetSucesso();
       }
 
-      final body = _parsearBody(response.body);
+      final body = response.data as Map<String, dynamic>? ?? {};
       return RequestResetFalha(_extrairMensagem(body));
-    } on SocketException {
-      return const RequestResetFalha(TratadorDeErros.semConexao);
-    } on TimeoutException {
-      return const RequestResetFalha(TratadorDeErros.timeout);
-    } on http.ClientException catch (e) {
-      log(
-        'Erro HTTP em requestReset',
-        error: e,
-        name: 'PasswordResetRepository',
-      );
-      return const RequestResetFalha(TratadorDeErros.erroComunicacao);
+    } on DioException catch (e) {
+      final body = e.response?.data as Map<String, dynamic>? ?? {};
+      return RequestResetFalha(_extrairMensagem(body));
     } catch (e) {
       log(
         'Erro desconhecido em requestReset',
@@ -85,37 +66,23 @@ class PasswordResetRepository {
     String novaSenha,
   ) async {
     try {
-      final response = await httpClient
-          .post(
-            Uri.parse('$baseUrl/auth/password-reset/confirm'),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: jsonEncode({
-              'email': email,
-              'token': token,
-              'password': novaSenha,
-              'password_confirmation': novaSenha,
-            }),
-          )
-          .timeout(_kTimeout);
+      final response = await dio.post(
+        '/auth/password-reset/confirm',
+        data: {
+          'email': email,
+          'token': token,
+          'password': novaSenha,
+          'password_confirmation': novaSenha,
+        },
+      );
 
       if (response.statusCode == 200) return const ConfirmResetSucesso();
 
-      final body = _parsearBody(response.body);
+      final body = response.data as Map<String, dynamic>? ?? {};
       return ConfirmResetFalha(_extrairMensagem(body));
-    } on SocketException {
-      return const ConfirmResetFalha(TratadorDeErros.semConexao);
-    } on TimeoutException {
-      return const ConfirmResetFalha(TratadorDeErros.timeout);
-    } on http.ClientException catch (e) {
-      log(
-        'Erro HTTP em confirmReset',
-        error: e,
-        name: 'PasswordResetRepository',
-      );
-      return const ConfirmResetFalha(TratadorDeErros.erroComunicacao);
+    } on DioException catch (e) {
+      final body = e.response?.data as Map<String, dynamic>? ?? {};
+      return ConfirmResetFalha(_extrairMensagem(body));
     } catch (e) {
       log(
         'Erro desconhecido em confirmReset',
@@ -123,14 +90,6 @@ class PasswordResetRepository {
         name: 'PasswordResetRepository',
       );
       return const ConfirmResetFalha(TratadorDeErros.erroInesperado);
-    }
-  }
-
-  Map<String, dynamic> _parsearBody(String bodyStr) {
-    try {
-      return jsonDecode(bodyStr) as Map<String, dynamic>;
-    } catch (_) {
-      return {};
     }
   }
 

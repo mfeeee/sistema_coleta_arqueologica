@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 abstract final class TratadorDeErros {
   static const credenciaisInvalidas =
@@ -17,9 +17,17 @@ abstract final class TratadorDeErros {
   static const sessaoExpirada = 'Sessão expirada. Faça login novamente.';
 
   static String deExcecao(Object erro) {
+    if (erro is DioException) {
+      if (erro.type == DioExceptionType.connectionTimeout ||
+          erro.type == DioExceptionType.sendTimeout ||
+          erro.type == DioExceptionType.receiveTimeout) {
+        return timeout;
+      }
+      if (erro.error is SocketException) return semConexao;
+      return erroComunicacao;
+    }
     if (erro is SocketException) return semConexao;
     if (erro is TimeoutException) return timeout;
-    if (erro is http.ClientException) return erroComunicacao;
     return erroInesperado;
   }
 }

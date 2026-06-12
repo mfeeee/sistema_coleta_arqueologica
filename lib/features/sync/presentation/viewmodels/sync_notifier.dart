@@ -65,7 +65,6 @@ class SyncNotifier extends ChangeNotifier {
 
     try {
       final resumo = await _repository.sincronizarTodas(
-        token,
         onProgresso: (msg) {
           _mensagemProgresso = msg;
           notifyListeners();

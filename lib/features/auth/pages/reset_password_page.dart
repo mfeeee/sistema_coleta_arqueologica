@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
-import 'package:sistema_coleta_arqueologica/core/constants/api_constants.dart';
+import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/data/password_reset_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/presentation/viewmodels/password_reset_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/presentation/viewmodels/password_reset_state.dart';
@@ -17,30 +16,31 @@ class ResetPasswordPage extends StatefulWidget {
 }
 
 class _ResetPasswordPageState extends State<ResetPasswordPage> {
-  late final PasswordResetNotifier _notifier;
+  PasswordResetNotifier? _notifier;
 
   @override
-  void initState() {
-    super.initState();
-    _notifier = PasswordResetNotifier(
-      repositorio: PasswordResetRepository(
-        httpClient: http.Client(),
-        baseUrl: kApiBaseUrl,
-      ),
-    );
-    _notifier.addListener(_escutarEstado);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_notifier == null) {
+      final scope = AppScope.of(context);
+      _notifier = PasswordResetNotifier(
+        repositorio: PasswordResetRepository(dio: scope.dioPublic),
+      );
+      _notifier!.addListener(_escutarEstado);
+    }
   }
 
   void _escutarEstado() {
-    final estado = _notifier.estado;
+    final estado = _notifier?.estado;
     if (estado is! PasswordResetError) return;
     final mensagem = estado.mensagem;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      final theme = Theme.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(mensagem),
-          backgroundColor: Theme.of(context).colorScheme.error,
+          backgroundColor: theme.colorScheme.error,
         ),
       );
     });
@@ -48,14 +48,16 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   @override
   void dispose() {
-    _notifier.removeListener(_escutarEstado);
-    _notifier.dispose();
+    _notifier?.removeListener(_escutarEstado);
+    _notifier?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final notifier = _notifier;
+    if (notifier == null) return const SizedBox.shrink();
 
     return Scaffold(
       appBar: AppBar(
@@ -72,9 +74,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
             child: Container(
               constraints: const BoxConstraints(maxWidth: 480),
               child: ListenableBuilder(
-                listenable: _notifier,
+                listenable: notifier,
                 builder: (context, _) {
-                  if (_notifier.estado is PasswordResetSuccess) {
+                  if (notifier.estado is PasswordResetSuccess) {
                     return _SucessoRedefinicao(theme: theme);
                   }
                   return Column(
@@ -82,7 +84,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     children: [
                       _HeaderRedefinicao(theme: theme),
                       _ResetForm(
-                        notifier: _notifier,
+                        notifier: notifier,
                         tokenInicial: widget.token,
                         emailInicial: widget.email,
                       ),

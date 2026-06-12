@@ -34,13 +34,20 @@ class DetalhesItemPage extends StatelessWidget {
                     _Linha('Ano de Registro', '${bem.anoRegistro}'),
                 ],
               ),
-              if (bem.latitude != null && bem.longitude != null) ...[
+              if (bem.localizacao?.lat != null &&
+                  bem.localizacao?.lng != null) ...[
                 const SizedBox(height: 16),
                 _SecaoDados(
                   titulo: 'COORDENADAS',
                   linhas: [
-                    _Linha('Latitude', bem.latitude!.toStringAsFixed(6)),
-                    _Linha('Longitude', bem.longitude!.toStringAsFixed(6)),
+                    _Linha(
+                      'Latitude',
+                      bem.localizacao!.lat!.toStringAsFixed(6),
+                    ),
+                    _Linha(
+                      'Longitude',
+                      bem.localizacao!.lng!.toStringAsFixed(6),
+                    ),
                   ],
                 ),
               ],
@@ -49,20 +56,26 @@ class DetalhesItemPage extends StatelessWidget {
                 _SecaoDados(
                   titulo: 'ENDEREÇO',
                   linhas: [
-                    if (bem.endereco != null)
-                      _Linha('Logradouro', bem.endereco!),
-                    if (bem.municipio != null)
-                      _Linha('Município', bem.municipio!),
-                    if (bem.uf != null) _Linha('UF', bem.uf!),
-                    if (bem.cep != null) _Linha('CEP', bem.cep!),
+                    if (bem.localizacao?.logradouro != null)
+                      _Linha('Logradouro', bem.localizacao!.logradouro!),
+                    if (bem.localizacao?.municipio != null)
+                      _Linha('Município', bem.localizacao!.municipio!),
+                    if (bem.localizacao?.uf != null)
+                      _Linha('UF', bem.localizacao!.uf!),
+                    if (bem.localizacao?.cep != null)
+                      _Linha('CEP', bem.localizacao!.cep!),
                   ],
                 ),
               ],
-              if (bem.artefatos.isNotEmpty) ...[
+              if (bem.artefatoTipos.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 _SecaoArtefatos(
-                  artefatos: bem.artefatos.map((a) => a.label).toList(),
+                  artefatos: bem.artefatoTipos.map((a) => a.nome).toList(),
                 ),
+              ],
+              if (bem.responsaveis.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                _SecaoResponsaveis(responsaveis: bem.responsaveis),
               ],
               if (bem.meiosAcesso != null && bem.meiosAcesso!.isNotEmpty) ...[
                 const SizedBox(height: 16),
@@ -77,10 +90,10 @@ class DetalhesItemPage extends StatelessWidget {
   }
 
   bool _temEndereco(BemMaterialEntity b) =>
-      b.endereco != null ||
-      b.municipio != null ||
-      b.uf != null ||
-      b.cep != null;
+      b.localizacao?.logradouro != null ||
+      b.localizacao?.municipio != null ||
+      b.localizacao?.uf != null ||
+      b.localizacao?.cep != null;
 }
 
 class _SecaoDados extends StatelessWidget {
@@ -188,6 +201,58 @@ class _SecaoArtefatos extends StatelessWidget {
                 ),
               )
               .toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class _SecaoResponsaveis extends StatelessWidget {
+  const _SecaoResponsaveis({required this.responsaveis});
+
+  final List<dynamic> responsaveis;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'RESPONSÁVEIS',
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
+          ),
+          child: Column(
+            children: [
+              for (var i = 0; i < responsaveis.length; i++) ...[
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: responsaveis[i].usuario.avatarUrl != null
+                        ? NetworkImage(responsaveis[i].usuario.avatarUrl!)
+                        : null,
+                    child: responsaveis[i].usuario.avatarUrl == null
+                        ? const Icon(Icons.person)
+                        : null,
+                  ),
+                  title: Text(responsaveis[i].usuario.nome),
+                  subtitle: Text(responsaveis[i].papel),
+                ),
+                if (i < responsaveis.length - 1)
+                  Divider(height: 1, color: theme.colorScheme.outlineVariant),
+              ],
+            ],
+          ),
         ),
       ],
     );

@@ -70,7 +70,7 @@ class HomeViewModel {
           .getAll();
       final bensPublicados = bens.where((b) => b.publicado).toList();
       final pinosBem = bensPublicados
-          .where((b) => _coordsValidas(b.latitude, b.longitude))
+          .where((b) => _coordsValidas(b.localizacao?.lat, b.localizacao?.lng))
           .map((b) => b.paraMapa)
           .whereType<PinoMapa>()
           .toList();

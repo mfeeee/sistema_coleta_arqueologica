@@ -84,10 +84,12 @@ class CriarColetaUseCase {
       natureza: input.natureza?.name,
       tipo: input.tipo?.name,
       meiosAcesso: input.meiosAcesso?.trim(),
-      artefatos: input.artefatos,
+      artefatoTipos: artefatoTipos,
+      responsaveis: const [],
       publicado: false,
       criadoEm: agora,
       atualizadoEm: agora,
+      localizacao: localizacao,
     );
 
     return ColetaFormResult(coleta: coleta, bemMaterial: bemMaterial);

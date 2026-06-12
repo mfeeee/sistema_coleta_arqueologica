@@ -1,9 +1,7 @@
-import 'dart:convert';
-
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
-import 'package:http/testing.dart';
+
+import '../../helpers/dio_mock.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/services/auth_service.dart';
@@ -138,7 +136,7 @@ ColetaEntity _coletaPendente(String id) => ColetaEntity(
   dadosColetados: const {},
 );
 
-final _respostaLoginOk = jsonEncode({
+final _respostaLoginOk = {
   'token': 'jwt_teste_123',
   'user': {
     'name': 'Pesquisador Teste',
@@ -146,12 +144,11 @@ final _respostaLoginOk = jsonEncode({
     'email': 'teste@arqueologia.br',
     'classificacao': 'pesquisador',
   },
-});
+};
 
 AuthService _authServiceOk() => AuthService(
   secureStorage: _FakeSecureStorageService(),
-  httpClient: MockClient((_) async => http.Response(_respostaLoginOk, 200)),
-  baseUrl: 'http://fake.local',
+  dio: createMockDio((_) async => createResponse(_respostaLoginOk, 200)),
 );
 
 // ---------------------------------------------------------------------------

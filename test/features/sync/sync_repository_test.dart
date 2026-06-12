@@ -85,7 +85,9 @@ ColetaModel _criarColetaPendente(String id) => ColetaModel(
   updatedAt: DateTime(2024),
   versao: 1,
   syncStatus: StatusColeta.pendente,
-  artefatoTipos: const [ArtefatoTipoModel(id: 'tipo-ceramica', nome: 'ceramica')],
+  artefatoTipos: const [
+    ArtefatoTipoModel(id: 'tipo-ceramica', nome: 'ceramica'),
+  ],
   dadosColetados: {},
 );
 

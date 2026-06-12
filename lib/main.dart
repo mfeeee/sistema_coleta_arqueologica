@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
-import 'package:dio/dio.dart';
+
 import 'package:flutter/material.dart';
 import 'dart:developer';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -35,9 +35,8 @@ import 'core/theme/app_theme.dart';
 import 'core/database/app_database.dart';
 import 'core/services/secure_storage_service.dart';
 import 'core/services/auth_service.dart';
-import 'core/services/authenticated_http_client.dart';
+import 'core/network/dio_client.dart';
 import 'core/services/profile_service.dart';
-import 'package:http/http.dart' as http;
 import 'features/auth/auth_notifier.dart';
 import 'core/di/app_scope.dart';
 
@@ -83,28 +82,21 @@ Future<void> main() async {
     rethrow;
   }
 
-  final plainHttpClient = http.Client();
-  final authService = AuthService(
-    secureStorage: secureStorage,
-    httpClient: plainHttpClient,
+  late final AuthNotifier authNotifier;
+
+  final dioPublic = DioClient.public(baseUrl: kApiBaseUrl);
+  final dioAuth = DioClient.authenticated(
     baseUrl: kApiBaseUrl,
+    secureStorage: secureStorage,
+    onSessionExpired: () => authNotifier.sairPorSessaoExpirada(),
+    onRefreshToken: () => authNotifier.authService.renovarToken(),
   );
 
-  final authenticatedClient = AuthenticatedHttpClient(
-    secureStorage: secureStorage,
-    authService: authService,
-  );
+  final authService = AuthService(secureStorage: secureStorage, dio: dioPublic);
 
-  final profileService = ProfileService(
-    httpClient: authenticatedClient,
-    baseUrl: kApiBaseUrl,
-  );
+  final profileService = ProfileService(dio: dioAuth);
 
-  final coletaApiDatasource = ColetaApiDatasourceImpl(
-    httpClient: authenticatedClient,
-    secureStorage: secureStorage,
-    baseUrl: kApiBaseUrl,
-  );
+  final coletaApiDatasource = ColetaApiDatasourceImpl(dio: dioAuth);
 
   final coletaLocalDatasource = ColetaLocalDatasourceImpl(db);
   final coletaRepository = ColetaRepositoryImpl(coletaLocalDatasource);
@@ -119,18 +111,13 @@ Future<void> main() async {
     coletaRepository,
   );
 
-  final bemMaterialApiDatasource = BemMaterialApiDatasourceImpl(
-    httpClient: authenticatedClient,
-    secureStorage: secureStorage,
-    baseUrl: kApiBaseUrl,
-  );
+  final bemMaterialApiDatasource = BemMaterialApiDatasourceImpl(dio: dioAuth);
   final bemMaterialRepository = BemMaterialRepositoryImpl(
     local: BemMaterialLocalDatasourceImpl(db),
     api: bemMaterialApiDatasource,
     secureStorage: secureStorage,
   );
 
-  late final AuthNotifier authNotifier;
   final executarSyncPosLogin = ExecutarSyncPosLoginUseCase(
     pullService: pullService,
     bemMaterialRepository: bemMaterialRepository,
@@ -139,36 +126,18 @@ Future<void> main() async {
     onSyncBensConcluido: () => authNotifier.contadorSyncBens.value++,
     onAviso: (msg) => authNotifier.setarAviso(msg),
   );
+
   authNotifier = AuthNotifier(
     authService: authService,
     executarSyncPosLogin: executarSyncPosLogin,
   );
 
-  authenticatedClient.onSessaoExpirada = authNotifier.sairPorSessaoExpirada;
-
-  final dio = Dio(
-    BaseOptions(
-      baseUrl: kApiBaseUrl,
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 30),
-      headers: {'Accept': 'application/json'},
-    ),
-  );
-
-  final notificacaoApiDatasource = NotificacaoApiDatasourceImpl(
-    httpClient: authenticatedClient,
-    secureStorage: secureStorage,
-    baseUrl: kApiBaseUrl,
-  );
+  final notificacaoApiDatasource = NotificacaoApiDatasourceImpl(dio: dioAuth);
   final notificacaoRepository = NotificacaoRepositoryImpl(
     notificacaoApiDatasource,
   );
 
-  final preferenciasApiDatasource = PreferenciasApiDatasourceImpl(
-    httpClient: authenticatedClient,
-    secureStorage: secureStorage,
-    baseUrl: kApiBaseUrl,
-  );
+  final preferenciasApiDatasource = PreferenciasApiDatasourceImpl(dio: dioAuth);
   final preferenciasRepository = PreferenciasNotificacaoRepositoryImpl(
     prefs,
     apiDatasource: preferenciasApiDatasource,
@@ -196,7 +165,8 @@ Future<void> main() async {
       database: db,
       secureStorage: secureStorage,
       authNotifier: authNotifier,
-      dio: dio,
+      dio: dioAuth,
+      dioPublic: dioPublic,
       prefs: prefs,
       temaModo: temaModo,
       idiomaAtual: idiomaAtual,

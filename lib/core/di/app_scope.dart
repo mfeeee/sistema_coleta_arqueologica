@@ -38,6 +38,7 @@ class AppScope extends InheritedWidget {
     required this.fotoPerfilPath,
     required this.profileService,
     required this.secureStorage,
+    required this.dioPublic,
     required super.child,
   });
 
@@ -55,12 +56,14 @@ class AppScope extends InheritedWidget {
   final ValueNotifier<String?> fotoPerfilPath;
   final ProfileService profileService;
   final SecureStorageService secureStorage;
+  final Dio dioPublic;
 
   factory AppScope.create({
     required AppDatabase database,
     required SecureStorageService secureStorage,
     required AuthNotifier authNotifier,
     required Dio dio,
+    required Dio dioPublic,
     required SharedPreferences prefs,
     required ValueNotifier<ThemeMode> temaModo,
     required ValueNotifier<Locale> idiomaAtual,
@@ -107,6 +110,7 @@ class AppScope extends InheritedWidget {
       fotoPerfilPath: ValueNotifier<String?>(null),
       profileService: profileService,
       secureStorage: secureStorage,
+      dioPublic: dioPublic,
       child: child,
     );
   }
@@ -132,5 +136,6 @@ class AppScope extends InheritedWidget {
       idiomaAtual != oldWidget.idiomaAtual ||
       fotoPerfilPath != oldWidget.fotoPerfilPath ||
       profileService != oldWidget.profileService ||
-      secureStorage != oldWidget.secureStorage;
+      secureStorage != oldWidget.secureStorage ||
+      dioPublic != oldWidget.dioPublic;
 }

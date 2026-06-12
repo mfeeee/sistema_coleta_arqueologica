@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import '../../coleta/data/models/coleta_model.dart';
 import '../../coleta/domain/entities/coleta_entity.dart';
 import '../../../../core/utils/retry_util.dart';
 import '../domain/entities/sync_resumo.dart';
@@ -29,22 +30,16 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
     Map<String, dynamic>? dadosColetadosOverride,
     void Function(int tentativa, int max)? onTentativa,
   }) async {
+    final model = ColetaModel.fromEntity(coleta);
+    final coletaJson = model.toJson();
+
+    // Se houver override de dados coletados (ex: fotos já processadas)
+    if (dadosColetadosOverride != null) {
+      coletaJson['dados_coletados'] = dadosColetadosOverride;
+    }
+
     final payload = {
-      'coletas': [
-        {
-          'id': coleta.id,
-          'data_coleta': coleta.dataColeta.toUtc().toIso8601String(),
-          'nome_bem': coleta.nomeBem,
-          'latitude': coleta.latitude,
-          'longitude': coleta.longitude,
-          'natureza': coleta.natureza?.name,
-          'tipo': coleta.tipo?.name,
-          'uf': coleta.uf,
-          'artefatos': coleta.artefatos.map((e) => e.name).toList(),
-          'versao': coleta.versao,
-          'dados_coletados': dadosColetadosOverride ?? coleta.dadosColetados,
-        },
-      ],
+      'coletas': [coletaJson],
     };
 
     try {

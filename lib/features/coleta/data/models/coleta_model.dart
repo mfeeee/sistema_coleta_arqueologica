@@ -1,11 +1,12 @@
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
-
-import '../../domain/entities/coleta_entity.dart';
 import 'package:drift/drift.dart';
 import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
+import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
+import 'package:sistema_coleta_arqueologica/core/models/artefato_tipo_model.dart';
+
+import '../../domain/entities/coleta_entity.dart';
 
 class ColetaModel extends ColetaEntity {
   const ColetaModel({
@@ -14,9 +15,8 @@ class ColetaModel extends ColetaEntity {
     required super.dataColeta,
     required super.syncStatus,
     required super.nomeBem,
-    required super.latitude,
-    required super.longitude,
-    required super.artefatos,
+    super.localizacao,
+    required super.artefatoTipos,
     required super.versao,
     required super.updatedAt,
     required super.dadosColetados,
@@ -26,6 +26,13 @@ class ColetaModel extends ColetaEntity {
     super.uf,
     super.deletadoEm,
   });
+
+  @override
+  LocalizacaoModel? get localizacao => super.localizacao as LocalizacaoModel?;
+
+  @override
+  List<ArtefatoTipoModel> get artefatoTipos =>
+      super.artefatoTipos.cast<ArtefatoTipoModel>();
 
   factory ColetaModel.fromRow(Coleta row) {
     return ColetaModel(
@@ -47,11 +54,14 @@ class ColetaModel extends ColetaEntity {
             )
           : null,
       uf: row.uf,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      artefatos: row.artefatos
-          .map((e) => ArtefatoBem.tryFromString(e))
-          .whereType<ArtefatoBem>()
+      localizacao: LocalizacaoModel(
+        id: 'local-${row.uuid}',
+        uf: row.uf,
+        lat: row.latitude,
+        lng: row.longitude,
+      ),
+      artefatoTipos: row.artefatos
+          .map((e) => ArtefatoTipoModel(id: 'tipo-$e', nome: e))
           .toList(),
       versao: row.versao,
       updatedAt: row.updatedAt,
@@ -71,9 +81,27 @@ class ColetaModel extends ColetaEntity {
       natureza: entity.natureza,
       tipo: entity.tipo,
       uf: entity.uf,
-      latitude: entity.latitude,
-      longitude: entity.longitude,
-      artefatos: entity.artefatos,
+      localizacao: entity.localizacao != null
+          ? LocalizacaoModel(
+              id: entity.localizacao!.id,
+              cep: entity.localizacao!.cep,
+              logradouro: entity.localizacao!.logradouro,
+              municipio: entity.localizacao!.municipio,
+              uf: entity.localizacao!.uf,
+              lat: entity.localizacao!.lat,
+              lng: entity.localizacao!.lng,
+            )
+          : null,
+      artefatoTipos: entity.artefatoTipos
+          .map(
+            (e) => ArtefatoTipoModel(
+              id: e.id,
+              nome: e.nome,
+              descricaoNova: e.descricaoNova,
+              novoTipo: e.novoTipo,
+            ),
+          )
+          .toList(),
       versao: entity.versao,
       updatedAt: entity.updatedAt,
       dadosColetados: entity.dadosColetados,
@@ -92,53 +120,61 @@ class ColetaModel extends ColetaEntity {
           (json['usuario_id'] as String?) ??
           (throw const FormatException('usuario_id ausente na coleta')),
       dataColeta:
-          DateTime.tryParse(
-            json['data_coleta'] as String? ??
-                (throw const FormatException('data_coleta ausente na coleta')),
-          ) ??
-          (throw FormatException(
-            "data_coleta inválida: ${json['data_coleta']}",
-          )),
-      syncStatus: StatusColeta.values.byName(
-        json['status_sincronizacao'] as String? ?? StatusColeta.pendente.name,
+          DateTime.tryParse(json['data_coleta'] as String? ?? '') ??
+          (throw const FormatException('data_coleta inválida')),
+      syncStatus: StatusColeta.fromString(
+        json['status_sincronizacao'] as String? ?? '',
       ),
       nomeBem: json['nome_bem'] as String? ?? '',
-      natureza: json['natureza'] != null
-          ? NaturezaBem.values.firstWhere(
-              (e) => e.name == json['natureza'],
-              orElse: () => NaturezaBem.bemArqueologico,
+      localizacao: json['localizacao'] != null
+          ? LocalizacaoModel.fromJson(
+              json['localizacao'] as Map<String, dynamic>,
             )
           : null,
-      tipo: json['tipo'] != null
-          ? TipoBem.values.firstWhere(
-              (e) => e.name == json['tipo'],
-              orElse: () => TipoBem.sitio,
-            )
-          : null,
-      uf: json['uf'] as String?,
-      latitude: (json['latitude'] as num?)?.toDouble(),
-      longitude: (json['longitude'] as num?)?.toDouble(),
-      artefatos:
-          (json['artefatos'] as List<dynamic>?)
-              ?.map((e) => ArtefatoBem.tryFromString(e as String))
-              .whereType<ArtefatoBem>()
+      artefatoTipos:
+          (json['artefato_tipos'] as List?)
+              ?.map(
+                (e) => ArtefatoTipoModel.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
       versao: json['versao'] as int? ?? 1,
       updatedAt:
-          DateTime.tryParse(
-            json['updated_at'] as String? ??
-                (throw const FormatException('updated_at ausente na coleta')),
-          ) ??
-          (throw FormatException("updated_at inválido: ${json['updated_at']}")),
-      dadosColetados: json['dados_coletados'] is Map<String, dynamic>
-          ? json['dados_coletados'] as Map<String, dynamic>
-          : {},
-      fotosUrls: (json['fotos_urls'] as List<dynamic>?)?.cast<String>() ?? [],
+          DateTime.tryParse(json['updated_at'] as String? ?? '') ??
+          DateTime.now(),
+      dadosColetados: json['dados_coletados'] as Map<String, dynamic>? ?? {},
+      fotosUrls: (json['fotos_urls'] as List?)?.cast<String>() ?? [],
+      natureza: json['natureza'] != null
+          ? NaturezaBem.fromString(json['natureza'] as String)
+          : null,
+      tipo: json['tipo'] != null
+          ? TipoBem.fromString(json['tipo'] as String)
+          : null,
+      uf: json['uf'] as String?,
       deletadoEm: json['deletado_em'] != null
           ? DateTime.tryParse(json['deletado_em'] as String)
           : null,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'uuid': id,
+      'usuario_id': usuarioId,
+      'data_coleta': dataColeta.toIso8601String(),
+      'status_sincronizacao': syncStatus.name,
+      'nome_bem': nomeBem,
+      'localizacao': localizacao?.toJson(),
+      'artefato_tipos': artefatoTipos.map((e) => e.toJson()).toList(),
+      'versao': versao,
+      'updated_at': updatedAt.toIso8601String(),
+      'dados_coletados': dadosColetados,
+      'fotos_urls': fotosUrls,
+      'natureza': natureza?.name,
+      'tipo': tipo?.name,
+      'uf': uf,
+      'deletado_em': deletadoEm?.toIso8601String(),
+    };
   }
 
   ColetasCompanion toCompanion() {
@@ -151,9 +187,9 @@ class ColetaModel extends ColetaEntity {
       natureza: Value(natureza?.name),
       tipo: Value(tipo?.name),
       uf: Value(uf),
-      latitude: Value(latitude ?? 0.0),
-      longitude: Value(longitude ?? 0.0),
-      artefatos: Value(artefatos.map((e) => e.name).toList()),
+      latitude: Value(localizacao?.lat ?? 0.0),
+      longitude: Value(localizacao?.lng ?? 0.0),
+      artefatos: Value(artefatoTipos.map((e) => e.nome).toList()),
       versao: Value(versao),
       updatedAt: Value(updatedAt),
       dadosColetados: dadosColetados,

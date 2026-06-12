@@ -52,7 +52,7 @@ The project is organized by feature following Clean Architecture principles. Eac
 *   **Temporary Views:** Use the built-in `Navigator.push/pop` for short-lived screens like dialogs that do not need deep links.
 
 ## Data & Offline-First Strategy
-*   **Local Database:** Uses SQLite (`arqueologia_offline.db`) via `sqflite` (mobile) and `sqflite_common_ffi` (desktop/Linux).
+*   **Local Database:** Uses SQLite (`arqueologia_offline.db`) via **Drift** and **SQLCipher** for encrypted persistence on mobile and desktop.
 *   **Proximity Service:** `ProximidadeService` uses the Haversine formula to detect nearby archaeological sites from the local cache.
 *   **Serialization:** Use `json_serializable` and `json_annotation`. When encoding data, use `fieldRename: FieldRename.snake` to convert Dart's camelCase to snake_case for the API.
 
@@ -78,7 +78,6 @@ The project is organized by feature following Clean Architecture principles. Eac
 *   **Mocks:** Prefer fakes or stubs over mocks. Use `mockito` or `mocktail` only if necessary. Avoid code generation for mocks.
 
 ## Active TODOs (WIP Areas)
-*   **Geolocator:** Integration is currently mocked (returns hardcoded coordinates for Parnaíba).
-*   **SQLite:** Datasource implementations currently have placeholder connection code.
-*   **Forms:** `ColetaWizard` form fields are not yet bound to the ViewModel.
-*   **Spatial Queries:** PostGIS queries are stubbed in the sync feature.
+*   **Bens Materiais UI (Task 016):** Implementing UI pages (`BensMateriaisPage`, `DetalhesItemPage`, `NovoBemMaterialPage`) and connecting the remote API datasource.
+*   **Theme Toggle Bug (Task 023):** Refactoring `ValueListenableBuilder` around `MaterialApp.router` so changing between light/dark mode doesn't reset GoRouter's navigation stack.
+*   **Search and Filter (Task 042):** Adding real-time text search by `nomeBem` to the `ColetasPage` across its 4 synchronization tabs.

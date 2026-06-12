@@ -19,7 +19,9 @@ ColetaModel _coleta(String id, StatusColeta status) => ColetaModel(
   updatedAt: _data,
   versao: 1,
   syncStatus: status,
-  artefatoTipos: const [ArtefatoTipoModel(id: 'tipo-ceramica', nome: 'ceramica')],
+  artefatoTipos: const [
+    ArtefatoTipoModel(id: 'tipo-ceramica', nome: 'ceramica'),
+  ],
   dadosColetados: {},
 );
 

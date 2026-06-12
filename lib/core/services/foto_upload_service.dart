@@ -17,7 +17,6 @@ class FotoUploadService {
 
   Future<FotoUploadResult> uploadFotos({
     required List<String> localPaths,
-    required String token,
     void Function(int current, int total)? onProgress,
   }) async {
     final uploaded = <String>[];
@@ -36,11 +35,7 @@ class FotoUploadService {
           'fotos[]': await MultipartFile.fromFile(localPaths[i]),
         });
 
-        final response = await _dio.post(
-          '/v1/mobile/fotos',
-          data: formData,
-          options: Options(headers: {'Authorization': 'Bearer $token'}),
-        );
+        final response = await _dio.post('/v1/mobile/fotos', data: formData);
 
         if (response.statusCode == 201) {
           uploaded.addAll((response.data['urls'] as List).cast<String>());

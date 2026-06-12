@@ -13,7 +13,6 @@ class SyncResultado {
 abstract class SyncApiDatasource {
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
-    required String bearerToken,
     Map<String, dynamic>? dadosColetadosOverride,
     void Function(int tentativa, int max)? onTentativa,
   });
@@ -27,7 +26,6 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
   @override
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
-    required String bearerToken,
     Map<String, dynamic>? dadosColetadosOverride,
     void Function(int tentativa, int max)? onTentativa,
   }) async {
@@ -63,11 +61,6 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
             '/v1/mobile/sync',
             data: payload,
             options: Options(
-              headers: {
-                'Authorization': 'Bearer $bearerToken',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
               sendTimeout: const Duration(seconds: 30),
               validateStatus: (status) => status != null && status < 500,
             ),

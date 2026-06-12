@@ -49,7 +49,8 @@ class BemMaterialModel extends BemMaterialEntity {
           .toList(),
       responsaveis: [],
       publicado: row.publicado,
-      localizacao: row.uf != null ||
+      localizacao:
+          row.uf != null ||
               row.municipio != null ||
               row.latitude != null ||
               row.longitude != null
@@ -84,23 +85,27 @@ class BemMaterialModel extends BemMaterialEntity {
       tipo: entity.tipo,
       meiosAcesso: entity.meiosAcesso,
       artefatoTipos: entity.artefatoTipos
-          .map((e) => ArtefatoTipoModel(
-                id: e.id,
-                nome: e.nome,
-                descricaoNova: e.descricaoNova,
-                novoTipo: e.novoTipo,
-              ))
+          .map(
+            (e) => ArtefatoTipoModel(
+              id: e.id,
+              nome: e.nome,
+              descricaoNova: e.descricaoNova,
+              novoTipo: e.novoTipo,
+            ),
+          )
           .toList(),
       responsaveis: entity.responsaveis
-          .map((e) => BemResponsavelModel(
-                usuarioModel: UsuarioModel(
-                  id: e.usuario.id,
-                  nome: e.usuario.nome,
-                  email: e.usuario.email,
-                  avatarUrl: e.usuario.avatarUrl,
-                ),
-                papel: e.papel,
-              ))
+          .map(
+            (e) => BemResponsavelModel(
+              usuarioModel: UsuarioModel(
+                id: e.usuario.id,
+                nome: e.usuario.nome,
+                email: e.usuario.email,
+                avatarUrl: e.usuario.avatarUrl,
+              ),
+              papel: e.papel,
+            ),
+          )
           .toList(),
       publicado: entity.publicado,
       localizacao: entity.localizacao != null
@@ -145,17 +150,24 @@ class BemMaterialModel extends BemMaterialEntity {
       meiosAcesso: json['meios_acesso'] as String?,
       artefatoTipos: json['artefato_tipos'] is List
           ? (json['artefato_tipos'] as List)
-              .map((e) => ArtefatoTipoModel.fromJson(e as Map<String, dynamic>))
-              .toList()
+                .map(
+                  (e) => ArtefatoTipoModel.fromJson(e as Map<String, dynamic>),
+                )
+                .toList()
           : [],
       responsaveis: json['responsaveis'] is List
           ? (json['responsaveis'] as List)
-              .map((e) => BemResponsavelModel.fromJson(e as Map<String, dynamic>))
-              .toList()
+                .map(
+                  (e) =>
+                      BemResponsavelModel.fromJson(e as Map<String, dynamic>),
+                )
+                .toList()
           : [],
       publicado: json['publicado'] as bool? ?? false,
       localizacao: json['localizacao'] != null
-          ? LocalizacaoModel.fromJson(json['localizacao'] as Map<String, dynamic>)
+          ? LocalizacaoModel.fromJson(
+              json['localizacao'] as Map<String, dynamic>,
+            )
           : null,
       geojson: json['geojson'] is String
           ? json['geojson'] as String

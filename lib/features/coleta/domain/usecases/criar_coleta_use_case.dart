@@ -3,6 +3,8 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dar
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
 import '../entities/coleta_entity.dart';
 
@@ -45,6 +47,16 @@ class CriarColetaUseCase {
     final coletaId = const Uuid().v4();
     final agora = DateTime.now();
 
+    final localizacao = LocalizacaoEntity(
+      id: const Uuid().v4(),
+      lat: input.lat,
+      lng: input.lng,
+    );
+
+    final artefatoTipos = input.artefatos
+        .map((e) => ArtefatoTipoEntity(id: const Uuid().v4(), nome: e.name))
+        .toList();
+
     final coleta = ColetaEntity(
       id: coletaId,
       usuarioId: input.usuarioId,
@@ -53,9 +65,8 @@ class CriarColetaUseCase {
       nomeBem: input.nome.trim(),
       natureza: input.natureza,
       tipo: input.tipo,
-      artefatos: input.artefatos,
-      latitude: input.lat,
-      longitude: input.lng,
+      localizacao: localizacao,
+      artefatoTipos: artefatoTipos,
       versao: 1,
       updatedAt: agora,
       dadosColetados: {
@@ -84,6 +95,17 @@ class CriarColetaUseCase {
 
   ColetaEntity criarRascunho(CriarColetaInput input) {
     final agora = DateTime.now();
+
+    final localizacao = LocalizacaoEntity(
+      id: const Uuid().v4(),
+      lat: input.lat,
+      lng: input.lng,
+    );
+
+    final artefatoTipos = input.artefatos
+        .map((e) => ArtefatoTipoEntity(id: const Uuid().v4(), nome: e.name))
+        .toList();
+
     return ColetaEntity(
       id: const Uuid().v4(),
       usuarioId: input.usuarioId,
@@ -92,9 +114,8 @@ class CriarColetaUseCase {
       nomeBem: input.nome.trim().isEmpty ? 'Rascunho' : input.nome.trim(),
       natureza: input.natureza,
       tipo: input.tipo,
-      artefatos: input.artefatos,
-      latitude: input.lat,
-      longitude: input.lng,
+      localizacao: localizacao,
+      artefatoTipos: artefatoTipos,
       versao: 1,
       updatedAt: agora,
       dadosColetados: {

@@ -19,8 +19,8 @@ class ProximidadeService {
     final sitiosProximos = <ColetaEntity>[];
 
     for (final sitio in coletas) {
-      final lat = sitio.latitude;
-      final lng = sitio.longitude;
+      final lat = sitio.localizacao?.lat;
+      final lng = sitio.localizacao?.lng;
       if (lat == null || lng == null) continue;
 
       final distancia = calcularDistanciaMetros(latAtual, lonAtual, lat, lng);

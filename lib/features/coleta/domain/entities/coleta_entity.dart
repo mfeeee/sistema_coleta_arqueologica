@@ -1,8 +1,9 @@
 import 'package:latlong2/latlong.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/home/domain/entities/pino_mapa.dart';
 import 'package:sistema_coleta_arqueologica/features/home/domain/entities/tipo_pino.dart';
 
@@ -17,9 +18,8 @@ class ColetaEntity {
   final NaturezaBem? natureza;
   final TipoBem? tipo;
   final String? uf;
-  final double? latitude;
-  final double? longitude;
-  final List<ArtefatoBem> artefatos;
+  final LocalizacaoEntity? localizacao;
+  final List<ArtefatoTipoEntity> artefatoTipos;
   final int versao;
   final DateTime updatedAt;
   final Map<String, dynamic> dadosColetados;
@@ -32,9 +32,8 @@ class ColetaEntity {
     required this.dataColeta,
     required this.syncStatus,
     required this.nomeBem,
-    this.latitude,
-    this.longitude,
-    required this.artefatos,
+    this.localizacao,
+    required this.artefatoTipos,
     required this.versao,
     required this.updatedAt,
     required this.dadosColetados,
@@ -48,8 +47,8 @@ class ColetaEntity {
 
 extension ColetaParaMapa on ColetaEntity {
   PinoMapa? get paraMapa {
-    final lat = latitude;
-    final lng = longitude;
+    final lat = localizacao?.lat;
+    final lng = localizacao?.lng;
     if (lat == null || lng == null) return null;
     return PinoMapa(
       id: id,

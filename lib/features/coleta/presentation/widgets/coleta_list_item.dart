@@ -17,9 +17,9 @@ class ColetaListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final localizacao =
         coleta.uf ??
-        (coleta.latitude != null && coleta.longitude != null
-            ? '${coleta.latitude!.toStringAsFixed(4)}, '
-                  '${coleta.longitude!.toStringAsFixed(4)}'
+        (coleta.localizacao?.lat != null && coleta.localizacao?.lng != null
+            ? '${coleta.localizacao!.lat!.toStringAsFixed(4)}, '
+                  '${coleta.localizacao!.lng!.toStringAsFixed(4)}'
             : '—');
     final data = _formatarData(coleta.dataColeta);
 

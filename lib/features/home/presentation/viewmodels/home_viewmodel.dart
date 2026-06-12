@@ -61,7 +61,7 @@ class HomeViewModel {
       final todasColetas = await _coletaRepository.getAll();
 
       final pinosColeta = todasColetas
-          .where((c) => _coordsValidas(c.latitude, c.longitude))
+          .where((c) => _coordsValidas(c.localizacao?.lat, c.localizacao?.lng))
           .map((c) => c.paraMapa)
           .whereType<PinoMapa>()
           .toList();

@@ -205,9 +205,9 @@ class _SecaoIdentificacao extends StatelessWidget {
     final theme = Theme.of(context);
     final localizacao =
         coleta.uf ??
-        (coleta.latitude != null && coleta.longitude != null
-            ? '${coleta.latitude!.toStringAsFixed(5)}, '
-                  '${coleta.longitude!.toStringAsFixed(5)}'
+        (coleta.localizacao?.lat != null && coleta.localizacao?.lng != null
+            ? '${coleta.localizacao!.lat!.toStringAsFixed(5)}, '
+                  '${coleta.localizacao!.lng!.toStringAsFixed(5)}'
             : '—');
 
     return Column(
@@ -279,7 +279,7 @@ class _SecaoDadosTecnicos extends StatelessWidget {
             const SizedBox(width: 8),
             _CartaoDadoTecnico(
               rotulo: 'ARTEFATOS',
-              valor: coleta.artefatos.length.toString(),
+              valor: coleta.artefatoTipos.length.toString(),
               theme: theme,
             ),
           ],

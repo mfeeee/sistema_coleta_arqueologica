@@ -9,10 +9,8 @@ class BemResponsavelModel extends BemResponsavelEntity {
   @JsonKey(name: 'user')
   final UsuarioModel usuarioModel;
 
-  BemResponsavelModel({
-    required this.usuarioModel,
-    required super.papel,
-  }) : super(usuario: usuarioModel);
+  BemResponsavelModel({required this.usuarioModel, required super.papel})
+    : super(usuario: usuarioModel);
 
   factory BemResponsavelModel.fromJson(Map<String, dynamic> json) =>
       _$BemResponsavelModelFromJson(json);

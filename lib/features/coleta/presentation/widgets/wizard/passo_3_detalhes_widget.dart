@@ -1,8 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../viewmodels/coleta_form_notifier.dart';
+import '../foto_picker_widget.dart';
 
 class Passo3DetalhesWidget extends StatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -45,46 +43,6 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
 
   void _alternarGravacao() {
     setState(() => _gravandoAudio = !_gravandoAudio);
-  }
-
-  void _escolherFonte() {
-    final cs = Theme.of(context).colorScheme;
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: cs.primaryContainer,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.camera_alt, color: cs.onPrimaryContainer),
-              title: Text(
-                'Câmera',
-                style: TextStyle(color: cs.onPrimaryContainer),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                widget.formNotifier.adicionarFoto(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.photo_library, color: cs.onPrimaryContainer),
-              title: Text(
-                'Galeria',
-                style: TextStyle(color: cs.onPrimaryContainer),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                widget.formNotifier.adicionarFoto(ImageSource.gallery);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -160,18 +118,17 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                     primaryBrown: cs.primaryContainer,
                   ),
                   const SizedBox(height: 16),
-                  _BotaoCapturar(
-                    primaryBrown: cs.primaryContainer,
-                    textMuted: cs.onSurfaceVariant,
-                    onTap: _escolherFonte,
+                  ListenableBuilder(
+                    listenable: widget.formNotifier,
+                    builder: (context, _) {
+                      return FotoPickerWidget(
+                        midias: widget.formNotifier.midias,
+                        carregando: widget.formNotifier.carregandoMidia,
+                        onPick: widget.formNotifier.adicionarFoto,
+                        onRemover: widget.formNotifier.removerMidia,
+                      );
+                    },
                   ),
-                  if (widget.formNotifier.totalFotos > 0) ...[
-                    const SizedBox(height: 12),
-                    _GradeMiniaturas(
-                      fotos: widget.formNotifier.fotos,
-                      onRemover: widget.formNotifier.removerFoto,
-                    ),
-                  ],
                   const SizedBox(height: 48),
                   ElevatedButton.icon(
                     onPressed: widget.onFinalizar,
@@ -417,107 +374,6 @@ class _CampoTexto extends StatelessWidget {
           borderSide: BorderSide(color: borderColor, width: 1.5),
         ),
       ),
-    );
-  }
-}
-
-class _BotaoCapturar extends StatelessWidget {
-  final Color primaryBrown;
-  final Color textMuted;
-  final VoidCallback onTap;
-
-  const _BotaoCapturar({
-    required this.primaryBrown,
-    required this.textMuted,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 96,
-        decoration: BoxDecoration(
-          border: Border.all(color: primaryBrown.withValues(alpha: 0.3)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.camera_alt_outlined, color: primaryBrown, size: 32),
-            const SizedBox(height: 8),
-            Text(
-              'CAPTURAR',
-              style: TextStyle(
-                color: textMuted,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GradeMiniaturas extends StatelessWidget {
-  final List<File> fotos;
-  final void Function(int) onRemover;
-
-  static const int _maxVisiveis = 3;
-
-  const _GradeMiniaturas({required this.fotos, required this.onRemover});
-
-  @override
-  Widget build(BuildContext context) {
-    final int exibindo = fotos.length > _maxVisiveis
-        ? _maxVisiveis
-        : fotos.length;
-    final int extras = fotos.length - _maxVisiveis;
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: exibindo,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
-      itemBuilder: (context, index) {
-        final bool isUltima = index == _maxVisiveis - 1 && extras > 0;
-        return GestureDetector(
-          onLongPress: () => onRemover(index),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.file(fotos[index], fit: BoxFit.cover),
-                if (isUltima)
-                  ColoredBox(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.scrim.withValues(alpha: 0.54),
-                    child: Center(
-                      child: Text(
-                        '+$extras',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onInverseSurface,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

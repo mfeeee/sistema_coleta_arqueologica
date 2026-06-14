@@ -4,11 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/core/models/midia_model.dart';
+import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/models/artefato_tipo_model.dart';
 import 'package:sistema_coleta_arqueologica/features/media/domain/usecases/upload_midia_usecase.dart';
 import '../../domain/entities/coleta_entity.dart';
 import '../../domain/usecases/criar_coleta_use_case.dart';
@@ -25,7 +27,6 @@ class ColetaFormNotifier extends ChangeNotifier {
     String? id,
     required MediaService mediaService,
     required UploadMidiaUseCase uploadMidiaUseCase,
-
     CriarColetaUseCase criarColetaUseCase = const CriarColetaUseCase(),
   }) : id = id ?? const Uuid().v4(),
        _mediaService = mediaService,
@@ -37,10 +38,11 @@ class ColetaFormNotifier extends ChangeNotifier {
   List<String> nomesPopulares = [];
   NaturezaBem? natureza;
   TipoBem? tipo;
+  LocalizacaoModel? localizacao;
 
   // Passo 2
-  final Set<ArtefatoBem> _artefatos = {};
-  Set<ArtefatoBem> get artefatos => Set.unmodifiable(_artefatos);
+  final List<ArtefatoTipoEntity> _artefatos = [];
+  List<ArtefatoTipoEntity> get artefatos => List.unmodifiable(_artefatos);
 
   // Passo 3
   String? meiosAcesso;
@@ -78,21 +80,22 @@ class ColetaFormNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Mutacoes passo 2
-  void toggleArtefato(ArtefatoBem artefato) {
-    if (_artefatos.contains(artefato)) {
-      _artefatos.remove(artefato);
-    } else {
-      _artefatos.add(artefato);
-    }
+  void setLocalizacao(LocalizacaoModel? value) {
+    localizacao = value;
     notifyListeners();
   }
 
-  bool isArtefatoSelecionado(ArtefatoBem artefato) =>
-      _artefatos.contains(artefato);
+  // Mutacoes passo 2
+  void setArtefatos(List<ArtefatoTipoEntity> values) {
+    _artefatos.clear();
+    _artefatos.addAll(values);
+    notifyListeners();
+  }
+
+  bool isArtefatoSelecionado(String typeId) =>
+      _artefatos.any((e) => e.id == typeId);
 
   // Mutacoes passo 3
-
   void setMeiosAcesso(String? value) {
     meiosAcesso = value;
     notifyListeners();
@@ -131,7 +134,11 @@ class ColetaFormNotifier extends ChangeNotifier {
 
   // Validação
   bool get passo1Valido =>
-      nome.trim().isNotEmpty && natureza != null && tipo != null;
+      nome.trim().isNotEmpty &&
+      natureza != null &&
+      tipo != null &&
+      localizacao?.uf != null &&
+      localizacao!.uf!.isNotEmpty;
 
   bool get passo2Valido => _artefatos.isNotEmpty;
 
@@ -139,7 +146,8 @@ class ColetaFormNotifier extends ChangeNotifier {
       nome.isNotEmpty ||
       natureza != null ||
       _artefatos.isNotEmpty ||
-      _midias.isNotEmpty;
+      _midias.isNotEmpty ||
+      localizacao != null;
 
   int get passoRestauracao {
     if (passo1Valido && passo2Valido) return 2;
@@ -154,7 +162,17 @@ class ColetaFormNotifier extends ChangeNotifier {
     'nomes_populares': nomesPopulares,
     'natureza': natureza?.name,
     'tipo': tipo?.name,
-    'artefatos': _artefatos.map((a) => a.name).toList(),
+    'localizacao': localizacao?.toJson(),
+    'artefatos': _artefatos
+        .map(
+          (a) => ArtefatoTipoModel(
+            id: a.id,
+            nome: a.nome,
+            descricaoNova: a.descricaoNova,
+            novoTipo: a.novoTipo,
+          ).toJson(),
+        )
+        .toList(),
     'meios_acesso': meiosAcesso,
     'midias': _midias.map((m) => m.toJson()).toList(),
   };
@@ -181,10 +199,16 @@ class ColetaFormNotifier extends ChangeNotifier {
       }
     }
 
+    if (map['localizacao'] != null) {
+      localizacao = LocalizacaoModel.fromJson(
+        map['localizacao'] as Map<String, dynamic>,
+      );
+    }
+
     _artefatos.clear();
-    for (final a in (map['artefatos'] as List?)?.cast<String>() ?? []) {
-      final artefato = ArtefatoBem.tryFromString(a);
-      if (artefato != null) _artefatos.add(artefato);
+    final artefatosJson = (map['artefatos'] as List?) ?? [];
+    for (final a in artefatosJson) {
+      _artefatos.add(ArtefatoTipoModel.fromJson(a as Map<String, dynamic>));
     }
 
     meiosAcesso = map['meios_acesso'] as String?;
@@ -238,11 +262,7 @@ class ColetaFormNotifier extends ChangeNotifier {
     log('Rascunho descartado', name: 'ColetaFormNotifier');
   }
 
-  Future<ColetaEntity> toRascunho({
-    required double lat,
-    required double lng,
-    required String usuarioId,
-  }) async {
+  Future<ColetaEntity> toRascunho({required String usuarioId}) async {
     return _criarColetaUseCase.criarRascunho(
       CriarColetaInput(
         id: id,
@@ -250,21 +270,16 @@ class ColetaFormNotifier extends ChangeNotifier {
         nomesPopulares: nomesPopulares,
         natureza: natureza,
         tipo: tipo,
-        artefatos: _artefatos.toList(),
+        localizacao: localizacao,
+        artefatoTipos: _artefatos,
         meiosAcesso: meiosAcesso,
         midias: _midias,
-        lat: lat,
-        lng: lng,
         usuarioId: usuarioId,
       ),
     );
   }
 
-  Future<ColetaFormResult> toResult({
-    required double lat,
-    required double lng,
-    required String usuarioId,
-  }) async {
+  Future<ColetaFormResult> toResult({required String usuarioId}) async {
     assert(passo1Valido, 'toResult() chamado com Passo 1 inválido');
     assert(passo2Valido, 'toResult() chamado com nenhum artefato selecionado');
 
@@ -275,11 +290,10 @@ class ColetaFormNotifier extends ChangeNotifier {
         nomesPopulares: nomesPopulares,
         natureza: natureza,
         tipo: tipo,
-        artefatos: _artefatos.toList(),
+        localizacao: localizacao,
+        artefatoTipos: _artefatos,
         meiosAcesso: meiosAcesso,
         midias: _midias,
-        lat: lat,
-        lng: lng,
         usuarioId: usuarioId,
       ),
     );

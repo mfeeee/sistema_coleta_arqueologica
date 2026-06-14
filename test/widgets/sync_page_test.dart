@@ -37,6 +37,7 @@ import 'package:sistema_coleta_arqueologica/features/notifications/data/reposito
 import 'package:sistema_coleta_arqueologica/features/profile/data/models/preferencias_notificacao.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
+import '../helpers/stub_midia_repository.dart';
 
 // ---------------------------------------------------------------------------
 // Stubs de infraestrutura
@@ -138,8 +139,6 @@ class _StubColetaLocalDatasource implements ColetaLocalDatasource {
     int novaVersao,
   ) async {}
   @override
-  Future<void> salvarFotosUrls(String uuid, List<String> urls) async {}
-  @override
   Future<void> deletar(String uuid) async {}
 }
 
@@ -238,6 +237,7 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     routes: [GoRoute(path: '/sync', builder: (_, __) => const SyncPage())],
   );
 
+  final conectividadeService = ConectividadeService();
   final dio = Dio();
 
   return AppScope(
@@ -247,8 +247,10 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     bemMaterialRepository: _StubBemMaterialRepository(),
     notificacaoRepository: _StubNotificacaoRepository(),
     preferenciasRepository: _StubPreferenciasRepository(),
+    midiaRepository: StubMidiaRepository(),
+    uploadMidiaUseCase: StubUploadMidiaUseCase(),
     mediaService: MediaService(ImagePicker()),
-    conectividadeService: ConectividadeService(),
+    conectividadeService: conectividadeService,
     prefs: prefs,
     temaModo: ValueNotifier(ThemeMode.light),
     idiomaAtual: ValueNotifier(const Locale('pt', 'BR')),

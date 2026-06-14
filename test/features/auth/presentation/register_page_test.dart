@@ -39,6 +39,7 @@ import 'package:sistema_coleta_arqueologica/features/notifications/data/reposito
 import 'package:sistema_coleta_arqueologica/features/profile/data/models/preferencias_notificacao.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
+import '../../../helpers/stub_midia_repository.dart';
 
 // ---------------------------------------------------------------------------
 // Stubs de infraestrutura (nunca chamados nos testes de RegisterPage)
@@ -137,8 +138,6 @@ class _StubColetaLocalDatasource implements ColetaLocalDatasource {
     StatusColeta status,
     int novaVersao,
   ) async {}
-  @override
-  Future<void> salvarFotosUrls(String uuid, List<String> urls) async {}
   @override
   Future<void> deletar(String uuid) async {}
 }
@@ -261,6 +260,8 @@ Future<Widget> _montarWidget(_FakeAuthNotifier notifier) async {
     bemMaterialRepository: _StubBemMaterialRepository(),
     notificacaoRepository: _StubNotificacaoRepository(),
     preferenciasRepository: _StubPreferenciasRepository(),
+    midiaRepository: StubMidiaRepository(),
+    uploadMidiaUseCase: StubUploadMidiaUseCase(),
     mediaService: MediaService(ImagePicker()),
     conectividadeService: ConectividadeService(),
     prefs: prefs,

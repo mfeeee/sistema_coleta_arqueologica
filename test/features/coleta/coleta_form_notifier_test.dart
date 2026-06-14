@@ -1,3 +1,4 @@
+import "../../helpers/stub_midia_repository.dart";
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -17,8 +18,10 @@ class _StubMediaService extends MediaService {
       throw UnsupportedError('não deve ser chamado nos testes unitários');
 }
 
-ColetaFormNotifier _criarNotifier() =>
-    ColetaFormNotifier(mediaService: _StubMediaService());
+ColetaFormNotifier _criarNotifier() => ColetaFormNotifier(
+  uploadMidiaUseCase: StubUploadMidiaUseCase(),
+  mediaService: _StubMediaService(),
+);
 
 void main() {
   group('ColetaFormNotifier.passo1Valido', () {

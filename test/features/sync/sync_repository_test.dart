@@ -55,9 +55,6 @@ class _FakeColetaLocalDatasource implements ColetaLocalDatasource {
   ) async => statusAtualizado[uuid] = status;
 
   @override
-  Future<void> salvarFotosUrls(String uuid, List<String> urls) async {}
-
-  @override
   Future<void> deletar(String uuid) async =>
       _pendentes.removeWhere((c) => c.id == uuid);
 }

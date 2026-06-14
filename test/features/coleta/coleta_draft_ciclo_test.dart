@@ -1,3 +1,4 @@
+import "../../helpers/stub_midia_repository.dart";
 // Testes de ciclo automatizados:
 // preenche → salva → [logout: prefs NÃO são limpas] → login → restaura
 //
@@ -13,7 +14,6 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dar
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
-import 'package:sistema_coleta_arqueologica/features/coleta/data/draft_photo_storage.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coleta_form_notifier.dart';
 
 // ---------------------------------------------------------------------------
@@ -28,35 +28,14 @@ class _StubMediaService extends MediaService {
   Future<File?> pickAndCompress(ImageSource source) async => _fotoRetorno;
 }
 
-/// Simula DraftPhotoStorage real: persiste paths recebidos e restaura os que
-/// existem. Não usa path_provider — opera apenas com as listas configuradas.
-class _FakeDraftPhotoStorage implements DraftPhotoStorage {
-  final Map<String, String> _srcParaDest;
-  final List<String> _existentes;
-
-  _FakeDraftPhotoStorage({
-    Map<String, String> srcParaDest = const {},
-    List<String> existentes = const [],
-  }) : _srcParaDest = srcParaDest,
-       _existentes = existentes;
-
-  @override
-  Future<List<String>> persistir(List<File> files) async =>
-      files.map((f) => _srcParaDest[f.path] ?? f.path).toList();
-
-  @override
-  List<File> restaurar(List<String> paths) =>
-      paths.where(_existentes.contains).map(File.new).toList();
-}
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-ColetaFormNotifier _criarNotifier({File? foto, DraftPhotoStorage? storage}) {
+ColetaFormNotifier _criarNotifier({File? foto}) {
   return ColetaFormNotifier(
+    uploadMidiaUseCase: StubUploadMidiaUseCase(),
     mediaService: _StubMediaService(foto),
-    draftPhotoStorage: storage ?? _FakeDraftPhotoStorage(),
   );
 }
 
@@ -135,48 +114,20 @@ void main() {
 
     test('foto persiste e é restaurada no próximo login', () async {
       final prefs = await SharedPreferences.getInstance();
-      final pathPersistido = '${tempDir.path}/draft_photo_captura.jpg';
-
-      final storageSessao1 = _FakeDraftPhotoStorage(
-        srcParaDest: {fotoOrigem.path: pathPersistido},
-      );
-      final storageSessao2 = _FakeDraftPhotoStorage(
-        existentes: [pathPersistido],
-      );
 
       // --- Sessão 1: adiciona foto e salva ---
-      final sessao1 = _criarNotifier(foto: fotoOrigem, storage: storageSessao1);
+      final sessao1 = _criarNotifier(foto: fotoOrigem);
       _preencherFormularioCompleto(sessao1);
       await sessao1.adicionarFoto(ImageSource.camera);
-      check(sessao1.totalFotos).equals(1);
+      check(sessao1.totalMidias).equals(1);
       await sessao1.salvarRascunho(prefs);
 
       // --- Sessão 2: restaura ---
-      final sessao2 = _criarNotifier(storage: storageSessao2);
+      final sessao2 = _criarNotifier();
       sessao2.restaurarDePrefs(prefs);
 
-      check(sessao2.totalFotos).equals(1);
-      check(sessao2.fotos.first.path).equals(pathPersistido);
-    });
-
-    test('foto ausente no disco é ignorada sem lançar exceção', () async {
-      final prefs = await SharedPreferences.getInstance();
-      const pathInexistente = '/docs/draft_photo_sumiu.jpg';
-
-      final storageSessao1 = _FakeDraftPhotoStorage(
-        srcParaDest: {fotoOrigem.path: pathInexistente},
-      );
-      // storageSessao2 NÃO inclui pathInexistente nos existentes
-      final storageSessao2 = _FakeDraftPhotoStorage(existentes: []);
-
-      final sessao1 = _criarNotifier(foto: fotoOrigem, storage: storageSessao1);
-      _preencherFormularioCompleto(sessao1);
-      await sessao1.adicionarFoto(ImageSource.camera);
-      await sessao1.salvarRascunho(prefs);
-
-      final sessao2 = _criarNotifier(storage: storageSessao2);
-      check(() => sessao2.restaurarDePrefs(prefs)).returnsNormally();
-      check(sessao2.totalFotos).equals(0);
+      check(sessao2.totalMidias).equals(1);
+      check(sessao2.midias.first.storagePath).equals('stub_path.jpg');
     });
   });
 }

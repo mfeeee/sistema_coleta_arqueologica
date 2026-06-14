@@ -5,6 +5,7 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/midia_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
 import '../entities/coleta_entity.dart';
 
@@ -15,22 +16,24 @@ class ColetaFormResult {
 }
 
 class CriarColetaInput {
+  final String? id;
   final String nome;
   final List<String> nomesPopulares;
   final NaturezaBem? natureza;
   final TipoBem? tipo;
   final List<ArtefatoBem> artefatos;
   final String? meiosAcesso;
-  final List<String> fotoPaths;
+  final List<MidiaEntity> midias;
   final double lat;
   final double lng;
   final String usuarioId;
 
   const CriarColetaInput({
+    this.id,
     required this.nome,
     required this.nomesPopulares,
     required this.artefatos,
-    required this.fotoPaths,
+    required this.midias,
     required this.lat,
     required this.lng,
     required this.usuarioId,
@@ -44,7 +47,7 @@ class CriarColetaUseCase {
   const CriarColetaUseCase();
 
   ColetaFormResult call(CriarColetaInput input) {
-    final coletaId = const Uuid().v4();
+    final coletaId = input.id ?? const Uuid().v4();
     final agora = DateTime.now();
 
     final localizacao = LocalizacaoEntity(
@@ -72,8 +75,8 @@ class CriarColetaUseCase {
       dadosColetados: {
         'nomes_populares': input.nomesPopulares,
         'meios_acesso': input.meiosAcesso,
-        'foto_paths': input.fotoPaths,
       },
+      midias: input.midias,
     );
 
     final bemMaterial = BemMaterialEntity(
@@ -90,6 +93,7 @@ class CriarColetaUseCase {
       criadoEm: agora,
       atualizadoEm: agora,
       localizacao: localizacao,
+      midias: input.midias,
     );
 
     return ColetaFormResult(coleta: coleta, bemMaterial: bemMaterial);
@@ -97,6 +101,7 @@ class CriarColetaUseCase {
 
   ColetaEntity criarRascunho(CriarColetaInput input) {
     final agora = DateTime.now();
+    final coletaId = input.id ?? const Uuid().v4();
 
     final localizacao = LocalizacaoEntity(
       id: const Uuid().v4(),
@@ -109,7 +114,7 @@ class CriarColetaUseCase {
         .toList();
 
     return ColetaEntity(
-      id: const Uuid().v4(),
+      id: coletaId,
       usuarioId: input.usuarioId,
       dataColeta: agora,
       syncStatus: StatusColeta.rascunho,
@@ -123,8 +128,8 @@ class CriarColetaUseCase {
       dadosColetados: {
         'nomes_populares': input.nomesPopulares,
         'meios_acesso': input.meiosAcesso,
-        'foto_paths': input.fotoPaths,
       },
+      midias: input.midias,
     );
   }
 }

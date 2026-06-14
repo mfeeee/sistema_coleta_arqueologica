@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/midia_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/models/midia_model.dart';
+import 'package:sistema_coleta_arqueologica/features/media/presentation/widgets/midia_viewer.dart';
 
 class ColetaListItem extends StatelessWidget {
   const ColetaListItem({
@@ -28,7 +31,7 @@ class ColetaListItem extends StatelessWidget {
       title: coleta.nomeBem,
       location: localizacao,
       date: data,
-      imageUrl: coleta.fotosUrls.firstOrNull,
+      midia: coleta.midias.firstOrNull,
       onTap: onVerDetalhes,
       actionsRow: _AcoesColeta(coleta: coleta, onVerDetalhes: onVerDetalhes),
     );
@@ -134,7 +137,7 @@ class _ColetaCard extends StatelessWidget {
     required this.location,
     required this.date,
     required this.actionsRow,
-    this.imageUrl,
+    this.midia,
     this.onTap,
   });
 
@@ -142,7 +145,7 @@ class _ColetaCard extends StatelessWidget {
   final String title;
   final String location;
   final String date;
-  final String? imageUrl;
+  final MidiaEntity? midia;
   final Widget actionsRow;
   final VoidCallback? onTap;
 
@@ -217,7 +220,7 @@ class _ColetaCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              _ImagemColeta(imageUrl: imageUrl, theme: theme),
+              _ImagemColeta(midia: midia, theme: theme),
             ],
           ),
           const SizedBox(height: 16),
@@ -327,22 +330,31 @@ class _AcoesColeta extends StatelessWidget {
 }
 
 class _ImagemColeta extends StatelessWidget {
-  const _ImagemColeta({required this.imageUrl, required this.theme});
+  const _ImagemColeta({required this.midia, required this.theme});
 
-  final String? imageUrl;
+  final MidiaEntity? midia;
   final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
-    if (imageUrl != null && imageUrl!.isNotEmpty) {
+    if (midia != null) {
+      final midiaModel = MidiaModel(
+        id: midia!.id,
+        mediableType: midia!.mediableType,
+        mediableId: midia!.mediableId,
+        storagePath: midia!.storagePath,
+        mimeType: midia!.mimeType,
+        tipo: midia!.tipo,
+        url: midia!.url,
+        descricao: midia!.descricao,
+      );
+
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          imageUrl!,
+        child: SizedBox(
           width: 80,
           height: 80,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _placeholder(),
+          child: MidiaViewer(midia: midiaModel, fit: BoxFit.cover),
         ),
       );
     }

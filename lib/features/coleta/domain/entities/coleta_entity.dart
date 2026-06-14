@@ -4,6 +4,7 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/midia_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/home/domain/entities/pino_mapa.dart';
 import 'package:sistema_coleta_arqueologica/features/home/domain/entities/tipo_pino.dart';
 
@@ -23,7 +24,7 @@ class ColetaEntity {
   final int versao;
   final DateTime updatedAt;
   final Map<String, dynamic> dadosColetados;
-  final List<String> fotosUrls;
+  final List<MidiaEntity> midias;
   final DateTime? deletadoEm;
 
   const ColetaEntity({
@@ -37,7 +38,7 @@ class ColetaEntity {
     required this.versao,
     required this.updatedAt,
     required this.dadosColetados,
-    this.fotosUrls = const [],
+    this.midias = const [],
     this.natureza,
     this.tipo,
     this.uf,

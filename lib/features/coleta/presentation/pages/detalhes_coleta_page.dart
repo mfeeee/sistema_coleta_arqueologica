@@ -3,6 +3,8 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.da
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
+import 'package:sistema_coleta_arqueologica/features/media/presentation/widgets/midia_viewer.dart';
+import 'package:sistema_coleta_arqueologica/core/models/midia_model.dart';
 
 import '../viewmodels/detalhes_coleta_viewmodel.dart';
 
@@ -65,6 +67,22 @@ class _DetalhesColetaPageState extends State<DetalhesColetaPage> {
                 if (coleta == null) {
                   return const Center(child: CircularProgressIndicator());
                 }
+                // Convert list of entities to list of models for the viewer
+                final midias = coleta.midias
+                    .map(
+                      (e) => MidiaModel(
+                        id: e.id,
+                        mediableType: e.mediableType,
+                        mediableId: e.mediableId,
+                        storagePath: e.storagePath,
+                        mimeType: e.mimeType,
+                        tipo: e.tipo,
+                        url: e.url,
+                        descricao: e.descricao,
+                      ),
+                    )
+                    .toList();
+
                 return SafeArea(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
@@ -82,7 +100,7 @@ class _DetalhesColetaPageState extends State<DetalhesColetaPage> {
                         const SizedBox(height: 16),
                         _SecaoDescricao(dadosColetados: coleta.dadosColetados),
                         const SizedBox(height: 16),
-                        _SecaoGaleria(fotosUrls: coleta.fotosUrls),
+                        _SecaoGaleria(midias: midias),
                         const SizedBox(height: 24),
                       ],
                     ),
@@ -326,16 +344,16 @@ class _SecaoDescricao extends StatelessWidget {
 }
 
 class _SecaoGaleria extends StatelessWidget {
-  const _SecaoGaleria({required this.fotosUrls});
+  const _SecaoGaleria({required this.midias});
 
-  final List<String> fotosUrls;
+  final List<MidiaModel> midias;
 
   static const int _fotosVisiveis = 4;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final count = fotosUrls.length;
+    final count = midias.length;
     final exibir = count.clamp(0, _fotosVisiveis);
     final extras = count > _fotosVisiveis ? count - _fotosVisiveis + 1 : 0;
 
@@ -364,7 +382,7 @@ class _SecaoGaleria extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        if (fotosUrls.isEmpty)
+        if (midias.isEmpty)
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 24),
@@ -395,13 +413,7 @@ class _SecaoGaleria extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: <Widget>[
-                    Image.network(
-                      fotosUrls[index],
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                      ),
-                    ),
+                    MidiaViewer(midia: midias[index], fit: BoxFit.cover),
                     if (isUltima)
                       ColoredBox(
                         color: theme.colorScheme.scrim.withValues(alpha: 0.54),

@@ -35,9 +35,7 @@ class SyncRepository {
       final coleta = pendentes[i];
       onProgresso?.call('Sincronizando coleta ${i + 1}/${pendentes.length}…');
       final res = await _strategy.sincronizar(coleta, onProgresso: onProgresso);
-      if (res.uploadedUrls.isNotEmpty) {
-        await _coletaDatasource.salvarFotosUrls(coleta.id, res.uploadedUrls);
-      }
+
       // Sync ≠ aprovação: dados transmitidos, servidor pode sobrescrever.
       switch (res.status) {
         case SyncResultStatus.sucesso:

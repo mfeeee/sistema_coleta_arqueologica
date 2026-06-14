@@ -11,6 +11,10 @@ import 'package:sistema_coleta_arqueologica/features/bem_material/domain/reposit
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
+import 'package:sistema_coleta_arqueologica/features/media/domain/repositories/midia_repository.dart';
+import 'package:sistema_coleta_arqueologica/features/media/domain/usecases/upload_midia_usecase.dart';
+import 'package:sistema_coleta_arqueologica/features/media/data/repositories/midia_repository_impl.dart';
+import 'package:sistema_coleta_arqueologica/features/media/data/datasources/midia_remote_datasource.dart';
 
 import '../../features/sync/presentation/viewmodels/sync_notifier.dart';
 import '../../features/auth/auth_notifier.dart';
@@ -30,6 +34,8 @@ class AppScope extends InheritedWidget {
     required this.bemMaterialRepository,
     required this.notificacaoRepository,
     required this.preferenciasRepository,
+    required this.midiaRepository,
+    required this.uploadMidiaUseCase,
     required this.mediaService,
     required this.conectividadeService,
     required this.prefs,
@@ -48,6 +54,8 @@ class AppScope extends InheritedWidget {
   final BemMaterialRepository bemMaterialRepository;
   final NotificacaoRepository notificacaoRepository;
   final PreferenciasNotificacaoRepository preferenciasRepository;
+  final MidiaRepository midiaRepository;
+  final UploadMidiaUseCase uploadMidiaUseCase;
   final MediaService mediaService;
   final ConectividadeService conectividadeService;
   final SharedPreferences prefs;
@@ -95,6 +103,12 @@ class AppScope extends InheritedWidget {
 
     final mediaService = MediaService(ImagePicker());
 
+    final midiaRemoteDatasource = MidiaRemoteDatasourceImpl(dio: dio);
+    final midiaRepository = MidiaRepositoryImpl(
+      remoteDatasource: midiaRemoteDatasource,
+    );
+    final uploadMidiaUseCase = UploadMidiaUseCase(midiaRepository);
+
     return AppScope(
       authNotifier: authNotifier,
       syncNotifier: syncNotifier,
@@ -102,6 +116,8 @@ class AppScope extends InheritedWidget {
       bemMaterialRepository: bemMaterialRepository,
       notificacaoRepository: notificacaoRepository,
       preferenciasRepository: preferenciasRepository,
+      midiaRepository: midiaRepository,
+      uploadMidiaUseCase: uploadMidiaUseCase,
       mediaService: mediaService,
       conectividadeService: conectividadeService,
       prefs: prefs,
@@ -129,6 +145,8 @@ class AppScope extends InheritedWidget {
       bemMaterialRepository != oldWidget.bemMaterialRepository ||
       notificacaoRepository != oldWidget.notificacaoRepository ||
       preferenciasRepository != oldWidget.preferenciasRepository ||
+      midiaRepository != oldWidget.midiaRepository ||
+      uploadMidiaUseCase != oldWidget.uploadMidiaUseCase ||
       mediaService != oldWidget.mediaService ||
       conectividadeService != oldWidget.conectividadeService ||
       prefs != oldWidget.prefs ||

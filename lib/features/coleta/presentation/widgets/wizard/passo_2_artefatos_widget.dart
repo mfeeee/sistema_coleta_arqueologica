@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
+import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import '../../viewmodels/coleta_form_notifier.dart';
+import '../artefato_tipo_picker.dart';
 
 class Passo2ArtefatosWidget extends StatelessWidget {
   final ColetaFormNotifier formNotifier;
@@ -17,6 +18,7 @@ class Passo2ArtefatosWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final scope = AppScope.of(context);
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -55,7 +57,7 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Selecione todos os que foram identificados no campo.',
+                  'Selecione os que foram identificados ou adicione um novo tipo.',
                   style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
                 ),
                 const SizedBox(height: 20),
@@ -63,44 +65,11 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                 ListenableBuilder(
                   listenable: formNotifier,
                   builder: (context, _) {
-                    return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: ArtefatoBem.values.map((artefato) {
-                        final selecionado = formNotifier.isArtefatoSelecionado(
-                          artefato,
-                        );
-                        return FilterChip(
-                          label: Text(artefato.label),
-                          selected: selecionado,
-                          onSelected: (_) =>
-                              formNotifier.toggleArtefato(artefato),
-                          backgroundColor: cs.surface,
-                          selectedColor: cs.primaryContainer,
-                          checkmarkColor: cs.onPrimaryContainer,
-                          labelStyle: TextStyle(
-                            color: selecionado
-                                ? cs.onPrimaryContainer
-                                : cs.onSurfaceVariant,
-                            fontSize: 16,
-                            fontWeight: selecionado
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                          side: BorderSide(
-                            color: selecionado
-                                ? cs.primaryContainer
-                                : cs.primaryContainer.withValues(alpha: 0.25),
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 2,
-                          ),
-                        );
-                      }).toList(),
+                    return ArtefatoTipoPicker(
+                      selectedTypes: formNotifier.artefatos,
+                      onChanged: formNotifier.setArtefatos,
+                      dio: scope
+                          .dioPublic, // Use dioPublic if it doesn't need auth, or just scope.dio
                     );
                   },
                 ),

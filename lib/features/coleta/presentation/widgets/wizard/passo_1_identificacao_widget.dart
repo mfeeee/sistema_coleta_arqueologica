@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
+import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
+import 'package:uuid/uuid.dart';
 import '../../viewmodels/coleta_form_notifier.dart';
+import '../location_picker_widget.dart';
 
 class Passo1IdentificacaoWidget extends StatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -27,6 +30,21 @@ class Passo1IdentificacaoWidget extends StatefulWidget {
 }
 
 class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
+  @override
+  void initState() {
+    super.initState();
+    // Inicializa localização com coordenadas do GPS se ainda não existir
+    if (widget.formNotifier.localizacao == null) {
+      widget.formNotifier.setLocalizacao(
+        LocalizacaoModel(
+          id: const Uuid().v4(),
+          lat: widget.latitude,
+          lng: widget.longitude,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -64,7 +82,7 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 48.0),
                 children: [
-                  // --- COORDENADAS GPS ---
+                  // --- COORDENADAS GPS (Informativo) ---
                   _SectionLabel('COORDENADAS GPS', textColor: cs.onSurface),
                   const SizedBox(height: 8),
                   Row(
@@ -72,7 +90,7 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                       Expanded(
                         child: _GpsBox(
                           label: 'LATITUDE',
-                          value: '${widget.latitude.toStringAsFixed(4)}° S',
+                          value: '${widget.latitude.toStringAsFixed(5)}° S',
                           borderColor: borderColor,
                         ),
                       ),
@@ -80,11 +98,21 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                       Expanded(
                         child: _GpsBox(
                           label: 'LONGITUDE',
-                          value: '${widget.longitude.toStringAsFixed(4)}° W',
+                          value: '${widget.longitude.toStringAsFixed(5)}° W',
                           borderColor: borderColor,
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // --- LOCALIZAÇÃO ---
+                  _SectionLabel('LOCALIZAÇÃO DO BEM', textColor: cs.onSurface),
+                  const SizedBox(height: 12),
+                  LocationPickerWidget(
+                    initialValue: widget.formNotifier.localizacao,
+                    borderColor: borderColor,
+                    onChanged: widget.formNotifier.setLocalizacao,
                   ),
                   const SizedBox(height: 24),
 

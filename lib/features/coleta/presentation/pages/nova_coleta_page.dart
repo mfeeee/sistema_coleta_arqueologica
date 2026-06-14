@@ -181,13 +181,10 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
 
     final messenger = ScaffoldMessenger.of(context);
     final scope = AppScope.of(context);
-    final coord = _viewModel.coordenadaAtual;
 
     await _formNotifier.salvarRascunho(_prefs);
 
     final rascunho = await _formNotifier.toRascunho(
-      lat: coord?.latitude ?? 0.0,
-      lng: coord?.longitude ?? 0.0,
       usuarioId: scope.authNotifier.userId ?? '',
     );
     await scope.coletaRepository.salvar(rascunho);
@@ -223,11 +220,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     setState(() => _saving = true);
 
     try {
-      final resultado = await _formNotifier.toResult(
-        lat: coord.latitude,
-        lng: coord.longitude,
-        usuarioId: usuarioId,
-      );
+      final resultado = await _formNotifier.toResult(usuarioId: usuarioId);
 
       await scope.coletaRepository.salvar(resultado.coleta);
       await scope.bemMaterialRepository.salvar(resultado.bemMaterial);

@@ -1,30 +1,35 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
-import 'package:sistema_coleta_arqueologica/features/coleta/data/draft_photo_storage.dart';
+import 'package:sistema_coleta_arqueologica/core/models/midia_model.dart';
+import 'package:sistema_coleta_arqueologica/features/media/domain/usecases/upload_midia_usecase.dart';
 import '../../domain/entities/coleta_entity.dart';
 import '../../domain/usecases/criar_coleta_use_case.dart';
 
 const _kChaveRascunho = 'rascunho_coleta';
 
 class ColetaFormNotifier extends ChangeNotifier {
+  final String id;
   final MediaService _mediaService;
-  final DraftPhotoStorage _draftPhotoStorage;
+  final UploadMidiaUseCase _uploadMidiaUseCase;
   final CriarColetaUseCase _criarColetaUseCase;
 
   ColetaFormNotifier({
+    String? id,
     required MediaService mediaService,
-    DraftPhotoStorage draftPhotoStorage = const DraftPhotoStorageImpl(),
+    required UploadMidiaUseCase uploadMidiaUseCase,
+
     CriarColetaUseCase criarColetaUseCase = const CriarColetaUseCase(),
-  }) : _mediaService = mediaService,
-       _draftPhotoStorage = draftPhotoStorage,
+  }) : id = id ?? const Uuid().v4(),
+       _mediaService = mediaService,
+       _uploadMidiaUseCase = uploadMidiaUseCase,
        _criarColetaUseCase = criarColetaUseCase;
 
   // Passo 1
@@ -41,13 +46,12 @@ class ColetaFormNotifier extends ChangeNotifier {
   String? meiosAcesso;
   bool transcrevendo = false;
 
-  final List<File> _fotos = [];
-  bool _carregandoFoto = false;
+  final List<MidiaModel> _midias = [];
+  bool _carregandoMidia = false;
 
-  List<File> get fotos => List.unmodifiable(_fotos);
-  bool get carregandoFoto => _carregandoFoto;
-  int get totalFotos => fotos.length;
-  List<String> get fotoPaths => _fotos.map((f) => f.path).toList();
+  List<MidiaModel> get midias => List.unmodifiable(_midias);
+  bool get carregandoMidia => _carregandoMidia;
+  int get totalMidias => _midias.length;
 
   // Mutacoes passo 1
   void setNome(String value) {
@@ -95,27 +99,33 @@ class ColetaFormNotifier extends ChangeNotifier {
   }
 
   Future<void> adicionarFoto(ImageSource source) async {
-    if (_carregandoFoto) return;
+    if (_carregandoMidia) return;
 
-    _carregandoFoto = true;
+    _carregandoMidia = true;
     notifyListeners();
 
     try {
       final file = await _mediaService.pickAndCompress(source);
       if (file != null) {
-        _fotos.add(file);
+        final midia = await _uploadMidiaUseCase(
+          file: file,
+          mediableType: 'coleta',
+          mediableId: id,
+          tipo: 'foto',
+        );
+        _midias.add(midia);
       }
     } catch (e) {
       log('Erro ao adicionar foto', error: e, name: 'ColetaFormNotifier');
     } finally {
-      _carregandoFoto = false;
+      _carregandoMidia = false;
       notifyListeners();
     }
   }
 
-  void removerFoto(int index) {
-    if (index < 0 || index >= _fotos.length) return;
-    _fotos.removeAt(index);
+  void removerMidia(int index) {
+    if (index < 0 || index >= _midias.length) return;
+    _midias.removeAt(index);
     notifyListeners();
   }
 
@@ -126,7 +136,10 @@ class ColetaFormNotifier extends ChangeNotifier {
   bool get passo2Valido => _artefatos.isNotEmpty;
 
   bool get temDadosRascunho =>
-      nome.isNotEmpty || natureza != null || _artefatos.isNotEmpty;
+      nome.isNotEmpty ||
+      natureza != null ||
+      _artefatos.isNotEmpty ||
+      _midias.isNotEmpty;
 
   int get passoRestauracao {
     if (passo1Valido && passo2Valido) return 2;
@@ -136,13 +149,14 @@ class ColetaFormNotifier extends ChangeNotifier {
 
   // Rascunho
   Map<String, dynamic> toMap() => {
+    'id': id,
     'nome': nome,
     'nomes_populares': nomesPopulares,
     'natureza': natureza?.name,
     'tipo': tipo?.name,
     'artefatos': _artefatos.map((a) => a.name).toList(),
     'meios_acesso': meiosAcesso,
-    'foto_paths': fotoPaths,
+    'midias': _midias.map((m) => m.toJson()).toList(),
   };
 
   void _restaurarDeMap(Map<String, dynamic> map) {
@@ -175,9 +189,11 @@ class ColetaFormNotifier extends ChangeNotifier {
 
     meiosAcesso = map['meios_acesso'] as String?;
 
-    _fotos.clear();
-    final paths = (map['foto_paths'] as List?)?.cast<String>() ?? [];
-    _fotos.addAll(_draftPhotoStorage.restaurar(paths));
+    _midias.clear();
+    final midiasJson = (map['midias'] as List?) ?? [];
+    for (final m in midiasJson) {
+      _midias.add(MidiaModel.fromJson(m as Map<String, dynamic>));
+    }
   }
 
   void restaurarDePrefs(SharedPreferences prefs) {
@@ -201,14 +217,10 @@ class ColetaFormNotifier extends ChangeNotifier {
   Future<void> salvarRascunho(SharedPreferences prefs) async {
     if (!temDadosRascunho) return;
     try {
-      final fotosSnapshot = List.of(_fotos);
-      final pathsPersistentes = await _draftPhotoStorage.persistir(
-        fotosSnapshot,
-      );
-      final map = toMap()..['foto_paths'] = pathsPersistentes;
+      final map = toMap();
       await prefs.setString(_kChaveRascunho, jsonEncode(map));
       log(
-        'Rascunho salvo (${pathsPersistentes.length} fotos)',
+        'Rascunho salvo (${_midias.length} mídias)',
         name: 'ColetaFormNotifier',
       );
     } catch (e, st) {
@@ -231,18 +243,16 @@ class ColetaFormNotifier extends ChangeNotifier {
     required double lng,
     required String usuarioId,
   }) async {
-    final pathsPersistentes = await _draftPhotoStorage.persistir(
-      List.of(_fotos),
-    );
     return _criarColetaUseCase.criarRascunho(
       CriarColetaInput(
+        id: id,
         nome: nome,
         nomesPopulares: nomesPopulares,
         natureza: natureza,
         tipo: tipo,
         artefatos: _artefatos.toList(),
         meiosAcesso: meiosAcesso,
-        fotoPaths: pathsPersistentes,
+        midias: _midias,
         lat: lat,
         lng: lng,
         usuarioId: usuarioId,
@@ -258,18 +268,16 @@ class ColetaFormNotifier extends ChangeNotifier {
     assert(passo1Valido, 'toResult() chamado com Passo 1 inválido');
     assert(passo2Valido, 'toResult() chamado com nenhum artefato selecionado');
 
-    final pathsPersistentes = await _draftPhotoStorage.persistir(
-      List.of(_fotos),
-    );
     return _criarColetaUseCase.call(
       CriarColetaInput(
+        id: id,
         nome: nome,
         nomesPopulares: nomesPopulares,
         natureza: natureza,
         tipo: tipo,
         artefatos: _artefatos.toList(),
         meiosAcesso: meiosAcesso,
-        fotoPaths: pathsPersistentes,
+        midias: _midias,
         lat: lat,
         lng: lng,
         usuarioId: usuarioId,
@@ -279,7 +287,7 @@ class ColetaFormNotifier extends ChangeNotifier {
 
   @override
   void dispose() {
-    _fotos.clear();
+    _midias.clear();
     super.dispose();
   }
 }

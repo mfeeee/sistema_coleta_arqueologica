@@ -1,6 +1,7 @@
 import 'package:latlong2/latlong.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/midia_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_responsavel_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/home/domain/entities/pino_mapa.dart';
 import 'package:sistema_coleta_arqueologica/features/home/domain/entities/tipo_pino.dart';
@@ -18,6 +19,7 @@ class BemMaterialEntity {
   final String? meiosAcesso;
   final List<ArtefatoTipoEntity> artefatoTipos;
   final List<BemResponsavelEntity> responsaveis;
+  final List<MidiaEntity> midias;
   final bool publicado;
 
   final LocalizacaoEntity? localizacao;
@@ -41,6 +43,7 @@ class BemMaterialEntity {
     required this.publicado,
     required this.criadoEm,
     required this.atualizadoEm,
+    this.midias = const [],
     this.localizacao,
     this.coletaId,
     this.curadorResponsavelId,

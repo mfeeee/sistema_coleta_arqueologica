@@ -6,6 +6,7 @@ import 'package:sistema_coleta_arqueologica/core/models/artefato_tipo_model.dart
 import 'package:sistema_coleta_arqueologica/core/models/bem_responsavel_model.dart';
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:sistema_coleta_arqueologica/core/models/usuario_model.dart';
+import 'package:sistema_coleta_arqueologica/core/models/midia_model.dart';
 import '../../domain/entities/bem_material_entity.dart';
 
 class BemMaterialModel extends BemMaterialEntity {
@@ -20,6 +21,7 @@ class BemMaterialModel extends BemMaterialEntity {
     required super.publicado,
     required super.criadoEm,
     required super.atualizadoEm,
+    List<MidiaModel> midias = const [],
     super.localizacao,
     super.coletaId,
     super.curadorResponsavelId,
@@ -29,7 +31,10 @@ class BemMaterialModel extends BemMaterialEntity {
     super.anoRegistro,
     super.descricaoAtualizacao,
     super.deletadoEm,
-  });
+  }) : super(midias: midias);
+
+  @override
+  List<MidiaModel> get midias => super.midias.cast<MidiaModel>();
 
   factory BemMaterialModel.fromRow(BensMateriai row) {
     return BemMaterialModel(
@@ -48,6 +53,7 @@ class BemMaterialModel extends BemMaterialEntity {
           .map((e) => ArtefatoTipoModel(id: e, nome: e))
           .toList(),
       responsaveis: [],
+      midias: [], // Loaded separately
       publicado: row.publicado,
       localizacao:
           row.uf != null ||
@@ -107,6 +113,20 @@ class BemMaterialModel extends BemMaterialEntity {
             ),
           )
           .toList(),
+      midias: entity.midias
+          .map(
+            (e) => MidiaModel(
+              id: e.id,
+              mediableType: e.mediableType,
+              mediableId: e.mediableId,
+              storagePath: e.storagePath,
+              mimeType: e.mimeType,
+              tipo: e.tipo,
+              url: e.url,
+              descricao: e.descricao,
+            ),
+          )
+          .toList(),
       publicado: entity.publicado,
       localizacao: entity.localizacao != null
           ? LocalizacaoModel(
@@ -163,6 +183,11 @@ class BemMaterialModel extends BemMaterialEntity {
                 )
                 .toList()
           : [],
+      midias: json['midias'] is List
+          ? (json['midias'] as List)
+                .map((e) => MidiaModel.fromJson(e as Map<String, dynamic>))
+                .toList()
+          : [],
       publicado: json['publicado'] as bool? ?? false,
       localizacao: json['localizacao'] != null
           ? LocalizacaoModel.fromJson(
@@ -191,7 +216,7 @@ class BemMaterialModel extends BemMaterialEntity {
       'curador_responsavel_id': curadorResponsavelId,
       'codigo_iphan': codigoIphan,
       'nome_bem': nomeBem,
-      'nomes_populares': nomesPopulares,
+      'nomesPopulares': nomesPopulares,
       'natureza': natureza,
       'tipo': tipo,
       'meios_acesso': meiosAcesso,
@@ -201,6 +226,7 @@ class BemMaterialModel extends BemMaterialEntity {
       'responsaveis': responsaveis
           .map((e) => (e as BemResponsavelModel).toJson())
           .toList(),
+      'midias': midias.map((e) => e.toJson()).toList(),
       'publicado': publicado,
       'localizacao': (localizacao as LocalizacaoModel?)?.toJson(),
       'geojson': geojson,

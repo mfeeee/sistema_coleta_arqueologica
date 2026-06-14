@@ -5,6 +5,7 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dar
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:sistema_coleta_arqueologica/core/models/artefato_tipo_model.dart';
+import 'package:sistema_coleta_arqueologica/core/models/midia_model.dart';
 
 import '../../domain/entities/coleta_entity.dart';
 
@@ -20,12 +21,12 @@ class ColetaModel extends ColetaEntity {
     required super.versao,
     required super.updatedAt,
     required super.dadosColetados,
-    super.fotosUrls = const [],
+    List<MidiaModel> midias = const [],
     super.natureza,
     super.tipo,
     super.uf,
     super.deletadoEm,
-  });
+  }) : super(midias: midias);
 
   @override
   LocalizacaoModel? get localizacao => super.localizacao as LocalizacaoModel?;
@@ -33,6 +34,9 @@ class ColetaModel extends ColetaEntity {
   @override
   List<ArtefatoTipoModel> get artefatoTipos =>
       super.artefatoTipos.cast<ArtefatoTipoModel>();
+
+  @override
+  List<MidiaModel> get midias => super.midias.cast<MidiaModel>();
 
   factory ColetaModel.fromRow(Coleta row) {
     return ColetaModel(
@@ -66,7 +70,7 @@ class ColetaModel extends ColetaEntity {
       versao: row.versao,
       updatedAt: row.updatedAt,
       dadosColetados: row.dadosColetados,
-      fotosUrls: row.fotosUrls,
+      midias: [], // Midias are loaded separately or from a joined table
       deletadoEm: row.deletadoEm,
     );
   }
@@ -105,7 +109,20 @@ class ColetaModel extends ColetaEntity {
       versao: entity.versao,
       updatedAt: entity.updatedAt,
       dadosColetados: entity.dadosColetados,
-      fotosUrls: entity.fotosUrls,
+      midias: entity.midias
+          .map(
+            (e) => MidiaModel(
+              id: e.id,
+              mediableType: e.mediableType,
+              mediableId: e.mediableId,
+              storagePath: e.storagePath,
+              mimeType: e.mimeType,
+              tipo: e.tipo,
+              url: e.url,
+              descricao: e.descricao,
+            ),
+          )
+          .toList(),
       deletadoEm: entity.deletadoEm,
     );
   }
@@ -143,7 +160,11 @@ class ColetaModel extends ColetaEntity {
           DateTime.tryParse(json['updated_at'] as String? ?? '') ??
           DateTime.now(),
       dadosColetados: json['dados_coletados'] as Map<String, dynamic>? ?? {},
-      fotosUrls: (json['fotos_urls'] as List?)?.cast<String>() ?? [],
+      midias:
+          (json['midias'] as List?)
+              ?.map((e) => MidiaModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
       natureza: json['natureza'] != null
           ? NaturezaBem.fromString(json['natureza'] as String)
           : null,
@@ -169,7 +190,7 @@ class ColetaModel extends ColetaEntity {
       'versao': versao,
       'updated_at': updatedAt.toIso8601String(),
       'dados_coletados': dadosColetados,
-      'fotos_urls': fotosUrls,
+      'midias': midias.map((e) => e.toJson()).toList(),
       'natureza': natureza?.name,
       'tipo': tipo?.name,
       'uf': uf,
@@ -193,7 +214,6 @@ class ColetaModel extends ColetaEntity {
       versao: Value(versao),
       updatedAt: Value(updatedAt),
       dadosColetados: dadosColetados,
-      fotosUrls: Value(fotosUrls),
       deletadoEm: Value(deletadoEm),
     );
   }

@@ -1,11 +1,11 @@
 enum TipoMidia {
-  imagem,
+  foto,
   video,
   tese,
   artigo;
 
   static TipoMidia fromString(String value) => TipoMidia.values.firstWhere(
     (e) => e.name == value,
-    orElse: () => TipoMidia.imagem,
+    orElse: () => TipoMidia.foto,
   );
 }

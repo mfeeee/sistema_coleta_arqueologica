@@ -1,5 +1,4 @@
 import 'package:uuid/uuid.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
@@ -21,21 +20,19 @@ class CriarColetaInput {
   final List<String> nomesPopulares;
   final NaturezaBem? natureza;
   final TipoBem? tipo;
-  final List<ArtefatoBem> artefatos;
+  final List<ArtefatoTipoEntity> artefatoTipos;
   final String? meiosAcesso;
   final List<MidiaEntity> midias;
-  final double lat;
-  final double lng;
+  final LocalizacaoEntity? localizacao;
   final String usuarioId;
 
   const CriarColetaInput({
     this.id,
     required this.nome,
     required this.nomesPopulares,
-    required this.artefatos,
+    required this.artefatoTipos,
     required this.midias,
-    required this.lat,
-    required this.lng,
+    this.localizacao,
     required this.usuarioId,
     this.natureza,
     this.tipo,
@@ -50,16 +47,6 @@ class CriarColetaUseCase {
     final coletaId = input.id ?? const Uuid().v4();
     final agora = DateTime.now();
 
-    final localizacao = LocalizacaoEntity(
-      id: const Uuid().v4(),
-      lat: input.lat,
-      lng: input.lng,
-    );
-
-    final artefatoTipos = input.artefatos
-        .map((e) => ArtefatoTipoEntity(id: const Uuid().v4(), nome: e.name))
-        .toList();
-
     final coleta = ColetaEntity(
       id: coletaId,
       usuarioId: input.usuarioId,
@@ -68,8 +55,8 @@ class CriarColetaUseCase {
       nomeBem: input.nome.trim(),
       natureza: input.natureza,
       tipo: input.tipo,
-      localizacao: localizacao,
-      artefatoTipos: artefatoTipos,
+      localizacao: input.localizacao,
+      artefatoTipos: input.artefatoTipos,
       versao: 1,
       updatedAt: agora,
       dadosColetados: {
@@ -87,12 +74,12 @@ class CriarColetaUseCase {
       natureza: input.natureza?.name,
       tipo: input.tipo?.name,
       meiosAcesso: input.meiosAcesso?.trim(),
-      artefatoTipos: artefatoTipos,
+      artefatoTipos: input.artefatoTipos,
       responsaveis: const [],
       publicado: false,
       criadoEm: agora,
       atualizadoEm: agora,
-      localizacao: localizacao,
+      localizacao: input.localizacao,
       midias: input.midias,
     );
 
@@ -103,16 +90,6 @@ class CriarColetaUseCase {
     final agora = DateTime.now();
     final coletaId = input.id ?? const Uuid().v4();
 
-    final localizacao = LocalizacaoEntity(
-      id: const Uuid().v4(),
-      lat: input.lat,
-      lng: input.lng,
-    );
-
-    final artefatoTipos = input.artefatos
-        .map((e) => ArtefatoTipoEntity(id: const Uuid().v4(), nome: e.name))
-        .toList();
-
     return ColetaEntity(
       id: coletaId,
       usuarioId: input.usuarioId,
@@ -121,8 +98,8 @@ class CriarColetaUseCase {
       nomeBem: input.nome.trim().isEmpty ? 'Rascunho' : input.nome.trim(),
       natureza: input.natureza,
       tipo: input.tipo,
-      localizacao: localizacao,
-      artefatoTipos: artefatoTipos,
+      localizacao: input.localizacao,
+      artefatoTipos: input.artefatoTipos,
       versao: 1,
       updatedAt: agora,
       dadosColetados: {

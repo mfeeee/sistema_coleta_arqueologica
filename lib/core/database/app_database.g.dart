@@ -3274,34 +3274,63 @@ class CuradoriasCompanion extends UpdateCompanion<Curadoria> {
   }
 }
 
-class $MidiaLinksTable extends MidiaLinks
-    with TableInfo<$MidiaLinksTable, MidiaLink> {
+class $MidiasTable extends Midias with TableInfo<$MidiasTable, Midia> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $MidiaLinksTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  $MidiasTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
-  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
-    'uuid',
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _bemMaterialIdMeta = const VerificationMeta(
-    'bemMaterialId',
+  static const VerificationMeta _mediableTypeMeta = const VerificationMeta(
+    'mediableType',
   );
   @override
-  late final GeneratedColumn<String> bemMaterialId = GeneratedColumn<String>(
-    'bem_material_id',
+  late final GeneratedColumn<String> mediableType = GeneratedColumn<String>(
+    'mediable_type',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES bens_materiais (uuid)',
-    ),
+  );
+  static const VerificationMeta _mediableIdMeta = const VerificationMeta(
+    'mediableId',
+  );
+  @override
+  late final GeneratedColumn<String> mediableId = GeneratedColumn<String>(
+    'mediable_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _storagePathMeta = const VerificationMeta(
+    'storagePath',
+  );
+  @override
+  late final GeneratedColumn<String> storagePath = GeneratedColumn<String>(
+    'storage_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _mimeTypeMeta = const VerificationMeta(
+    'mimeType',
+  );
+  @override
+  late final GeneratedColumn<String> mimeType = GeneratedColumn<String>(
+    'mime_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
   );
   @override
   late final GeneratedColumnWithTypeConverter<TipoMidia, String> tipo =
@@ -3310,9 +3339,8 @@ class $MidiaLinksTable extends MidiaLinks
         aliasedName,
         false,
         type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        clientDefault: () => TipoMidia.imagem.name,
-      ).withConverter<TipoMidia>($MidiaLinksTable.$convertertipo);
+        requiredDuringInsert: true,
+      ).withConverter<TipoMidia>($MidiasTable.$convertertipo);
   static const VerificationMeta _urlMeta = const VerificationMeta('url');
   @override
   late final GeneratedColumn<String> url = GeneratedColumn<String>(
@@ -3335,8 +3363,11 @@ class $MidiaLinksTable extends MidiaLinks
   );
   @override
   List<GeneratedColumn> get $columns => [
-    uuid,
-    bemMaterialId,
+    id,
+    mediableType,
+    mediableId,
+    storagePath,
+    mimeType,
     tipo,
     url,
     descricao,
@@ -3345,32 +3376,56 @@ class $MidiaLinksTable extends MidiaLinks
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'midia_links';
+  static const String $name = 'midias';
   @override
   VerificationContext validateIntegrity(
-    Insertable<MidiaLink> instance, {
+    Insertable<Midia> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('uuid')) {
-      context.handle(
-        _uuidMeta,
-        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
-      );
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
-      context.missing(_uuidMeta);
+      context.missing(_idMeta);
     }
-    if (data.containsKey('bem_material_id')) {
+    if (data.containsKey('mediable_type')) {
       context.handle(
-        _bemMaterialIdMeta,
-        bemMaterialId.isAcceptableOrUnknown(
-          data['bem_material_id']!,
-          _bemMaterialIdMeta,
+        _mediableTypeMeta,
+        mediableType.isAcceptableOrUnknown(
+          data['mediable_type']!,
+          _mediableTypeMeta,
         ),
       );
     } else if (isInserting) {
-      context.missing(_bemMaterialIdMeta);
+      context.missing(_mediableTypeMeta);
+    }
+    if (data.containsKey('mediable_id')) {
+      context.handle(
+        _mediableIdMeta,
+        mediableId.isAcceptableOrUnknown(data['mediable_id']!, _mediableIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_mediableIdMeta);
+    }
+    if (data.containsKey('storage_path')) {
+      context.handle(
+        _storagePathMeta,
+        storagePath.isAcceptableOrUnknown(
+          data['storage_path']!,
+          _storagePathMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_storagePathMeta);
+    }
+    if (data.containsKey('mime_type')) {
+      context.handle(
+        _mimeTypeMeta,
+        mimeType.isAcceptableOrUnknown(data['mime_type']!, _mimeTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_mimeTypeMeta);
     }
     if (data.containsKey('url')) {
       context.handle(
@@ -3390,20 +3445,32 @@ class $MidiaLinksTable extends MidiaLinks
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {uuid};
+  Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  MidiaLink map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Midia map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return MidiaLink(
-      uuid: attachedDatabase.typeMapping.read(
+    return Midia(
+      id: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}uuid'],
+        data['${effectivePrefix}id'],
       )!,
-      bemMaterialId: attachedDatabase.typeMapping.read(
+      mediableType: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}bem_material_id'],
+        data['${effectivePrefix}mediable_type'],
       )!,
-      tipo: $MidiaLinksTable.$convertertipo.fromSql(
+      mediableId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mediable_id'],
+      )!,
+      storagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}storage_path'],
+      )!,
+      mimeType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mime_type'],
+      )!,
+      tipo: $MidiasTable.$convertertipo.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}tipo'],
@@ -3421,23 +3488,29 @@ class $MidiaLinksTable extends MidiaLinks
   }
 
   @override
-  $MidiaLinksTable createAlias(String alias) {
-    return $MidiaLinksTable(attachedDatabase, alias);
+  $MidiasTable createAlias(String alias) {
+    return $MidiasTable(attachedDatabase, alias);
   }
 
   static JsonTypeConverter2<TipoMidia, String, String> $convertertipo =
       const EnumNameConverter<TipoMidia>(TipoMidia.values);
 }
 
-class MidiaLink extends DataClass implements Insertable<MidiaLink> {
-  final String uuid;
-  final String bemMaterialId;
+class Midia extends DataClass implements Insertable<Midia> {
+  final String id;
+  final String mediableType;
+  final String mediableId;
+  final String storagePath;
+  final String mimeType;
   final TipoMidia tipo;
   final String url;
   final String? descricao;
-  const MidiaLink({
-    required this.uuid,
-    required this.bemMaterialId,
+  const Midia({
+    required this.id,
+    required this.mediableType,
+    required this.mediableId,
+    required this.storagePath,
+    required this.mimeType,
     required this.tipo,
     required this.url,
     this.descricao,
@@ -3445,12 +3518,13 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['uuid'] = Variable<String>(uuid);
-    map['bem_material_id'] = Variable<String>(bemMaterialId);
+    map['id'] = Variable<String>(id);
+    map['mediable_type'] = Variable<String>(mediableType);
+    map['mediable_id'] = Variable<String>(mediableId);
+    map['storage_path'] = Variable<String>(storagePath);
+    map['mime_type'] = Variable<String>(mimeType);
     {
-      map['tipo'] = Variable<String>(
-        $MidiaLinksTable.$convertertipo.toSql(tipo),
-      );
+      map['tipo'] = Variable<String>($MidiasTable.$convertertipo.toSql(tipo));
     }
     map['url'] = Variable<String>(url);
     if (!nullToAbsent || descricao != null) {
@@ -3459,10 +3533,13 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
     return map;
   }
 
-  MidiaLinksCompanion toCompanion(bool nullToAbsent) {
-    return MidiaLinksCompanion(
-      uuid: Value(uuid),
-      bemMaterialId: Value(bemMaterialId),
+  MidiasCompanion toCompanion(bool nullToAbsent) {
+    return MidiasCompanion(
+      id: Value(id),
+      mediableType: Value(mediableType),
+      mediableId: Value(mediableId),
+      storagePath: Value(storagePath),
+      mimeType: Value(mimeType),
       tipo: Value(tipo),
       url: Value(url),
       descricao: descricao == null && nullToAbsent
@@ -3471,15 +3548,18 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
     );
   }
 
-  factory MidiaLink.fromJson(
+  factory Midia.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return MidiaLink(
-      uuid: serializer.fromJson<String>(json['uuid']),
-      bemMaterialId: serializer.fromJson<String>(json['bemMaterialId']),
-      tipo: $MidiaLinksTable.$convertertipo.fromJson(
+    return Midia(
+      id: serializer.fromJson<String>(json['id']),
+      mediableType: serializer.fromJson<String>(json['mediableType']),
+      mediableId: serializer.fromJson<String>(json['mediableId']),
+      storagePath: serializer.fromJson<String>(json['storagePath']),
+      mimeType: serializer.fromJson<String>(json['mimeType']),
+      tipo: $MidiasTable.$convertertipo.fromJson(
         serializer.fromJson<String>(json['tipo']),
       ),
       url: serializer.fromJson<String>(json['url']),
@@ -3490,35 +3570,51 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'uuid': serializer.toJson<String>(uuid),
-      'bemMaterialId': serializer.toJson<String>(bemMaterialId),
+      'id': serializer.toJson<String>(id),
+      'mediableType': serializer.toJson<String>(mediableType),
+      'mediableId': serializer.toJson<String>(mediableId),
+      'storagePath': serializer.toJson<String>(storagePath),
+      'mimeType': serializer.toJson<String>(mimeType),
       'tipo': serializer.toJson<String>(
-        $MidiaLinksTable.$convertertipo.toJson(tipo),
+        $MidiasTable.$convertertipo.toJson(tipo),
       ),
       'url': serializer.toJson<String>(url),
       'descricao': serializer.toJson<String?>(descricao),
     };
   }
 
-  MidiaLink copyWith({
-    String? uuid,
-    String? bemMaterialId,
+  Midia copyWith({
+    String? id,
+    String? mediableType,
+    String? mediableId,
+    String? storagePath,
+    String? mimeType,
     TipoMidia? tipo,
     String? url,
     Value<String?> descricao = const Value.absent(),
-  }) => MidiaLink(
-    uuid: uuid ?? this.uuid,
-    bemMaterialId: bemMaterialId ?? this.bemMaterialId,
+  }) => Midia(
+    id: id ?? this.id,
+    mediableType: mediableType ?? this.mediableType,
+    mediableId: mediableId ?? this.mediableId,
+    storagePath: storagePath ?? this.storagePath,
+    mimeType: mimeType ?? this.mimeType,
     tipo: tipo ?? this.tipo,
     url: url ?? this.url,
     descricao: descricao.present ? descricao.value : this.descricao,
   );
-  MidiaLink copyWithCompanion(MidiaLinksCompanion data) {
-    return MidiaLink(
-      uuid: data.uuid.present ? data.uuid.value : this.uuid,
-      bemMaterialId: data.bemMaterialId.present
-          ? data.bemMaterialId.value
-          : this.bemMaterialId,
+  Midia copyWithCompanion(MidiasCompanion data) {
+    return Midia(
+      id: data.id.present ? data.id.value : this.id,
+      mediableType: data.mediableType.present
+          ? data.mediableType.value
+          : this.mediableType,
+      mediableId: data.mediableId.present
+          ? data.mediableId.value
+          : this.mediableId,
+      storagePath: data.storagePath.present
+          ? data.storagePath.value
+          : this.storagePath,
+      mimeType: data.mimeType.present ? data.mimeType.value : this.mimeType,
       tipo: data.tipo.present ? data.tipo.value : this.tipo,
       url: data.url.present ? data.url.value : this.url,
       descricao: data.descricao.present ? data.descricao.value : this.descricao,
@@ -3527,9 +3623,12 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
 
   @override
   String toString() {
-    return (StringBuffer('MidiaLink(')
-          ..write('uuid: $uuid, ')
-          ..write('bemMaterialId: $bemMaterialId, ')
+    return (StringBuffer('Midia(')
+          ..write('id: $id, ')
+          ..write('mediableType: $mediableType, ')
+          ..write('mediableId: $mediableId, ')
+          ..write('storagePath: $storagePath, ')
+          ..write('mimeType: $mimeType, ')
           ..write('tipo: $tipo, ')
           ..write('url: $url, ')
           ..write('descricao: $descricao')
@@ -3538,54 +3637,85 @@ class MidiaLink extends DataClass implements Insertable<MidiaLink> {
   }
 
   @override
-  int get hashCode => Object.hash(uuid, bemMaterialId, tipo, url, descricao);
+  int get hashCode => Object.hash(
+    id,
+    mediableType,
+    mediableId,
+    storagePath,
+    mimeType,
+    tipo,
+    url,
+    descricao,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is MidiaLink &&
-          other.uuid == this.uuid &&
-          other.bemMaterialId == this.bemMaterialId &&
+      (other is Midia &&
+          other.id == this.id &&
+          other.mediableType == this.mediableType &&
+          other.mediableId == this.mediableId &&
+          other.storagePath == this.storagePath &&
+          other.mimeType == this.mimeType &&
           other.tipo == this.tipo &&
           other.url == this.url &&
           other.descricao == this.descricao);
 }
 
-class MidiaLinksCompanion extends UpdateCompanion<MidiaLink> {
-  final Value<String> uuid;
-  final Value<String> bemMaterialId;
+class MidiasCompanion extends UpdateCompanion<Midia> {
+  final Value<String> id;
+  final Value<String> mediableType;
+  final Value<String> mediableId;
+  final Value<String> storagePath;
+  final Value<String> mimeType;
   final Value<TipoMidia> tipo;
   final Value<String> url;
   final Value<String?> descricao;
   final Value<int> rowid;
-  const MidiaLinksCompanion({
-    this.uuid = const Value.absent(),
-    this.bemMaterialId = const Value.absent(),
+  const MidiasCompanion({
+    this.id = const Value.absent(),
+    this.mediableType = const Value.absent(),
+    this.mediableId = const Value.absent(),
+    this.storagePath = const Value.absent(),
+    this.mimeType = const Value.absent(),
     this.tipo = const Value.absent(),
     this.url = const Value.absent(),
     this.descricao = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  MidiaLinksCompanion.insert({
-    required String uuid,
-    required String bemMaterialId,
-    this.tipo = const Value.absent(),
+  MidiasCompanion.insert({
+    required String id,
+    required String mediableType,
+    required String mediableId,
+    required String storagePath,
+    required String mimeType,
+    required TipoMidia tipo,
     required String url,
     this.descricao = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : uuid = Value(uuid),
-       bemMaterialId = Value(bemMaterialId),
+  }) : id = Value(id),
+       mediableType = Value(mediableType),
+       mediableId = Value(mediableId),
+       storagePath = Value(storagePath),
+       mimeType = Value(mimeType),
+       tipo = Value(tipo),
        url = Value(url);
-  static Insertable<MidiaLink> custom({
-    Expression<String>? uuid,
-    Expression<String>? bemMaterialId,
+  static Insertable<Midia> custom({
+    Expression<String>? id,
+    Expression<String>? mediableType,
+    Expression<String>? mediableId,
+    Expression<String>? storagePath,
+    Expression<String>? mimeType,
     Expression<String>? tipo,
     Expression<String>? url,
     Expression<String>? descricao,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (uuid != null) 'uuid': uuid,
-      if (bemMaterialId != null) 'bem_material_id': bemMaterialId,
+      if (id != null) 'id': id,
+      if (mediableType != null) 'mediable_type': mediableType,
+      if (mediableId != null) 'mediable_id': mediableId,
+      if (storagePath != null) 'storage_path': storagePath,
+      if (mimeType != null) 'mime_type': mimeType,
       if (tipo != null) 'tipo': tipo,
       if (url != null) 'url': url,
       if (descricao != null) 'descricao': descricao,
@@ -3593,17 +3723,23 @@ class MidiaLinksCompanion extends UpdateCompanion<MidiaLink> {
     });
   }
 
-  MidiaLinksCompanion copyWith({
-    Value<String>? uuid,
-    Value<String>? bemMaterialId,
+  MidiasCompanion copyWith({
+    Value<String>? id,
+    Value<String>? mediableType,
+    Value<String>? mediableId,
+    Value<String>? storagePath,
+    Value<String>? mimeType,
     Value<TipoMidia>? tipo,
     Value<String>? url,
     Value<String?>? descricao,
     Value<int>? rowid,
   }) {
-    return MidiaLinksCompanion(
-      uuid: uuid ?? this.uuid,
-      bemMaterialId: bemMaterialId ?? this.bemMaterialId,
+    return MidiasCompanion(
+      id: id ?? this.id,
+      mediableType: mediableType ?? this.mediableType,
+      mediableId: mediableId ?? this.mediableId,
+      storagePath: storagePath ?? this.storagePath,
+      mimeType: mimeType ?? this.mimeType,
       tipo: tipo ?? this.tipo,
       url: url ?? this.url,
       descricao: descricao ?? this.descricao,
@@ -3614,15 +3750,24 @@ class MidiaLinksCompanion extends UpdateCompanion<MidiaLink> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (uuid.present) {
-      map['uuid'] = Variable<String>(uuid.value);
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
     }
-    if (bemMaterialId.present) {
-      map['bem_material_id'] = Variable<String>(bemMaterialId.value);
+    if (mediableType.present) {
+      map['mediable_type'] = Variable<String>(mediableType.value);
+    }
+    if (mediableId.present) {
+      map['mediable_id'] = Variable<String>(mediableId.value);
+    }
+    if (storagePath.present) {
+      map['storage_path'] = Variable<String>(storagePath.value);
+    }
+    if (mimeType.present) {
+      map['mime_type'] = Variable<String>(mimeType.value);
     }
     if (tipo.present) {
       map['tipo'] = Variable<String>(
-        $MidiaLinksTable.$convertertipo.toSql(tipo.value),
+        $MidiasTable.$convertertipo.toSql(tipo.value),
       );
     }
     if (url.present) {
@@ -3639,9 +3784,12 @@ class MidiaLinksCompanion extends UpdateCompanion<MidiaLink> {
 
   @override
   String toString() {
-    return (StringBuffer('MidiaLinksCompanion(')
-          ..write('uuid: $uuid, ')
-          ..write('bemMaterialId: $bemMaterialId, ')
+    return (StringBuffer('MidiasCompanion(')
+          ..write('id: $id, ')
+          ..write('mediableType: $mediableType, ')
+          ..write('mediableId: $mediableId, ')
+          ..write('storagePath: $storagePath, ')
+          ..write('mimeType: $mimeType, ')
           ..write('tipo: $tipo, ')
           ..write('url: $url, ')
           ..write('descricao: $descricao, ')
@@ -4706,7 +4854,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $BensMateriaisTable bensMateriais = $BensMateriaisTable(this);
   late final $UsuariosTable usuarios = $UsuariosTable(this);
   late final $CuradoriasTable curadorias = $CuradoriasTable(this);
-  late final $MidiaLinksTable midiaLinks = $MidiaLinksTable(this);
+  late final $MidiasTable midias = $MidiasTable(this);
   late final $ResponsaveisSitioTable responsaveisSitio =
       $ResponsaveisSitioTable(this);
   late final $AuditoriasTable auditorias = $AuditoriasTable(this);
@@ -4775,7 +4923,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     bensMateriais,
     usuarios,
     curadorias,
-    midiaLinks,
+    midias,
     responsaveisSitio,
     auditorias,
     coletasUsuarioIdx,
@@ -5405,26 +5553,6 @@ final class $$BensMateriaisTableReferences
     );
   }
 
-  static MultiTypedResultKey<$MidiaLinksTable, List<MidiaLink>>
-  _midiaLinksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.midiaLinks,
-    aliasName: $_aliasNameGenerator(
-      db.bensMateriais.uuid,
-      db.midiaLinks.bemMaterialId,
-    ),
-  );
-
-  $$MidiaLinksTableProcessedTableManager get midiaLinksRefs {
-    final manager = $$MidiaLinksTableTableManager($_db, $_db.midiaLinks).filter(
-      (f) => f.bemMaterialId.uuid.sqlEquals($_itemColumn<String>('uuid')!),
-    );
-
-    final cache = $_typedResult.readTableOrNull(_midiaLinksRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
   static MultiTypedResultKey<
     $ResponsaveisSitioTable,
     List<ResponsaveisSitioData>
@@ -5597,31 +5725,6 @@ class $$BensMateriaisTableFilterComposer
           }) => $$CuradoriasTableFilterComposer(
             $db: $db,
             $table: $db.curadorias,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> midiaLinksRefs(
-    Expression<bool> Function($$MidiaLinksTableFilterComposer f) f,
-  ) {
-    final $$MidiaLinksTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.uuid,
-      referencedTable: $db.midiaLinks,
-      getReferencedColumn: (t) => t.bemMaterialId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$MidiaLinksTableFilterComposer(
-            $db: $db,
-            $table: $db.midiaLinks,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5901,31 +6004,6 @@ class $$BensMateriaisTableAnnotationComposer
     return f(composer);
   }
 
-  Expression<T> midiaLinksRefs<T extends Object>(
-    Expression<T> Function($$MidiaLinksTableAnnotationComposer a) f,
-  ) {
-    final $$MidiaLinksTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.uuid,
-      referencedTable: $db.midiaLinks,
-      getReferencedColumn: (t) => t.bemMaterialId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$MidiaLinksTableAnnotationComposer(
-            $db: $db,
-            $table: $db.midiaLinks,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
   Expression<T> responsaveisSitioRefs<T extends Object>(
     Expression<T> Function($$ResponsaveisSitioTableAnnotationComposer a) f,
   ) {
@@ -5968,7 +6046,6 @@ class $$BensMateriaisTableTableManager
           BensMateriai,
           PrefetchHooks Function({
             bool curadoriasRefs,
-            bool midiaLinksRefs,
             bool responsaveisSitioRefs,
           })
         > {
@@ -6096,16 +6173,11 @@ class $$BensMateriaisTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({
-                curadoriasRefs = false,
-                midiaLinksRefs = false,
-                responsaveisSitioRefs = false,
-              }) {
+              ({curadoriasRefs = false, responsaveisSitioRefs = false}) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (curadoriasRefs) db.curadorias,
-                    if (midiaLinksRefs) db.midiaLinks,
                     if (responsaveisSitioRefs) db.responsaveisSitio,
                   ],
                   addJoins: null,
@@ -6126,27 +6198,6 @@ class $$BensMateriaisTableTableManager
                                 table,
                                 p0,
                               ).curadoriasRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.bemMaterialId == item.uuid,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (midiaLinksRefs)
-                        await $_getPrefetchedData<
-                          BensMateriai,
-                          $BensMateriaisTable,
-                          MidiaLink
-                        >(
-                          currentTable: table,
-                          referencedTable: $$BensMateriaisTableReferences
-                              ._midiaLinksRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$BensMateriaisTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).midiaLinksRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.bemMaterialId == item.uuid,
@@ -6194,11 +6245,7 @@ typedef $$BensMateriaisTableProcessedTableManager =
       $$BensMateriaisTableUpdateCompanionBuilder,
       (BensMateriai, $$BensMateriaisTableReferences),
       BensMateriai,
-      PrefetchHooks Function({
-        bool curadoriasRefs,
-        bool midiaLinksRefs,
-        bool responsaveisSitioRefs,
-      })
+      PrefetchHooks Function({bool curadoriasRefs, bool responsaveisSitioRefs})
     >;
 typedef $$UsuariosTableCreateCompanionBuilder =
     UsuariosCompanion Function({
@@ -7345,63 +7392,62 @@ typedef $$CuradoriasTableProcessedTableManager =
         bool auditoriasRefs,
       })
     >;
-typedef $$MidiaLinksTableCreateCompanionBuilder =
-    MidiaLinksCompanion Function({
-      required String uuid,
-      required String bemMaterialId,
-      Value<TipoMidia> tipo,
+typedef $$MidiasTableCreateCompanionBuilder =
+    MidiasCompanion Function({
+      required String id,
+      required String mediableType,
+      required String mediableId,
+      required String storagePath,
+      required String mimeType,
+      required TipoMidia tipo,
       required String url,
       Value<String?> descricao,
       Value<int> rowid,
     });
-typedef $$MidiaLinksTableUpdateCompanionBuilder =
-    MidiaLinksCompanion Function({
-      Value<String> uuid,
-      Value<String> bemMaterialId,
+typedef $$MidiasTableUpdateCompanionBuilder =
+    MidiasCompanion Function({
+      Value<String> id,
+      Value<String> mediableType,
+      Value<String> mediableId,
+      Value<String> storagePath,
+      Value<String> mimeType,
       Value<TipoMidia> tipo,
       Value<String> url,
       Value<String?> descricao,
       Value<int> rowid,
     });
 
-final class $$MidiaLinksTableReferences
-    extends BaseReferences<_$AppDatabase, $MidiaLinksTable, MidiaLink> {
-  $$MidiaLinksTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static $BensMateriaisTable _bemMaterialIdTable(_$AppDatabase db) =>
-      db.bensMateriais.createAlias(
-        $_aliasNameGenerator(
-          db.midiaLinks.bemMaterialId,
-          db.bensMateriais.uuid,
-        ),
-      );
-
-  $$BensMateriaisTableProcessedTableManager get bemMaterialId {
-    final $_column = $_itemColumn<String>('bem_material_id')!;
-
-    final manager = $$BensMateriaisTableTableManager(
-      $_db,
-      $_db.bensMateriais,
-    ).filter((f) => f.uuid.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_bemMaterialIdTable($_db));
-    if (item == null) return manager;
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
-    );
-  }
-}
-
-class $$MidiaLinksTableFilterComposer
-    extends Composer<_$AppDatabase, $MidiaLinksTable> {
-  $$MidiaLinksTableFilterComposer({
+class $$MidiasTableFilterComposer
+    extends Composer<_$AppDatabase, $MidiasTable> {
+  $$MidiasTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get uuid => $composableBuilder(
-    column: $table.uuid,
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mediableType => $composableBuilder(
+    column: $table.mediableType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mediableId => $composableBuilder(
+    column: $table.mediableId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get storagePath => $composableBuilder(
+    column: $table.storagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mimeType => $composableBuilder(
+    column: $table.mimeType,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7420,42 +7466,39 @@ class $$MidiaLinksTableFilterComposer
     column: $table.descricao,
     builder: (column) => ColumnFilters(column),
   );
-
-  $$BensMateriaisTableFilterComposer get bemMaterialId {
-    final $$BensMateriaisTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.bemMaterialId,
-      referencedTable: $db.bensMateriais,
-      getReferencedColumn: (t) => t.uuid,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BensMateriaisTableFilterComposer(
-            $db: $db,
-            $table: $db.bensMateriais,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
-class $$MidiaLinksTableOrderingComposer
-    extends Composer<_$AppDatabase, $MidiaLinksTable> {
-  $$MidiaLinksTableOrderingComposer({
+class $$MidiasTableOrderingComposer
+    extends Composer<_$AppDatabase, $MidiasTable> {
+  $$MidiasTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get uuid => $composableBuilder(
-    column: $table.uuid,
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mediableType => $composableBuilder(
+    column: $table.mediableType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mediableId => $composableBuilder(
+    column: $table.mediableId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get storagePath => $composableBuilder(
+    column: $table.storagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mimeType => $composableBuilder(
+    column: $table.mimeType,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -7473,42 +7516,37 @@ class $$MidiaLinksTableOrderingComposer
     column: $table.descricao,
     builder: (column) => ColumnOrderings(column),
   );
-
-  $$BensMateriaisTableOrderingComposer get bemMaterialId {
-    final $$BensMateriaisTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.bemMaterialId,
-      referencedTable: $db.bensMateriais,
-      getReferencedColumn: (t) => t.uuid,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BensMateriaisTableOrderingComposer(
-            $db: $db,
-            $table: $db.bensMateriais,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
-class $$MidiaLinksTableAnnotationComposer
-    extends Composer<_$AppDatabase, $MidiaLinksTable> {
-  $$MidiaLinksTableAnnotationComposer({
+class $$MidiasTableAnnotationComposer
+    extends Composer<_$AppDatabase, $MidiasTable> {
+  $$MidiasTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get uuid =>
-      $composableBuilder(column: $table.uuid, builder: (column) => column);
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get mediableType => $composableBuilder(
+    column: $table.mediableType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get mediableId => $composableBuilder(
+    column: $table.mediableId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get storagePath => $composableBuilder(
+    column: $table.storagePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get mimeType =>
+      $composableBuilder(column: $table.mimeType, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<TipoMidia, String> get tipo =>
       $composableBuilder(column: $table.tipo, builder: (column) => column);
@@ -7518,68 +7556,51 @@ class $$MidiaLinksTableAnnotationComposer
 
   GeneratedColumn<String> get descricao =>
       $composableBuilder(column: $table.descricao, builder: (column) => column);
-
-  $$BensMateriaisTableAnnotationComposer get bemMaterialId {
-    final $$BensMateriaisTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.bemMaterialId,
-      referencedTable: $db.bensMateriais,
-      getReferencedColumn: (t) => t.uuid,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$BensMateriaisTableAnnotationComposer(
-            $db: $db,
-            $table: $db.bensMateriais,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
-class $$MidiaLinksTableTableManager
+class $$MidiasTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $MidiaLinksTable,
-          MidiaLink,
-          $$MidiaLinksTableFilterComposer,
-          $$MidiaLinksTableOrderingComposer,
-          $$MidiaLinksTableAnnotationComposer,
-          $$MidiaLinksTableCreateCompanionBuilder,
-          $$MidiaLinksTableUpdateCompanionBuilder,
-          (MidiaLink, $$MidiaLinksTableReferences),
-          MidiaLink,
-          PrefetchHooks Function({bool bemMaterialId})
+          $MidiasTable,
+          Midia,
+          $$MidiasTableFilterComposer,
+          $$MidiasTableOrderingComposer,
+          $$MidiasTableAnnotationComposer,
+          $$MidiasTableCreateCompanionBuilder,
+          $$MidiasTableUpdateCompanionBuilder,
+          (Midia, BaseReferences<_$AppDatabase, $MidiasTable, Midia>),
+          Midia,
+          PrefetchHooks Function()
         > {
-  $$MidiaLinksTableTableManager(_$AppDatabase db, $MidiaLinksTable table)
+  $$MidiasTableTableManager(_$AppDatabase db, $MidiasTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$MidiaLinksTableFilterComposer($db: db, $table: table),
+              $$MidiasTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$MidiaLinksTableOrderingComposer($db: db, $table: table),
+              $$MidiasTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$MidiaLinksTableAnnotationComposer($db: db, $table: table),
+              $$MidiasTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<String> uuid = const Value.absent(),
-                Value<String> bemMaterialId = const Value.absent(),
+                Value<String> id = const Value.absent(),
+                Value<String> mediableType = const Value.absent(),
+                Value<String> mediableId = const Value.absent(),
+                Value<String> storagePath = const Value.absent(),
+                Value<String> mimeType = const Value.absent(),
                 Value<TipoMidia> tipo = const Value.absent(),
                 Value<String> url = const Value.absent(),
                 Value<String?> descricao = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => MidiaLinksCompanion(
-                uuid: uuid,
-                bemMaterialId: bemMaterialId,
+              }) => MidiasCompanion(
+                id: id,
+                mediableType: mediableType,
+                mediableId: mediableId,
+                storagePath: storagePath,
+                mimeType: mimeType,
                 tipo: tipo,
                 url: url,
                 descricao: descricao,
@@ -7587,86 +7608,47 @@ class $$MidiaLinksTableTableManager
               ),
           createCompanionCallback:
               ({
-                required String uuid,
-                required String bemMaterialId,
-                Value<TipoMidia> tipo = const Value.absent(),
+                required String id,
+                required String mediableType,
+                required String mediableId,
+                required String storagePath,
+                required String mimeType,
+                required TipoMidia tipo,
                 required String url,
                 Value<String?> descricao = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => MidiaLinksCompanion.insert(
-                uuid: uuid,
-                bemMaterialId: bemMaterialId,
+              }) => MidiasCompanion.insert(
+                id: id,
+                mediableType: mediableType,
+                mediableId: mediableId,
+                storagePath: storagePath,
+                mimeType: mimeType,
                 tipo: tipo,
                 url: url,
                 descricao: descricao,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$MidiaLinksTableReferences(db, table, e),
-                ),
-              )
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({bemMaterialId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (bemMaterialId) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.bemMaterialId,
-                                referencedTable: $$MidiaLinksTableReferences
-                                    ._bemMaterialIdTable(db),
-                                referencedColumn: $$MidiaLinksTableReferences
-                                    ._bemMaterialIdTable(db)
-                                    .uuid,
-                              )
-                              as T;
-                    }
-
-                    return state;
-                  },
-              getPrefetchedDataCallback: (items) async {
-                return [];
-              },
-            );
-          },
+          prefetchHooksCallback: null,
         ),
       );
 }
 
-typedef $$MidiaLinksTableProcessedTableManager =
+typedef $$MidiasTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $MidiaLinksTable,
-      MidiaLink,
-      $$MidiaLinksTableFilterComposer,
-      $$MidiaLinksTableOrderingComposer,
-      $$MidiaLinksTableAnnotationComposer,
-      $$MidiaLinksTableCreateCompanionBuilder,
-      $$MidiaLinksTableUpdateCompanionBuilder,
-      (MidiaLink, $$MidiaLinksTableReferences),
-      MidiaLink,
-      PrefetchHooks Function({bool bemMaterialId})
+      $MidiasTable,
+      Midia,
+      $$MidiasTableFilterComposer,
+      $$MidiasTableOrderingComposer,
+      $$MidiasTableAnnotationComposer,
+      $$MidiasTableCreateCompanionBuilder,
+      $$MidiasTableUpdateCompanionBuilder,
+      (Midia, BaseReferences<_$AppDatabase, $MidiasTable, Midia>),
+      Midia,
+      PrefetchHooks Function()
     >;
 typedef $$ResponsaveisSitioTableCreateCompanionBuilder =
     ResponsaveisSitioCompanion Function({
@@ -8546,8 +8528,8 @@ class $AppDatabaseManager {
       $$UsuariosTableTableManager(_db, _db.usuarios);
   $$CuradoriasTableTableManager get curadorias =>
       $$CuradoriasTableTableManager(_db, _db.curadorias);
-  $$MidiaLinksTableTableManager get midiaLinks =>
-      $$MidiaLinksTableTableManager(_db, _db.midiaLinks);
+  $$MidiasTableTableManager get midias =>
+      $$MidiasTableTableManager(_db, _db.midias);
   $$ResponsaveisSitioTableTableManager get responsaveisSitio =>
       $$ResponsaveisSitioTableTableManager(_db, _db.responsaveisSitio);
   $$AuditoriasTableTableManager get auditorias =>

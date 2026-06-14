@@ -9,7 +9,7 @@ import 'tables/usuarios_table.dart';
 import 'tables/coletas_table.dart';
 import 'tables/bens_materiais_table.dart';
 import 'tables/curadorias_table.dart';
-import 'tables/midia_links_table.dart';
+import 'tables/midias_table.dart';
 import 'tables/responsaveis_sitio_table.dart';
 import 'tables/auditorias_table.dart';
 
@@ -25,7 +25,7 @@ part 'app_database.g.dart';
     Coletas,
     BensMateriais,
     Curadorias,
-    MidiaLinks,
+    Midias,
     ResponsaveisSitio,
     Auditorias,
   ],
@@ -34,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -56,6 +56,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 7) {
         await customStatement('DROP TABLE IF EXISTS bens_materiais');
         await m.createTable(bensMateriais);
+      }
+      if (from < 8) {
+        await customStatement('DROP TABLE IF EXISTS midia_links');
+        await m.createTable(midias);
       }
     },
     beforeOpen: (details) async {

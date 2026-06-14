@@ -39,6 +39,35 @@ class ColetaModel extends ColetaEntity {
   List<MidiaModel> get midias => super.midias.cast<MidiaModel>();
 
   factory ColetaModel.fromRow(Coleta row) {
+    final dados = row.dadosColetados;
+
+    // Tenta recuperar localizacao completa dos dados coletados
+    LocalizacaoModel? localizacao;
+    if (dados['localizacao_completa'] != null) {
+      localizacao = LocalizacaoModel.fromJson(
+        dados['localizacao_completa'] as Map<String, dynamic>,
+      );
+    } else {
+      localizacao = LocalizacaoModel(
+        id: 'local-${row.uuid}',
+        uf: row.uf,
+        lat: row.latitude,
+        lng: row.longitude,
+      );
+    }
+
+    // Tenta recuperar artefatos completos
+    List<ArtefatoTipoModel> artefatos;
+    if (dados['artefatos_completos'] != null) {
+      artefatos = (dados['artefatos_completos'] as List)
+          .map((e) => ArtefatoTipoModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } else {
+      artefatos = row.artefatos
+          .map((e) => ArtefatoTipoModel(id: 'tipo-$e', nome: e))
+          .toList();
+    }
+
     return ColetaModel(
       id: row.uuid,
       usuarioId: row.usuarioId,
@@ -58,18 +87,11 @@ class ColetaModel extends ColetaEntity {
             )
           : null,
       uf: row.uf,
-      localizacao: LocalizacaoModel(
-        id: 'local-${row.uuid}',
-        uf: row.uf,
-        lat: row.latitude,
-        lng: row.longitude,
-      ),
-      artefatoTipos: row.artefatos
-          .map((e) => ArtefatoTipoModel(id: 'tipo-$e', nome: e))
-          .toList(),
+      localizacao: localizacao,
+      artefatoTipos: artefatos,
       versao: row.versao,
       updatedAt: row.updatedAt,
-      dadosColetados: row.dadosColetados,
+      dadosColetados: dados,
       midias: [], // Midias are loaded separately or from a joined table
       deletadoEm: row.deletadoEm,
     );
@@ -199,6 +221,15 @@ class ColetaModel extends ColetaEntity {
   }
 
   ColetasCompanion toCompanion() {
+    final novosDados = Map<String, dynamic>.from(dadosColetados);
+
+    if (localizacao != null) {
+      novosDados['localizacao_completa'] = localizacao!.toJson();
+    }
+    novosDados['artefatos_completos'] = artefatoTipos
+        .map((e) => e.toJson())
+        .toList();
+
     return ColetasCompanion.insert(
       uuid: id,
       usuarioId: usuarioId,
@@ -207,13 +238,13 @@ class ColetaModel extends ColetaEntity {
       nomeBem: Value(nomeBem),
       natureza: Value(natureza?.name),
       tipo: Value(tipo?.name),
-      uf: Value(uf),
+      uf: Value(localizacao?.uf),
       latitude: Value(localizacao?.lat ?? 0.0),
       longitude: Value(localizacao?.lng ?? 0.0),
       artefatos: Value(artefatoTipos.map((e) => e.nome).toList()),
       versao: Value(versao),
       updatedAt: Value(updatedAt),
-      dadosColetados: dadosColetados,
+      dadosColetados: novosDados,
       deletadoEm: Value(deletadoEm),
     );
   }

@@ -1,3 +1,5 @@
+import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
 import "../../helpers/stub_midia_repository.dart";
 // Testes de ciclo automatizados:
 // preenche → salva → [logout: prefs NÃO são limpas] → login → restaura
@@ -10,7 +12,6 @@ import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
@@ -39,13 +40,16 @@ ColetaFormNotifier _criarNotifier({File? foto}) {
   );
 }
 
+const _artefatoCeramica = ArtefatoTipoEntity(id: '1', nome: 'Cerâmica');
+const _artefatoLitico = ArtefatoTipoEntity(id: '2', nome: 'Lítico');
+
 void _preencherFormularioCompleto(ColetaFormNotifier n) {
   n.setNome('Sítio Lapa do Sol');
   n.setNomesPopulares('Caverna do Sol, Gruta Amarela');
   n.setNatureza(NaturezaBem.bemArqueologico);
   n.setTipo(TipoBem.sitio);
-  n.toggleArtefato(ArtefatoBem.ceramica);
-  n.toggleArtefato(ArtefatoBem.litico);
+  n.setLocalizacao(const LocalizacaoModel(id: 'l1', uf: 'PI'));
+  n.setArtefatos([_artefatoCeramica, _artefatoLitico]);
   n.setMeiosAcesso('Estrada de terra, 5 km após o posto.');
 }
 
@@ -73,8 +77,8 @@ void main() {
       check(sessao2.nome).equals('Sítio Lapa do Sol');
       check(sessao2.natureza).equals(NaturezaBem.bemArqueologico);
       check(sessao2.tipo).equals(TipoBem.sitio);
-      check(sessao2.artefatos).contains(ArtefatoBem.ceramica);
-      check(sessao2.artefatos).contains(ArtefatoBem.litico);
+      check(sessao2.artefatos.map((e) => e.id)).contains('1');
+      check(sessao2.artefatos.map((e) => e.id)).contains('2');
       check(sessao2.meiosAcesso).equals('Estrada de terra, 5 km após o posto.');
       check(
         sessao2.nomesPopulares,

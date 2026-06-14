@@ -1,9 +1,10 @@
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/criar_coleta_use_case.dart';
 
 CriarColetaInput _inputValido({String nome = 'Sítio das Pedras'}) =>
@@ -12,11 +13,14 @@ CriarColetaInput _inputValido({String nome = 'Sítio das Pedras'}) =>
       nomesPopulares: const ['Pedreira'],
       natureza: NaturezaBem.bemArqueologico,
       tipo: TipoBem.sitio,
-      artefatos: const [ArtefatoBem.ceramica],
+      artefatoTipos: const [ArtefatoTipoEntity(id: '1', nome: 'Cerâmica')],
       meiosAcesso: 'A pé, 30 min',
       midias: const [],
-      lat: -2.9078,
-      lng: -41.7722,
+      localizacao: const LocalizacaoEntity(
+        id: 'loc-1',
+        lat: -2.9078,
+        lng: -41.7722,
+      ),
       usuarioId: 'usuario-42',
     );
 
@@ -92,10 +96,9 @@ void main() {
       const input = CriarColetaInput(
         nome: '',
         nomesPopulares: [],
-        artefatos: [],
+        artefatoTipos: [],
         midias: [],
-        lat: 0,
-        lng: 0,
+        localizacao: LocalizacaoEntity(id: 'l1', lat: 0, lng: 0),
         usuarioId: 'u1',
       );
 

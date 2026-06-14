@@ -1,9 +1,10 @@
+import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
 import "../../helpers/stub_midia_repository.dart";
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/artefato_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
@@ -23,6 +24,9 @@ ColetaFormNotifier _criarNotifier() => ColetaFormNotifier(
   mediaService: _StubMediaService(),
 );
 
+const _artefatoCeramica = ArtefatoTipoEntity(id: '1', nome: 'Cerâmica');
+const _artefatoLitico = ArtefatoTipoEntity(id: '2', nome: 'Lítico');
+
 void main() {
   group('ColetaFormNotifier.passo1Valido', () {
     test('nome vazio → passo1Valido é false', () {
@@ -41,6 +45,7 @@ void main() {
       notifier.setNome('Sítio A');
       notifier.setNatureza(NaturezaBem.bemArqueologico);
       notifier.setTipo(TipoBem.sitio);
+      notifier.setLocalizacao(const LocalizacaoModel(id: 'l1', uf: 'PI'));
       expect(notifier.passo1Valido, isTrue);
     });
 
@@ -49,51 +54,39 @@ void main() {
       notifier.setNome('   ');
       notifier.setNatureza(NaturezaBem.bemArqueologico);
       notifier.setTipo(TipoBem.sitio);
+      notifier.setLocalizacao(const LocalizacaoModel(id: 'l1', uf: 'PI'));
       expect(notifier.passo1Valido, isFalse);
     });
   });
 
-  group('ColetaFormNotifier.toggleArtefato', () {
-    test('primeiro toggle adiciona artefato', () {
+  group('ColetaFormNotifier.setArtefatos', () {
+    test('setArtefatos adiciona artefatos e valida passo 2', () {
       final notifier = _criarNotifier();
 
-      notifier.toggleArtefato(ArtefatoBem.ceramica);
+      notifier.setArtefatos([_artefatoCeramica]);
 
-      expect(notifier.artefatos, contains(ArtefatoBem.ceramica));
+      expect(notifier.artefatos, contains(_artefatoCeramica));
       expect(notifier.passo2Valido, isTrue);
     });
 
-    test('segundo toggle no mesmo artefato o remove', () {
+    test('lista vazia invalida o passo 2', () {
       final notifier = _criarNotifier();
-      notifier.toggleArtefato(ArtefatoBem.ceramica);
+      notifier.setArtefatos([_artefatoCeramica]);
+      expect(notifier.passo2Valido, isTrue);
 
-      notifier.toggleArtefato(ArtefatoBem.ceramica);
+      notifier.setArtefatos([]);
 
-      expect(notifier.artefatos, isNot(contains(ArtefatoBem.ceramica)));
+      expect(notifier.artefatos, isEmpty);
       expect(notifier.passo2Valido, isFalse);
     });
 
-    test('toggles independentes acumulam artefatos distintos', () {
+    test('isArtefatoSelecionado funciona corretamente', () {
       final notifier = _criarNotifier();
 
-      notifier.toggleArtefato(ArtefatoBem.ceramica);
-      notifier.toggleArtefato(ArtefatoBem.litico);
+      notifier.setArtefatos([_artefatoCeramica]);
 
-      expect(
-        notifier.artefatos,
-        containsAll([ArtefatoBem.ceramica, ArtefatoBem.litico]),
-      );
-    });
-
-    test('remover um artefato não afeta os outros', () {
-      final notifier = _criarNotifier();
-      notifier.toggleArtefato(ArtefatoBem.ceramica);
-      notifier.toggleArtefato(ArtefatoBem.litico);
-
-      notifier.toggleArtefato(ArtefatoBem.ceramica);
-
-      expect(notifier.artefatos, isNot(contains(ArtefatoBem.ceramica)));
-      expect(notifier.artefatos, contains(ArtefatoBem.litico));
+      expect(notifier.isArtefatoSelecionado(_artefatoCeramica.id), isTrue);
+      expect(notifier.isArtefatoSelecionado(_artefatoLitico.id), isFalse);
     });
   });
 
@@ -105,23 +98,26 @@ void main() {
         notifier.setNome('Sítio das Pedras');
         notifier.setNatureza(NaturezaBem.bemArqueologico);
         notifier.setTipo(TipoBem.sitio);
-        notifier.toggleArtefato(ArtefatoBem.ceramica);
-        notifier.toggleArtefato(ArtefatoBem.litico);
+        notifier.setLocalizacao(
+          const LocalizacaoModel(
+            id: 'loc-1',
+            uf: 'PI',
+            lat: -2.9078,
+            lng: -41.7722,
+          ),
+        );
+        notifier.setArtefatos([_artefatoCeramica, _artefatoLitico]);
         notifier.setMeiosAcesso('A pé, 30 min');
         notifier.setNomesPopulares('Pedreira, Sítio da Serra');
 
-        final result = await notifier.toResult(
-          lat: -2.9078,
-          lng: -41.7722,
-          usuarioId: 'usuario-42',
-        );
+        final result = await notifier.toResult(usuarioId: 'usuario-42');
 
         expect(result.coleta.nomeBem, 'Sítio das Pedras');
         expect(result.coleta.natureza, NaturezaBem.bemArqueologico);
         expect(result.coleta.tipo, TipoBem.sitio);
         expect(
           result.coleta.artefatoTipos.map((e) => e.nome),
-          containsAll([ArtefatoBem.ceramica.name, ArtefatoBem.litico.name]),
+          containsAll(['Cerâmica', 'Lítico']),
         );
         expect(result.coleta.localizacao?.lat, closeTo(-2.9078, 0.0001));
         expect(result.coleta.localizacao?.lng, closeTo(-41.7722, 0.0001));
@@ -141,13 +137,10 @@ void main() {
       notifier.setNome('Sítio X');
       notifier.setNatureza(NaturezaBem.bemArqueologico);
       notifier.setTipo(TipoBem.sitio);
-      notifier.toggleArtefato(ArtefatoBem.ceramica);
+      notifier.setLocalizacao(const LocalizacaoModel(id: 'l1', uf: 'PI'));
+      notifier.setArtefatos([_artefatoCeramica]);
 
-      final result = await notifier.toResult(
-        lat: -3.0,
-        lng: -42.0,
-        usuarioId: 'u1',
-      );
+      final result = await notifier.toResult(usuarioId: 'u1');
 
       expect(result.coleta.id, isNotEmpty);
       expect(result.bemMaterial.id, isNotEmpty);

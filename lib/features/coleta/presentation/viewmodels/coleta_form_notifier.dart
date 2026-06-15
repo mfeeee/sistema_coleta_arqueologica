@@ -28,6 +28,16 @@ class ColetaFormNotifier extends ChangeNotifier {
        _uploadMidiaUseCase = uploadMidiaUseCase,
        _criarColetaUseCase = criarColetaUseCase;
 
+  // Passo Atual (para UI)
+  int _passoAtual = 0;
+  int get passoAtual => _passoAtual;
+
+  void setPassoAtual(int value) {
+    if (_passoAtual == value) return;
+    _passoAtual = value;
+    notifyListeners();
+  }
+
   // Passo 1
   String nome = '';
   List<String> nomesPopulares = [];

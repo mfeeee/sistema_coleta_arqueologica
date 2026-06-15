@@ -18,6 +18,10 @@ class ColetasViewModel {
       .where((c) => c.syncStatus == StatusColeta.pendente)
       .toList();
 
+  List<ColetaEntity> get rascunhos => coletas.value
+      .where((c) => c.syncStatus == StatusColeta.rascunho)
+      .toList();
+
   List<ColetaEntity> get sincronizadas => coletas.value
       .where((c) => c.syncStatus == StatusColeta.sincronizado)
       .toList();
@@ -55,6 +59,21 @@ class ColetasViewModel {
   }
 
   Future<void> atualizar() => carregarColetas();
+
+  Future<void> deletarColeta(String id) async {
+    try {
+      await _repository.deletar(id);
+      await atualizar();
+    } catch (e, st) {
+      log(
+        'Erro ao deletar coleta',
+        error: e,
+        stackTrace: st,
+        name: 'ColetasViewModel',
+      );
+      erro.value = 'Não foi possível excluir a coleta. Tente novamente.';
+    }
+  }
 
   void dispose() {
     coletas.dispose();

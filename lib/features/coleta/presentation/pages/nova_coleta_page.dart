@@ -12,7 +12,8 @@ import '../widgets/alerta_proximidade_widget.dart';
 import '../widgets/wizard/coleta_wizard_widget.dart';
 
 class NovaColetaPage extends StatefulWidget {
-  const NovaColetaPage({super.key});
+  final String? id;
+  const NovaColetaPage({super.key, this.id});
 
   @override
   State<NovaColetaPage> createState() => _NovaColetaPageState();
@@ -41,10 +42,17 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     final geolocatorHelper = GeolocatorHelper();
 
     _formNotifier = ColetaFormNotifier(
+      id: widget.id,
       mediaService: scope.mediaService,
       uploadMidiaUseCase: scope.uploadMidiaUseCase,
     );
-    _formNotifier.restaurarDePrefs(_prefs);
+
+    if (widget.id != null) {
+      _carregarColetaExistente(widget.id!);
+    } else {
+      _formNotifier.restaurarDePrefs(_prefs);
+    }
+
     _conectividadeService = scope.conectividadeService;
 
     _viewModel = ColetaViewModel(
@@ -52,6 +60,21 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
       geolocatorHelper: geolocatorHelper,
     );
     _viewModel.iniciarMapeamento();
+  }
+
+  Future<void> _carregarColetaExistente(String id) async {
+    setState(() => _saving = true);
+    try {
+      final scope = AppScope.of(context);
+      final coleta = await scope.coletaRepository.getById(id);
+      if (coleta != null) {
+        _formNotifier.restaurarDeEntity(coleta);
+      }
+    } catch (e, st) {
+      log('Erro ao carregar coleta existente', error: e, stackTrace: st);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
@@ -139,9 +162,9 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
             preferredSize: const Size.fromHeight(1.0),
             child: Container(height: 1.0),
           ),
-          title: const Text(
-            'Nova Coleta - Passo 1/3',
-            style: TextStyle(
+          title: Text(
+            widget.id != null ? 'Editar Coleta' : 'Nova Coleta - Passo 1/3',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               letterSpacing: -0.45,

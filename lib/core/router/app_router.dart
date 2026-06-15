@@ -67,7 +67,11 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
         ],
       ),
       GoRoute(path: '/perfil', builder: (_, __) => const ProfilePage()),
-      GoRoute(path: '/nova-coleta', builder: (_, __) => const NovaColetaPage()),
+      GoRoute(
+        path: '/nova-coleta',
+        builder: (_, GoRouterState state) =>
+            NovaColetaPage(id: state.extra as String?),
+      ),
       GoRoute(
         path: '/detalhes-coleta',
         builder: (_, GoRouterState state) =>

@@ -548,6 +548,366 @@ abstract class AppLocalizations {
   /// **'Coleta salva com sucesso!'**
   String get coletaSuccess;
 
+  /// No description provided for @coletaStatusSincronizado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sincronizado'**
+  String get coletaStatusSincronizado;
+
+  /// No description provided for @coletaStatusNaoSincronizado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não sincronizado'**
+  String get coletaStatusNaoSincronizado;
+
+  /// No description provided for @coletaStatusAprovado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovado'**
+  String get coletaStatusAprovado;
+
+  /// No description provided for @coletaStatusRejeitado.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitado'**
+  String get coletaStatusRejeitado;
+
+  /// No description provided for @coletaStatusRascunho.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rascunho'**
+  String get coletaStatusRascunho;
+
+  /// No description provided for @coletaStatusPendente.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendente'**
+  String get coletaStatusPendente;
+
+  /// No description provided for @coletaDatePrefix.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coletado em: {date}'**
+  String coletaDatePrefix(String date);
+
+  /// No description provided for @coletaActionEdit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar'**
+  String get coletaActionEdit;
+
+  /// No description provided for @coletaActionSyncNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sincronizar Agora'**
+  String get coletaActionSyncNow;
+
+  /// No description provided for @coletaActionViewDetails.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver Detalhes'**
+  String get coletaActionViewDetails;
+
+  /// No description provided for @coletaActionContinueDraft.
+  ///
+  /// In pt, this message translates to:
+  /// **'Continuar Rascunho'**
+  String get coletaActionContinueDraft;
+
+  /// No description provided for @coletaActionDeleteDraft.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir Rascunho'**
+  String get coletaActionDeleteDraft;
+
+  /// No description provided for @coletaActionDiscard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Descartar'**
+  String get coletaActionDiscard;
+
+  /// No description provided for @coletaActionContinueEditing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Continuar Editando'**
+  String get coletaActionContinueEditing;
+
+  /// No description provided for @coletaActionSaveDraft.
+  ///
+  /// In pt, this message translates to:
+  /// **'Salvar Rascunho'**
+  String get coletaActionSaveDraft;
+
+  /// No description provided for @coletaActionFinish.
+  ///
+  /// In pt, this message translates to:
+  /// **'Finalizar Coleta'**
+  String get coletaActionFinish;
+
+  /// No description provided for @coletaExitTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sair da Coleta?'**
+  String get coletaExitTitle;
+
+  /// No description provided for @coletaExitContent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você tem alterações não salvas. Deseja salvar como rascunho ou descartar tudo?'**
+  String get coletaExitContent;
+
+  /// No description provided for @coletaDraftSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rascunho salvo com sucesso.'**
+  String get coletaDraftSuccess;
+
+  /// No description provided for @coletaDraftError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao salvar rascunho.'**
+  String get coletaDraftError;
+
+  /// No description provided for @coletaCoordsUnavailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coordenadas não disponíveis.'**
+  String get coletaCoordsUnavailable;
+
+  /// No description provided for @coletaFinishSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coleta finalizada com sucesso! Pronta para envio.'**
+  String get coletaFinishSuccess;
+
+  /// No description provided for @coletaFinishError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao finalizar. Tente novamente.'**
+  String get coletaFinishError;
+
+  /// No description provided for @coletaOfflineBanner.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você está offline. A coleta será salva localmente.'**
+  String get coletaOfflineBanner;
+
+  /// No description provided for @coletaLoadingGps.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obtendo sua localização e verificando sítios próximos...'**
+  String get coletaLoadingGps;
+
+  /// No description provided for @coletaRetryGps.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tentar Novamente'**
+  String get coletaRetryGps;
+
+  /// No description provided for @coletaGrantPermission.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conceder Permissão'**
+  String get coletaGrantPermission;
+
+  /// No description provided for @coletaOpenAppSettings.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir Configurações do App'**
+  String get coletaOpenAppSettings;
+
+  /// No description provided for @coletaEnableLocation.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativar Localização'**
+  String get coletaEnableLocation;
+
+  /// No description provided for @coletaRetakeTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Retomar Coleta'**
+  String get coletaRetakeTitle;
+
+  /// No description provided for @coletaStepPrefix.
+  ///
+  /// In pt, this message translates to:
+  /// **'Passo {current} de {total}'**
+  String coletaStepPrefix(int current, int total);
+
+  /// No description provided for @coletaSectionAccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meios de Acesso'**
+  String get coletaSectionAccess;
+
+  /// No description provided for @coletaSectionVisuals.
+  ///
+  /// In pt, this message translates to:
+  /// **'Evidências Visuais'**
+  String get coletaSectionVisuals;
+
+  /// No description provided for @coletaAudioBadge.
+  ///
+  /// In pt, this message translates to:
+  /// **'ÁUDIO'**
+  String get coletaAudioBadge;
+
+  /// No description provided for @coletaCameraBadge.
+  ///
+  /// In pt, this message translates to:
+  /// **'CÂMERA'**
+  String get coletaCameraBadge;
+
+  /// No description provided for @coletaAudioHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque no microfone para descrever os meios de acesso.'**
+  String get coletaAudioHint;
+
+  /// No description provided for @coletaManualNotes.
+  ///
+  /// In pt, this message translates to:
+  /// **'TRANSCRIÇÃO OU NOTAS MANUAIS (OPCIONAL)'**
+  String get coletaManualNotes;
+
+  /// No description provided for @coletaNotesHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Insira notas adicionais sobre os meios de acesso...'**
+  String get coletaNotesHint;
+
+  /// No description provided for @coletaFinishBanner.
+  ///
+  /// In pt, this message translates to:
+  /// **'A COLETA SERÁ SALVA LOCALMENTE E FICARÁ PENDENTE PARA SINCRONIZAÇÃO.'**
+  String get coletaFinishBanner;
+
+  /// No description provided for @coletaRecording.
+  ///
+  /// In pt, this message translates to:
+  /// **'GRAVANDO...'**
+  String get coletaRecording;
+
+  /// No description provided for @coletaTapToRecord.
+  ///
+  /// In pt, this message translates to:
+  /// **'TOQUE PARA GRAVAR'**
+  String get coletaTapToRecord;
+
+  /// No description provided for @coletaStopRecording.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parar gravação'**
+  String get coletaStopRecording;
+
+  /// No description provided for @coletaStartRecording.
+  ///
+  /// In pt, this message translates to:
+  /// **'Iniciar gravação de áudio'**
+  String get coletaStartRecording;
+
+  /// No description provided for @coletaGpsCoords.
+  ///
+  /// In pt, this message translates to:
+  /// **'COORDENADAS GPS'**
+  String get coletaGpsCoords;
+
+  /// No description provided for @coletaLatitude.
+  ///
+  /// In pt, this message translates to:
+  /// **'LATITUDE'**
+  String get coletaLatitude;
+
+  /// No description provided for @coletaLongitude.
+  ///
+  /// In pt, this message translates to:
+  /// **'LONGITUDE'**
+  String get coletaLongitude;
+
+  /// No description provided for @coletaAssetLocation.
+  ///
+  /// In pt, this message translates to:
+  /// **'LOCALIZAÇÃO DO BEM'**
+  String get coletaAssetLocation;
+
+  /// No description provided for @coletaAssetName.
+  ///
+  /// In pt, this message translates to:
+  /// **'NOME DO BEM'**
+  String get coletaAssetName;
+
+  /// No description provided for @coletaPopularNames.
+  ///
+  /// In pt, this message translates to:
+  /// **'NOMES POPULARES'**
+  String get coletaPopularNames;
+
+  /// No description provided for @coletaOptional.
+  ///
+  /// In pt, this message translates to:
+  /// **'(opcional)'**
+  String get coletaOptional;
+
+  /// No description provided for @coletaNature.
+  ///
+  /// In pt, this message translates to:
+  /// **'NATUREZA'**
+  String get coletaNature;
+
+  /// No description provided for @coletaType.
+  ///
+  /// In pt, this message translates to:
+  /// **'TIPO'**
+  String get coletaType;
+
+  /// No description provided for @coletaActionNextStep.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prosseguir para Artefatos'**
+  String get coletaActionNextStep;
+
+  /// No description provided for @coletaActionCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'CANCELAR COLETA'**
+  String get coletaActionCancel;
+
+  /// No description provided for @coletaNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Muro de Arrimo - Setor A'**
+  String get coletaNameHint;
+
+  /// No description provided for @coletaPopularNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como a comunidade local se refere a este bem?'**
+  String get coletaPopularNameHint;
+
+  /// No description provided for @coletaArtifactTypes.
+  ///
+  /// In pt, this message translates to:
+  /// **'TIPOS DE ARTEFATO'**
+  String get coletaArtifactTypes;
+
+  /// No description provided for @coletaArtifactHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione os que foram identificados ou adicione um novo tipo.'**
+  String get coletaArtifactHint;
+
+  /// No description provided for @coletaActionNextStepDocs.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prosseguir para Documentação'**
+  String get coletaActionNextStepDocs;
+
+  /// No description provided for @coletaArtifactRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione ao menos um tipo de artefato.'**
+  String get coletaArtifactRequired;
+
   /// No description provided for @coletasTitle.
   ///
   /// In pt, this message translates to:
@@ -559,6 +919,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'TODOS'**
   String get coletasTabAll;
+
+  /// No description provided for @coletasTabDrafts.
+  ///
+  /// In pt, this message translates to:
+  /// **'RASCUNHOS'**
+  String get coletasTabDrafts;
 
   /// No description provided for @coletasTabPending.
   ///
@@ -601,6 +967,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Registre sua primeira coleta arqueológica.'**
   String get coletasEmptyFirst;
+
+  /// No description provided for @coletasEmptyDrafts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum rascunho salvo.'**
+  String get coletasEmptyDrafts;
 
   /// No description provided for @coletasEmptyPending.
   ///

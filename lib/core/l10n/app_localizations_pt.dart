@@ -252,10 +252,207 @@ class AppLocalizationsPt extends AppLocalizations {
   String get coletaSuccess => 'Coleta salva com sucesso!';
 
   @override
+  String get coletaStatusSincronizado => 'Sincronizado';
+
+  @override
+  String get coletaStatusNaoSincronizado => 'Não sincronizado';
+
+  @override
+  String get coletaStatusAprovado => 'Aprovado';
+
+  @override
+  String get coletaStatusRejeitado => 'Rejeitado';
+
+  @override
+  String get coletaStatusRascunho => 'Rascunho';
+
+  @override
+  String get coletaStatusPendente => 'Pendente';
+
+  @override
+  String coletaDatePrefix(String date) {
+    return 'Coletado em: $date';
+  }
+
+  @override
+  String get coletaActionEdit => 'Editar';
+
+  @override
+  String get coletaActionSyncNow => 'Sincronizar Agora';
+
+  @override
+  String get coletaActionViewDetails => 'Ver Detalhes';
+
+  @override
+  String get coletaActionContinueDraft => 'Continuar Rascunho';
+
+  @override
+  String get coletaActionDeleteDraft => 'Excluir Rascunho';
+
+  @override
+  String get coletaActionDiscard => 'Descartar';
+
+  @override
+  String get coletaActionContinueEditing => 'Continuar Editando';
+
+  @override
+  String get coletaActionSaveDraft => 'Salvar Rascunho';
+
+  @override
+  String get coletaActionFinish => 'Finalizar Coleta';
+
+  @override
+  String get coletaExitTitle => 'Sair da Coleta?';
+
+  @override
+  String get coletaExitContent =>
+      'Você tem alterações não salvas. Deseja salvar como rascunho ou descartar tudo?';
+
+  @override
+  String get coletaDraftSuccess => 'Rascunho salvo com sucesso.';
+
+  @override
+  String get coletaDraftError => 'Erro ao salvar rascunho.';
+
+  @override
+  String get coletaCoordsUnavailable => 'Coordenadas não disponíveis.';
+
+  @override
+  String get coletaFinishSuccess =>
+      'Coleta finalizada com sucesso! Pronta para envio.';
+
+  @override
+  String get coletaFinishError => 'Erro ao finalizar. Tente novamente.';
+
+  @override
+  String get coletaOfflineBanner =>
+      'Você está offline. A coleta será salva localmente.';
+
+  @override
+  String get coletaLoadingGps =>
+      'Obtendo sua localização e verificando sítios próximos...';
+
+  @override
+  String get coletaRetryGps => 'Tentar Novamente';
+
+  @override
+  String get coletaGrantPermission => 'Conceder Permissão';
+
+  @override
+  String get coletaOpenAppSettings => 'Abrir Configurações do App';
+
+  @override
+  String get coletaEnableLocation => 'Ativar Localização';
+
+  @override
+  String get coletaRetakeTitle => 'Retomar Coleta';
+
+  @override
+  String coletaStepPrefix(int current, int total) {
+    return 'Passo $current de $total';
+  }
+
+  @override
+  String get coletaSectionAccess => 'Meios de Acesso';
+
+  @override
+  String get coletaSectionVisuals => 'Evidências Visuais';
+
+  @override
+  String get coletaAudioBadge => 'ÁUDIO';
+
+  @override
+  String get coletaCameraBadge => 'CÂMERA';
+
+  @override
+  String get coletaAudioHint =>
+      'Toque no microfone para descrever os meios de acesso.';
+
+  @override
+  String get coletaManualNotes => 'TRANSCRIÇÃO OU NOTAS MANUAIS (OPCIONAL)';
+
+  @override
+  String get coletaNotesHint =>
+      'Insira notas adicionais sobre os meios de acesso...';
+
+  @override
+  String get coletaFinishBanner =>
+      'A COLETA SERÁ SALVA LOCALMENTE E FICARÁ PENDENTE PARA SINCRONIZAÇÃO.';
+
+  @override
+  String get coletaRecording => 'GRAVANDO...';
+
+  @override
+  String get coletaTapToRecord => 'TOQUE PARA GRAVAR';
+
+  @override
+  String get coletaStopRecording => 'Parar gravação';
+
+  @override
+  String get coletaStartRecording => 'Iniciar gravação de áudio';
+
+  @override
+  String get coletaGpsCoords => 'COORDENADAS GPS';
+
+  @override
+  String get coletaLatitude => 'LATITUDE';
+
+  @override
+  String get coletaLongitude => 'LONGITUDE';
+
+  @override
+  String get coletaAssetLocation => 'LOCALIZAÇÃO DO BEM';
+
+  @override
+  String get coletaAssetName => 'NOME DO BEM';
+
+  @override
+  String get coletaPopularNames => 'NOMES POPULARES';
+
+  @override
+  String get coletaOptional => '(opcional)';
+
+  @override
+  String get coletaNature => 'NATUREZA';
+
+  @override
+  String get coletaType => 'TIPO';
+
+  @override
+  String get coletaActionNextStep => 'Prosseguir para Artefatos';
+
+  @override
+  String get coletaActionCancel => 'CANCELAR COLETA';
+
+  @override
+  String get coletaNameHint => 'Ex: Muro de Arrimo - Setor A';
+
+  @override
+  String get coletaPopularNameHint =>
+      'Como a comunidade local se refere a este bem?';
+
+  @override
+  String get coletaArtifactTypes => 'TIPOS DE ARTEFATO';
+
+  @override
+  String get coletaArtifactHint =>
+      'Selecione os que foram identificados ou adicione um novo tipo.';
+
+  @override
+  String get coletaActionNextStepDocs => 'Prosseguir para Documentação';
+
+  @override
+  String get coletaArtifactRequired =>
+      'Selecione ao menos um tipo de artefato.';
+
+  @override
   String get coletasTitle => 'Minhas Coletas';
 
   @override
   String get coletasTabAll => 'TODOS';
+
+  @override
+  String get coletasTabDrafts => 'RASCUNHOS';
 
   @override
   String get coletasTabPending => 'PENDENTES';
@@ -277,6 +474,9 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get coletasEmptyFirst => 'Registre sua primeira coleta arqueológica.';
+
+  @override
+  String get coletasEmptyDrafts => 'Nenhum rascunho salvo.';
 
   @override
   String get coletasEmptyPending => 'Nenhuma coleta pendente.';

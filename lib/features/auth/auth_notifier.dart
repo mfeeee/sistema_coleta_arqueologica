@@ -213,7 +213,7 @@ class AuthNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sairPorSessaoExpirada() async {
+  Future<void> sairPorSessaoExpirada([String? customMessage]) async {
     await authService.logout();
     // INTENCIONAL: SharedPreferences não é limpo no logout por sessão expirada.
     // Rascunhos de coleta (chave 'rascunho_coleta') devem sobreviver
@@ -233,7 +233,7 @@ class AuthNotifier extends ChangeNotifier {
     _userEmail = null;
     _userClassificacao = null;
     _userAvatarUrl = null;
-    _errorMessage = TratadorDeErros.sessaoExpirada;
+    _errorMessage = customMessage ?? TratadorDeErros.sessaoExpirada;
     _avisoSistema = null;
     notifyListeners();
   }

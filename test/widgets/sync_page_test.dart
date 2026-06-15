@@ -98,9 +98,20 @@ class _StubBemMaterialRepository implements BemMaterialRepository {
 
 class _StubNotificacaoRepository implements NotificacaoRepository {
   @override
-  Future<List<NotificacaoModel>> buscarNotificacoes() async => [];
+  Future<List<NotificacaoModel>> listar() async => [];
   @override
-  Future<void> marcarComoLida(int id) async {}
+  Future<void> marcarComoLida(String id) async {}
+  @override
+  Future<PreferenciasNotificacaoModel> getPreferencias() async =>
+      const PreferenciasNotificacaoModel(
+        pushEnabled: true,
+        emailEnabled: true,
+        tiposHabilitados: [],
+      );
+  @override
+  Future<void> atualizarPreferencias(
+    PreferenciasNotificacaoModel preferencias,
+  ) async {}
 }
 
 class _StubPreferenciasRepository implements PreferenciasNotificacaoRepository {
@@ -255,6 +266,7 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     temaModo: ValueNotifier(ThemeMode.light),
     idiomaAtual: ValueNotifier(const Locale('pt', 'BR')),
     fotoPerfilPath: ValueNotifier(null),
+    unreadNotificationsCount: ValueNotifier<int>(0),
     profileService: ProfileService(dio: dio),
     secureStorage: _StubSecureStorage(),
     dioPublic: dio,

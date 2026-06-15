@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import '../../viewmodels/coleta_form_notifier.dart';
 import '../foto_picker_widget.dart';
 
@@ -49,6 +50,7 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final borderColor = cs.primaryContainer.withValues(alpha: 0.2);
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -78,14 +80,14 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                 padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 48.0),
                 children: [
                   _CabecalhoSecao(
-                    titulo: 'Meios de Acesso',
-                    badgeTexto: 'ÁUDIO',
+                    titulo: l10n.coletaSectionAccess,
+                    badgeTexto: l10n.coletaAudioBadge,
                     textLight: cs.onSurface,
                     primaryBrown: cs.primaryContainer,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Toque no microfone para descrever os meios de acesso.',
+                    l10n.coletaAudioHint,
                     style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
                   ),
                   const SizedBox(height: 20),
@@ -96,24 +98,19 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                     onTap: _alternarGravacao,
                   ),
                   const SizedBox(height: 20),
-                  _RotuloSecao(
-                    'TRANSCRIÇÃO OU NOTAS MANUAIS (OPCIONAL)',
-                    textColor: cs.onSurface,
-                  ),
+                  _RotuloSecao(l10n.coletaManualNotes, textColor: cs.onSurface),
                   const SizedBox(height: 8),
                   _CampoTexto(
                     controller: _meiosAcessoController,
                     borderColor: borderColor,
                     textColor: cs.onSurface,
-                    hintText:
-                        'Insira notas adicionais sobre os meios de '
-                        'acesso...',
+                    hintText: l10n.coletaNotesHint,
                     maxLines: 4,
                   ),
                   const SizedBox(height: 32),
                   _CabecalhoSecao(
-                    titulo: 'Evidências Visuais',
-                    badgeTexto: 'CÂMERA',
+                    titulo: l10n.coletaSectionVisuals,
+                    badgeTexto: l10n.coletaCameraBadge,
                     textLight: cs.onSurface,
                     primaryBrown: cs.primaryContainer,
                   ),
@@ -138,7 +135,7 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                       size: 20,
                     ),
                     label: Text(
-                      'Finalizar e Salvar Coleta',
+                      l10n.coletaActionFinish,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -158,8 +155,7 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'A COLETA SERÁ SALVA LOCALMENTE E NA PRÓXIMA '
-                    'SINCRONIZAÇÃO SERÁ ENVIADA.',
+                    l10n.coletaFinishBanner,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: cs.onSurfaceVariant,
@@ -173,13 +169,16 @@ class _Passo3DetalhesWidgetState extends State<Passo3DetalhesWidget> {
                     style: TextButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                     ),
-                    child: Text(
-                      'VOLTAR',
-                      style: TextStyle(
-                        color: cs.onSurfaceVariant,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
+                    child: Semantics(
+                      label: 'Voltar para artefatos',
+                      child: Text(
+                        l10n.commonBack.toUpperCase(),
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                     ),
                   ),
@@ -274,35 +273,41 @@ class _BotaoMicrofone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Center(
       child: Column(
         children: [
-          GestureDetector(
-            onTap: onTap,
-            child: Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: primaryBrown,
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryBrown.withValues(alpha: 0.45),
-                    blurRadius: 18,
-                    spreadRadius: 4,
-                  ),
-                ],
-              ),
-              child: Icon(
-                gravando ? Icons.stop_rounded : Icons.mic,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                size: 32,
+          Semantics(
+            label: gravando
+                ? l10n.coletaStopRecording
+                : l10n.coletaStartRecording,
+            child: GestureDetector(
+              onTap: onTap,
+              child: Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: primaryBrown,
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryBrown.withValues(alpha: 0.45),
+                      blurRadius: 18,
+                      spreadRadius: 4,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  gravando ? Icons.stop_rounded : Icons.mic,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  size: 32,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            gravando ? 'GRAVANDO...' : 'TOQUE PARA GRAVAR',
+            gravando ? l10n.coletaRecording : l10n.coletaTapToRecord,
             style: TextStyle(
               color: textMuted,
               fontSize: 10,

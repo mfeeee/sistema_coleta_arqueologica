@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'passo_1_identificacao_widget.dart';
 import 'passo_3_detalhes_widget.dart';
 import '../../viewmodels/coleta_form_notifier.dart';
@@ -58,9 +59,7 @@ class _ColetaWizardWidgetState extends State<ColetaWizardWidget> {
       _irParaPagina(2);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Selecione ao menos um tipo de artefato.'),
-        ),
+        SnackBar(content: Text(context.l10n.coletaArtifactRequired)),
       );
     }
   }

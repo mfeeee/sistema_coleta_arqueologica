@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coleta_form_notifier.dart';
@@ -78,7 +79,6 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
         !_descartouRascunho &&
         _initialized &&
         _formNotifier.modificado) {
-      // Salva automaticamente o rascunho no banco ao sair (multiplos rascunhos)
       _salvarRascunhoSilencioso();
     }
     _viewModel.dispose();
@@ -88,15 +88,6 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
 
   Future<void> _salvarRascunhoSilencioso() async {
     try {
-      // Não temos context disponível de forma segura no dispose para acessar o AppScope
-      // Mas podemos injetar o usuarioId diretamente se necessário,
-      // aqui usamos uma abordagem fire-and-forget idealmente ligada a um serviço background,
-      // mas para simplificar, usaremos o scope injetado previamente.
-      // Em uma arquitetura real robusta, o dispose despacharia um evento ou usaria um isolado.
-      // Como workaround simples para não quebrar a compilação: vamos garantir que _onWillPop lide com a maioria das saídas.
-      // O dispose atua como fallback e precisará de referência ao repositório e auth.
-      // NOTA: Para um aplicativo real de produção, salvar no banco dentro de dispose é antipattern.
-      // Melhor depender exclusivamente do _onWillPop e do botão de "Salvar".
       log(
         'Salvamento automático em dispose desativado para SQLite, utilize o botão Salvar Rascunho ou a interceptação de pop.',
         name: 'NovaColetaPage',
@@ -114,28 +105,27 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
       return;
     }
 
+    final l10n = context.l10n;
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sair da Coleta?'),
-        content: const Text(
-          'Você tem alterações não salvas. Deseja salvar como rascunho ou descartar tudo?',
-        ),
+        title: Text(l10n.coletaExitTitle),
+        content: Text(l10n.coletaExitContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, 'cancel'),
-            child: const Text('CONTINUAR EDITANDO'),
+            child: Text(l10n.coletaActionContinueEditing.toUpperCase()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, 'discard'),
             child: Text(
-              'DESCARTAR',
+              l10n.coletaActionDiscard.toUpperCase(),
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, 'save'),
-            child: const Text('SALVAR RASCUNHO'),
+            child: Text(l10n.coletaActionSaveDraft.toUpperCase()),
           ),
         ],
       ),
@@ -146,8 +136,6 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     if (result == 'save') {
       await _salvarRascunho();
     } else if (result == 'discard') {
-      // Se não quiser salvar as alterações, não precisa apagar o rascunho do BD,
-      // basta não salvar a edição atual. Se for um rascunho novo não salvo, é só sair.
       _descartouRascunho = true;
       if (mounted) Navigator.of(context).pop();
     }
@@ -155,6 +143,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
@@ -169,13 +158,26 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
             preferredSize: const Size.fromHeight(1.0),
             child: Container(height: 1.0),
           ),
-          title: Text(
-            widget.id != null ? 'Editar Coleta' : 'Nova Coleta - Passo 1/3',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.45,
-            ),
+          title: ValueListenableBuilder<ColetaStep>(
+            valueListenable: _viewModel.stepNotifier,
+            builder: (context, step, _) {
+              final String titulo;
+              if (widget.id != null) {
+                titulo = l10n.coletaRetakeTitle;
+              } else if (step == ColetaStep.fillingForm) {
+                titulo = l10n.coletaStepPrefix(_formNotifier.passoAtual + 1, 3);
+              } else {
+                titulo = l10n.coletaNewTitle;
+              }
+              return Text(
+                titulo,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.45,
+                ),
+              );
+            },
           ),
           actions: [
             if (_saving)
@@ -192,7 +194,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
             else
               IconButton(
                 icon: const Icon(Icons.save_outlined),
-                tooltip: 'Salvar rascunho',
+                tooltip: l10n.coletaActionSaveDraft,
                 onPressed: _salvarRascunho,
               ),
             const SizedBox(width: 8),
@@ -227,6 +229,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
   }
 
   Widget _buildBody(ColetaStep step) {
+    final l10n = context.l10n;
     return switch (step) {
       ColetaStep.initial ||
       ColetaStep.gettingLocation ||
@@ -250,37 +253,38 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
 
       ColetaStep.error => _PainelErroGps(
         icone: Icons.error_outline,
-        mensagem: _viewModel.errorMessage.value ?? 'Erro desconhecido.',
-        labelPrimario: 'Tentar Novamente',
+        mensagem: _viewModel.errorMessage.value ?? l10n.commonError,
+        labelPrimario: l10n.coletaRetryGps,
         onPrimario: _viewModel.tentarNovamente,
       ),
 
       ColetaStep.permissaoNegada => _PainelErroGps(
         icone: Icons.location_off_outlined,
         mensagem: _viewModel.errorMessage.value ?? '',
-        labelPrimario: 'Conceder Permissão',
+        labelPrimario: l10n.coletaGrantPermission,
         onPrimario: _viewModel.tentarNovamente,
       ),
 
       ColetaStep.permissaoNegadaPermanentemente => _PainelErroGps(
         icone: Icons.lock_outlined,
         mensagem: _viewModel.errorMessage.value ?? '',
-        labelPrimario: 'Abrir Configurações do App',
+        labelPrimario: l10n.coletaOpenAppSettings,
         onPrimario: _viewModel.abrirConfiguracoes,
       ),
 
       ColetaStep.gpsDesativado => _PainelErroGps(
         icone: Icons.gps_off,
         mensagem: _viewModel.errorMessage.value ?? '',
-        labelPrimario: 'Ativar Localização',
+        labelPrimario: l10n.coletaEnableLocation,
         onPrimario: _viewModel.abrirConfiguracoesLocalizacao,
-        labelSecundario: 'Tentar Novamente',
+        labelSecundario: l10n.coletaRetryGps,
         onSecundario: _viewModel.tentarNovamente,
       ),
     };
   }
 
   Future<void> _salvarRascunho() async {
+    final l10n = context.l10n;
     if (!_formNotifier.modificado && _formNotifier.temDadosRascunho) {
       Navigator.of(context).pop();
       return;
@@ -305,38 +309,37 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
       _salvouComSucesso = true;
 
       if (!mounted) return;
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Rascunho salvo com sucesso.')),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.coletaDraftSuccess)));
       Navigator.of(context).pop();
     } catch (e, st) {
       log('Erro ao salvar rascunho', error: e, stackTrace: st);
       if (mounted) {
         setState(() => _saving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao salvar rascunho.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.coletaDraftError)));
       }
     }
   }
 
   Future<void> _salvarColeta() async {
+    final l10n = context.l10n;
     final scope = AppScope.of(context);
 
     final usuarioId = scope.authNotifier.userId;
 
     if (usuarioId == null || usuarioId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sessão expirada. Faça login novamente.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.syncExpiredSession)));
       return;
     }
 
     final coord = _viewModel.coordenadaAtual;
     if (coord == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Coordenadas não disponíveis.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.coletaCoordsUnavailable)));
       return;
     }
 
@@ -352,11 +355,11 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Coleta finalizada com sucesso! Pronta para envio.'),
+        SnackBar(
+          content: Text(l10n.coletaFinishSuccess),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-          duration: Duration(seconds: 4),
+          duration: const Duration(seconds: 4),
         ),
       );
       Navigator.of(context).pop();
@@ -370,7 +373,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Erro ao finalizar. Tente novamente.'),
+          content: Text(l10n.coletaFinishError),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -385,18 +388,19 @@ class _BannerOffline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       width: double.infinity,
       color: AppColors.warningBg,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: const Row(
+      child: Row(
         children: <Widget>[
-          Icon(Icons.wifi_off, size: 16, color: AppColors.warningText),
-          SizedBox(width: 8),
+          const Icon(Icons.wifi_off, size: 16, color: AppColors.warningText),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Você está offline. A coleta será salva localmente.',
-              style: TextStyle(
+              l10n.coletaOfflineBanner,
+              style: const TextStyle(
                 fontSize: 12,
                 color: AppColors.warningText,
                 fontWeight: FontWeight.w500,
@@ -414,13 +418,18 @@ class _CarregandoLocalizacaoBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final l10n = context.l10n;
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(),
-          SizedBox(height: 24),
-          Text('Sincronizando coordenadas e verificando radar...'),
+          const CircularProgressIndicator(),
+          const SizedBox(height: 24),
+          Text(
+            l10n.coletaLoadingGps,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );

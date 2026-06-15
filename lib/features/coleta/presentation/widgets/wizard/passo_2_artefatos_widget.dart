@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import '../../viewmodels/coleta_form_notifier.dart';
 import '../artefato_tipo_picker.dart';
 
@@ -19,6 +20,7 @@ class Passo2ArtefatosWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final scope = AppScope.of(context);
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -47,7 +49,7 @@ class Passo2ArtefatosWidget extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 48),
               children: [
                 Text(
-                  'TIPOS DE ARTEFATO',
+                  l10n.coletaArtifactTypes,
                   style: TextStyle(
                     color: cs.onSurface,
                     fontSize: 14,
@@ -57,7 +59,7 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Selecione os que foram identificados ou adicione um novo tipo.',
+                  l10n.coletaArtifactHint,
                   style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
                 ),
                 const SizedBox(height: 20),
@@ -68,8 +70,7 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                     return ArtefatoTipoPicker(
                       selectedTypes: formNotifier.artefatos,
                       onChanged: formNotifier.setArtefatos,
-                      dio: scope
-                          .dioPublic, // Use dioPublic if it doesn't need auth, or just scope.dio
+                      dio: scope.dioPublic,
                     );
                   },
                 ),
@@ -90,7 +91,7 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Próximo Passo: Documentação',
+                        l10n.coletaActionNextStepDocs,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -112,13 +113,16 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                   style: TextButton.styleFrom(
                     minimumSize: const Size(double.infinity, 48),
                   ),
-                  child: Text(
-                    'VOLTAR',
-                    style: TextStyle(
-                      color: cs.onSurfaceVariant,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
+                  child: Semantics(
+                    label: 'Voltar para identificação',
+                    child: Text(
+                      l10n.commonBack.toUpperCase(),
+                      style: TextStyle(
+                        color: cs.onSurfaceVariant,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
                     ),
                   ),
                 ),

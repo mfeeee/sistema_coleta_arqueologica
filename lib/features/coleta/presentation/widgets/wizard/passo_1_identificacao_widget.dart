@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:uuid/uuid.dart';
 import '../../viewmodels/coleta_form_notifier.dart';
@@ -49,6 +50,7 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final borderColor = cs.primaryContainer.withValues(alpha: 0.2);
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: cs.surface,
@@ -83,13 +85,13 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                 padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 48.0),
                 children: [
                   // --- COORDENADAS GPS (Informativo) ---
-                  _SectionLabel('COORDENADAS GPS', textColor: cs.onSurface),
+                  _SectionLabel(l10n.coletaGpsCoords, textColor: cs.onSurface),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: _GpsBox(
-                          label: 'LATITUDE',
+                          label: l10n.coletaLatitude,
                           value: '${widget.latitude.toStringAsFixed(5)}° S',
                           borderColor: borderColor,
                         ),
@@ -97,7 +99,7 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: _GpsBox(
-                          label: 'LONGITUDE',
+                          label: l10n.coletaLongitude,
                           value: '${widget.longitude.toStringAsFixed(5)}° W',
                           borderColor: borderColor,
                         ),
@@ -107,7 +109,10 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                   const SizedBox(height: 24),
 
                   // --- LOCALIZAÇÃO ---
-                  _SectionLabel('LOCALIZAÇÃO DO BEM', textColor: cs.onSurface),
+                  _SectionLabel(
+                    l10n.coletaAssetLocation,
+                    textColor: cs.onSurface,
+                  ),
                   const SizedBox(height: 12),
                   LocationPickerWidget(
                     initialValue: widget.formNotifier.localizacao,
@@ -117,14 +122,14 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                   const SizedBox(height: 24),
 
                   // --- NOME DO BEM ---
-                  _SectionLabel('NOME DO BEM', textColor: cs.onSurface),
+                  _SectionLabel(l10n.coletaAssetName, textColor: cs.onSurface),
                   const SizedBox(height: 8),
                   _CustomTextField(
                     initialValue: widget.formNotifier.nome,
                     onChanged: widget.formNotifier.setNome,
                     borderColor: borderColor,
                     textColor: cs.onSurface,
-                    hintText: 'Ex: Muro de Arrimo - Setor A',
+                    hintText: l10n.coletaNameHint,
                   ),
                   const SizedBox(height: 24),
 
@@ -133,10 +138,13 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      _SectionLabel('NOMES POPULARES', textColor: cs.onSurface),
+                      _SectionLabel(
+                        l10n.coletaPopularNames,
+                        textColor: cs.onSurface,
+                      ),
                       const SizedBox(width: 8),
                       Text(
-                        '(opcional)',
+                        l10n.coletaOptional,
                         style: TextStyle(
                           color: cs.onSurface.withValues(alpha: 0.6),
                           fontSize: 12,
@@ -150,13 +158,13 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                     onChanged: widget.formNotifier.setNomesPopulares,
                     borderColor: borderColor,
                     textColor: cs.onSurface,
-                    hintText: 'Como a comunidade local se refere a este bem?',
+                    hintText: l10n.coletaPopularNameHint,
                     maxLines: 2,
                   ),
                   const SizedBox(height: 24),
 
                   // --- NATUREZA ---
-                  _SectionLabel('NATUREZA', textColor: cs.onSurface),
+                  _SectionLabel(l10n.coletaNature, textColor: cs.onSurface),
                   const SizedBox(height: 8),
                   _CustomDropdown<NaturezaBem>(
                     value: widget.formNotifier.natureza,
@@ -169,7 +177,7 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                   const SizedBox(height: 24),
 
                   // --- TIPO ---
-                  _SectionLabel('TIPO', textColor: cs.onSurface),
+                  _SectionLabel(l10n.coletaType, textColor: cs.onSurface),
                   const SizedBox(height: 8),
                   _CustomDropdown<TipoBem>(
                     value: widget.formNotifier.tipo,
@@ -199,7 +207,7 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Próximo Passo: Artefatos',
+                          l10n.coletaActionNextStep,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -221,13 +229,16 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                     style: TextButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                     ),
-                    child: Text(
-                      'CANCELAR COLETA',
-                      style: TextStyle(
-                        color: cs.onSurfaceVariant,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
+                    child: Semantics(
+                      label: 'Cancelar preenchimento e sair',
+                      child: Text(
+                        l10n.coletaActionCancel,
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                     ),
                   ),

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:sistema_coleta_arqueologica/core/network/interceptors/auth_interceptor.dart';
 import 'package:sistema_coleta_arqueologica/core/network/interceptors/error_interceptor.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
@@ -8,7 +7,7 @@ class DioClient {
   static Dio authenticated({
     required String baseUrl,
     required SecureStorageService secureStorage,
-    VoidCallback? onSessionExpired,
+    void Function(String?)? onSessionExpired,
     Future<bool> Function()? onRefreshToken,
   }) {
     final dio = _base(baseUrl);

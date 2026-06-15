@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'dart:developer';
+import 'package:sistema_coleta_arqueologica/core/errors/auth_exceptions.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/tratador_de_erros.dart';
 import 'secure_storage_service.dart';
 
@@ -70,6 +71,13 @@ class AuthService {
       );
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
+        final body = e.response?.data as Map<String, dynamic>?;
+        final msg = body?['message'] as String?;
+        if (msg != null &&
+            (msg.toLowerCase().contains('deactivated') ||
+                msg.toLowerCase().contains('desativada'))) {
+          return const AuthFailure(TratadorDeErros.contaDesativada);
+        }
         return const AuthFailure(TratadorDeErros.credenciaisInvalidas);
       }
       if (e.response?.statusCode == 403) {
@@ -173,6 +181,20 @@ class AuthService {
 
       await secureStorage.saveJwt(novoToken);
       return true;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        final body = e.response?.data as Map<String, dynamic>?;
+        final msg = body?['message'] as String?;
+        if (msg != null &&
+            (msg.toLowerCase().contains('deactivated') ||
+                msg.toLowerCase().contains('desativada'))) {
+          throw const AccountDeactivatedException(
+            TratadorDeErros.contaDesativada,
+          );
+        }
+      }
+      log('Erro ao renovar token', error: e, name: 'AuthService');
+      return false;
     } catch (e) {
       log('Erro ao renovar token', error: e, name: 'AuthService');
       return false;

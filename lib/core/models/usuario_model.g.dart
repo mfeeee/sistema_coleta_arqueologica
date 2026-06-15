@@ -11,6 +11,9 @@ UsuarioModel _$UsuarioModelFromJson(Map<String, dynamic> json) => UsuarioModel(
   nome: json['name'] as String,
   email: json['email'] as String?,
   avatarUrl: json['avatar_url'] as String?,
+  deletedAt: json['deleted_at'] == null
+      ? null
+      : DateTime.parse(json['deleted_at'] as String),
 );
 
 Map<String, dynamic> _$UsuarioModelToJson(UsuarioModel instance) =>
@@ -19,4 +22,5 @@ Map<String, dynamic> _$UsuarioModelToJson(UsuarioModel instance) =>
       'name': instance.nome,
       'email': instance.email,
       'avatar_url': instance.avatarUrl,
+      'deleted_at': instance.deletedAt?.toIso8601String(),
     };

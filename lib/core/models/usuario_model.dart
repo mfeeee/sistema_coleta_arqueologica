@@ -10,6 +10,7 @@ class UsuarioModel extends UsuarioEntity {
     @JsonKey(name: 'name') required super.nome,
     super.email,
     super.avatarUrl,
+    super.deletedAt,
   });
 
   factory UsuarioModel.fromJson(Map<String, dynamic> json) =>

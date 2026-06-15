@@ -13,7 +13,7 @@ abstract final class TratadorDeErros {
   static const erroInesperado = 'Ocorreu um erro inesperado. Tente novamente.';
   static const erroLocalizacao =
       'Não foi possível obter a localização. Tente novamente.';
-  static const contaDesativada = 'Conta desativada. Contate o administrador.';
+  static const contaDesativada = 'Conta desativada. Entre em contato.';
   static const sessaoExpirada = 'Sessão expirada. Faça login novamente.';
 
   static String deExcecao(Object erro) {

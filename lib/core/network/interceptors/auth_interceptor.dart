@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:sistema_coleta_arqueologica/core/errors/auth_exceptions.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 
 class AuthInterceptor extends Interceptor {
   final SecureStorageService _secureStorage;
-  final VoidCallback? onSessionExpired;
+  final ValueChanged<String?>? onSessionExpired;
   final Future<bool> Function()? onRefreshToken;
 
   AuthInterceptor(
@@ -42,29 +43,39 @@ class AuthInterceptor extends Interceptor {
       }
 
       _isRefreshing = true;
-      final refreshed = await onRefreshToken!();
-      _isRefreshing = false;
+      try {
+        final refreshed = await onRefreshToken!();
+        _isRefreshing = false;
 
-      if (refreshed) {
-        // Retry the current request
-        final retryResponse = await _retry(err.requestOptions);
-        handler.resolve(retryResponse);
+        if (refreshed) {
+          // Retry the current request
+          final retryResponse = await _retry(err.requestOptions);
+          handler.resolve(retryResponse);
 
-        // Retry all queued requests
-        for (final request in _failedRequests) {
-          final response = await _retry(request.options);
-          request.handler.resolve(response);
+          // Retry all queued requests
+          for (final request in _failedRequests) {
+            final response = await _retry(request.options);
+            request.handler.resolve(response);
+          }
+          _failedRequests.clear();
+          return;
+        } else {
+          _failedRequests.clear();
+          onSessionExpired?.call(null);
         }
+      } on AccountDeactivatedException catch (e) {
+        _isRefreshing = false;
         _failedRequests.clear();
-        return;
-      } else {
+        onSessionExpired?.call(e.message);
+      } catch (e) {
+        _isRefreshing = false;
         _failedRequests.clear();
-        onSessionExpired?.call();
+        onSessionExpired?.call(null);
       }
     }
 
     if (err.response?.statusCode == 403) {
-      onSessionExpired?.call();
+      onSessionExpired?.call(null);
     }
 
     handler.next(err);

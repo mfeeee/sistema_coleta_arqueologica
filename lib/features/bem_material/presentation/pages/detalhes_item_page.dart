@@ -215,6 +215,11 @@ class _SecaoResponsaveis extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final ativos = responsaveis
+        .where((r) => r.usuario.deletedAt == null)
+        .toList();
+
+    if (ativos.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,20 +240,20 @@ class _SecaoResponsaveis extends StatelessWidget {
           ),
           child: Column(
             children: [
-              for (var i = 0; i < responsaveis.length; i++) ...[
+              for (var i = 0; i < ativos.length; i++) ...[
                 ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: responsaveis[i].usuario.avatarUrl != null
-                        ? NetworkImage(responsaveis[i].usuario.avatarUrl!)
+                    backgroundImage: ativos[i].usuario.avatarUrl != null
+                        ? NetworkImage(ativos[i].usuario.avatarUrl!)
                         : null,
-                    child: responsaveis[i].usuario.avatarUrl == null
+                    child: ativos[i].usuario.avatarUrl == null
                         ? const Icon(Icons.person)
                         : null,
                   ),
-                  title: Text(responsaveis[i].usuario.nome),
-                  subtitle: Text(responsaveis[i].papel),
+                  title: Text(ativos[i].usuario.nome),
+                  subtitle: Text(ativos[i].papel),
                 ),
-                if (i < responsaveis.length - 1)
+                if (i < ativos.length - 1)
                   Divider(height: 1, color: theme.colorScheme.outlineVariant),
               ],
             ],

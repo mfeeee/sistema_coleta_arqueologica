@@ -44,13 +44,41 @@ class _ColetasPageState extends State<ColetasPage> {
     }
   }
 
+  void _deletarColeta(String id) async {
+    final l10n = context.l10n;
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.coletaDeleteButton),
+        content: Text(l10n.coletaDeleteConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              l10n.commonDelete,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmado == true) {
+      await _viewModel.deletarColeta(id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
 
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
@@ -92,6 +120,7 @@ class _ColetasPageState extends State<ColetasPage> {
                   indicatorWeight: 2.0,
                   tabs: <Widget>[
                     Tab(text: l10n.coletasTabAll),
+                    Tab(text: l10n.coletasTabDrafts),
                     Tab(text: l10n.coletasTabPending),
                     Tab(text: l10n.coletasTabApproved),
                     Tab(text: l10n.coletasTabRejected),
@@ -125,6 +154,18 @@ class _ColetasPageState extends State<ColetasPage> {
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
                         onEditar: _editarColeta,
+                        onDeletar: _deletarColeta,
+                      ),
+                      _ListaColetasFiltrada(
+                        coletas: _viewModel.rascunhos,
+                        carregando: carregando,
+                        erro: erro,
+                        mensagemVazia: l10n.coletasEmptyDrafts,
+                        exibirBotaoNovaColeta: false,
+                        onRefresh: _viewModel.atualizar,
+                        onVerDetalhes: _verDetalhes,
+                        onEditar: _editarColeta,
+                        onDeletar: _deletarColeta,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.pendentes,
@@ -135,6 +176,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
                         onEditar: _editarColeta,
+                        onDeletar: _deletarColeta,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.sincronizadas,
@@ -145,6 +187,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
                         onEditar: _editarColeta,
+                        onDeletar: _deletarColeta,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.conflitos,
@@ -155,6 +198,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
                         onEditar: _editarColeta,
+                        onDeletar: _deletarColeta,
                       ),
                     ],
                   );
@@ -188,6 +232,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
     required this.onRefresh,
     required this.onVerDetalhes,
     required this.onEditar,
+    required this.onDeletar,
   });
 
   final List<ColetaEntity> coletas;
@@ -198,6 +243,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
   final Future<void> Function() onRefresh;
   final void Function(String id) onVerDetalhes;
   final void Function(String id) onEditar;
+  final void Function(String id) onDeletar;
 
   @override
   Widget build(BuildContext context) {
@@ -235,6 +281,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
           coleta: coletas[index],
           onVerDetalhes: () => onVerDetalhes(coletas[index].id),
           onEditar: () => onEditar(coletas[index].id),
+          onDeletar: () => onDeletar(coletas[index].id),
         ),
       ),
     );

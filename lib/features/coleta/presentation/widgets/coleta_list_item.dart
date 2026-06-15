@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
+import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/midia_entity.dart';
@@ -12,14 +14,17 @@ class ColetaListItem extends StatelessWidget {
     required this.coleta,
     required this.onVerDetalhes,
     this.onEditar,
+    this.onDeletar,
   });
 
   final ColetaEntity coleta;
   final VoidCallback onVerDetalhes;
   final VoidCallback? onEditar;
+  final VoidCallback? onDeletar;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final localizacao =
         coleta.uf ??
         (coleta.localizacao?.lat != null && coleta.localizacao?.lng != null
@@ -32,7 +37,7 @@ class ColetaListItem extends StatelessWidget {
       barraBadges: _BadgesRow(coleta: coleta),
       title: coleta.nomeBem,
       location: localizacao,
-      date: data,
+      date: l10n.coletaDatePrefix(data),
       midia: coleta.midias.firstOrNull,
       onTap: coleta.syncStatus == StatusColeta.rascunho
           ? onEditar
@@ -41,6 +46,7 @@ class ColetaListItem extends StatelessWidget {
         coleta: coleta,
         onVerDetalhes: onVerDetalhes,
         onEditar: onEditar,
+        onDeletar: onDeletar,
       ),
     );
   }
@@ -63,9 +69,18 @@ class _BadgesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final (rotuloSync, textoSync, fundoSync) = _estaSincronizado
-        ? ('Sincronizado', AppColors.successText, AppColors.successBg)
-        : ('Não sincronizado', AppColors.warningText, AppColors.warningBg);
+        ? (
+            l10n.coletaStatusSincronizado,
+            AppColors.successText,
+            AppColors.successBg,
+          )
+        : (
+            l10n.coletaStatusNaoSincronizado,
+            AppColors.warningText,
+            AppColors.warningBg,
+          );
 
     final (
       rotuloStatus,
@@ -73,21 +88,25 @@ class _BadgesRow extends StatelessWidget {
       fundoStatus,
     ) = switch (coleta.syncStatus) {
       StatusColeta.sincronizado => (
-        'Aprovado',
+        l10n.coletaStatusAprovado,
         AppColors.successText,
         AppColors.successBg,
       ),
       StatusColeta.conflito => (
-        'Rejeitado',
+        l10n.coletaStatusRejeitado,
         AppColors.errorText,
         AppColors.errorBg,
       ),
       StatusColeta.rascunho => (
-        'Rascunho',
+        l10n.coletaStatusRascunho,
         AppColors.warningText,
         AppColors.warningBg,
       ),
-      _ => ('Pendente', AppColors.warningText, AppColors.warningBg),
+      _ => (
+        l10n.coletaStatusPendente,
+        AppColors.warningText,
+        AppColors.warningBg,
+      ),
     };
 
     return Wrap(
@@ -221,7 +240,7 @@ class _ColetaCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Coletado em: $date',
+                          date,
                           style: TextStyle(
                             fontSize: 10,
                             color: theme.colorScheme.outline,
@@ -252,24 +271,28 @@ class _AcoesColeta extends StatelessWidget {
     required this.coleta,
     required this.onVerDetalhes,
     this.onEditar,
+    this.onDeletar,
   });
 
   final ColetaEntity coleta;
   final VoidCallback onVerDetalhes;
   final VoidCallback? onEditar;
+  final VoidCallback? onDeletar;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+
     return switch (coleta.syncStatus) {
-      StatusColeta.pendente => _acoesPendente(theme),
-      StatusColeta.sincronizado => _botaoVerDetalhes(theme),
-      StatusColeta.conflito => _botaoConflito(theme),
-      StatusColeta.rascunho => _botaoEditar(theme),
+      StatusColeta.pendente => _acoesPendente(theme, l10n),
+      StatusColeta.sincronizado => _botaoVerDetalhes(theme, l10n),
+      StatusColeta.conflito => _botaoConflito(theme, l10n),
+      StatusColeta.rascunho => _acoesRascunho(theme, l10n),
     };
   }
 
-  Widget _acoesPendente(ThemeData theme) {
+  Widget _acoesPendente(ThemeData theme, AppLocalizations l10n) {
     return Row(
       children: <Widget>[
         Expanded(
@@ -282,7 +305,7 @@ class _AcoesColeta extends StatelessWidget {
               color: theme.colorScheme.primary,
             ),
             label: Text(
-              'Editar',
+              l10n.coletaActionEdit,
               style: TextStyle(color: theme.colorScheme.primary),
             ),
             style: OutlinedButton.styleFrom(
@@ -303,7 +326,7 @@ class _AcoesColeta extends StatelessWidget {
               color: theme.colorScheme.onPrimary,
             ),
             label: Text(
-              'Sincronizar Agora',
+              l10n.coletaActionSyncNow,
               style: TextStyle(color: theme.colorScheme.onPrimary),
             ),
             style: ElevatedButton.styleFrom(
@@ -315,7 +338,7 @@ class _AcoesColeta extends StatelessWidget {
     );
   }
 
-  Widget _botaoVerDetalhes(ThemeData theme) {
+  Widget _botaoVerDetalhes(ThemeData theme, AppLocalizations l10n) {
     return ElevatedButton(
       onPressed: onVerDetalhes,
       style: ElevatedButton.styleFrom(
@@ -324,27 +347,54 @@ class _AcoesColeta extends StatelessWidget {
         minimumSize: const Size(double.infinity, 40),
       ),
       child: Text(
-        'Ver Detalhes',
+        l10n.coletaActionViewDetails,
         style: TextStyle(color: theme.colorScheme.primary),
       ),
     );
   }
 
-  Widget _botaoEditar(ThemeData theme) {
-    return ElevatedButton.icon(
-      onPressed: onEditar,
-      icon: const Icon(Icons.edit_note_outlined, size: 20),
-      label: const Text('Continuar Rascunho'),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.warningBg,
-        foregroundColor: AppColors.warningText,
-        elevation: 0,
-        minimumSize: const Size(double.infinity, 40),
-      ),
+  Widget _acoesRascunho(ThemeData theme, AppLocalizations l10n) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: OutlinedButton.icon(
+            onPressed: onDeletar,
+            icon: Icon(
+              Icons.delete_outline,
+              size: 18,
+              color: theme.colorScheme.error,
+            ),
+            label: Text(
+              l10n.coletaActionDeleteDraft,
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(
+                color: theme.colorScheme.error.withValues(alpha: 0.2),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 3,
+          child: ElevatedButton.icon(
+            onPressed: onEditar,
+            icon: const Icon(Icons.edit_note_outlined, size: 20),
+            label: Text(l10n.coletaActionContinueDraft),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.warningBg,
+              foregroundColor: AppColors.warningText,
+              elevation: 0,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _botaoConflito(ThemeData theme) {
+  Widget _botaoConflito(ThemeData theme, AppLocalizations l10n) {
     return ElevatedButton(
       onPressed: onVerDetalhes,
       style: ElevatedButton.styleFrom(
@@ -354,7 +404,7 @@ class _AcoesColeta extends StatelessWidget {
         minimumSize: const Size(double.infinity, 40),
       ),
       child: Text(
-        'Ver Detalhes',
+        l10n.coletaActionViewDetails,
         style: TextStyle(color: theme.colorScheme.error),
       ),
     );

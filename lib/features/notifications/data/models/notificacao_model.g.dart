@@ -8,20 +8,42 @@ part of 'notificacao_model.dart';
 
 NotificacaoModel _$NotificacaoModelFromJson(Map<String, dynamic> json) =>
     NotificacaoModel(
-      id: (json['id'] as num).toInt(),
-      titulo: json['title'] as String,
-      mensagem: json['body'] as String,
-      tipo: json['type'] as String,
-      lida: json['is_read'] as bool,
-      criadaEm: DateTime.parse(json['created_at'] as String),
+      id: json['id'] as String,
+      titulo: json['titulo'] as String,
+      corpo: json['corpo'] as String,
+      tipo: json['tipo'] as String,
+      lida: json['lida'] as bool,
+      lidaEm: json['lida_em'] == null
+          ? null
+          : DateTime.parse(json['lida_em'] as String),
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
 
 Map<String, dynamic> _$NotificacaoModelToJson(NotificacaoModel instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'title': instance.titulo,
-      'body': instance.mensagem,
-      'type': instance.tipo,
-      'is_read': instance.lida,
-      'created_at': instance.criadaEm.toIso8601String(),
+      'titulo': instance.titulo,
+      'corpo': instance.corpo,
+      'tipo': instance.tipo,
+      'lida': instance.lida,
+      'lida_em': instance.lidaEm?.toIso8601String(),
+      'created_at': instance.createdAt.toIso8601String(),
     };
+
+PreferenciasNotificacaoModel _$PreferenciasNotificacaoModelFromJson(
+  Map<String, dynamic> json,
+) => PreferenciasNotificacaoModel(
+  pushEnabled: json['push_enabled'] as bool,
+  emailEnabled: json['email_enabled'] as bool,
+  tiposHabilitados: (json['tipos_habilitados'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
+);
+
+Map<String, dynamic> _$PreferenciasNotificacaoModelToJson(
+  PreferenciasNotificacaoModel instance,
+) => <String, dynamic>{
+  'push_enabled': instance.pushEnabled,
+  'email_enabled': instance.emailEnabled,
+  'tipos_habilitados': instance.tiposHabilitados,
+};

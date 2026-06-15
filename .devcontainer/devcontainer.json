@@ -1,0 +1,12 @@
+{
+  "name": "Ambiente Flutter/Dart",
+  "image": "ghcr.io/cirruslabs/flutter:latest",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dart-code.dart-code",
+        "dart-code.flutter"
+      ]
+    }
+  }
+}

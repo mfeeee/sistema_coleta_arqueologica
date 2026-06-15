@@ -49,7 +49,8 @@ class ColetaLocalDatasourceImpl implements ColetaLocalDatasource {
   Future<ColetaModel?> getById(String uuid) async {
     final row = await (_db.select(
       _db.coletas,
-    )..where((t) => t.uuid.equals(uuid))).getSingleOrNull();
+    )..where((t) => t.uuid.equals(uuid) & t.deletadoEm.isNull()))
+        .getSingleOrNull();
     if (row == null) return null;
     final list = await _attachMidias([ColetaModel.fromRow(row)]);
     return list.first;

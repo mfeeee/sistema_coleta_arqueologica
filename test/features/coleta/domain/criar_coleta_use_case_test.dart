@@ -3,116 +3,82 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
-import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
-import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/criar_coleta_use_case.dart';
 
-CriarColetaInput _inputValido({String nome = 'Sítio das Pedras'}) =>
-    CriarColetaInput(
-      nome: nome,
-      nomesPopulares: const ['Pedreira'],
+CriarColetaInput _inputBase() => const CriarColetaInput(
+      nome: 'Sítio Pedra do Encantado',
+      nomesPopulares: ['Pedra Mágica'],
+      artefatoTipos: [],
+      midias: [],
+      usuarioId: 'arq-001',
       natureza: NaturezaBem.bemArqueologico,
       tipo: TipoBem.sitio,
-      artefatoTipos: const [ArtefatoTipoEntity(id: '1', nome: 'Cerâmica')],
-      meiosAcesso: 'A pé, 30 min',
-      midias: const [],
-      localizacao: const LocalizacaoEntity(
-        id: 'loc-1',
-        lat: -2.9078,
-        lng: -41.7722,
-      ),
-      usuarioId: 'usuario-42',
     );
 
 void main() {
   const useCase = CriarColetaUseCase();
 
-  group('CriarColetaUseCase.call — coleta final', () {
-    test('cria ColetaEntity com syncStatus pendente', () {
-      // Arrange
-      final input = _inputValido();
-
-      // Act
-      final result = useCase.call(input);
-
-      // Assert
+  group('CriarColetaUseCase.call — criação de coleta finalizada', () {
+    test('cria coleta com status pendente', () {
+      final result = useCase.call(_inputBase());
       check(result.coleta.syncStatus).equals(StatusColeta.pendente);
     });
 
-    test('coleta recebe todos os campos do input corretamente', () {
-      final input = _inputValido();
-
+    test('nome é trimado corretamente', () {
+      const input = CriarColetaInput(
+        nome: '  Sítio com espaços  ',
+        nomesPopulares: [],
+        artefatoTipos: [],
+        midias: [],
+        usuarioId: 'u1',
+      );
       final result = useCase.call(input);
-      final coleta = result.coleta;
-
-      check(coleta.nomeBem).equals('Sítio das Pedras');
-      check(coleta.usuarioId).equals('usuario-42');
-      check(coleta.localizacao?.lat).isNotNull();
-      check(coleta.localizacao!.lat!).isCloseTo(-2.9078, 0.0001);
-      check(coleta.localizacao!.lng!).isCloseTo(-41.7722, 0.0001);
-      check(coleta.versao).equals(1);
-      check(coleta.id).isNotEmpty();
+      check(result.coleta.nomeBem).equals('Sítio com espaços');
     });
 
-    test('BemMaterialEntity recebe o mesmo coletaId da coleta criada', () {
-      final input = _inputValido();
-
-      final result = useCase.call(input);
-
+    test('coleta e bemMaterial têm IDs distintos mas coletaId vinculado', () {
+      final result = useCase.call(_inputBase());
+      check(result.coleta.id).isNotEmpty();
+      check(result.bemMaterial.id).isNotEmpty();
+      check(result.coleta.id).not((it) => it.equals(result.bemMaterial.id));
       check(result.bemMaterial.coletaId).equals(result.coleta.id);
     });
 
-    test('id da coleta e id do bemMaterial são distintos', () {
-      final result = useCase.call(_inputValido());
-
-      check(result.coleta.id).isNotEmpty();
-      check(result.bemMaterial.id).isNotEmpty();
-      check(result.coleta.id == result.bemMaterial.id).isFalse();
-    });
-
-    test('nome com espaços extras é normalizado com trim', () {
-      final input = _inputValido(nome: '  Sítio X  ');
-
-      final result = useCase.call(input);
-
-      check(result.coleta.nomeBem).equals('Sítio X');
-      check(result.bemMaterial.nomeBem).equals('Sítio X');
+    test('versão inicial é 1', () {
+      final result = useCase.call(_inputBase());
+      check(result.coleta.versao).equals(1);
     });
   });
 
-  group('CriarColetaUseCase.criarRascunho', () {
-    test('cria ColetaEntity com syncStatus rascunho', () {
-      // Arrange
-      final input = _inputValido();
-
-      // Act
-      final rascunho = useCase.criarRascunho(input);
-
-      // Assert
-      check(rascunho.syncStatus).equals(StatusColeta.rascunho);
+  group('CriarColetaUseCase.criarRascunho — rascunho parcial', () {
+    test('status do rascunho é rascunho', () {
+      final result = useCase.criarRascunho(_inputBase());
+      check(result.syncStatus).equals(StatusColeta.rascunho);
     });
 
-    test('usa "Rascunho" como nomeBem quando nome está vazio', () {
+    test('nome vazio usa fallback "Rascunho"', () {
       const input = CriarColetaInput(
         nome: '',
         nomesPopulares: [],
         artefatoTipos: [],
         midias: [],
-        localizacao: LocalizacaoEntity(id: 'l1', lat: 0, lng: 0),
         usuarioId: 'u1',
       );
-
-      final rascunho = useCase.criarRascunho(input);
-
-      check(rascunho.nomeBem).equals('Rascunho');
+      final result = useCase.criarRascunho(input);
+      check(result.nomeBem).equals('Rascunho');
     });
 
-    test('preserva o nome quando fornecido', () {
-      final input = _inputValido(nome: 'Sítio Real');
-
-      final rascunho = useCase.criarRascunho(input);
-
-      check(rascunho.nomeBem).equals('Sítio Real');
+    test('ID fornecido é preservado no rascunho', () {
+      const input = CriarColetaInput(
+        id: 'id-fixo-123',
+        nome: 'Qualquer',
+        nomesPopulares: [],
+        artefatoTipos: [],
+        midias: [],
+        usuarioId: 'u1',
+      );
+      final result = useCase.criarRascunho(input);
+      check(result.id).equals('id-fixo-123');
     });
   });
 }

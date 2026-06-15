@@ -17,7 +17,6 @@ class ColetasPage extends StatefulWidget {
 class _ColetasPageState extends State<ColetasPage> {
   late final ColetasViewModel _viewModel;
   bool _initialized = false;
-  bool _temRascunho = false;
 
   @override
   void didChangeDependencies() {
@@ -27,7 +26,6 @@ class _ColetasPageState extends State<ColetasPage> {
       final scope = AppScope.of(context);
       _viewModel = ColetasViewModel(scope.coletaRepository);
       _viewModel.carregarColetas();
-      _temRascunho = scope.prefs.containsKey('rascunho_coleta');
     }
   }
 
@@ -42,30 +40,8 @@ class _ColetasPageState extends State<ColetasPage> {
   void _editarColeta(String id) async {
     await context.push('/nova-coleta', extra: id);
     if (mounted) {
-      setState(() {
-        _temRascunho = AppScope.of(
-          context,
-        ).prefs.containsKey('rascunho_coleta');
-      });
       _viewModel.atualizar();
     }
-  }
-
-  Future<void> _continuarRascunho() async {
-    await context.push('/nova-coleta');
-    if (mounted) {
-      setState(() {
-        _temRascunho = AppScope.of(
-          context,
-        ).prefs.containsKey('rascunho_coleta');
-      });
-      _viewModel.atualizar();
-    }
-  }
-
-  Future<void> _descartarRascunho() async {
-    await AppScope.of(context).prefs.remove('rascunho_coleta');
-    if (mounted) setState(() => _temRascunho = false);
   }
 
   @override
@@ -127,11 +103,6 @@ class _ColetasPageState extends State<ColetasPage> {
         ),
         body: Column(
           children: <Widget>[
-            if (_temRascunho)
-              _BannerRascunho(
-                onContinuar: _continuarRascunho,
-                onDescartar: _descartarRascunho,
-              ),
             Expanded(
               child: ListenableBuilder(
                 listenable: Listenable.merge([
@@ -196,88 +167,12 @@ class _ColetasPageState extends State<ColetasPage> {
           onPressed: () async {
             await context.push('/nova-coleta');
             if (mounted) {
-              setState(() {
-                _temRascunho = AppScope.of(
-                  context,
-                ).prefs.containsKey('rascunho_coleta');
-              });
               _viewModel.atualizar();
             }
           },
           backgroundColor: theme.colorScheme.primary,
           child: Icon(Icons.add, color: theme.colorScheme.onPrimary),
         ),
-      ),
-    );
-  }
-}
-
-class _BannerRascunho extends StatelessWidget {
-  const _BannerRascunho({required this.onContinuar, required this.onDescartar});
-
-  final VoidCallback onContinuar;
-  final VoidCallback onDescartar;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: theme.colorScheme.primaryContainer,
-      child: Row(
-        children: <Widget>[
-          Icon(
-            Icons.edit_note_outlined,
-            color: theme.colorScheme.primary,
-            size: 18,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              l10n.coletasDraftBanner,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: theme.colorScheme.onPrimaryContainer,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: onDescartar,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              l10n.coletasDraftDiscard,
-              style: TextStyle(
-                color: theme.colorScheme.error,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: onContinuar,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              l10n.coletasDraftContinue,
-              style: TextStyle(
-                color: theme.colorScheme.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

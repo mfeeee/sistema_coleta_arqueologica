@@ -16,6 +16,8 @@ import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/cole
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
+import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
+import 'package:sistema_coleta_arqueologica/features/notifications/data/models/notificacao_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 // ---------------------------------------------------------------------------
@@ -30,6 +32,26 @@ class _FakeSecureStorageService extends SecureStorageService {
 
   @override
   Future<String?> getJwt() async => null;
+}
+
+class _FakeNotificacaoRepository implements NotificacaoRepository {
+  @override
+  Future<void> vincularTokenFCM(String token) async {}
+  @override
+  Future<List<NotificacaoModel>> listar() async => [];
+  @override
+  Future<void> marcarComoLida(String id) async {}
+  @override
+  Future<PreferenciasNotificacaoModel> getPreferencias() async =>
+      const PreferenciasNotificacaoModel(
+        pushEnabled: true,
+        emailEnabled: true,
+        tiposHabilitados: [],
+      );
+  @override
+  Future<void> atualizarPreferencias(
+    PreferenciasNotificacaoModel preferencias,
+  ) async {}
 }
 
 class _FakeColetaRepository implements ColetaRepository {
@@ -168,6 +190,7 @@ void main() {
             obterColetasPendentesUseCase: spy,
             agendarSync: () async {},
           ),
+          notificacaoRepository: _FakeNotificacaoRepository(),
         );
 
         await notifier.login('teste@arqueologia.br', 'senha123');
@@ -189,6 +212,7 @@ void main() {
           obterColetasPendentesUseCase: spy,
           agendarSync: () async => chamouAgendar.add(true),
         ),
+        notificacaoRepository: _FakeNotificacaoRepository(),
       );
 
       await notifier.login('teste@arqueologia.br', 'senha123');
@@ -209,6 +233,7 @@ void main() {
           obterColetasPendentesUseCase: spy,
           agendarSync: () async => chamouAgendar.add(true),
         ),
+        notificacaoRepository: _FakeNotificacaoRepository(),
       );
 
       await notifier.login('teste@arqueologia.br', 'senha123');
@@ -228,6 +253,7 @@ void main() {
             obterColetasPendentesUseCase: _ErrandoObterPendentesUseCase(),
             agendarSync: () async {},
           ),
+          notificacaoRepository: _FakeNotificacaoRepository(),
         );
 
         await notifier.login('teste@arqueologia.br', 'senha123');

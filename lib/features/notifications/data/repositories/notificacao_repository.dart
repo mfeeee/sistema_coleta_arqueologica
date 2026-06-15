@@ -6,12 +6,17 @@ abstract interface class NotificacaoRepository {
   Future<void> marcarComoLida(String id);
   Future<PreferenciasNotificacaoModel> getPreferencias();
   Future<void> atualizarPreferencias(PreferenciasNotificacaoModel preferencias);
+  Future<void> vincularTokenFCM(String token);
 }
 
 class NotificacaoRepositoryImpl implements NotificacaoRepository {
   const NotificacaoRepositoryImpl(this._datasource);
 
   final NotificacaoApiDatasource _datasource;
+
+  @override
+  Future<void> vincularTokenFCM(String token) =>
+      _datasource.vincularTokenFCM(token);
 
   @override
   Future<List<NotificacaoModel>> listar() => _datasource.listar();

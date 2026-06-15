@@ -1,6 +1,8 @@
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
+import 'package:sistema_coleta_arqueologica/core/services/notification_service.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/tratador_de_erros.dart';
+import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
 import '../../core/services/auth_service.dart';
 import '../../core/services/background_sync_service.dart';
 import 'domain/usecases/executar_sync_pos_login_use_case.dart';
@@ -13,10 +15,13 @@ class AuthNotifier extends ChangeNotifier {
   AuthNotifier({
     required this.authService,
     required ExecutarSyncPosLoginUseCase executarSyncPosLogin,
-  }) : _executarSyncPosLogin = executarSyncPosLogin;
+    required NotificacaoRepository notificacaoRepository,
+  }) : _executarSyncPosLogin = executarSyncPosLogin,
+       _notificacaoRepository = notificacaoRepository;
 
   final AuthService authService;
   final ExecutarSyncPosLoginUseCase _executarSyncPosLogin;
+  final NotificacaoRepository _notificacaoRepository;
 
   /// Incrementado quando sincronizarBens() termina (com ou sem erros).
   final ValueNotifier<int> contadorSyncBens = ValueNotifier(0);
@@ -92,6 +97,10 @@ class AuthNotifier extends ChangeNotifier {
         _userEmail = emailRetornado;
         _userClassificacao = classifRetornada;
         _userAvatarUrl = avatarRetornado;
+
+        // Registro do Token FCM pós-login bem sucedido
+        _registrarTokenFCM();
+
         _executarSyncPosLogin
             .call(idRetornado)
             .catchError(
@@ -109,6 +118,18 @@ class AuthNotifier extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  Future<void> _registrarTokenFCM() async {
+    try {
+      final token = await NotificationService.instance.getToken();
+      if (token != null) {
+        await _notificacaoRepository.vincularTokenFCM(token);
+        log('Token FCM vinculado com sucesso', name: 'AuthNotifier');
+      }
+    } catch (e) {
+      log('Falha ao vincular token FCM', error: e, name: 'AuthNotifier');
+    }
   }
 
   Future<void> register({
@@ -139,6 +160,9 @@ class AuthNotifier extends ChangeNotifier {
         _userEmail = emailRetornado;
         _userClassificacao = classifRetornada;
         _userAvatarUrl = null;
+
+        _registrarTokenFCM();
+
         BackgroundSyncService.agendar().then(
           (_) {},
           onError: (Object e, StackTrace st) => log(

@@ -98,6 +98,8 @@ class _StubBemMaterialRepository implements BemMaterialRepository {
 
 class _StubNotificacaoRepository implements NotificacaoRepository {
   @override
+  Future<void> vincularTokenFCM(String token) async {}
+  @override
   Future<List<NotificacaoModel>> listar() async => [];
   @override
   Future<void> marcarComoLida(String id) async {}
@@ -236,6 +238,7 @@ AuthNotifier _criarStubAuthNotifier() {
       ),
       agendarSync: () async {},
     ),
+    notificacaoRepository: _StubNotificacaoRepository(),
   );
 }
 

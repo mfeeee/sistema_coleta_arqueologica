@@ -7,9 +7,11 @@ class NotificationService {
   NotificationService._();
   static final NotificationService instance = NotificationService._();
 
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  FirebaseMessaging? _fcm;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
+
+  bool _initialized = false;
 
   final StreamController<RemoteMessage> _onMessageController =
       StreamController<RemoteMessage>.broadcast();
@@ -17,38 +19,55 @@ class NotificationService {
   Stream<RemoteMessage> get onMessage => _onMessageController.stream;
 
   Future<void> initialize() async {
-    // Solicitar permissão (necessário para iOS e Android 13+)
-    final NotificationSettings settings = await _fcm.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    try {
+      _fcm = FirebaseMessaging.instance;
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      log('Usuário concedeu permissão para notificações');
+      // Solicitar permissão (necessário para iOS e Android 13+)
+      final NotificationSettings settings = await _fcm!.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        log('Usuário concedeu permissão para notificações');
+      }
+
+      // Configurar notificações locais para foreground
+      const initializationSettingsAndroid = AndroidInitializationSettings(
+        '@mipmap/ic_launcher',
+      );
+      const initializationSettings = InitializationSettings(
+        android: initializationSettingsAndroid,
+      );
+      await _localNotifications.initialize(settings: initializationSettings);
+
+      // Foreground messages
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        log('Recebeu mensagem no foreground: ${message.notification?.title}');
+        _onMessageController.add(message);
+      });
+
+      // Background/Terminated messages
+      FirebaseMessaging.onBackgroundMessage(
+        _firebaseMessagingBackgroundHandler,
+      );
+
+      _initialized = true;
+    } catch (e) {
+      log('Falha ao inicializar NotificationService: $e');
+      _initialized = false;
     }
-
-    // Configurar notificações locais para foreground
-    const initializationSettingsAndroid = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
-    const initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
-    await _localNotifications.initialize(settings: initializationSettings);
-
-    // Foreground messages
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      log('Recebeu mensagem no foreground: ${message.notification?.title}');
-      _onMessageController.add(message);
-    });
-
-    // Background/Terminated messages
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
   Future<String?> getToken() async {
-    return await _fcm.getToken();
+    if (!_initialized || _fcm == null) return null;
+    try {
+      return await _fcm!.getToken();
+    } catch (e) {
+      log('Erro ao obter token FCM: $e');
+      return null;
+    }
   }
 }
 

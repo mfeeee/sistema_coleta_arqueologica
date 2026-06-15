@@ -139,14 +139,15 @@ Future<void> main() async {
     onAviso: (msg) => authNotifier.setarAviso(msg),
   );
 
-  authNotifier = AuthNotifier(
-    authService: authService,
-    executarSyncPosLogin: executarSyncPosLogin,
-  );
-
   final notificacaoApiDatasource = NotificacaoApiDatasourceImpl(dio: dioAuth);
   final notificacaoRepository = NotificacaoRepositoryImpl(
     notificacaoApiDatasource,
+  );
+
+  authNotifier = AuthNotifier(
+    authService: authService,
+    executarSyncPosLogin: executarSyncPosLogin,
+    notificacaoRepository: notificacaoRepository,
   );
 
   final preferenciasApiDatasource = PreferenciasApiDatasourceImpl(dio: dioAuth);
@@ -158,6 +159,19 @@ Future<void> main() async {
   // Agenda sync em background se já há sessão ativa.
   if ((await secureStorage.getJwt()) != null) {
     await BackgroundSyncService.agendar();
+
+    // Tenta registrar o token FCM se a sessão já estiver ativa ao iniciar o app
+    NotificationService.instance.getToken().then((token) {
+      if (token != null) {
+        notificacaoRepository.vincularTokenFCM(token).catchError((e) {
+          log(
+            'Falha ao vincular token FCM na restauração',
+            error: e,
+            name: 'Main',
+          );
+        });
+      }
+    });
   }
 
   final router = createAppRouter(authNotifier);

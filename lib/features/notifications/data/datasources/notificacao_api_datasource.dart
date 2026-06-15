@@ -8,12 +8,25 @@ abstract interface class NotificacaoApiDatasource {
   Future<void> marcarComoLida(String id);
   Future<PreferenciasNotificacaoModel> getPreferencias();
   Future<void> atualizarPreferencias(PreferenciasNotificacaoModel preferencias);
+  Future<void> vincularTokenFCM(String token);
 }
 
 class NotificacaoApiDatasourceImpl implements NotificacaoApiDatasource {
   const NotificacaoApiDatasourceImpl({required this.dio});
 
   final Dio dio;
+
+  @override
+  Future<void> vincularTokenFCM(String token) async {
+    try {
+      await dio.put('/v1/mobile/fcm-token', data: {'fcm_token': token});
+    } on DioException catch (e) {
+      if (e.error is ArqueoException) {
+        throw e.error as ArqueoException;
+      }
+      rethrow;
+    }
+  }
 
   @override
   Future<List<NotificacaoModel>> listar() async {

@@ -255,6 +255,55 @@ class ColetaFormNotifier extends ChangeNotifier {
     }
   }
 
+  void restaurarDeEntity(ColetaEntity entity) {
+    nome = entity.nomeBem;
+    natureza = entity.natureza;
+    tipo = entity.tipo;
+
+    if (entity.localizacao != null) {
+      localizacao = LocalizacaoModel(
+        id: entity.localizacao!.id,
+        lat: entity.localizacao!.lat,
+        lng: entity.localizacao!.lng,
+        uf: entity.localizacao!.uf,
+        municipio: entity.localizacao!.municipio,
+        cep: entity.localizacao!.cep,
+        logradouro: entity.localizacao!.logradouro,
+      );
+    }
+
+    _artefatos.clear();
+    _artefatos.addAll(entity.artefatoTipos);
+
+    nomesPopulares =
+        (entity.dadosColetados['nomes_populares'] as List?)?.cast<String>() ??
+        [];
+    meiosAcesso = entity.dadosColetados['meios_acesso'] as String?;
+
+    _midias.clear();
+    for (final m in entity.midias) {
+      _midias.add(
+        MidiaModel(
+          id: m.id,
+          mediableType: m.mediableType,
+          mediableId: m.mediableId,
+          storagePath: m.storagePath,
+          mimeType: m.mimeType,
+          tipo: m.tipo,
+          url: m.url,
+          descricao: m.descricao,
+        ),
+      );
+    }
+
+    _modificado = false;
+    notifyListeners();
+    log(
+      'Estado restaurado de ColetaEntity (${entity.id})',
+      name: 'ColetaFormNotifier',
+    );
+  }
+
   void resetModificado() {
     _modificado = false;
     notifyListeners();

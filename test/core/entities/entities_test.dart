@@ -10,10 +10,17 @@ import 'package:sistema_coleta_arqueologica/core/entities/usuario_entity.dart';
 void main() {
   // ── ArtefatoTipoEntity ───────────────────────────────────────────────────────
   group('ArtefatoTipoEntity', () {
-    test('construtor armazena id e nome corretamente', () {
-      const entity = ArtefatoTipoEntity(id: 'tipo-1', nome: 'Cerâmica');
+    test('construtor armazena todos os campos corretamente', () {
+      const entity = ArtefatoTipoEntity(
+        id: 'tipo-1',
+        nome: 'Cerâmica',
+        descricaoNova: 'Nova cerâmica encontrada',
+        novoTipo: true,
+      );
       check(entity.id).equals('tipo-1');
       check(entity.nome).equals('Cerâmica');
+      check(entity.descricaoNova).equals('Nova cerâmica encontrada');
+      check(entity.novoTipo).isTrue();
     });
 
     test('duas instâncias com mesmos valores são iguais (const)', () {
@@ -31,10 +38,25 @@ void main() {
 
   // ── LocalizacaoEntity ────────────────────────────────────────────────────────
   group('LocalizacaoEntity', () {
-    test('construtor armazena campos obrigatórios', () {
-      const loc = LocalizacaoEntity(id: 'loc-1', uf: 'PI');
+    test('construtor armazena todos os campos corretamente', () {
+      const loc = LocalizacaoEntity(
+        id: 'loc-1',
+        uf: 'PI',
+        cep: '64000-000',
+        logradouro: 'Rua das Flores',
+        municipio: 'Teresina',
+        lat: -5.0920,
+        lng: -42.8034,
+      );
       check(loc.id).equals('loc-1');
       check(loc.uf).equals('PI');
+      check(loc.cep).equals('64000-000');
+      check(loc.logradouro).equals('Rua das Flores');
+      check(loc.municipio).equals('Teresina');
+      check(loc.lat).isNotNull();
+      check(loc.lng).isNotNull();
+      check(loc.lat!).isCloseTo(-5.0920, 0.0001);
+      check(loc.lng!).isCloseTo(-42.8034, 0.0001);
     });
 
     test('lat e lng são nulos quando não fornecidos', () {
@@ -105,6 +127,34 @@ void main() {
       const usuario = UsuarioEntity(id: 'usr-001', nome: 'Maria Silva');
       check(usuario.id).equals('usr-001');
       check(usuario.nome).equals('Maria Silva');
+    });
+
+    test('armazena campos opcionais corretamente', () {
+      final now = DateTime.now();
+      final usuario = UsuarioEntity(
+        id: 'usr-002',
+        nome: 'João Santos',
+        email: 'joao@example.com',
+        avatarUrl: 'https://example.com/avatar.png',
+        deletedAt: now,
+      );
+      check(usuario.email).equals('joao@example.com');
+      check(usuario.avatarUrl).equals('https://example.com/avatar.png');
+      check(usuario.deletedAt).equals(now);
+    });
+
+    test('ativo retorna true quando deletedAt é nulo', () {
+      const usuario = UsuarioEntity(id: '1', nome: 'X');
+      check(usuario.ativo).isTrue();
+    });
+
+    test('ativo retorna false quando deletedAt não é nulo', () {
+      final usuario = UsuarioEntity(
+        id: '1',
+        nome: 'X',
+        deletedAt: DateTime.now(),
+      );
+      check(usuario.ativo).isFalse();
     });
   });
 }

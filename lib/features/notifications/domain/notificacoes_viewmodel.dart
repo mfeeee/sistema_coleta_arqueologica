@@ -4,25 +4,17 @@ import 'package:flutter/foundation.dart';
 import '../data/models/notificacao_model.dart';
 import '../data/repositories/notificacao_repository.dart';
 
-const _kIntervaloPolling = Duration(seconds: 30);
-
 class NotificacoesViewModel {
   NotificacoesViewModel({required NotificacaoRepository repository})
     : _repository = repository;
 
   final NotificacaoRepository _repository;
-  Timer? _timer;
 
   final ValueNotifier<bool> carregando = ValueNotifier(false);
   final ValueNotifier<String?> erro = ValueNotifier(null);
   final ValueNotifier<List<NotificacaoModel>> notificacoes = ValueNotifier([]);
-  final ValueNotifier<String?> filtroAtivo = ValueNotifier(null);
-
-  List<NotificacaoModel> get filtradas {
-    final filtro = filtroAtivo.value;
-    if (filtro == null) return notificacoes.value;
-    return notificacoes.value.where((n) => n.tipo == filtro).toList();
-  }
+  final ValueNotifier<PreferenciasNotificacaoModel?> preferencias =
+      ValueNotifier(null);
 
   int get totalNaoLidas => notificacoes.value.where((n) => !n.lida).length;
 
@@ -31,7 +23,7 @@ class NotificacoesViewModel {
     carregando.value = true;
     erro.value = null;
     try {
-      notificacoes.value = await _repository.buscarNotificacoes();
+      notificacoes.value = await _repository.listar();
     } catch (e, st) {
       log(
         'Erro ao carregar notificações',
@@ -45,26 +37,44 @@ class NotificacoesViewModel {
     }
   }
 
-  void iniciarPolling() {
-    _timer?.cancel();
-    _timer = Timer.periodic(_kIntervaloPolling, (_) => carregar());
+  Future<void> carregarPreferencias() async {
+    try {
+      preferencias.value = await _repository.getPreferencias();
+    } catch (e, st) {
+      log(
+        'Erro ao carregar preferências de notificação',
+        error: e,
+        stackTrace: st,
+        name: 'NotificacoesViewModel',
+      );
+    }
   }
 
-  void pararPolling() {
-    _timer?.cancel();
-    _timer = null;
+  Future<void> atualizarPreferencias(
+    PreferenciasNotificacaoModel novasPreferencias,
+  ) async {
+    try {
+      await _repository.atualizarPreferencias(novasPreferencias);
+      preferencias.value = novasPreferencias;
+    } catch (e, st) {
+      log(
+        'Erro ao atualizar preferências de notificação',
+        error: e,
+        stackTrace: st,
+        name: 'NotificacoesViewModel',
+      );
+    }
   }
 
-  void definirFiltro(String? tipo) {
-    filtroAtivo.value = tipo;
-  }
-
-  Future<void> marcarComoLida(int id) async {
+  Future<void> marcarComoLida(String id) async {
     try {
       await _repository.marcarComoLida(id);
-      notificacoes.value = notificacoes.value
-          .map((n) => n.id == id ? n.marcarComoLida() : n)
-          .toList();
+      notificacoes.value = notificacoes.value.map((n) {
+        if (n.id == id) {
+          return n.copyWith(lida: true, lidaEm: DateTime.now());
+        }
+        return n;
+      }).toList();
     } catch (e, st) {
       log(
         'Erro ao marcar notificação como lida',
@@ -76,10 +86,9 @@ class NotificacoesViewModel {
   }
 
   void dispose() {
-    pararPolling();
     carregando.dispose();
     erro.dispose();
     notificacoes.dispose();
-    filtroAtivo.dispose();
+    preferencias.dispose();
   }
 }

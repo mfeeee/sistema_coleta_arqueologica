@@ -324,10 +324,22 @@ class _FloatingHeader extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(
-                  Icons.notifications_none,
-                  color: theme.colorScheme.onSurface,
-                  size: 22,
+                icon: ListenableBuilder(
+                  listenable: AppScope.of(context).unreadNotificationsCount,
+                  builder: (context, _) {
+                    final count = AppScope.of(
+                      context,
+                    ).unreadNotificationsCount.value;
+                    return Badge(
+                      label: count > 0 ? Text('$count') : null,
+                      isLabelVisible: count > 0,
+                      child: Icon(
+                        Icons.notifications_none,
+                        color: theme.colorScheme.onSurface,
+                        size: 22,
+                      ),
+                    );
+                  },
                 ),
                 onPressed: () => context.push('/notificacoes'),
                 padding: EdgeInsets.zero,

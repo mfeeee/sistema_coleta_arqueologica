@@ -42,6 +42,7 @@ class AppScope extends InheritedWidget {
     required this.temaModo,
     required this.idiomaAtual,
     required this.fotoPerfilPath,
+    required this.unreadNotificationsCount,
     required this.profileService,
     required this.secureStorage,
     required this.dioPublic,
@@ -62,6 +63,7 @@ class AppScope extends InheritedWidget {
   final ValueNotifier<ThemeMode> temaModo;
   final ValueNotifier<Locale> idiomaAtual;
   final ValueNotifier<String?> fotoPerfilPath;
+  final ValueNotifier<int> unreadNotificationsCount;
   final ProfileService profileService;
   final SecureStorageService secureStorage;
   final Dio dioPublic;
@@ -124,6 +126,7 @@ class AppScope extends InheritedWidget {
       temaModo: temaModo,
       idiomaAtual: idiomaAtual,
       fotoPerfilPath: ValueNotifier<String?>(null),
+      unreadNotificationsCount: ValueNotifier<int>(0),
       profileService: profileService,
       secureStorage: secureStorage,
       dioPublic: dioPublic,
@@ -153,6 +156,7 @@ class AppScope extends InheritedWidget {
       temaModo != oldWidget.temaModo ||
       idiomaAtual != oldWidget.idiomaAtual ||
       fotoPerfilPath != oldWidget.fotoPerfilPath ||
+      unreadNotificationsCount != oldWidget.unreadNotificationsCount ||
       profileService != oldWidget.profileService ||
       secureStorage != oldWidget.secureStorage ||
       dioPublic != oldWidget.dioPublic;

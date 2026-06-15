@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
 import 'dart:developer';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:sistema_coleta_arqueologica/core/services/notification_service.dart';
 import 'core/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
@@ -42,6 +44,16 @@ import 'core/di/app_scope.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await Firebase.initializeApp();
+    await NotificationService.instance.initialize();
+  } catch (e) {
+    log(
+      'Firebase initialization failed (likely missing config files)',
+      error: e,
+    );
+  }
 
   await FMTCObjectBoxBackend().initialise();
   await const FMTCStore('arqueologico').manage.create();
@@ -209,6 +221,22 @@ class _ArqueoAppState extends State<_ArqueoApp> {
     super.initState();
     widget.temaModo.addListener(_onTemaAlterado);
     widget.idiomaAtual.addListener(_onIdiomaAlterado);
+
+    NotificationService.instance.onMessage.listen((message) {
+      if (!mounted) return;
+      final scope = AppScope.of(context);
+      scope.unreadNotificationsCount.value++;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message.notification?.title ?? 'Nova notificação'),
+          action: SnackBarAction(
+            label: 'Ver',
+            onPressed: () => widget.router.push('/notificacoes'),
+          ),
+        ),
+      );
+    });
   }
 
   @override

@@ -10,7 +10,7 @@ import '../../features/home/presentation/pages/inicio_page.dart';
 import '../../features/sync/presentation/pages/sync_page.dart';
 import '../../features/profile/pages/profile_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
-import '../../features/profile/presentation/pages/preferencias_notificacao_page.dart';
+import '../../features/notifications/presentation/pages/preferencias_notificacoes_page.dart';
 import '../../features/coleta/presentation/pages/nova_coleta_page.dart';
 import '../../features/coleta/presentation/pages/detalhes_coleta_page.dart';
 import '../../features/coleta/presentation/pages/motivo_rejeicao_page.dart';
@@ -59,12 +59,14 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
       GoRoute(
         path: '/notificacoes',
         builder: (_, __) => const NotificationsPage(),
+        routes: [
+          GoRoute(
+            path: 'preferencias',
+            builder: (_, __) => const PreferenciasNotificacoesPage(),
+          ),
+        ],
       ),
       GoRoute(path: '/perfil', builder: (_, __) => const ProfilePage()),
-      GoRoute(
-        path: '/perfil/preferencias-notificacao',
-        builder: (_, __) => const PreferenciasNotificacaoPage(),
-      ),
       GoRoute(path: '/nova-coleta', builder: (_, __) => const NovaColetaPage()),
       GoRoute(
         path: '/detalhes-coleta',
@@ -99,6 +101,11 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
                 path: '/sincronizar',
                 builder: (_, __) => const SyncPage(),
               ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(path: '/perfil', builder: (_, __) => const ProfilePage()),
             ],
           ),
         ],

@@ -6,14 +6,14 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/criar_coleta_use_case.dart';
 
 CriarColetaInput _inputBase() => const CriarColetaInput(
-      nome: 'Sítio Pedra do Encantado',
-      nomesPopulares: ['Pedra Mágica'],
-      artefatoTipos: [],
-      midias: [],
-      usuarioId: 'arq-001',
-      natureza: NaturezaBem.bemArqueologico,
-      tipo: TipoBem.sitio,
-    );
+  nome: 'Sítio Pedra do Encantado',
+  nomesPopulares: ['Pedra Mágica'],
+  artefatoTipos: [],
+  midias: [],
+  usuarioId: 'arq-001',
+  natureza: NaturezaBem.bemArqueologico,
+  tipo: TipoBem.sitio,
+);
 
 void main() {
   const useCase = CriarColetaUseCase();

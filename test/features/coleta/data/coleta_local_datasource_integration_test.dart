@@ -10,22 +10,23 @@ import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/col
 import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_model.dart';
 
 // Banco Drift 100% em memória — sem arquivo, sem SQLCipher
-AppDatabase _criarBancoMemoria() =>
-    AppDatabase(NativeDatabase.memory());
+AppDatabase _criarBancoMemoria() => AppDatabase(NativeDatabase.memory());
 
-ColetaModel _criarColeta(String id, {StatusColeta status = StatusColeta.pendente}) =>
-    ColetaModel(
-      id: id,
-      usuarioId: 'arq-001',
-      nomeBem: 'Bem $id',
-      localizacao: LocalizacaoModel(id: 'loc-$id', lat: -2.9078, lng: -41.7722),
-      dataColeta: DateTime(2025, 1, 15),
-      updatedAt: DateTime(2025, 1, 15),
-      versao: 1,
-      syncStatus: status,
-      artefatoTipos: const [ArtefatoTipoModel(id: 'tipo-1', nome: 'Cerâmica')],
-      dadosColetados: const {'nomes_populares': []},
-    );
+ColetaModel _criarColeta(
+  String id, {
+  StatusColeta status = StatusColeta.pendente,
+}) => ColetaModel(
+  id: id,
+  usuarioId: 'arq-001',
+  nomeBem: 'Bem $id',
+  localizacao: LocalizacaoModel(id: 'loc-$id', lat: -2.9078, lng: -41.7722),
+  dataColeta: DateTime(2025, 1, 15),
+  updatedAt: DateTime(2025, 1, 15),
+  versao: 1,
+  syncStatus: status,
+  artefatoTipos: const [ArtefatoTipoModel(id: 'tipo-1', nome: 'Cerâmica')],
+  dadosColetados: const {'nomes_populares': []},
+);
 
 void main() {
   late AppDatabase db;
@@ -62,16 +63,22 @@ void main() {
     });
 
     test('getPendentes retorna apenas coletas com status pendente', () async {
-      await datasource.inserir(_criarColeta('pend-1', status: StatusColeta.pendente));
-      await datasource.inserir(_criarColeta('sync-1', status: StatusColeta.sincronizado));
-      await datasource.inserir(_criarColeta('pend-2', status: StatusColeta.pendente));
+      await datasource.inserir(
+        _criarColeta('pend-1', status: StatusColeta.pendente),
+      );
+      await datasource.inserir(
+        _criarColeta('sync-1', status: StatusColeta.sincronizado),
+      );
+      await datasource.inserir(
+        _criarColeta('pend-2', status: StatusColeta.pendente),
+      );
 
       final pendentes = await datasource.getPendentes();
 
       check(pendentes.map((c) => c.id))
-          ..contains('pend-1')
-          ..contains('pend-2')
-          ..not((it) => it.contains('sync-1'));
+        ..contains('pend-1')
+        ..contains('pend-2')
+        ..not((it) => it.contains('sync-1'));
     });
 
     test('atualizarStatus muda o status corretamente no banco', () async {
@@ -92,11 +99,19 @@ void main() {
     });
 
     test('contarPorStatus conta corretamente', () async {
-      await datasource.inserir(_criarColeta('p1', status: StatusColeta.pendente));
-      await datasource.inserir(_criarColeta('p2', status: StatusColeta.pendente));
-      await datasource.inserir(_criarColeta('s1', status: StatusColeta.sincronizado));
+      await datasource.inserir(
+        _criarColeta('p1', status: StatusColeta.pendente),
+      );
+      await datasource.inserir(
+        _criarColeta('p2', status: StatusColeta.pendente),
+      );
+      await datasource.inserir(
+        _criarColeta('s1', status: StatusColeta.sincronizado),
+      );
 
-      final totalPendentes = await datasource.contarPorStatus(StatusColeta.pendente);
+      final totalPendentes = await datasource.contarPorStatus(
+        StatusColeta.pendente,
+      );
       check(totalPendentes).equals(2);
     });
 
@@ -108,14 +123,14 @@ void main() {
       final recentes = await datasource.getRecentes(3);
       check(recentes).has((l) => l.length, 'length').isLessOrEqual(3);
     });
-   group('Persistence details', () {
-    test('localizacao_completa is preserved in dadosColetados', () async {
-      final coleta = _criarColeta('c-geo');
-      await datasource.inserir(coleta);
+    group('Persistence details', () {
+      test('localizacao_completa is preserved in dadosColetados', () async {
+        final coleta = _criarColeta('c-geo');
+        await datasource.inserir(coleta);
 
-      final recuperada = await datasource.getById('c-geo');
-      check(recuperada!.dadosColetados).containsKey('localizacao_completa');
+        final recuperada = await datasource.getById('c-geo');
+        check(recuperada!.dadosColetados).containsKey('localizacao_completa');
+      });
     });
-  });
   });
 }

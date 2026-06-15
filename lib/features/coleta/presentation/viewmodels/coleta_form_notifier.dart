@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
@@ -10,12 +8,9 @@ import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/core/models/midia_model.dart';
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
-import 'package:sistema_coleta_arqueologica/core/models/artefato_tipo_model.dart';
 import 'package:sistema_coleta_arqueologica/features/media/domain/usecases/upload_midia_usecase.dart';
 import '../../domain/entities/coleta_entity.dart';
 import '../../domain/usecases/criar_coleta_use_case.dart';
-
-const _kChaveRascunho = 'rascunho_coleta';
 
 class ColetaFormNotifier extends ChangeNotifier {
   final String id;
@@ -171,90 +166,6 @@ class ColetaFormNotifier extends ChangeNotifier {
     return 0;
   }
 
-  // Rascunho
-  Map<String, dynamic> toMap() => {
-    'id': id,
-    'nome': nome,
-    'nomes_populares': nomesPopulares,
-    'natureza': natureza?.name,
-    'tipo': tipo?.name,
-    'localizacao': localizacao?.toJson(),
-    'artefatos': _artefatos
-        .map(
-          (a) => ArtefatoTipoModel(
-            id: a.id,
-            nome: a.nome,
-            descricaoNova: a.descricaoNova,
-            novoTipo: a.novoTipo,
-          ).toJson(),
-        )
-        .toList(),
-    'meios_acesso': meiosAcesso,
-    'midias': _midias.map((m) => m.toJson()).toList(),
-  };
-
-  void _restaurarDeMap(Map<String, dynamic> map) {
-    nome = map['nome'] as String? ?? '';
-    nomesPopulares = (map['nomes_populares'] as List?)?.cast<String>() ?? [];
-
-    final naturezaStr = map['natureza'] as String?;
-    if (naturezaStr != null) {
-      try {
-        natureza = NaturezaBem.fromString(naturezaStr);
-      } catch (_) {
-        natureza = null;
-      }
-    }
-
-    final tipoStr = map['tipo'] as String?;
-    if (tipoStr != null) {
-      try {
-        tipo = TipoBem.fromString(tipoStr);
-      } catch (_) {
-        tipo = null;
-      }
-    }
-
-    if (map['localizacao'] != null) {
-      localizacao = LocalizacaoModel.fromJson(
-        map['localizacao'] as Map<String, dynamic>,
-      );
-    }
-
-    _artefatos.clear();
-    final artefatosJson = (map['artefatos'] as List?) ?? [];
-    for (final a in artefatosJson) {
-      _artefatos.add(ArtefatoTipoModel.fromJson(a as Map<String, dynamic>));
-    }
-
-    meiosAcesso = map['meios_acesso'] as String?;
-
-    _midias.clear();
-    final midiasJson = (map['midias'] as List?) ?? [];
-    for (final m in midiasJson) {
-      _midias.add(MidiaModel.fromJson(m as Map<String, dynamic>));
-    }
-  }
-
-  void restaurarDePrefs(SharedPreferences prefs) {
-    final json = prefs.getString(_kChaveRascunho);
-    if (json == null) return;
-    try {
-      final map = jsonDecode(json) as Map<String, dynamic>;
-      _restaurarDeMap(map);
-      _modificado = false; // Reset após restaurar
-      notifyListeners();
-      log('Rascunho restaurado', name: 'ColetaFormNotifier');
-    } catch (e, st) {
-      log(
-        'Erro ao restaurar rascunho',
-        error: e,
-        stackTrace: st,
-        name: 'ColetaFormNotifier',
-      );
-    }
-  }
-
   void restaurarDeEntity(ColetaEntity entity) {
     nome = entity.nomeBem;
     natureza = entity.natureza;
@@ -307,30 +218,6 @@ class ColetaFormNotifier extends ChangeNotifier {
   void resetModificado() {
     _modificado = false;
     notifyListeners();
-  }
-
-  Future<void> salvarRascunho(SharedPreferences prefs) async {
-    if (!temDadosRascunho) return;
-    try {
-      final map = toMap();
-      await prefs.setString(_kChaveRascunho, jsonEncode(map));
-      log(
-        'Rascunho salvo (${_midias.length} mídias)',
-        name: 'ColetaFormNotifier',
-      );
-    } catch (e, st) {
-      log(
-        'Erro ao salvar rascunho',
-        error: e,
-        stackTrace: st,
-        name: 'ColetaFormNotifier',
-      );
-    }
-  }
-
-  Future<void> descartarRascunho(SharedPreferences prefs) async {
-    await prefs.remove(_kChaveRascunho);
-    log('Rascunho descartado', name: 'ColetaFormNotifier');
   }
 
   Future<ColetaEntity> toRascunho({required String usuarioId}) async {

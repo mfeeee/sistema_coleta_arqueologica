@@ -35,6 +35,6 @@ jobs:
       - name: Analyze Code
         run: flutter analyze
 
-      # Testes desligados temporariamente
-      # - name: Run Tests
-      #   run: flutter test
+      # 6. Roda os testes 
+      - name: Run Tests
+        run: flutter test

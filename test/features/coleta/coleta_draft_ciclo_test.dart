@@ -2,7 +2,7 @@ import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
 import "../../helpers/stub_midia_repository.dart";
 // Testes de ciclo automatizados:
-// preenche → salva → [logout: prefs NÃO são limpas] → login → restaura
+// preenche → toRascunho → [banco] → restauraDeEntity
 //
 // Motivação: garantir end-to-end sem dependência de execução manual.
 
@@ -11,7 +11,6 @@ import 'dart:io';
 import 'package:checks/checks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
@@ -58,45 +57,43 @@ void _preencherFormularioCompleto(ColetaFormNotifier n) {
 // ---------------------------------------------------------------------------
 
 void main() {
-  setUp(() => SharedPreferences.setMockInitialValues({}));
+  group('Ciclo rascunho — dados textuais', () {
+    test(
+      'todos os campos sobrevivem ao ciclo cria rascunho → restaura',
+      () async {
+        // --- Sessão 1: usuário preenche e cria rascunho ---
+        final sessao1 = _criarNotifier();
+        _preencherFormularioCompleto(sessao1);
+        final rascunho = await sessao1.toRascunho(usuarioId: 'u1');
 
-  group('Ciclo rascunho pós-logout — dados textuais', () {
-    test('todos os campos sobrevivem ao ciclo salva → restaura', () async {
-      final prefs = await SharedPreferences.getInstance();
+        // --- Sessão 2: abre formulário com rascunho existente ---
+        final sessao2 = _criarNotifier();
+        sessao2.restaurarDeEntity(rascunho);
 
-      // --- Sessão 1: usuário preenche e fecha (logout) ---
-      final sessao1 = _criarNotifier();
-      _preencherFormularioCompleto(sessao1);
-      await sessao1.salvarRascunho(prefs);
-      // Logout: SharedPreferences NÃO é limpo (comportamento intencional).
-
-      // --- Sessão 2: usuário faz login novamente ---
-      final sessao2 = _criarNotifier();
-      sessao2.restaurarDePrefs(prefs);
-
-      check(sessao2.nome).equals('Sítio Lapa do Sol');
-      check(sessao2.natureza).equals(NaturezaBem.bemArqueologico);
-      check(sessao2.tipo).equals(TipoBem.sitio);
-      check(sessao2.artefatos.map((e) => e.id)).contains('1');
-      check(sessao2.artefatos.map((e) => e.id)).contains('2');
-      check(sessao2.meiosAcesso).equals('Estrada de terra, 5 km após o posto.');
-      check(
-        sessao2.nomesPopulares,
-      ).containsEqualInOrder(['Caverna do Sol', 'Gruta Amarela']);
-      check(sessao2.temDadosRascunho).isTrue();
-    });
+        check(sessao2.nome).equals('Sítio Lapa do Sol');
+        check(sessao2.natureza).equals(NaturezaBem.bemArqueologico);
+        check(sessao2.tipo).equals(TipoBem.sitio);
+        check(sessao2.artefatos.map((e) => e.id)).contains('1');
+        check(sessao2.artefatos.map((e) => e.id)).contains('2');
+        check(
+          sessao2.meiosAcesso,
+        ).equals('Estrada de terra, 5 km após o posto.');
+        check(
+          sessao2.nomesPopulares,
+        ).containsEqualInOrder(['Caverna do Sol', 'Gruta Amarela']);
+        check(sessao2.temDadosRascunho).isTrue();
+      },
+    );
 
     test(
       'passoRestauracao aponta para o passo correto após restauração',
       () async {
-        final prefs = await SharedPreferences.getInstance();
-
         final sessao1 = _criarNotifier();
         _preencherFormularioCompleto(sessao1);
-        await sessao1.salvarRascunho(prefs);
+        final rascunho = await sessao1.toRascunho(usuarioId: 'u1');
 
         final sessao2 = _criarNotifier();
-        sessao2.restaurarDePrefs(prefs);
+        sessao2.restaurarDeEntity(rascunho);
 
         // passo1Valido e passo2Valido → passoRestauracao == 2 (artefatos)
         check(sessao2.passoRestauracao).equals(2);
@@ -104,7 +101,7 @@ void main() {
     );
   });
 
-  group('Ciclo rascunho pós-logout — com foto', () {
+  group('Ciclo rascunho — com foto', () {
     late Directory tempDir;
     late File fotoOrigem;
 
@@ -116,19 +113,18 @@ void main() {
 
     tearDown(() => tempDir.delete(recursive: true));
 
-    test('foto persiste e é restaurada no próximo login', () async {
-      final prefs = await SharedPreferences.getInstance();
-
-      // --- Sessão 1: adiciona foto e salva ---
+    test('foto persiste e é restaurada', () async {
+      // --- Sessão 1: adiciona foto e gera rascunho ---
       final sessao1 = _criarNotifier(foto: fotoOrigem);
       _preencherFormularioCompleto(sessao1);
       await sessao1.adicionarFoto(ImageSource.camera);
       check(sessao1.totalMidias).equals(1);
-      await sessao1.salvarRascunho(prefs);
+
+      final rascunho = await sessao1.toRascunho(usuarioId: 'u1');
 
       // --- Sessão 2: restaura ---
       final sessao2 = _criarNotifier();
-      sessao2.restaurarDePrefs(prefs);
+      sessao2.restaurarDeEntity(rascunho);
 
       check(sessao2.totalMidias).equals(1);
       check(sessao2.midias.first.storagePath).equals('stub_path.jpg');

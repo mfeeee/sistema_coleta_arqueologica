@@ -353,8 +353,10 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Coleta salva com sucesso!'),
+          content: Text('Coleta finalizada com sucesso! Pronta para envio.'),
           backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 4),
         ),
       );
       Navigator.of(context).pop();
@@ -368,7 +370,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Erro ao salvar. Tente novamente.'),
+          content: const Text('Erro ao finalizar. Tente novamente.'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );

@@ -100,7 +100,7 @@ Future<void> main() async {
   final dioAuth = DioClient.authenticated(
     baseUrl: kApiBaseUrl,
     secureStorage: secureStorage,
-    onSessionExpired: () => authNotifier.sairPorSessaoExpirada(),
+    onSessionExpired: (msg) => authNotifier.sairPorSessaoExpirada(msg),
     onRefreshToken: () => authNotifier.authService.renovarToken(),
   );
 

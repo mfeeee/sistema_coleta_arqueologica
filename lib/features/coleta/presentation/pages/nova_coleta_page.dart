@@ -26,6 +26,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
   bool _initialized = false;
   bool _saving = false;
   bool _salvouComSucesso = false;
+  bool _descartouRascunho = false;
 
   @override
   void didChangeDependencies() {
@@ -55,9 +56,11 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
 
   @override
   void dispose() {
-    if (!_salvouComSucesso && _initialized && _formNotifier.temDadosRascunho) {
-      // Snapshot das fotos é capturado sincronamente dentro de salvarRascunho()
-      // antes do primeiro await — seguro como fire-and-forget em dispose().
+    if (!_salvouComSucesso &&
+        !_descartouRascunho &&
+        _initialized &&
+        _formNotifier.modificado) {
+      // Salva apenas o estado do formulário em SharedPreferences
       _formNotifier.salvarRascunho(_prefs);
     }
     _viewModel.dispose();
@@ -65,55 +68,129 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(height: 1.0),
-        ),
-        title: const Text(
-          'Nova Coleta - Passo 1/3',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            letterSpacing: -0.45,
-          ),
+  Future<void> _onWillPop() async {
+    if (_saving) return;
+
+    if (!_formNotifier.modificado) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sair da Coleta?'),
+        content: const Text(
+          'Você tem alterações não salvas. Deseja salvar como rascunho ou descartar tudo?',
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save_outlined),
-            tooltip: 'Salvar rascunho',
-            onPressed: _saving ? null : _salvarRascunho,
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'cancel'),
+            child: const Text('CONTINUAR EDITANDO'),
           ),
-          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'discard'),
+            child: Text(
+              'DESCARTAR',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, 'save'),
+            child: const Text('SALVAR RASCUNHO'),
+          ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            ValueListenableBuilder<bool>(
-              valueListenable: _conectividadeService.estaOnline,
-              builder: (context, online, _) {
-                if (online) return const SizedBox.shrink();
-                return const _BannerOffline();
-              },
+    );
+
+    if (!mounted) return;
+
+    if (result == 'save') {
+      await _salvarRascunho();
+    } else if (result == 'discard') {
+      await _descartarRascunho();
+      if (mounted) Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _descartarRascunho() async {
+    setState(() => _saving = true);
+    try {
+      await _formNotifier.descartarRascunho(_prefs);
+      _descartouRascunho = true;
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _onWillPop();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          centerTitle: true,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(1.0),
+            child: Container(height: 1.0),
+          ),
+          title: const Text(
+            'Nova Coleta - Passo 1/3',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.45,
             ),
-            Expanded(
-              child: ValueListenableBuilder<ColetaStep>(
-                valueListenable: _viewModel.stepNotifier,
-                builder: (context, step, child) {
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: _buildBody(step),
-                  );
+          ),
+          actions: [
+            if (_saving)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.only(right: 16.0),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.save_outlined),
+                tooltip: 'Salvar rascunho',
+                onPressed: _salvarRascunho,
+              ),
+            const SizedBox(width: 8),
+          ],
+        ),
+        body: SafeArea(
+          child: Column(
+            children: <Widget>[
+              ValueListenableBuilder<bool>(
+                valueListenable: _conectividadeService.estaOnline,
+                builder: (context, online, _) {
+                  if (online) return const SizedBox.shrink();
+                  return const _BannerOffline();
                 },
               ),
-            ),
-          ],
+              Expanded(
+                child: ValueListenableBuilder<ColetaStep>(
+                  valueListenable: _viewModel.stepNotifier,
+                  builder: (context, step, child) {
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: _buildBody(step),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -137,7 +214,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
         longitude: _viewModel.coordenadaAtual?.longitude ?? 0.0,
         formNotifier: _formNotifier,
         initialPage: _formNotifier.passoRestauracao,
-        onCancelar: () => Navigator.pop(context),
+        onCancelar: () => Navigator.maybePop(context),
         onFinalizar: _saving ? () {} : () => _salvarColeta(),
       ),
 
@@ -174,27 +251,45 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
   }
 
   Future<void> _salvarRascunho() async {
-    if (!_formNotifier.temDadosRascunho) {
-      Navigator.pop(context);
+    if (!_formNotifier.modificado && _formNotifier.temDadosRascunho) {
+      Navigator.of(context).pop();
       return;
     }
 
-    final messenger = ScaffoldMessenger.of(context);
-    final scope = AppScope.of(context);
+    if (!_formNotifier.temDadosRascunho) {
+      Navigator.of(context).pop();
+      return;
+    }
 
-    await _formNotifier.salvarRascunho(_prefs);
+    setState(() => _saving = true);
 
-    final rascunho = await _formNotifier.toRascunho(
-      usuarioId: scope.authNotifier.userId ?? '',
-    );
-    await scope.coletaRepository.salvar(rascunho);
-    _salvouComSucesso = true;
+    try {
+      final messenger = ScaffoldMessenger.of(context);
+      final scope = AppScope.of(context);
 
-    if (!mounted) return;
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Rascunho salvo com sucesso.')),
-    );
-    Navigator.pop(context);
+      await _formNotifier.salvarRascunho(_prefs);
+
+      final rascunho = await _formNotifier.toRascunho(
+        usuarioId: scope.authNotifier.userId ?? '',
+      );
+      await scope.coletaRepository.salvar(rascunho);
+      _formNotifier.resetModificado();
+      _salvouComSucesso = true;
+
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Rascunho salvo com sucesso.')),
+      );
+      Navigator.of(context).pop();
+    } catch (e, st) {
+      log('Erro ao salvar rascunho', error: e, stackTrace: st);
+      if (mounted) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao salvar rascunho.')),
+        );
+      }
+    }
   }
 
   Future<void> _salvarColeta() async {
@@ -235,7 +330,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
           backgroundColor: AppColors.success,
         ),
       );
-      Navigator.pop(context);
+      Navigator.of(context).pop();
     } catch (e, stackTrace) {
       log(
         'Erro ao salvar coleta',

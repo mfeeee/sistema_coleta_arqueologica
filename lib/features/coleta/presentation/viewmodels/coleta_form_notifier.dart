@@ -51,45 +51,59 @@ class ColetaFormNotifier extends ChangeNotifier {
   final List<MidiaModel> _midias = [];
   bool _carregandoMidia = false;
 
+  bool _modificado = false;
+  bool get modificado => _modificado;
+
   List<MidiaModel> get midias => List.unmodifiable(_midias);
   bool get carregandoMidia => _carregandoMidia;
   int get totalMidias => _midias.length;
 
-  // Mutacoes passo 1
-  void setNome(String value) {
-    nome = value;
+  void _marcarModificado() {
+    _modificado = true;
     notifyListeners();
   }
 
+  // Mutacoes passo 1
+  void setNome(String value) {
+    if (nome == value) return;
+    nome = value;
+    _marcarModificado();
+  }
+
   void setNomesPopulares(String raw) {
-    nomesPopulares = raw
+    final novosNomes = raw
         .split(',')
         .map((s) => s.trim())
         .where((s) => s.isNotEmpty)
         .toList();
-    notifyListeners();
+    if (listEquals(nomesPopulares, novosNomes)) return;
+    nomesPopulares = novosNomes;
+    _marcarModificado();
   }
 
   void setNatureza(NaturezaBem? value) {
+    if (natureza == value) return;
     natureza = value;
-    notifyListeners();
+    _marcarModificado();
   }
 
   void setTipo(TipoBem? value) {
+    if (tipo == value) return;
     tipo = value;
-    notifyListeners();
+    _marcarModificado();
   }
 
   void setLocalizacao(LocalizacaoModel? value) {
+    if (localizacao == value) return;
     localizacao = value;
-    notifyListeners();
+    _marcarModificado();
   }
 
   // Mutacoes passo 2
   void setArtefatos(List<ArtefatoTipoEntity> values) {
     _artefatos.clear();
     _artefatos.addAll(values);
-    notifyListeners();
+    _marcarModificado();
   }
 
   bool isArtefatoSelecionado(String typeId) =>
@@ -97,8 +111,9 @@ class ColetaFormNotifier extends ChangeNotifier {
 
   // Mutacoes passo 3
   void setMeiosAcesso(String? value) {
+    if (meiosAcesso == value) return;
     meiosAcesso = value;
-    notifyListeners();
+    _marcarModificado();
   }
 
   Future<void> adicionarFoto(ImageSource source) async {
@@ -117,6 +132,7 @@ class ColetaFormNotifier extends ChangeNotifier {
           tipo: 'foto',
         );
         _midias.add(midia);
+        _marcarModificado();
       }
     } catch (e) {
       log('Erro ao adicionar foto', error: e, name: 'ColetaFormNotifier');
@@ -129,7 +145,7 @@ class ColetaFormNotifier extends ChangeNotifier {
   void removerMidia(int index) {
     if (index < 0 || index >= _midias.length) return;
     _midias.removeAt(index);
-    notifyListeners();
+    _marcarModificado();
   }
 
   // Validação
@@ -226,6 +242,7 @@ class ColetaFormNotifier extends ChangeNotifier {
     try {
       final map = jsonDecode(json) as Map<String, dynamic>;
       _restaurarDeMap(map);
+      _modificado = false; // Reset após restaurar
       notifyListeners();
       log('Rascunho restaurado', name: 'ColetaFormNotifier');
     } catch (e, st) {
@@ -236,6 +253,11 @@ class ColetaFormNotifier extends ChangeNotifier {
         name: 'ColetaFormNotifier',
       );
     }
+  }
+
+  void resetModificado() {
+    _modificado = false;
+    notifyListeners();
   }
 
   Future<void> salvarRascunho(SharedPreferences prefs) async {

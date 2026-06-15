@@ -39,6 +39,18 @@ class _ColetasPageState extends State<ColetasPage> {
 
   void _verDetalhes(String id) => context.push('/detalhes-coleta', extra: id);
 
+  void _editarColeta(String id) async {
+    await context.push('/nova-coleta', extra: id);
+    if (mounted) {
+      setState(() {
+        _temRascunho = AppScope.of(
+          context,
+        ).prefs.containsKey('rascunho_coleta');
+      });
+      _viewModel.atualizar();
+    }
+  }
+
   Future<void> _continuarRascunho() async {
     await context.push('/nova-coleta');
     if (mounted) {
@@ -141,6 +153,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
+                        onEditar: _editarColeta,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.pendentes,
@@ -150,6 +163,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
+                        onEditar: _editarColeta,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.sincronizadas,
@@ -159,6 +173,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
+                        onEditar: _editarColeta,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.conflitos,
@@ -168,6 +183,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         exibirBotaoNovaColeta: _viewModel.coletas.value.isEmpty,
                         onRefresh: _viewModel.atualizar,
                         onVerDetalhes: _verDetalhes,
+                        onEditar: _editarColeta,
                       ),
                     ],
                   );
@@ -276,6 +292,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
     required this.exibirBotaoNovaColeta,
     required this.onRefresh,
     required this.onVerDetalhes,
+    required this.onEditar,
   });
 
   final List<ColetaEntity> coletas;
@@ -285,6 +302,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
   final bool exibirBotaoNovaColeta;
   final Future<void> Function() onRefresh;
   final void Function(String id) onVerDetalhes;
+  final void Function(String id) onEditar;
 
   @override
   Widget build(BuildContext context) {
@@ -321,6 +339,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
         child: ColetaListItem(
           coleta: coletas[index],
           onVerDetalhes: () => onVerDetalhes(coletas[index].id),
+          onEditar: () => onEditar(coletas[index].id),
         ),
       ),
     );

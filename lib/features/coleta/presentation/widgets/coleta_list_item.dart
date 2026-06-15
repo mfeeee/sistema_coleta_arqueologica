@@ -11,10 +11,12 @@ class ColetaListItem extends StatelessWidget {
     super.key,
     required this.coleta,
     required this.onVerDetalhes,
+    this.onEditar,
   });
 
   final ColetaEntity coleta;
   final VoidCallback onVerDetalhes;
+  final VoidCallback? onEditar;
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +34,14 @@ class ColetaListItem extends StatelessWidget {
       location: localizacao,
       date: data,
       midia: coleta.midias.firstOrNull,
-      onTap: onVerDetalhes,
-      actionsRow: _AcoesColeta(coleta: coleta, onVerDetalhes: onVerDetalhes),
+      onTap: coleta.syncStatus == StatusColeta.rascunho
+          ? onEditar
+          : onVerDetalhes,
+      actionsRow: _AcoesColeta(
+        coleta: coleta,
+        onVerDetalhes: onVerDetalhes,
+        onEditar: onEditar,
+      ),
     );
   }
 
@@ -73,6 +81,11 @@ class _BadgesRow extends StatelessWidget {
         'Rejeitado',
         AppColors.errorText,
         AppColors.errorBg,
+      ),
+      StatusColeta.rascunho => (
+        'Rascunho',
+        AppColors.warningText,
+        AppColors.warningBg,
       ),
       _ => ('Pendente', AppColors.warningText, AppColors.warningBg),
     };
@@ -235,10 +248,15 @@ class _ColetaCard extends StatelessWidget {
 }
 
 class _AcoesColeta extends StatelessWidget {
-  const _AcoesColeta({required this.coleta, required this.onVerDetalhes});
+  const _AcoesColeta({
+    required this.coleta,
+    required this.onVerDetalhes,
+    this.onEditar,
+  });
 
   final ColetaEntity coleta;
   final VoidCallback onVerDetalhes;
+  final VoidCallback? onEditar;
 
   @override
   Widget build(BuildContext context) {
@@ -247,7 +265,7 @@ class _AcoesColeta extends StatelessWidget {
       StatusColeta.pendente => _acoesPendente(theme),
       StatusColeta.sincronizado => _botaoVerDetalhes(theme),
       StatusColeta.conflito => _botaoConflito(theme),
-      StatusColeta.rascunho => _botaoVerDetalhes(theme),
+      StatusColeta.rascunho => _botaoEditar(theme),
     };
   }
 
@@ -257,7 +275,7 @@ class _AcoesColeta extends StatelessWidget {
         Expanded(
           flex: 2,
           child: OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: onEditar,
             icon: Icon(
               Icons.edit_outlined,
               size: 16,
@@ -308,6 +326,20 @@ class _AcoesColeta extends StatelessWidget {
       child: Text(
         'Ver Detalhes',
         style: TextStyle(color: theme.colorScheme.primary),
+      ),
+    );
+  }
+
+  Widget _botaoEditar(ThemeData theme) {
+    return ElevatedButton.icon(
+      onPressed: onEditar,
+      icon: const Icon(Icons.edit_note_outlined, size: 20),
+      label: const Text('Continuar Rascunho'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.warningBg,
+        foregroundColor: AppColors.warningText,
+        elevation: 0,
+        minimumSize: const Size(double.infinity, 40),
       ),
     );
   }

@@ -8,6 +8,7 @@ import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
@@ -88,12 +89,14 @@ class AppScope extends InheritedWidget {
 
     final syncApiDatasource = SyncApiDatasourceImpl(dio);
     final fotoUploadService = FotoUploadService(dio);
+    final coletaApiDatasource = ColetaApiDatasourceImpl(dio: dio);
     final syncRepository = SyncRepository(
       coletaDatasource: coletaDatasource,
       strategy: ColetaSyncStrategy(
         apiDatasource: syncApiDatasource,
         fotoUploadService: fotoUploadService,
       ),
+      coletaApiDatasource: coletaApiDatasource,
     );
     final conectividadeService = ConectividadeService();
 

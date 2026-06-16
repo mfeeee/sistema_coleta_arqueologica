@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
 import 'package:sqlite3/open.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 import 'package:workmanager/workmanager.dart';
@@ -72,6 +73,7 @@ Future<void> _executarSync() async {
         apiDatasource: SyncApiDatasourceImpl(dioAuth),
         fotoUploadService: FotoUploadService(dioAuth),
       ),
+      coletaApiDatasource: ColetaApiDatasourceImpl(dio: dioAuth),
     );
 
     final pendentes = await syncRepository.contarPendentes();

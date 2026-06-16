@@ -1,5 +1,6 @@
 import 'dart:developer';
 import '../../../core/database/enums/status_coleta.dart';
+import '../../coleta/data/datasources/coleta_api_datasource.dart';
 import '../../coleta/data/datasources/coleta_local_datasource.dart';
 import '../domain/entities/sync_resumo.dart';
 import 'coleta_sync_strategy.dart';
@@ -8,15 +9,36 @@ class SyncRepository {
   const SyncRepository({
     required ColetaLocalDatasource coletaDatasource,
     required ColetaSyncStrategy strategy,
+    required ColetaApiDatasource coletaApiDatasource,
   }) : _coletaDatasource = coletaDatasource,
-       _strategy = strategy;
+       _strategy = strategy,
+       _coletaApiDatasource = coletaApiDatasource;
 
   final ColetaLocalDatasource _coletaDatasource;
   final ColetaSyncStrategy _strategy;
+  final ColetaApiDatasource _coletaApiDatasource;
 
   Future<int> contarPendentes() async {
     final pendentes = await _coletaDatasource.getPendentes();
     return pendentes.length;
+  }
+
+  Future<void> puxarDoServidor() async {
+    int page = 1;
+    bool temProxima = true;
+
+    while (temProxima) {
+      final resultado = await _coletaApiDatasource.fetchMinhas(page: page);
+
+      for (final coleta in resultado.items) {
+        await _coletaDatasource.inserir(coleta as dynamic);
+      }
+
+      temProxima = resultado.temProxima;
+      page++;
+    }
+
+    log('Pull concluído — página(s): ${page - 1}', name: 'SyncRepository');
   }
 
   Future<SyncResumo> sincronizarTodas({

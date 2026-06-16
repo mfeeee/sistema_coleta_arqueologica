@@ -64,6 +64,7 @@ class SyncNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // 1. Envia coletas pendentes para o servidor
       final resumo = await _repository.sincronizarTodas(
         onProgresso: (msg) {
           _mensagemProgresso = msg;
@@ -71,6 +72,12 @@ class SyncNotifier extends ChangeNotifier {
         },
       );
       _ultimoResumo = resumo;
+
+      // 2. Puxa dados atualizados do servidor
+      _mensagemProgresso = 'Atualizando dados do servidor…';
+      notifyListeners();
+      await _repository.puxarDoServidor();
+
       _pendentes = await _repository.contarPendentes();
       _state = SyncState.concluido;
     } catch (e, st) {

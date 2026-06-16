@@ -76,6 +76,15 @@ class ProfileService {
     }
   }
 
+  Future<ProfileResult> deleteAccount() async {
+    try {
+      final response = await dio.delete('/auth/conta');
+      return _processar(response);
+    } catch (e, st) {
+      return _falha(e, st, 'deleteAccount');
+    }
+  }
+
   ProfileResult _processar(Response response) {
     if (response.statusCode == 204) return const ProfileSuccess({});
     final body = response.data as Map<String, dynamic>;

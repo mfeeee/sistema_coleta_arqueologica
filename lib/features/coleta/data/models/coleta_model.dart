@@ -152,6 +152,28 @@ class ColetaModel extends ColetaEntity {
   }
 
   factory ColetaModel.fromJson(Map<String, dynamic> json) {
+    // Tenta obter localização de várias fontes (singular, plural ou campos na raiz)
+    LocalizacaoModel? localizacao;
+    if (json['localizacao'] != null) {
+      localizacao = LocalizacaoModel.fromJson(
+        json['localizacao'] as Map<String, dynamic>,
+      );
+    } else if (json['localizacoes'] is List &&
+        (json['localizacoes'] as List).isNotEmpty) {
+      // Se vier como lista (relacionamento hasMany na API), pega o primeiro
+      final first = json['localizacoes'][0];
+      if (first is Map<String, dynamic>) {
+        localizacao = LocalizacaoModel.fromJson(first);
+      }
+    } else if (json['latitude'] != null && json['longitude'] != null) {
+      localizacao = LocalizacaoModel(
+        id: 'local-${json['uuid'] ?? json['id']}',
+        uf: json['uf'] as String?,
+        lat: (json['latitude'] as num?)?.toDouble(),
+        lng: (json['longitude'] as num?)?.toDouble(),
+      );
+    }
+
     return ColetaModel(
       id:
           (json['uuid'] as String?) ??
@@ -167,23 +189,11 @@ class ColetaModel extends ColetaEntity {
         json['status_sincronizacao'] as String? ?? '',
       ),
       nomeBem: json['nome_bem'] as String? ?? '',
-      localizacao: json['localizacao'] != null
-          ? LocalizacaoModel.fromJson(
-              json['localizacao'] as Map<String, dynamic>,
-            )
-          : (json['latitude'] != null && json['longitude'] != null)
-          ? LocalizacaoModel(
-              id: 'local-${json['uuid'] ?? json['id']}',
-              uf: json['uf'] as String?,
-              lat: (json['latitude'] as num?)?.toDouble(),
-              lng: (json['longitude'] as num?)?.toDouble(),
-            )
-          : null,
+      localizacao: localizacao,
       artefatoTipos:
           (json['artefato_tipos'] as List?)
-              ?.map(
-                (e) => ArtefatoTipoModel.fromJson(e as Map<String, dynamic>),
-              )
+              ?.whereType<Map<String, dynamic>>()
+              .map((e) => ArtefatoTipoModel.fromJson(e))
               .toList() ??
           [],
       versao: json['versao'] as int? ?? 1,
@@ -193,7 +203,8 @@ class ColetaModel extends ColetaEntity {
       dadosColetados: json['dados_coletados'] as Map<String, dynamic>? ?? {},
       midias:
           (json['midias'] as List?)
-              ?.map((e) => MidiaModel.fromJson(e as Map<String, dynamic>))
+              ?.whereType<Map<String, dynamic>>()
+              .map((e) => MidiaModel.fromJson(e))
               .toList() ??
           [],
       natureza: json['natureza'] != null

@@ -8,6 +8,7 @@ import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/core/models/midia_model.dart';
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/utils/natureza_tipo_mapper.dart';
 import 'package:sistema_coleta_arqueologica/features/media/domain/usecases/upload_midia_usecase.dart';
 import '../../domain/entities/coleta_entity.dart';
 import '../../domain/usecases/criar_coleta_use_case.dart';
@@ -89,6 +90,12 @@ class ColetaFormNotifier extends ChangeNotifier {
   void setNatureza(NaturezaBem? value) {
     if (natureza == value) return;
     natureza = value;
+
+    final tiposValidos = tiposPermitidosPorNatureza(natureza);
+    if (!tiposValidos.contains(tipo)) {
+      tipo = null;
+    }
+
     _marcarModificado();
   }
 

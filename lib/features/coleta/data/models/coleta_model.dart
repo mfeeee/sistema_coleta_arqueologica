@@ -48,11 +48,13 @@ class ColetaModel extends ColetaEntity {
         dados['localizacao_completa'] as Map<String, dynamic>,
       );
     } else {
+      final lat = row.latitude == 0.0 ? null : row.latitude;
+      final lng = row.longitude == 0.0 ? null : row.longitude;
       localizacao = LocalizacaoModel(
         id: 'local-${row.uuid}',
         uf: row.uf,
-        lat: row.latitude,
-        lng: row.longitude,
+        lat: lat,
+        lng: lng,
       );
     }
 
@@ -169,6 +171,13 @@ class ColetaModel extends ColetaEntity {
           ? LocalizacaoModel.fromJson(
               json['localizacao'] as Map<String, dynamic>,
             )
+          : (json['latitude'] != null && json['longitude'] != null)
+          ? LocalizacaoModel(
+              id: 'local-${json['uuid'] ?? json['id']}',
+              uf: json['uf'] as String?,
+              lat: (json['latitude'] as num?)?.toDouble(),
+              lng: (json['longitude'] as num?)?.toDouble(),
+            )
           : null,
       artefatoTipos:
           (json['artefato_tipos'] as List?)
@@ -239,8 +248,8 @@ class ColetaModel extends ColetaEntity {
       natureza: Value(natureza?.name),
       tipo: Value(tipo?.name),
       uf: Value(localizacao?.uf),
-      latitude: Value(localizacao?.lat ?? 0.0),
-      longitude: Value(localizacao?.lng ?? 0.0),
+      latitude: Value(localizacao?.lat),
+      longitude: Value(localizacao?.lng),
       artefatos: Value(artefatoTipos.map((e) => e.nome).toList()),
       versao: Value(versao),
       updatedAt: Value(updatedAt),

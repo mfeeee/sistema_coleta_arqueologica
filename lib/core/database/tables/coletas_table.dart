@@ -44,9 +44,9 @@ class Coletas extends Table {
 
   TextColumn get uf => text().withLength(min: 2, max: 2).nullable()();
 
-  RealColumn get latitude => real().clientDefault(() => 0.0)();
+  RealColumn get latitude => real().nullable()();
 
-  RealColumn get longitude => real().clientDefault(() => 0.0)();
+  RealColumn get longitude => real().nullable()();
 
   TextColumn get artefatos => text()
       .named('artefatos')

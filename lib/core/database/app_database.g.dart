@@ -3,6 +3,531 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
+class $UsuariosTable extends Usuarios with TableInfo<$UsuariosTable, Usuario> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UsuariosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
+  @override
+  late final GeneratedColumn<String> nome = GeneratedColumn<String>(
+    'nome',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 150,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _senhaHashMeta = const VerificationMeta(
+    'senhaHash',
+  );
+  @override
+  late final GeneratedColumn<String> senhaHash = GeneratedColumn<String>(
+    'senha_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<PerfilUsuario, String> perfil =
+      GeneratedColumn<String>(
+        'perfil_usuario',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        clientDefault: () => PerfilUsuario.coletor.name,
+      ).withConverter<PerfilUsuario>($UsuariosTable.$converterperfil);
+  @override
+  late final GeneratedColumnWithTypeConverter<ClassificacaoUsuario, String>
+  classificacao = GeneratedColumn<String>(
+    'classificacao',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => ClassificacaoUsuario.arqueologo.name,
+  ).withConverter<ClassificacaoUsuario>($UsuariosTable.$converterclassificacao);
+  static const VerificationMeta _ativoMeta = const VerificationMeta('ativo');
+  @override
+  late final GeneratedColumn<bool> ativo = GeneratedColumn<bool>(
+    'ativo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("ativo" IN (0, 1))',
+    ),
+    clientDefault: () => true,
+  );
+  static const VerificationMeta _criadoEmMeta = const VerificationMeta(
+    'criadoEm',
+  );
+  @override
+  late final GeneratedColumn<DateTime> criadoEm = GeneratedColumn<DateTime>(
+    'criado_em',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    uuid,
+    nome,
+    email,
+    senhaHash,
+    perfil,
+    classificacao,
+    ativo,
+    criadoEm,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'usuarios';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Usuario> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uuidMeta);
+    }
+    if (data.containsKey('nome')) {
+      context.handle(
+        _nomeMeta,
+        nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nomeMeta);
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_emailMeta);
+    }
+    if (data.containsKey('senha_hash')) {
+      context.handle(
+        _senhaHashMeta,
+        senhaHash.isAcceptableOrUnknown(data['senha_hash']!, _senhaHashMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_senhaHashMeta);
+    }
+    if (data.containsKey('ativo')) {
+      context.handle(
+        _ativoMeta,
+        ativo.isAcceptableOrUnknown(data['ativo']!, _ativoMeta),
+      );
+    }
+    if (data.containsKey('criado_em')) {
+      context.handle(
+        _criadoEmMeta,
+        criadoEm.isAcceptableOrUnknown(data['criado_em']!, _criadoEmMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {uuid};
+  @override
+  Usuario map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Usuario(
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
+      nome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nome'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      )!,
+      senhaHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}senha_hash'],
+      )!,
+      perfil: $UsuariosTable.$converterperfil.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}perfil_usuario'],
+        )!,
+      ),
+      classificacao: $UsuariosTable.$converterclassificacao.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}classificacao'],
+        )!,
+      ),
+      ativo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}ativo'],
+      )!,
+      criadoEm: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}criado_em'],
+      )!,
+    );
+  }
+
+  @override
+  $UsuariosTable createAlias(String alias) {
+    return $UsuariosTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<PerfilUsuario, String, String> $converterperfil =
+      const EnumNameConverter<PerfilUsuario>(PerfilUsuario.values);
+  static JsonTypeConverter2<ClassificacaoUsuario, String, String>
+  $converterclassificacao = const EnumNameConverter<ClassificacaoUsuario>(
+    ClassificacaoUsuario.values,
+  );
+}
+
+class Usuario extends DataClass implements Insertable<Usuario> {
+  final String uuid;
+  final String nome;
+  final String email;
+  final String senhaHash;
+  final PerfilUsuario perfil;
+  final ClassificacaoUsuario classificacao;
+  final bool ativo;
+  final DateTime criadoEm;
+  const Usuario({
+    required this.uuid,
+    required this.nome,
+    required this.email,
+    required this.senhaHash,
+    required this.perfil,
+    required this.classificacao,
+    required this.ativo,
+    required this.criadoEm,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['uuid'] = Variable<String>(uuid);
+    map['nome'] = Variable<String>(nome);
+    map['email'] = Variable<String>(email);
+    map['senha_hash'] = Variable<String>(senhaHash);
+    {
+      map['perfil_usuario'] = Variable<String>(
+        $UsuariosTable.$converterperfil.toSql(perfil),
+      );
+    }
+    {
+      map['classificacao'] = Variable<String>(
+        $UsuariosTable.$converterclassificacao.toSql(classificacao),
+      );
+    }
+    map['ativo'] = Variable<bool>(ativo);
+    map['criado_em'] = Variable<DateTime>(criadoEm);
+    return map;
+  }
+
+  UsuariosCompanion toCompanion(bool nullToAbsent) {
+    return UsuariosCompanion(
+      uuid: Value(uuid),
+      nome: Value(nome),
+      email: Value(email),
+      senhaHash: Value(senhaHash),
+      perfil: Value(perfil),
+      classificacao: Value(classificacao),
+      ativo: Value(ativo),
+      criadoEm: Value(criadoEm),
+    );
+  }
+
+  factory Usuario.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Usuario(
+      uuid: serializer.fromJson<String>(json['uuid']),
+      nome: serializer.fromJson<String>(json['nome']),
+      email: serializer.fromJson<String>(json['email']),
+      senhaHash: serializer.fromJson<String>(json['senhaHash']),
+      perfil: $UsuariosTable.$converterperfil.fromJson(
+        serializer.fromJson<String>(json['perfil']),
+      ),
+      classificacao: $UsuariosTable.$converterclassificacao.fromJson(
+        serializer.fromJson<String>(json['classificacao']),
+      ),
+      ativo: serializer.fromJson<bool>(json['ativo']),
+      criadoEm: serializer.fromJson<DateTime>(json['criadoEm']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'uuid': serializer.toJson<String>(uuid),
+      'nome': serializer.toJson<String>(nome),
+      'email': serializer.toJson<String>(email),
+      'senhaHash': serializer.toJson<String>(senhaHash),
+      'perfil': serializer.toJson<String>(
+        $UsuariosTable.$converterperfil.toJson(perfil),
+      ),
+      'classificacao': serializer.toJson<String>(
+        $UsuariosTable.$converterclassificacao.toJson(classificacao),
+      ),
+      'ativo': serializer.toJson<bool>(ativo),
+      'criadoEm': serializer.toJson<DateTime>(criadoEm),
+    };
+  }
+
+  Usuario copyWith({
+    String? uuid,
+    String? nome,
+    String? email,
+    String? senhaHash,
+    PerfilUsuario? perfil,
+    ClassificacaoUsuario? classificacao,
+    bool? ativo,
+    DateTime? criadoEm,
+  }) => Usuario(
+    uuid: uuid ?? this.uuid,
+    nome: nome ?? this.nome,
+    email: email ?? this.email,
+    senhaHash: senhaHash ?? this.senhaHash,
+    perfil: perfil ?? this.perfil,
+    classificacao: classificacao ?? this.classificacao,
+    ativo: ativo ?? this.ativo,
+    criadoEm: criadoEm ?? this.criadoEm,
+  );
+  Usuario copyWithCompanion(UsuariosCompanion data) {
+    return Usuario(
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      nome: data.nome.present ? data.nome.value : this.nome,
+      email: data.email.present ? data.email.value : this.email,
+      senhaHash: data.senhaHash.present ? data.senhaHash.value : this.senhaHash,
+      perfil: data.perfil.present ? data.perfil.value : this.perfil,
+      classificacao: data.classificacao.present
+          ? data.classificacao.value
+          : this.classificacao,
+      ativo: data.ativo.present ? data.ativo.value : this.ativo,
+      criadoEm: data.criadoEm.present ? data.criadoEm.value : this.criadoEm,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Usuario(')
+          ..write('uuid: $uuid, ')
+          ..write('nome: $nome, ')
+          ..write('email: $email, ')
+          ..write('senhaHash: $senhaHash, ')
+          ..write('perfil: $perfil, ')
+          ..write('classificacao: $classificacao, ')
+          ..write('ativo: $ativo, ')
+          ..write('criadoEm: $criadoEm')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    uuid,
+    nome,
+    email,
+    senhaHash,
+    perfil,
+    classificacao,
+    ativo,
+    criadoEm,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Usuario &&
+          other.uuid == this.uuid &&
+          other.nome == this.nome &&
+          other.email == this.email &&
+          other.senhaHash == this.senhaHash &&
+          other.perfil == this.perfil &&
+          other.classificacao == this.classificacao &&
+          other.ativo == this.ativo &&
+          other.criadoEm == this.criadoEm);
+}
+
+class UsuariosCompanion extends UpdateCompanion<Usuario> {
+  final Value<String> uuid;
+  final Value<String> nome;
+  final Value<String> email;
+  final Value<String> senhaHash;
+  final Value<PerfilUsuario> perfil;
+  final Value<ClassificacaoUsuario> classificacao;
+  final Value<bool> ativo;
+  final Value<DateTime> criadoEm;
+  final Value<int> rowid;
+  const UsuariosCompanion({
+    this.uuid = const Value.absent(),
+    this.nome = const Value.absent(),
+    this.email = const Value.absent(),
+    this.senhaHash = const Value.absent(),
+    this.perfil = const Value.absent(),
+    this.classificacao = const Value.absent(),
+    this.ativo = const Value.absent(),
+    this.criadoEm = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  UsuariosCompanion.insert({
+    required String uuid,
+    required String nome,
+    required String email,
+    required String senhaHash,
+    this.perfil = const Value.absent(),
+    this.classificacao = const Value.absent(),
+    this.ativo = const Value.absent(),
+    this.criadoEm = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : uuid = Value(uuid),
+       nome = Value(nome),
+       email = Value(email),
+       senhaHash = Value(senhaHash);
+  static Insertable<Usuario> custom({
+    Expression<String>? uuid,
+    Expression<String>? nome,
+    Expression<String>? email,
+    Expression<String>? senhaHash,
+    Expression<String>? perfil,
+    Expression<String>? classificacao,
+    Expression<bool>? ativo,
+    Expression<DateTime>? criadoEm,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (uuid != null) 'uuid': uuid,
+      if (nome != null) 'nome': nome,
+      if (email != null) 'email': email,
+      if (senhaHash != null) 'senha_hash': senhaHash,
+      if (perfil != null) 'perfil_usuario': perfil,
+      if (classificacao != null) 'classificacao': classificacao,
+      if (ativo != null) 'ativo': ativo,
+      if (criadoEm != null) 'criado_em': criadoEm,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  UsuariosCompanion copyWith({
+    Value<String>? uuid,
+    Value<String>? nome,
+    Value<String>? email,
+    Value<String>? senhaHash,
+    Value<PerfilUsuario>? perfil,
+    Value<ClassificacaoUsuario>? classificacao,
+    Value<bool>? ativo,
+    Value<DateTime>? criadoEm,
+    Value<int>? rowid,
+  }) {
+    return UsuariosCompanion(
+      uuid: uuid ?? this.uuid,
+      nome: nome ?? this.nome,
+      email: email ?? this.email,
+      senhaHash: senhaHash ?? this.senhaHash,
+      perfil: perfil ?? this.perfil,
+      classificacao: classificacao ?? this.classificacao,
+      ativo: ativo ?? this.ativo,
+      criadoEm: criadoEm ?? this.criadoEm,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (nome.present) {
+      map['nome'] = Variable<String>(nome.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (senhaHash.present) {
+      map['senha_hash'] = Variable<String>(senhaHash.value);
+    }
+    if (perfil.present) {
+      map['perfil_usuario'] = Variable<String>(
+        $UsuariosTable.$converterperfil.toSql(perfil.value),
+      );
+    }
+    if (classificacao.present) {
+      map['classificacao'] = Variable<String>(
+        $UsuariosTable.$converterclassificacao.toSql(classificacao.value),
+      );
+    }
+    if (ativo.present) {
+      map['ativo'] = Variable<bool>(ativo.value);
+    }
+    if (criadoEm.present) {
+      map['criado_em'] = Variable<DateTime>(criadoEm.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UsuariosCompanion(')
+          ..write('uuid: $uuid, ')
+          ..write('nome: $nome, ')
+          ..write('email: $email, ')
+          ..write('senhaHash: $senhaHash, ')
+          ..write('perfil: $perfil, ')
+          ..write('classificacao: $classificacao, ')
+          ..write('ativo: $ativo, ')
+          ..write('criadoEm: $criadoEm, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -2200,531 +2725,6 @@ class BensMateriaisCompanion extends UpdateCompanion<BensMateriai> {
   }
 }
 
-class $UsuariosTable extends Usuarios with TableInfo<$UsuariosTable, Usuario> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $UsuariosTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
-  @override
-  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
-    'uuid',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
-  @override
-  late final GeneratedColumn<String> nome = GeneratedColumn<String>(
-    'nome',
-    aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 150,
-    ),
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _emailMeta = const VerificationMeta('email');
-  @override
-  late final GeneratedColumn<String> email = GeneratedColumn<String>(
-    'email',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
-  );
-  static const VerificationMeta _senhaHashMeta = const VerificationMeta(
-    'senhaHash',
-  );
-  @override
-  late final GeneratedColumn<String> senhaHash = GeneratedColumn<String>(
-    'senha_hash',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  late final GeneratedColumnWithTypeConverter<PerfilUsuario, String> perfil =
-      GeneratedColumn<String>(
-        'perfil_usuario',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: false,
-        clientDefault: () => PerfilUsuario.coletor.name,
-      ).withConverter<PerfilUsuario>($UsuariosTable.$converterperfil);
-  @override
-  late final GeneratedColumnWithTypeConverter<ClassificacaoUsuario, String>
-  classificacao = GeneratedColumn<String>(
-    'classificacao',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    clientDefault: () => ClassificacaoUsuario.arqueologo.name,
-  ).withConverter<ClassificacaoUsuario>($UsuariosTable.$converterclassificacao);
-  static const VerificationMeta _ativoMeta = const VerificationMeta('ativo');
-  @override
-  late final GeneratedColumn<bool> ativo = GeneratedColumn<bool>(
-    'ativo',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("ativo" IN (0, 1))',
-    ),
-    clientDefault: () => true,
-  );
-  static const VerificationMeta _criadoEmMeta = const VerificationMeta(
-    'criadoEm',
-  );
-  @override
-  late final GeneratedColumn<DateTime> criadoEm = GeneratedColumn<DateTime>(
-    'criado_em',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    clientDefault: () => DateTime.now(),
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    uuid,
-    nome,
-    email,
-    senhaHash,
-    perfil,
-    classificacao,
-    ativo,
-    criadoEm,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'usuarios';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<Usuario> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('uuid')) {
-      context.handle(
-        _uuidMeta,
-        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_uuidMeta);
-    }
-    if (data.containsKey('nome')) {
-      context.handle(
-        _nomeMeta,
-        nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_nomeMeta);
-    }
-    if (data.containsKey('email')) {
-      context.handle(
-        _emailMeta,
-        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_emailMeta);
-    }
-    if (data.containsKey('senha_hash')) {
-      context.handle(
-        _senhaHashMeta,
-        senhaHash.isAcceptableOrUnknown(data['senha_hash']!, _senhaHashMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_senhaHashMeta);
-    }
-    if (data.containsKey('ativo')) {
-      context.handle(
-        _ativoMeta,
-        ativo.isAcceptableOrUnknown(data['ativo']!, _ativoMeta),
-      );
-    }
-    if (data.containsKey('criado_em')) {
-      context.handle(
-        _criadoEmMeta,
-        criadoEm.isAcceptableOrUnknown(data['criado_em']!, _criadoEmMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {uuid};
-  @override
-  Usuario map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Usuario(
-      uuid: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}uuid'],
-      )!,
-      nome: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}nome'],
-      )!,
-      email: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}email'],
-      )!,
-      senhaHash: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}senha_hash'],
-      )!,
-      perfil: $UsuariosTable.$converterperfil.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}perfil_usuario'],
-        )!,
-      ),
-      classificacao: $UsuariosTable.$converterclassificacao.fromSql(
-        attachedDatabase.typeMapping.read(
-          DriftSqlType.string,
-          data['${effectivePrefix}classificacao'],
-        )!,
-      ),
-      ativo: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}ativo'],
-      )!,
-      criadoEm: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}criado_em'],
-      )!,
-    );
-  }
-
-  @override
-  $UsuariosTable createAlias(String alias) {
-    return $UsuariosTable(attachedDatabase, alias);
-  }
-
-  static JsonTypeConverter2<PerfilUsuario, String, String> $converterperfil =
-      const EnumNameConverter<PerfilUsuario>(PerfilUsuario.values);
-  static JsonTypeConverter2<ClassificacaoUsuario, String, String>
-  $converterclassificacao = const EnumNameConverter<ClassificacaoUsuario>(
-    ClassificacaoUsuario.values,
-  );
-}
-
-class Usuario extends DataClass implements Insertable<Usuario> {
-  final String uuid;
-  final String nome;
-  final String email;
-  final String senhaHash;
-  final PerfilUsuario perfil;
-  final ClassificacaoUsuario classificacao;
-  final bool ativo;
-  final DateTime criadoEm;
-  const Usuario({
-    required this.uuid,
-    required this.nome,
-    required this.email,
-    required this.senhaHash,
-    required this.perfil,
-    required this.classificacao,
-    required this.ativo,
-    required this.criadoEm,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['uuid'] = Variable<String>(uuid);
-    map['nome'] = Variable<String>(nome);
-    map['email'] = Variable<String>(email);
-    map['senha_hash'] = Variable<String>(senhaHash);
-    {
-      map['perfil_usuario'] = Variable<String>(
-        $UsuariosTable.$converterperfil.toSql(perfil),
-      );
-    }
-    {
-      map['classificacao'] = Variable<String>(
-        $UsuariosTable.$converterclassificacao.toSql(classificacao),
-      );
-    }
-    map['ativo'] = Variable<bool>(ativo);
-    map['criado_em'] = Variable<DateTime>(criadoEm);
-    return map;
-  }
-
-  UsuariosCompanion toCompanion(bool nullToAbsent) {
-    return UsuariosCompanion(
-      uuid: Value(uuid),
-      nome: Value(nome),
-      email: Value(email),
-      senhaHash: Value(senhaHash),
-      perfil: Value(perfil),
-      classificacao: Value(classificacao),
-      ativo: Value(ativo),
-      criadoEm: Value(criadoEm),
-    );
-  }
-
-  factory Usuario.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Usuario(
-      uuid: serializer.fromJson<String>(json['uuid']),
-      nome: serializer.fromJson<String>(json['nome']),
-      email: serializer.fromJson<String>(json['email']),
-      senhaHash: serializer.fromJson<String>(json['senhaHash']),
-      perfil: $UsuariosTable.$converterperfil.fromJson(
-        serializer.fromJson<String>(json['perfil']),
-      ),
-      classificacao: $UsuariosTable.$converterclassificacao.fromJson(
-        serializer.fromJson<String>(json['classificacao']),
-      ),
-      ativo: serializer.fromJson<bool>(json['ativo']),
-      criadoEm: serializer.fromJson<DateTime>(json['criadoEm']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'uuid': serializer.toJson<String>(uuid),
-      'nome': serializer.toJson<String>(nome),
-      'email': serializer.toJson<String>(email),
-      'senhaHash': serializer.toJson<String>(senhaHash),
-      'perfil': serializer.toJson<String>(
-        $UsuariosTable.$converterperfil.toJson(perfil),
-      ),
-      'classificacao': serializer.toJson<String>(
-        $UsuariosTable.$converterclassificacao.toJson(classificacao),
-      ),
-      'ativo': serializer.toJson<bool>(ativo),
-      'criadoEm': serializer.toJson<DateTime>(criadoEm),
-    };
-  }
-
-  Usuario copyWith({
-    String? uuid,
-    String? nome,
-    String? email,
-    String? senhaHash,
-    PerfilUsuario? perfil,
-    ClassificacaoUsuario? classificacao,
-    bool? ativo,
-    DateTime? criadoEm,
-  }) => Usuario(
-    uuid: uuid ?? this.uuid,
-    nome: nome ?? this.nome,
-    email: email ?? this.email,
-    senhaHash: senhaHash ?? this.senhaHash,
-    perfil: perfil ?? this.perfil,
-    classificacao: classificacao ?? this.classificacao,
-    ativo: ativo ?? this.ativo,
-    criadoEm: criadoEm ?? this.criadoEm,
-  );
-  Usuario copyWithCompanion(UsuariosCompanion data) {
-    return Usuario(
-      uuid: data.uuid.present ? data.uuid.value : this.uuid,
-      nome: data.nome.present ? data.nome.value : this.nome,
-      email: data.email.present ? data.email.value : this.email,
-      senhaHash: data.senhaHash.present ? data.senhaHash.value : this.senhaHash,
-      perfil: data.perfil.present ? data.perfil.value : this.perfil,
-      classificacao: data.classificacao.present
-          ? data.classificacao.value
-          : this.classificacao,
-      ativo: data.ativo.present ? data.ativo.value : this.ativo,
-      criadoEm: data.criadoEm.present ? data.criadoEm.value : this.criadoEm,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Usuario(')
-          ..write('uuid: $uuid, ')
-          ..write('nome: $nome, ')
-          ..write('email: $email, ')
-          ..write('senhaHash: $senhaHash, ')
-          ..write('perfil: $perfil, ')
-          ..write('classificacao: $classificacao, ')
-          ..write('ativo: $ativo, ')
-          ..write('criadoEm: $criadoEm')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    uuid,
-    nome,
-    email,
-    senhaHash,
-    perfil,
-    classificacao,
-    ativo,
-    criadoEm,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Usuario &&
-          other.uuid == this.uuid &&
-          other.nome == this.nome &&
-          other.email == this.email &&
-          other.senhaHash == this.senhaHash &&
-          other.perfil == this.perfil &&
-          other.classificacao == this.classificacao &&
-          other.ativo == this.ativo &&
-          other.criadoEm == this.criadoEm);
-}
-
-class UsuariosCompanion extends UpdateCompanion<Usuario> {
-  final Value<String> uuid;
-  final Value<String> nome;
-  final Value<String> email;
-  final Value<String> senhaHash;
-  final Value<PerfilUsuario> perfil;
-  final Value<ClassificacaoUsuario> classificacao;
-  final Value<bool> ativo;
-  final Value<DateTime> criadoEm;
-  final Value<int> rowid;
-  const UsuariosCompanion({
-    this.uuid = const Value.absent(),
-    this.nome = const Value.absent(),
-    this.email = const Value.absent(),
-    this.senhaHash = const Value.absent(),
-    this.perfil = const Value.absent(),
-    this.classificacao = const Value.absent(),
-    this.ativo = const Value.absent(),
-    this.criadoEm = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  UsuariosCompanion.insert({
-    required String uuid,
-    required String nome,
-    required String email,
-    required String senhaHash,
-    this.perfil = const Value.absent(),
-    this.classificacao = const Value.absent(),
-    this.ativo = const Value.absent(),
-    this.criadoEm = const Value.absent(),
-    this.rowid = const Value.absent(),
-  }) : uuid = Value(uuid),
-       nome = Value(nome),
-       email = Value(email),
-       senhaHash = Value(senhaHash);
-  static Insertable<Usuario> custom({
-    Expression<String>? uuid,
-    Expression<String>? nome,
-    Expression<String>? email,
-    Expression<String>? senhaHash,
-    Expression<String>? perfil,
-    Expression<String>? classificacao,
-    Expression<bool>? ativo,
-    Expression<DateTime>? criadoEm,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (uuid != null) 'uuid': uuid,
-      if (nome != null) 'nome': nome,
-      if (email != null) 'email': email,
-      if (senhaHash != null) 'senha_hash': senhaHash,
-      if (perfil != null) 'perfil_usuario': perfil,
-      if (classificacao != null) 'classificacao': classificacao,
-      if (ativo != null) 'ativo': ativo,
-      if (criadoEm != null) 'criado_em': criadoEm,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  UsuariosCompanion copyWith({
-    Value<String>? uuid,
-    Value<String>? nome,
-    Value<String>? email,
-    Value<String>? senhaHash,
-    Value<PerfilUsuario>? perfil,
-    Value<ClassificacaoUsuario>? classificacao,
-    Value<bool>? ativo,
-    Value<DateTime>? criadoEm,
-    Value<int>? rowid,
-  }) {
-    return UsuariosCompanion(
-      uuid: uuid ?? this.uuid,
-      nome: nome ?? this.nome,
-      email: email ?? this.email,
-      senhaHash: senhaHash ?? this.senhaHash,
-      perfil: perfil ?? this.perfil,
-      classificacao: classificacao ?? this.classificacao,
-      ativo: ativo ?? this.ativo,
-      criadoEm: criadoEm ?? this.criadoEm,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (uuid.present) {
-      map['uuid'] = Variable<String>(uuid.value);
-    }
-    if (nome.present) {
-      map['nome'] = Variable<String>(nome.value);
-    }
-    if (email.present) {
-      map['email'] = Variable<String>(email.value);
-    }
-    if (senhaHash.present) {
-      map['senha_hash'] = Variable<String>(senhaHash.value);
-    }
-    if (perfil.present) {
-      map['perfil_usuario'] = Variable<String>(
-        $UsuariosTable.$converterperfil.toSql(perfil.value),
-      );
-    }
-    if (classificacao.present) {
-      map['classificacao'] = Variable<String>(
-        $UsuariosTable.$converterclassificacao.toSql(classificacao.value),
-      );
-    }
-    if (ativo.present) {
-      map['ativo'] = Variable<bool>(ativo.value);
-    }
-    if (criadoEm.present) {
-      map['criado_em'] = Variable<DateTime>(criadoEm.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('UsuariosCompanion(')
-          ..write('uuid: $uuid, ')
-          ..write('nome: $nome, ')
-          ..write('email: $email, ')
-          ..write('senhaHash: $senhaHash, ')
-          ..write('perfil: $perfil, ')
-          ..write('classificacao: $classificacao, ')
-          ..write('ativo: $ativo, ')
-          ..write('criadoEm: $criadoEm, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $CuradoriasTable extends Curadorias
     with TableInfo<$CuradoriasTable, Curadoria> {
   @override
@@ -4853,17 +4853,333 @@ class AuditoriasCompanion extends UpdateCompanion<Auditoria> {
   }
 }
 
+class $ArtefatoTiposTable extends ArtefatoTipos
+    with TableInfo<$ArtefatoTiposTable, ArtefatoTipo> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ArtefatoTiposTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nomeMeta = const VerificationMeta('nome');
+  @override
+  late final GeneratedColumn<String> nome = GeneratedColumn<String>(
+    'nome',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _novoTipoMeta = const VerificationMeta(
+    'novoTipo',
+  );
+  @override
+  late final GeneratedColumn<bool> novoTipo = GeneratedColumn<bool>(
+    'novo_tipo',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("novo_tipo" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _sincronizadoMeta = const VerificationMeta(
+    'sincronizado',
+  );
+  @override
+  late final GeneratedColumn<bool> sincronizado = GeneratedColumn<bool>(
+    'sincronizado',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("sincronizado" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, nome, novoTipo, sincronizado];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'artefato_tipos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ArtefatoTipo> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('nome')) {
+      context.handle(
+        _nomeMeta,
+        nome.isAcceptableOrUnknown(data['nome']!, _nomeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nomeMeta);
+    }
+    if (data.containsKey('novo_tipo')) {
+      context.handle(
+        _novoTipoMeta,
+        novoTipo.isAcceptableOrUnknown(data['novo_tipo']!, _novoTipoMeta),
+      );
+    }
+    if (data.containsKey('sincronizado')) {
+      context.handle(
+        _sincronizadoMeta,
+        sincronizado.isAcceptableOrUnknown(
+          data['sincronizado']!,
+          _sincronizadoMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ArtefatoTipo map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ArtefatoTipo(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      nome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nome'],
+      )!,
+      novoTipo: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}novo_tipo'],
+      )!,
+      sincronizado: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}sincronizado'],
+      )!,
+    );
+  }
+
+  @override
+  $ArtefatoTiposTable createAlias(String alias) {
+    return $ArtefatoTiposTable(attachedDatabase, alias);
+  }
+}
+
+class ArtefatoTipo extends DataClass implements Insertable<ArtefatoTipo> {
+  final String id;
+  final String nome;
+  final bool novoTipo;
+  final bool sincronizado;
+  const ArtefatoTipo({
+    required this.id,
+    required this.nome,
+    required this.novoTipo,
+    required this.sincronizado,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['nome'] = Variable<String>(nome);
+    map['novo_tipo'] = Variable<bool>(novoTipo);
+    map['sincronizado'] = Variable<bool>(sincronizado);
+    return map;
+  }
+
+  ArtefatoTiposCompanion toCompanion(bool nullToAbsent) {
+    return ArtefatoTiposCompanion(
+      id: Value(id),
+      nome: Value(nome),
+      novoTipo: Value(novoTipo),
+      sincronizado: Value(sincronizado),
+    );
+  }
+
+  factory ArtefatoTipo.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ArtefatoTipo(
+      id: serializer.fromJson<String>(json['id']),
+      nome: serializer.fromJson<String>(json['nome']),
+      novoTipo: serializer.fromJson<bool>(json['novoTipo']),
+      sincronizado: serializer.fromJson<bool>(json['sincronizado']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'nome': serializer.toJson<String>(nome),
+      'novoTipo': serializer.toJson<bool>(novoTipo),
+      'sincronizado': serializer.toJson<bool>(sincronizado),
+    };
+  }
+
+  ArtefatoTipo copyWith({
+    String? id,
+    String? nome,
+    bool? novoTipo,
+    bool? sincronizado,
+  }) => ArtefatoTipo(
+    id: id ?? this.id,
+    nome: nome ?? this.nome,
+    novoTipo: novoTipo ?? this.novoTipo,
+    sincronizado: sincronizado ?? this.sincronizado,
+  );
+  ArtefatoTipo copyWithCompanion(ArtefatoTiposCompanion data) {
+    return ArtefatoTipo(
+      id: data.id.present ? data.id.value : this.id,
+      nome: data.nome.present ? data.nome.value : this.nome,
+      novoTipo: data.novoTipo.present ? data.novoTipo.value : this.novoTipo,
+      sincronizado: data.sincronizado.present
+          ? data.sincronizado.value
+          : this.sincronizado,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArtefatoTipo(')
+          ..write('id: $id, ')
+          ..write('nome: $nome, ')
+          ..write('novoTipo: $novoTipo, ')
+          ..write('sincronizado: $sincronizado')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, nome, novoTipo, sincronizado);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ArtefatoTipo &&
+          other.id == this.id &&
+          other.nome == this.nome &&
+          other.novoTipo == this.novoTipo &&
+          other.sincronizado == this.sincronizado);
+}
+
+class ArtefatoTiposCompanion extends UpdateCompanion<ArtefatoTipo> {
+  final Value<String> id;
+  final Value<String> nome;
+  final Value<bool> novoTipo;
+  final Value<bool> sincronizado;
+  final Value<int> rowid;
+  const ArtefatoTiposCompanion({
+    this.id = const Value.absent(),
+    this.nome = const Value.absent(),
+    this.novoTipo = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ArtefatoTiposCompanion.insert({
+    required String id,
+    required String nome,
+    this.novoTipo = const Value.absent(),
+    this.sincronizado = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       nome = Value(nome);
+  static Insertable<ArtefatoTipo> custom({
+    Expression<String>? id,
+    Expression<String>? nome,
+    Expression<bool>? novoTipo,
+    Expression<bool>? sincronizado,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (nome != null) 'nome': nome,
+      if (novoTipo != null) 'novo_tipo': novoTipo,
+      if (sincronizado != null) 'sincronizado': sincronizado,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ArtefatoTiposCompanion copyWith({
+    Value<String>? id,
+    Value<String>? nome,
+    Value<bool>? novoTipo,
+    Value<bool>? sincronizado,
+    Value<int>? rowid,
+  }) {
+    return ArtefatoTiposCompanion(
+      id: id ?? this.id,
+      nome: nome ?? this.nome,
+      novoTipo: novoTipo ?? this.novoTipo,
+      sincronizado: sincronizado ?? this.sincronizado,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (nome.present) {
+      map['nome'] = Variable<String>(nome.value);
+    }
+    if (novoTipo.present) {
+      map['novo_tipo'] = Variable<bool>(novoTipo.value);
+    }
+    if (sincronizado.present) {
+      map['sincronizado'] = Variable<bool>(sincronizado.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArtefatoTiposCompanion(')
+          ..write('id: $id, ')
+          ..write('nome: $nome, ')
+          ..write('novoTipo: $novoTipo, ')
+          ..write('sincronizado: $sincronizado, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $UsuariosTable usuarios = $UsuariosTable(this);
   late final $ColetasTable coletas = $ColetasTable(this);
   late final $BensMateriaisTable bensMateriais = $BensMateriaisTable(this);
-  late final $UsuariosTable usuarios = $UsuariosTable(this);
   late final $CuradoriasTable curadorias = $CuradoriasTable(this);
   late final $MidiasTable midias = $MidiasTable(this);
   late final $ResponsaveisSitioTable responsaveisSitio =
       $ResponsaveisSitioTable(this);
   late final $AuditoriasTable auditorias = $AuditoriasTable(this);
+  late final $ArtefatoTiposTable artefatoTipos = $ArtefatoTiposTable(this);
   late final Index coletasUsuarioIdx = Index(
     'coletas_usuario_idx',
     'CREATE INDEX coletas_usuario_idx ON coletas (usuario_id)',
@@ -4925,13 +5241,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+    usuarios,
     coletas,
     bensMateriais,
-    usuarios,
     curadorias,
     midias,
     responsaveisSitio,
     auditorias,
+    artefatoTipos,
     coletasUsuarioIdx,
     coletasSincronizadaIdx,
     coletasNaturezaIdx,
@@ -4952,6 +5269,470 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       const DriftDatabaseOptions(storeDateTimeAsText: true);
 }
 
+typedef $$UsuariosTableCreateCompanionBuilder =
+    UsuariosCompanion Function({
+      required String uuid,
+      required String nome,
+      required String email,
+      required String senhaHash,
+      Value<PerfilUsuario> perfil,
+      Value<ClassificacaoUsuario> classificacao,
+      Value<bool> ativo,
+      Value<DateTime> criadoEm,
+      Value<int> rowid,
+    });
+typedef $$UsuariosTableUpdateCompanionBuilder =
+    UsuariosCompanion Function({
+      Value<String> uuid,
+      Value<String> nome,
+      Value<String> email,
+      Value<String> senhaHash,
+      Value<PerfilUsuario> perfil,
+      Value<ClassificacaoUsuario> classificacao,
+      Value<bool> ativo,
+      Value<DateTime> criadoEm,
+      Value<int> rowid,
+    });
+
+final class $$UsuariosTableReferences
+    extends BaseReferences<_$AppDatabase, $UsuariosTable, Usuario> {
+  $$UsuariosTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$CuradoriasTable, List<Curadoria>>
+  _curadoriasRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.curadorias,
+    aliasName: $_aliasNameGenerator(db.usuarios.uuid, db.curadorias.usuarioId),
+  );
+
+  $$CuradoriasTableProcessedTableManager get curadoriasRefs {
+    final manager = $$CuradoriasTableTableManager(
+      $_db,
+      $_db.curadorias,
+    ).filter((f) => f.usuarioId.uuid.sqlEquals($_itemColumn<String>('uuid')!));
+
+    final cache = $_typedResult.readTableOrNull(_curadoriasRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$AuditoriasTable, List<Auditoria>>
+  _auditoriasRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.auditorias,
+    aliasName: $_aliasNameGenerator(db.usuarios.uuid, db.auditorias.usuarioId),
+  );
+
+  $$AuditoriasTableProcessedTableManager get auditoriasRefs {
+    final manager = $$AuditoriasTableTableManager(
+      $_db,
+      $_db.auditorias,
+    ).filter((f) => f.usuarioId.uuid.sqlEquals($_itemColumn<String>('uuid')!));
+
+    final cache = $_typedResult.readTableOrNull(_auditoriasRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$UsuariosTableFilterComposer
+    extends Composer<_$AppDatabase, $UsuariosTable> {
+  $$UsuariosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nome => $composableBuilder(
+    column: $table.nome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get senhaHash => $composableBuilder(
+    column: $table.senhaHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<PerfilUsuario, PerfilUsuario, String>
+  get perfil => $composableBuilder(
+    column: $table.perfil,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<
+    ClassificacaoUsuario,
+    ClassificacaoUsuario,
+    String
+  >
+  get classificacao => $composableBuilder(
+    column: $table.classificacao,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<bool> get ativo => $composableBuilder(
+    column: $table.ativo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get criadoEm => $composableBuilder(
+    column: $table.criadoEm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> curadoriasRefs(
+    Expression<bool> Function($$CuradoriasTableFilterComposer f) f,
+  ) {
+    final $$CuradoriasTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.uuid,
+      referencedTable: $db.curadorias,
+      getReferencedColumn: (t) => t.usuarioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CuradoriasTableFilterComposer(
+            $db: $db,
+            $table: $db.curadorias,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> auditoriasRefs(
+    Expression<bool> Function($$AuditoriasTableFilterComposer f) f,
+  ) {
+    final $$AuditoriasTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.uuid,
+      referencedTable: $db.auditorias,
+      getReferencedColumn: (t) => t.usuarioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AuditoriasTableFilterComposer(
+            $db: $db,
+            $table: $db.auditorias,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$UsuariosTableOrderingComposer
+    extends Composer<_$AppDatabase, $UsuariosTable> {
+  $$UsuariosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nome => $composableBuilder(
+    column: $table.nome,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get senhaHash => $composableBuilder(
+    column: $table.senhaHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get perfil => $composableBuilder(
+    column: $table.perfil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get classificacao => $composableBuilder(
+    column: $table.classificacao,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ativo => $composableBuilder(
+    column: $table.ativo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get criadoEm => $composableBuilder(
+    column: $table.criadoEm,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$UsuariosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UsuariosTable> {
+  $$UsuariosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<String> get nome =>
+      $composableBuilder(column: $table.nome, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get senhaHash =>
+      $composableBuilder(column: $table.senhaHash, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<PerfilUsuario, String> get perfil =>
+      $composableBuilder(column: $table.perfil, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<ClassificacaoUsuario, String>
+  get classificacao => $composableBuilder(
+    column: $table.classificacao,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get ativo =>
+      $composableBuilder(column: $table.ativo, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get criadoEm =>
+      $composableBuilder(column: $table.criadoEm, builder: (column) => column);
+
+  Expression<T> curadoriasRefs<T extends Object>(
+    Expression<T> Function($$CuradoriasTableAnnotationComposer a) f,
+  ) {
+    final $$CuradoriasTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.uuid,
+      referencedTable: $db.curadorias,
+      getReferencedColumn: (t) => t.usuarioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CuradoriasTableAnnotationComposer(
+            $db: $db,
+            $table: $db.curadorias,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> auditoriasRefs<T extends Object>(
+    Expression<T> Function($$AuditoriasTableAnnotationComposer a) f,
+  ) {
+    final $$AuditoriasTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.uuid,
+      referencedTable: $db.auditorias,
+      getReferencedColumn: (t) => t.usuarioId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AuditoriasTableAnnotationComposer(
+            $db: $db,
+            $table: $db.auditorias,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$UsuariosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UsuariosTable,
+          Usuario,
+          $$UsuariosTableFilterComposer,
+          $$UsuariosTableOrderingComposer,
+          $$UsuariosTableAnnotationComposer,
+          $$UsuariosTableCreateCompanionBuilder,
+          $$UsuariosTableUpdateCompanionBuilder,
+          (Usuario, $$UsuariosTableReferences),
+          Usuario,
+          PrefetchHooks Function({bool curadoriasRefs, bool auditoriasRefs})
+        > {
+  $$UsuariosTableTableManager(_$AppDatabase db, $UsuariosTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UsuariosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UsuariosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UsuariosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> uuid = const Value.absent(),
+                Value<String> nome = const Value.absent(),
+                Value<String> email = const Value.absent(),
+                Value<String> senhaHash = const Value.absent(),
+                Value<PerfilUsuario> perfil = const Value.absent(),
+                Value<ClassificacaoUsuario> classificacao =
+                    const Value.absent(),
+                Value<bool> ativo = const Value.absent(),
+                Value<DateTime> criadoEm = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => UsuariosCompanion(
+                uuid: uuid,
+                nome: nome,
+                email: email,
+                senhaHash: senhaHash,
+                perfil: perfil,
+                classificacao: classificacao,
+                ativo: ativo,
+                criadoEm: criadoEm,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String uuid,
+                required String nome,
+                required String email,
+                required String senhaHash,
+                Value<PerfilUsuario> perfil = const Value.absent(),
+                Value<ClassificacaoUsuario> classificacao =
+                    const Value.absent(),
+                Value<bool> ativo = const Value.absent(),
+                Value<DateTime> criadoEm = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => UsuariosCompanion.insert(
+                uuid: uuid,
+                nome: nome,
+                email: email,
+                senhaHash: senhaHash,
+                perfil: perfil,
+                classificacao: classificacao,
+                ativo: ativo,
+                criadoEm: criadoEm,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$UsuariosTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({curadoriasRefs = false, auditoriasRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (curadoriasRefs) db.curadorias,
+                    if (auditoriasRefs) db.auditorias,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (curadoriasRefs)
+                        await $_getPrefetchedData<
+                          Usuario,
+                          $UsuariosTable,
+                          Curadoria
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsuariosTableReferences
+                              ._curadoriasRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsuariosTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).curadoriasRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.usuarioId == item.uuid,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (auditoriasRefs)
+                        await $_getPrefetchedData<
+                          Usuario,
+                          $UsuariosTable,
+                          Auditoria
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsuariosTableReferences
+                              ._auditoriasRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsuariosTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).auditoriasRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.usuarioId == item.uuid,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$UsuariosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UsuariosTable,
+      Usuario,
+      $$UsuariosTableFilterComposer,
+      $$UsuariosTableOrderingComposer,
+      $$UsuariosTableAnnotationComposer,
+      $$UsuariosTableCreateCompanionBuilder,
+      $$UsuariosTableUpdateCompanionBuilder,
+      (Usuario, $$UsuariosTableReferences),
+      Usuario,
+      PrefetchHooks Function({bool curadoriasRefs, bool auditoriasRefs})
+    >;
 typedef $$ColetasTableCreateCompanionBuilder =
     ColetasCompanion Function({
       required String uuid,
@@ -6252,470 +7033,6 @@ typedef $$BensMateriaisTableProcessedTableManager =
       (BensMateriai, $$BensMateriaisTableReferences),
       BensMateriai,
       PrefetchHooks Function({bool curadoriasRefs, bool responsaveisSitioRefs})
-    >;
-typedef $$UsuariosTableCreateCompanionBuilder =
-    UsuariosCompanion Function({
-      required String uuid,
-      required String nome,
-      required String email,
-      required String senhaHash,
-      Value<PerfilUsuario> perfil,
-      Value<ClassificacaoUsuario> classificacao,
-      Value<bool> ativo,
-      Value<DateTime> criadoEm,
-      Value<int> rowid,
-    });
-typedef $$UsuariosTableUpdateCompanionBuilder =
-    UsuariosCompanion Function({
-      Value<String> uuid,
-      Value<String> nome,
-      Value<String> email,
-      Value<String> senhaHash,
-      Value<PerfilUsuario> perfil,
-      Value<ClassificacaoUsuario> classificacao,
-      Value<bool> ativo,
-      Value<DateTime> criadoEm,
-      Value<int> rowid,
-    });
-
-final class $$UsuariosTableReferences
-    extends BaseReferences<_$AppDatabase, $UsuariosTable, Usuario> {
-  $$UsuariosTableReferences(super.$_db, super.$_table, super.$_typedResult);
-
-  static MultiTypedResultKey<$CuradoriasTable, List<Curadoria>>
-  _curadoriasRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.curadorias,
-    aliasName: $_aliasNameGenerator(db.usuarios.uuid, db.curadorias.usuarioId),
-  );
-
-  $$CuradoriasTableProcessedTableManager get curadoriasRefs {
-    final manager = $$CuradoriasTableTableManager(
-      $_db,
-      $_db.curadorias,
-    ).filter((f) => f.usuarioId.uuid.sqlEquals($_itemColumn<String>('uuid')!));
-
-    final cache = $_typedResult.readTableOrNull(_curadoriasRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-
-  static MultiTypedResultKey<$AuditoriasTable, List<Auditoria>>
-  _auditoriasRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.auditorias,
-    aliasName: $_aliasNameGenerator(db.usuarios.uuid, db.auditorias.usuarioId),
-  );
-
-  $$AuditoriasTableProcessedTableManager get auditoriasRefs {
-    final manager = $$AuditoriasTableTableManager(
-      $_db,
-      $_db.auditorias,
-    ).filter((f) => f.usuarioId.uuid.sqlEquals($_itemColumn<String>('uuid')!));
-
-    final cache = $_typedResult.readTableOrNull(_auditoriasRefsTable($_db));
-    return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: cache),
-    );
-  }
-}
-
-class $$UsuariosTableFilterComposer
-    extends Composer<_$AppDatabase, $UsuariosTable> {
-  $$UsuariosTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get uuid => $composableBuilder(
-    column: $table.uuid,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get nome => $composableBuilder(
-    column: $table.nome,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get email => $composableBuilder(
-    column: $table.email,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get senhaHash => $composableBuilder(
-    column: $table.senhaHash,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<PerfilUsuario, PerfilUsuario, String>
-  get perfil => $composableBuilder(
-    column: $table.perfil,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnWithTypeConverterFilters<
-    ClassificacaoUsuario,
-    ClassificacaoUsuario,
-    String
-  >
-  get classificacao => $composableBuilder(
-    column: $table.classificacao,
-    builder: (column) => ColumnWithTypeConverterFilters(column),
-  );
-
-  ColumnFilters<bool> get ativo => $composableBuilder(
-    column: $table.ativo,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get criadoEm => $composableBuilder(
-    column: $table.criadoEm,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  Expression<bool> curadoriasRefs(
-    Expression<bool> Function($$CuradoriasTableFilterComposer f) f,
-  ) {
-    final $$CuradoriasTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.uuid,
-      referencedTable: $db.curadorias,
-      getReferencedColumn: (t) => t.usuarioId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CuradoriasTableFilterComposer(
-            $db: $db,
-            $table: $db.curadorias,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<bool> auditoriasRefs(
-    Expression<bool> Function($$AuditoriasTableFilterComposer f) f,
-  ) {
-    final $$AuditoriasTableFilterComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.uuid,
-      referencedTable: $db.auditorias,
-      getReferencedColumn: (t) => t.usuarioId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$AuditoriasTableFilterComposer(
-            $db: $db,
-            $table: $db.auditorias,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$UsuariosTableOrderingComposer
-    extends Composer<_$AppDatabase, $UsuariosTable> {
-  $$UsuariosTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get uuid => $composableBuilder(
-    column: $table.uuid,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get nome => $composableBuilder(
-    column: $table.nome,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get email => $composableBuilder(
-    column: $table.email,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get senhaHash => $composableBuilder(
-    column: $table.senhaHash,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get perfil => $composableBuilder(
-    column: $table.perfil,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get classificacao => $composableBuilder(
-    column: $table.classificacao,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<bool> get ativo => $composableBuilder(
-    column: $table.ativo,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get criadoEm => $composableBuilder(
-    column: $table.criadoEm,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$UsuariosTableAnnotationComposer
-    extends Composer<_$AppDatabase, $UsuariosTable> {
-  $$UsuariosTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get uuid =>
-      $composableBuilder(column: $table.uuid, builder: (column) => column);
-
-  GeneratedColumn<String> get nome =>
-      $composableBuilder(column: $table.nome, builder: (column) => column);
-
-  GeneratedColumn<String> get email =>
-      $composableBuilder(column: $table.email, builder: (column) => column);
-
-  GeneratedColumn<String> get senhaHash =>
-      $composableBuilder(column: $table.senhaHash, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<PerfilUsuario, String> get perfil =>
-      $composableBuilder(column: $table.perfil, builder: (column) => column);
-
-  GeneratedColumnWithTypeConverter<ClassificacaoUsuario, String>
-  get classificacao => $composableBuilder(
-    column: $table.classificacao,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<bool> get ativo =>
-      $composableBuilder(column: $table.ativo, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get criadoEm =>
-      $composableBuilder(column: $table.criadoEm, builder: (column) => column);
-
-  Expression<T> curadoriasRefs<T extends Object>(
-    Expression<T> Function($$CuradoriasTableAnnotationComposer a) f,
-  ) {
-    final $$CuradoriasTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.uuid,
-      referencedTable: $db.curadorias,
-      getReferencedColumn: (t) => t.usuarioId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CuradoriasTableAnnotationComposer(
-            $db: $db,
-            $table: $db.curadorias,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-
-  Expression<T> auditoriasRefs<T extends Object>(
-    Expression<T> Function($$AuditoriasTableAnnotationComposer a) f,
-  ) {
-    final $$AuditoriasTableAnnotationComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.uuid,
-      referencedTable: $db.auditorias,
-      getReferencedColumn: (t) => t.usuarioId,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$AuditoriasTableAnnotationComposer(
-            $db: $db,
-            $table: $db.auditorias,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return f(composer);
-  }
-}
-
-class $$UsuariosTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $UsuariosTable,
-          Usuario,
-          $$UsuariosTableFilterComposer,
-          $$UsuariosTableOrderingComposer,
-          $$UsuariosTableAnnotationComposer,
-          $$UsuariosTableCreateCompanionBuilder,
-          $$UsuariosTableUpdateCompanionBuilder,
-          (Usuario, $$UsuariosTableReferences),
-          Usuario,
-          PrefetchHooks Function({bool curadoriasRefs, bool auditoriasRefs})
-        > {
-  $$UsuariosTableTableManager(_$AppDatabase db, $UsuariosTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$UsuariosTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$UsuariosTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$UsuariosTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> uuid = const Value.absent(),
-                Value<String> nome = const Value.absent(),
-                Value<String> email = const Value.absent(),
-                Value<String> senhaHash = const Value.absent(),
-                Value<PerfilUsuario> perfil = const Value.absent(),
-                Value<ClassificacaoUsuario> classificacao =
-                    const Value.absent(),
-                Value<bool> ativo = const Value.absent(),
-                Value<DateTime> criadoEm = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => UsuariosCompanion(
-                uuid: uuid,
-                nome: nome,
-                email: email,
-                senhaHash: senhaHash,
-                perfil: perfil,
-                classificacao: classificacao,
-                ativo: ativo,
-                criadoEm: criadoEm,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String uuid,
-                required String nome,
-                required String email,
-                required String senhaHash,
-                Value<PerfilUsuario> perfil = const Value.absent(),
-                Value<ClassificacaoUsuario> classificacao =
-                    const Value.absent(),
-                Value<bool> ativo = const Value.absent(),
-                Value<DateTime> criadoEm = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => UsuariosCompanion.insert(
-                uuid: uuid,
-                nome: nome,
-                email: email,
-                senhaHash: senhaHash,
-                perfil: perfil,
-                classificacao: classificacao,
-                ativo: ativo,
-                criadoEm: criadoEm,
-                rowid: rowid,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map(
-                (e) => (
-                  e.readTable(table),
-                  $$UsuariosTableReferences(db, table, e),
-                ),
-              )
-              .toList(),
-          prefetchHooksCallback:
-              ({curadoriasRefs = false, auditoriasRefs = false}) {
-                return PrefetchHooks(
-                  db: db,
-                  explicitlyWatchedTables: [
-                    if (curadoriasRefs) db.curadorias,
-                    if (auditoriasRefs) db.auditorias,
-                  ],
-                  addJoins: null,
-                  getPrefetchedDataCallback: (items) async {
-                    return [
-                      if (curadoriasRefs)
-                        await $_getPrefetchedData<
-                          Usuario,
-                          $UsuariosTable,
-                          Curadoria
-                        >(
-                          currentTable: table,
-                          referencedTable: $$UsuariosTableReferences
-                              ._curadoriasRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UsuariosTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).curadoriasRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.usuarioId == item.uuid,
-                              ),
-                          typedResults: items,
-                        ),
-                      if (auditoriasRefs)
-                        await $_getPrefetchedData<
-                          Usuario,
-                          $UsuariosTable,
-                          Auditoria
-                        >(
-                          currentTable: table,
-                          referencedTable: $$UsuariosTableReferences
-                              ._auditoriasRefsTable(db),
-                          managerFromTypedResult: (p0) =>
-                              $$UsuariosTableReferences(
-                                db,
-                                table,
-                                p0,
-                              ).auditoriasRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.usuarioId == item.uuid,
-                              ),
-                          typedResults: items,
-                        ),
-                    ];
-                  },
-                );
-              },
-        ),
-      );
-}
-
-typedef $$UsuariosTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $UsuariosTable,
-      Usuario,
-      $$UsuariosTableFilterComposer,
-      $$UsuariosTableOrderingComposer,
-      $$UsuariosTableAnnotationComposer,
-      $$UsuariosTableCreateCompanionBuilder,
-      $$UsuariosTableUpdateCompanionBuilder,
-      (Usuario, $$UsuariosTableReferences),
-      Usuario,
-      PrefetchHooks Function({bool curadoriasRefs, bool auditoriasRefs})
     >;
 typedef $$CuradoriasTableCreateCompanionBuilder =
     CuradoriasCompanion Function({
@@ -8522,16 +8839,199 @@ typedef $$AuditoriasTableProcessedTableManager =
       Auditoria,
       PrefetchHooks Function({bool usuarioId, bool curadoriaId})
     >;
+typedef $$ArtefatoTiposTableCreateCompanionBuilder =
+    ArtefatoTiposCompanion Function({
+      required String id,
+      required String nome,
+      Value<bool> novoTipo,
+      Value<bool> sincronizado,
+      Value<int> rowid,
+    });
+typedef $$ArtefatoTiposTableUpdateCompanionBuilder =
+    ArtefatoTiposCompanion Function({
+      Value<String> id,
+      Value<String> nome,
+      Value<bool> novoTipo,
+      Value<bool> sincronizado,
+      Value<int> rowid,
+    });
+
+class $$ArtefatoTiposTableFilterComposer
+    extends Composer<_$AppDatabase, $ArtefatoTiposTable> {
+  $$ArtefatoTiposTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nome => $composableBuilder(
+    column: $table.nome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get novoTipo => $composableBuilder(
+    column: $table.novoTipo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get sincronizado => $composableBuilder(
+    column: $table.sincronizado,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ArtefatoTiposTableOrderingComposer
+    extends Composer<_$AppDatabase, $ArtefatoTiposTable> {
+  $$ArtefatoTiposTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nome => $composableBuilder(
+    column: $table.nome,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get novoTipo => $composableBuilder(
+    column: $table.novoTipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get sincronizado => $composableBuilder(
+    column: $table.sincronizado,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ArtefatoTiposTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ArtefatoTiposTable> {
+  $$ArtefatoTiposTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get nome =>
+      $composableBuilder(column: $table.nome, builder: (column) => column);
+
+  GeneratedColumn<bool> get novoTipo =>
+      $composableBuilder(column: $table.novoTipo, builder: (column) => column);
+
+  GeneratedColumn<bool> get sincronizado => $composableBuilder(
+    column: $table.sincronizado,
+    builder: (column) => column,
+  );
+}
+
+class $$ArtefatoTiposTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ArtefatoTiposTable,
+          ArtefatoTipo,
+          $$ArtefatoTiposTableFilterComposer,
+          $$ArtefatoTiposTableOrderingComposer,
+          $$ArtefatoTiposTableAnnotationComposer,
+          $$ArtefatoTiposTableCreateCompanionBuilder,
+          $$ArtefatoTiposTableUpdateCompanionBuilder,
+          (
+            ArtefatoTipo,
+            BaseReferences<_$AppDatabase, $ArtefatoTiposTable, ArtefatoTipo>,
+          ),
+          ArtefatoTipo,
+          PrefetchHooks Function()
+        > {
+  $$ArtefatoTiposTableTableManager(_$AppDatabase db, $ArtefatoTiposTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ArtefatoTiposTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ArtefatoTiposTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ArtefatoTiposTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> nome = const Value.absent(),
+                Value<bool> novoTipo = const Value.absent(),
+                Value<bool> sincronizado = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArtefatoTiposCompanion(
+                id: id,
+                nome: nome,
+                novoTipo: novoTipo,
+                sincronizado: sincronizado,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String nome,
+                Value<bool> novoTipo = const Value.absent(),
+                Value<bool> sincronizado = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ArtefatoTiposCompanion.insert(
+                id: id,
+                nome: nome,
+                novoTipo: novoTipo,
+                sincronizado: sincronizado,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ArtefatoTiposTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ArtefatoTiposTable,
+      ArtefatoTipo,
+      $$ArtefatoTiposTableFilterComposer,
+      $$ArtefatoTiposTableOrderingComposer,
+      $$ArtefatoTiposTableAnnotationComposer,
+      $$ArtefatoTiposTableCreateCompanionBuilder,
+      $$ArtefatoTiposTableUpdateCompanionBuilder,
+      (
+        ArtefatoTipo,
+        BaseReferences<_$AppDatabase, $ArtefatoTiposTable, ArtefatoTipo>,
+      ),
+      ArtefatoTipo,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
+  $$UsuariosTableTableManager get usuarios =>
+      $$UsuariosTableTableManager(_db, _db.usuarios);
   $$ColetasTableTableManager get coletas =>
       $$ColetasTableTableManager(_db, _db.coletas);
   $$BensMateriaisTableTableManager get bensMateriais =>
       $$BensMateriaisTableTableManager(_db, _db.bensMateriais);
-  $$UsuariosTableTableManager get usuarios =>
-      $$UsuariosTableTableManager(_db, _db.usuarios);
   $$CuradoriasTableTableManager get curadorias =>
       $$CuradoriasTableTableManager(_db, _db.curadorias);
   $$MidiasTableTableManager get midias =>
@@ -8540,4 +9040,6 @@ class $AppDatabaseManager {
       $$ResponsaveisSitioTableTableManager(_db, _db.responsaveisSitio);
   $$AuditoriasTableTableManager get auditorias =>
       $$AuditoriasTableTableManager(_db, _db.auditorias);
+  $$ArtefatoTiposTableTableManager get artefatoTipos =>
+      $$ArtefatoTiposTableTableManager(_db, _db.artefatoTipos);
 }

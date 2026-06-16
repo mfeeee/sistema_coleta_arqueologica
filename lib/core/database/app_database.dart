@@ -12,6 +12,7 @@ import 'tables/curadorias_table.dart';
 import 'tables/midias_table.dart';
 import 'tables/responsaveis_sitio_table.dart';
 import 'tables/auditorias_table.dart';
+import 'tables/artefato_tipos_table.dart';
 
 import 'enums/perfil_usuario.dart';
 import 'enums/status_coleta.dart';
@@ -22,19 +23,21 @@ part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [
+    Usuarios,
     Coletas,
     BensMateriais,
     Curadorias,
     Midias,
     ResponsaveisSitio,
     Auditorias,
+    ArtefatoTipos,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -64,6 +67,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 9) {
         await customStatement('DROP TABLE IF EXISTS coletas');
         await m.createTable(coletas);
+      }
+      if (from < 10) {
+        await m.createTable(artefatoTipos);
       }
     },
     beforeOpen: (details) async {

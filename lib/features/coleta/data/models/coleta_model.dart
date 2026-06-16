@@ -152,19 +152,12 @@ class ColetaModel extends ColetaEntity {
   }
 
   factory ColetaModel.fromJson(Map<String, dynamic> json) {
-    // Tenta obter localização de várias fontes (singular, plural ou campos na raiz)
+    // Tenta obter localização de várias fontes (singular ou campos na raiz)
     LocalizacaoModel? localizacao;
     if (json['localizacao'] != null) {
       localizacao = LocalizacaoModel.fromJson(
         json['localizacao'] as Map<String, dynamic>,
       );
-    } else if (json['localizacoes'] is List &&
-        (json['localizacoes'] as List).isNotEmpty) {
-      // Se vier como lista (relacionamento hasMany na API), pega o primeiro
-      final first = json['localizacoes'][0];
-      if (first is Map<String, dynamic>) {
-        localizacao = LocalizacaoModel.fromJson(first);
-      }
     } else if (json['latitude'] != null && json['longitude'] != null) {
       localizacao = LocalizacaoModel(
         id: 'local-${json['uuid'] ?? json['id']}',

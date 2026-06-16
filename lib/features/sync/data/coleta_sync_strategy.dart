@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
+import '../../coleta/data/models/coleta_model.dart';
 import '../../coleta/domain/entities/coleta_entity.dart';
 import '../domain/entities/sync_resumo.dart';
 import 'sync_api_datasource.dart';
@@ -7,7 +8,12 @@ import 'sync_api_datasource.dart';
 class ColetaSyncResultado {
   final SyncResultStatus status;
   final List<String> uploadedUrls;
-  const ColetaSyncResultado({required this.status, required this.uploadedUrls});
+  final ColetaModel? coletaAtualizada;
+  const ColetaSyncResultado({
+    required this.status,
+    required this.uploadedUrls,
+    this.coletaAtualizada,
+  });
 }
 
 class ColetaSyncStrategy {
@@ -61,6 +67,7 @@ class ColetaSyncStrategy {
     return ColetaSyncResultado(
       status: resultado.status,
       uploadedUrls: uploadedUrls,
+      coletaAtualizada: resultado.coletaAtualizada,
     );
   }
 }

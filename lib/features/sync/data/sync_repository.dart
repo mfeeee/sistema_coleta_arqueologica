@@ -36,14 +36,17 @@ class SyncRepository {
       onProgresso?.call('Sincronizando coleta ${i + 1}/${pendentes.length}…');
       final res = await _strategy.sincronizar(coleta, onProgresso: onProgresso);
 
-      // Sync ≠ aprovação: dados transmitidos, servidor pode sobrescrever.
       switch (res.status) {
         case SyncResultStatus.sucesso:
-          await _coletaDatasource.atualizarStatus(
-            coleta.id,
-            StatusColeta.sincronizado,
-            coleta.versao,
-          );
+          if (res.coletaAtualizada != null) {
+            await _coletaDatasource.inserir(res.coletaAtualizada!);
+          } else {
+            await _coletaDatasource.atualizarStatus(
+              coleta.id,
+              StatusColeta.sincronizado,
+              coleta.versao,
+            );
+          }
           sucessos++;
         case SyncResultStatus.conflito:
           await _coletaDatasource.atualizarStatus(

@@ -8,7 +8,12 @@ import '../domain/entities/sync_resumo.dart';
 class SyncResultado {
   final String coletaId;
   final SyncResultStatus status;
-  const SyncResultado({required this.coletaId, required this.status});
+  final ColetaModel? coletaAtualizada;
+  const SyncResultado({
+    required this.coletaId,
+    required this.status,
+    this.coletaAtualizada,
+  });
 }
 
 abstract class SyncApiDatasource {
@@ -68,13 +73,34 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
         name: 'SyncApiDatasource',
       );
 
+      final statusCode = response.statusCode;
+
+      if (statusCode == 200 || statusCode == 202) {
+        ColetaModel? coletaAtualizada;
+        try {
+          final data = response.data;
+          final json = (data is Map && data['data'] is Map)
+              ? data['data'] as Map<String, dynamic>
+              : data as Map<String, dynamic>;
+          coletaAtualizada = ColetaModel.fromJson(json);
+        } catch (e) {
+          log(
+            'Erro ao parsear resposta do sync: $e',
+            name: 'SyncApiDatasource',
+          );
+        }
+        return SyncResultado(
+          coletaId: coleta.id,
+          status: SyncResultStatus.sucesso,
+          coletaAtualizada: coletaAtualizada,
+        );
+      }
+
       return SyncResultado(
         coletaId: coleta.id,
-        status: switch (response.statusCode) {
-          200 || 202 => SyncResultStatus.sucesso,
-          409 => SyncResultStatus.conflito,
-          _ => SyncResultStatus.erroRede,
-        },
+        status: statusCode == 409
+            ? SyncResultStatus.conflito
+            : SyncResultStatus.erroRede,
       );
     } on DioException catch (e) {
       log(

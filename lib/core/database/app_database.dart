@@ -70,6 +70,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 10) {
         await m.createTable(artefatoTipos);
+        await batch((b) {
+          b.insertAll(artefatoTipos, _artefatosTiposSeed());
+        });
       }
     },
     beforeOpen: (details) async {
@@ -111,3 +114,13 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 }
+
+List<ArtefatoTiposCompanion> _artefatosTiposSeed() => [
+  ArtefatoTiposCompanion.insert(id: '1', nome: 'Cerâmica'),
+  ArtefatoTiposCompanion.insert(id: '2', nome: 'Lítico'),
+  ArtefatoTiposCompanion.insert(id: '3', nome: 'Osso'),
+  ArtefatoTiposCompanion.insert(id: '4', nome: 'Concha'),
+  ArtefatoTiposCompanion.insert(id: '5', nome: 'Metal'),
+  ArtefatoTiposCompanion.insert(id: '6', nome: 'Madeira carbonizada'),
+  ArtefatoTiposCompanion.insert(id: '7', nome: 'Material orgânico'),
+];

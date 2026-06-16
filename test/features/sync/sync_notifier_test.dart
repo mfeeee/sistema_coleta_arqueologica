@@ -27,6 +27,9 @@ class _FakeSyncRepository extends Fake implements SyncRepository {
     _pendentes = 0;
     return resumo;
   }
+
+  @override
+  Future<void> puxarDoServidor() async {}
 }
 
 class _FakeConectividadeService extends Fake implements ConectividadeService {
@@ -100,5 +103,27 @@ void main() {
 
       check(notifier.state).equals(SyncState.semToken);
     });
+
+    test('erro em puxarDoServidor muda estado para erro', () async {
+      // Forçamos erro sobrescrevendo o método no objeto fake se possível,
+      // ou criando um fake específico.
+      final notifier = SyncNotifier(
+        repository: _ErrorSyncRepository(),
+        secureStorage: _FakeSecureStorage(),
+        conectividadeService: _FakeConectividadeService(),
+      );
+
+      await notifier.sincronizar();
+
+      check(notifier.state).equals(SyncState.erro);
+      check(notifier.mensagemErro).isNotNull();
+    });
   });
+}
+
+class _ErrorSyncRepository extends _FakeSyncRepository {
+  @override
+  Future<void> puxarDoServidor() async {
+    throw Exception('Erro ao puxar dados');
+  }
 }

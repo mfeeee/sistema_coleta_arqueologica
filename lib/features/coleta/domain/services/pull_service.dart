@@ -26,6 +26,15 @@ class PullService {
       for (final remota in resultado.items) {
         if (remota.usuarioId != usuarioId) continue;
 
+        if (remota.localizacao?.lat == null ||
+            remota.localizacao?.lng == null) {
+          log(
+            'Coleta ${remota.id} ignorada: sem coordenadas',
+            name: 'PullService',
+          );
+          continue;
+        }
+
         final local = await localRepository.getById(remota.id);
         if (local == null || remota.versao > local.versao) {
           await localRepository.salvar(remota);

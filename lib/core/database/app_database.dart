@@ -34,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -60,6 +60,10 @@ class AppDatabase extends _$AppDatabase {
       if (from < 8) {
         await customStatement('DROP TABLE IF EXISTS midia_links');
         await m.createTable(midias);
+      }
+      if (from < 9) {
+        await customStatement('DROP TABLE IF EXISTS coletas');
+        await m.createTable(coletas);
       }
     },
     beforeOpen: (details) async {

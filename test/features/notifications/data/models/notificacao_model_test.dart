@@ -76,40 +76,40 @@ void main() {
   });
 
   group('PreferenciasNotificacaoModel', () {
-    final json = {
-      'push_enabled': true,
-      'email_enabled': false,
-      'tipos_habilitados': ['info', 'alerta'],
-    };
+    final json = {'coleta': true, 'sync': false, 'sistema': true, 'push': true};
 
     const model = PreferenciasNotificacaoModel(
-      pushEnabled: true,
-      emailEnabled: false,
-      tiposHabilitados: ['info', 'alerta'],
+      coleta: true,
+      sync: false,
+      sistema: true,
+      push: true,
     );
 
     test('fromJson cria instância correta', () {
       final result = PreferenciasNotificacaoModel.fromJson(json);
-      check(result.pushEnabled).isTrue();
-      check(result.emailEnabled).isFalse();
-      check(result.tiposHabilitados).deepEquals(['info', 'alerta']);
+      check(result.coleta).isTrue();
+      check(result.sync).isFalse();
+      check(result.sistema).isTrue();
+      check(result.push).isTrue();
     });
 
     test('toJson retorna mapa correto', () {
       final result = model.toJson();
-      check(result['push_enabled']).equals(true);
-      check(result['email_enabled']).equals(false);
-      check(result['tipos_habilitados'] as List).deepEquals(['info', 'alerta']);
+      check(result['coleta']).equals(true);
+      check(result['sync']).equals(false);
+      check(result['sistema']).equals(true);
+      check(result['push']).equals(true);
     });
 
     test('copyWith funciona corretamente', () {
-      final updated = model.copyWith(pushEnabled: false);
-      check(updated.pushEnabled).isFalse();
-      check(updated.emailEnabled).equals(model.emailEnabled);
-      check(updated.tiposHabilitados).deepEquals(model.tiposHabilitados);
+      final updated = model.copyWith(coleta: false);
+      check(updated.coleta).isFalse();
+      check(updated.sync).equals(model.sync);
+      check(updated.sistema).equals(model.sistema);
+      check(updated.push).equals(model.push);
 
       final emptyUpdate = model.copyWith();
-      check(emptyUpdate.pushEnabled).equals(model.pushEnabled);
+      check(emptyUpdate.coleta).equals(model.coleta);
     });
   });
 }

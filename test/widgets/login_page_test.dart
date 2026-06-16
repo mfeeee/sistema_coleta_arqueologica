@@ -108,9 +108,10 @@ class _StubNotificacaoRepository implements NotificacaoRepository {
   @override
   Future<PreferenciasNotificacaoModel> getPreferencias() async =>
       const PreferenciasNotificacaoModel(
-        pushEnabled: true,
-        emailEnabled: true,
-        tiposHabilitados: [],
+        coleta: true,
+        sync: true,
+        sistema: true,
+        push: true,
       );
   @override
   Future<void> atualizarPreferencias(

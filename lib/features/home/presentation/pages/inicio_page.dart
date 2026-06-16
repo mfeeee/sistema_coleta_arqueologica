@@ -194,7 +194,12 @@ class _MapaLayerState extends State<_MapaLayer> {
   static void _navegarParaPino(BuildContext context, PinoMapa pino) {
     switch (pino.tipo) {
       case TipoPino.bemPublicado:
-        context.push('/bem-material/${pino.id}');
+        final repo = AppScope.of(context).bemMaterialRepository;
+        repo.getById(pino.id).then((bem) {
+          if (bem != null && context.mounted) {
+            context.push('/bem-material/${pino.id}', extra: bem);
+          }
+        });
       case TipoPino.coleta:
       case TipoPino.padrao:
         context.push('/detalhes-coleta', extra: pino.id);

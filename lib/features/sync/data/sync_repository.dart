@@ -1,4 +1,7 @@
 import 'dart:developer';
+import 'package:sistema_coleta_arqueologica/core/models/midia_model.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_model.dart';
+
 import '../../../core/database/enums/status_coleta.dart';
 import '../../coleta/data/datasources/coleta_api_datasource.dart';
 import '../../coleta/data/datasources/coleta_local_datasource.dart';
@@ -30,8 +33,41 @@ class SyncRepository {
     while (temProxima) {
       final resultado = await _coletaApiDatasource.fetchMinhas(page: page);
 
-      for (final coleta in resultado.items) {
-        await _coletaDatasource.inserir(coleta as dynamic);
+      for (final item in resultado.items) {
+        // Normaliza mediableType das mídias: 'App\Models\Coleta' → 'coleta'
+        final midiasNormalizadas = item.midias.map((m) {
+          final tipo = m.mediableType.split('\\').last.toLowerCase();
+          return MidiaModel(
+            id: m.id,
+            mediableType: tipo,
+            mediableId: m.mediableId,
+            storagePath: m.storagePath,
+            mimeType: m.mimeType,
+            tipo: m.tipo,
+            url: m.url,
+            descricao: m.descricao,
+          );
+        }).toList();
+
+        final coletaNormalizada = ColetaModel(
+          id: item.id,
+          usuarioId: item.usuarioId,
+          dataColeta: item.dataColeta,
+          syncStatus: item.syncStatus,
+          nomeBem: item.nomeBem,
+          localizacao: item.localizacao,
+          artefatoTipos: item.artefatoTipos,
+          versao: item.versao,
+          updatedAt: item.updatedAt,
+          dadosColetados: item.dadosColetados,
+          midias: midiasNormalizadas,
+          natureza: item.natureza,
+          tipo: item.tipo,
+          uf: item.uf,
+          deletadoEm: item.deletadoEm,
+        );
+
+        await _coletaDatasource.inserir(coletaNormalizada);
       }
 
       temProxima = resultado.temProxima;

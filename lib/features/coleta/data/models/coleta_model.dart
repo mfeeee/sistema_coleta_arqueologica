@@ -216,11 +216,14 @@ class ColetaModel extends ColetaEntity {
   Map<String, dynamic> toJson() {
     return {
       'uuid': id,
+      'id': id,
       'usuario_id': usuarioId,
       'data_coleta': dataColeta.toIso8601String(),
       'status_sincronizacao': syncStatus.name,
       'nome_bem': nomeBem,
       'localizacao': localizacao?.toJson(),
+      'latitude': localizacao?.lat,
+      'longitude': localizacao?.lng,
       'artefato_tipos': artefatoTipos.map((e) => e.toJson()).toList(),
       'versao': versao,
       'updated_at': updatedAt.toIso8601String(),

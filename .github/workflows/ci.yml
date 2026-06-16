@@ -35,17 +35,19 @@ jobs:
       - name: Analyze Code
         run: flutter analyze
 
-      # 6. Roda os testes 
+      # 6. Roda os testes e gera cobertura
       - name: Run Tests
-        run: flutter test
+        run: flutter test --coverage
 
       # 7. Instala o lcov para gerar o relatório
       - name: Install lcov
         run: sudo apt-get install -y lcov
 
-      # 8. Gera sumário de cobertura no log do CI
-      - name: Coverage Summary
-        run: lcov --summary coverage/lcov.info
+      # 8. Gera sumário de cobertura no log do CI e HTML
+      - name: Coverage Summary and HTML
+        run: |
+          lcov --summary coverage/lcov.info
+          genhtml coverage/lcov.info -o coverage/html
 
       # 9. Publica o relatório como artefato downloadável
       - name: Upload Coverage Report

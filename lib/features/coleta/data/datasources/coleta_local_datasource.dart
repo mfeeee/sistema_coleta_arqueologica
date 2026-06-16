@@ -138,12 +138,9 @@ class ColetaLocalDatasourceImpl implements ColetaLocalDatasource {
       await _db.into(_db.coletas).insertOnConflictUpdate(coleta.toCompanion());
 
       // Delete existing midias for this collection
-      await (_db.delete(_db.midias)..where(
-            (t) =>
-                t.mediableId.equals(coleta.id) &
-                t.mediableType.equals('coleta'),
-          ))
-          .go();
+      await (_db.delete(
+        _db.midias,
+      )..where((t) => t.mediableId.equals(coleta.id))).go();
 
       // Insert new midias
       for (final midia in coleta.midias) {

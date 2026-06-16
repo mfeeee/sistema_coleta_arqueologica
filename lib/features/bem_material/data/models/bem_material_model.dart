@@ -156,6 +156,20 @@ class BemMaterialModel extends BemMaterialEntity {
   }
 
   factory BemMaterialModel.fromJson(Map<String, dynamic> json) {
+    // Tenta obter localização de várias fontes (singular ou plural)
+    LocalizacaoModel? localizacao;
+    if (json['localizacao'] != null) {
+      localizacao = LocalizacaoModel.fromJson(
+        json['localizacao'] as Map<String, dynamic>,
+      );
+    } else if (json['localizacoes'] is List &&
+        (json['localizacoes'] as List).isNotEmpty) {
+      final first = json['localizacoes'][0];
+      if (first is Map<String, dynamic>) {
+        localizacao = LocalizacaoModel.fromJson(first);
+      }
+    }
+
     return BemMaterialModel(
       id: json['id'] as String,
       coletaId: json['coleta_id'] as String?,
@@ -170,30 +184,24 @@ class BemMaterialModel extends BemMaterialEntity {
       meiosAcesso: json['meios_acesso'] as String?,
       artefatoTipos: json['artefato_tipos'] is List
           ? (json['artefato_tipos'] as List)
-                .map(
-                  (e) => ArtefatoTipoModel.fromJson(e as Map<String, dynamic>),
-                )
+                .whereType<Map<String, dynamic>>()
+                .map((e) => ArtefatoTipoModel.fromJson(e))
                 .toList()
           : [],
       responsaveis: json['responsaveis'] is List
           ? (json['responsaveis'] as List)
-                .map(
-                  (e) =>
-                      BemResponsavelModel.fromJson(e as Map<String, dynamic>),
-                )
+                .whereType<Map<String, dynamic>>()
+                .map((e) => BemResponsavelModel.fromJson(e))
                 .toList()
           : [],
       midias: json['midias'] is List
           ? (json['midias'] as List)
-                .map((e) => MidiaModel.fromJson(e as Map<String, dynamic>))
+                .whereType<Map<String, dynamic>>()
+                .map((e) => MidiaModel.fromJson(e))
                 .toList()
           : [],
       publicado: json['publicado'] as bool? ?? false,
-      localizacao: json['localizacao'] != null
-          ? LocalizacaoModel.fromJson(
-              json['localizacao'] as Map<String, dynamic>,
-            )
-          : null,
+      localizacao: localizacao,
       geojson: json['geojson'] is String
           ? json['geojson'] as String
           : json['geojson'] != null

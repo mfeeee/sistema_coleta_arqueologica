@@ -23,10 +23,35 @@ class LocalizacaoModel extends LocalizacaoEntity {
   @override
   double? get lng => super.lng;
 
-  static Object? readLat(Map json, String key) =>
-      (json['geom'] as Map?)?['lat'] ?? json['lat'];
-  static Object? readLng(Map json, String key) =>
-      (json['geom'] as Map?)?['lng'] ?? json['lng'];
+  static Object? readLat(Map json, String key) {
+    final geom = json['geom'];
+    if (geom is Map) return geom['lat'] ?? json['lat'];
+    if (geom is String && geom.startsWith('POINT')) {
+      final match = RegExp(r'POINT\s?\((.*)\)').firstMatch(geom);
+      if (match != null) {
+        final coords = match.group(1)?.trim().split(' ');
+        if (coords != null && coords.length >= 2) {
+          return double.tryParse(coords[1]);
+        }
+      }
+    }
+    return json['lat'];
+  }
+
+  static Object? readLng(Map json, String key) {
+    final geom = json['geom'];
+    if (geom is Map) return geom['lng'] ?? json['lng'];
+    if (geom is String && geom.startsWith('POINT')) {
+      final match = RegExp(r'POINT\s?\((.*)\)').firstMatch(geom);
+      if (match != null) {
+        final coords = match.group(1)?.trim().split(' ');
+        if (coords != null && coords.length >= 2) {
+          return double.tryParse(coords[0]);
+        }
+      }
+    }
+    return json['lng'];
+  }
 
   factory LocalizacaoModel.fromJson(Map<String, dynamic> json) =>
       _$LocalizacaoModelFromJson(json);

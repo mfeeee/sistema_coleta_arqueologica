@@ -14,6 +14,8 @@ import '../../features/notifications/presentation/pages/preferencias_notificacoe
 import '../../features/coleta/presentation/pages/nova_coleta_page.dart';
 import '../../features/coleta/presentation/pages/detalhes_coleta_page.dart';
 import '../../features/coleta/presentation/pages/motivo_rejeicao_page.dart';
+import '../../features/bem_material/presentation/pages/detalhes_item_page.dart';
+import '../../features/bem_material/domain/entities/bem_material_entity.dart';
 
 import '../navigation/main_page.dart';
 
@@ -80,6 +82,11 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
       GoRoute(
         path: '/motivo-rejeicao',
         builder: (_, __) => const MotivoRejeicaoPage(),
+      ),
+      GoRoute(
+        path: '/bem-material/:id',
+        builder: (_, GoRouterState state) =>
+            DetalhesItemPage(bem: state.extra! as BemMaterialEntity),
       ),
 
       StatefulShellRoute.indexedStack(

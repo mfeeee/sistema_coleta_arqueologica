@@ -5,6 +5,7 @@ import '../../features/auth/pages/login_page.dart';
 import '../../features/auth/pages/recover_password_page.dart';
 import '../../features/auth/pages/register_page.dart';
 import '../../features/auth/pages/reset_password_page.dart';
+import '../../features/auth/pages/termos_uso_page.dart';
 import '../../features/coleta/presentation/pages/coletas_page.dart';
 import '../../features/home/presentation/pages/inicio_page.dart';
 import '../../features/sync/presentation/pages/sync_page.dart';
@@ -24,6 +25,7 @@ const _publicRoutes = {
   '/register',
   '/recover-password',
   '/reset-password',
+  '/termos-de-uso',
 };
 
 GoRouter createAppRouter(AuthNotifier authNotifier) {
@@ -43,6 +45,10 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
     routes: <RouteBase>[
       GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
       GoRoute(path: '/register', builder: (_, __) => const RegisterPage()),
+      GoRoute(
+        path: '/termos-de-uso',
+        builder: (_, __) => const TermosUsoPage(),
+      ),
       GoRoute(
         path: '/recover-password',
         builder: (_, __) => const RecoverPasswordPage(),

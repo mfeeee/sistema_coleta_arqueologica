@@ -197,13 +197,31 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                   // --- TIPO ---
                   _SectionLabel(l10n.coletaType, textColor: cs.onSurface),
                   const SizedBox(height: 8),
-                  _CustomDropdown<TipoBem>(
-                    value: widget.formNotifier.tipo,
-                    items: TipoBem.values,
-                    labelBuilder: (e) => e.label,
-                    borderColor: borderColor,
-                    textColor: cs.onSurface,
-                    onChanged: widget.formNotifier.setTipo,
+                  Builder(
+                    builder: (context) {
+                      final tiposPermitidos = tiposPermitidosPorNatureza(
+                        widget.formNotifier.natureza,
+                      );
+                      final isEnabled = tiposPermitidos.isNotEmpty;
+
+                      return _CustomDropdown<TipoBem>(
+                        value: widget.formNotifier.tipo,
+                        items: tiposPermitidos,
+                        labelBuilder: (e) => e.label,
+                        borderColor: isEnabled
+                            ? borderColor
+                            : borderColor.withValues(alpha: 0.5),
+                        textColor: isEnabled
+                            ? cs.onSurface
+                            : cs.onSurfaceVariant.withValues(alpha: 0.6),
+                        onChanged: isEnabled
+                            ? widget.formNotifier.setTipo
+                            : null,
+                        hintText: isEnabled
+                            ? null
+                            : 'Selecione a natureza primeiro',
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 48),
@@ -409,7 +427,8 @@ class _CustomDropdown<T> extends StatelessWidget {
   final String Function(T) labelBuilder;
   final Color borderColor;
   final Color textColor;
-  final ValueChanged<T?> onChanged;
+  final ValueChanged<T?>? onChanged;
+  final String? hintText;
 
   const _CustomDropdown({
     required this.value,
@@ -417,7 +436,8 @@ class _CustomDropdown<T> extends StatelessWidget {
     required this.labelBuilder,
     required this.borderColor,
     required this.textColor,
-    required this.onChanged,
+    this.onChanged,
+    this.hintText,
   });
 
   @override
@@ -430,6 +450,7 @@ class _CustomDropdown<T> extends StatelessWidget {
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
       style: TextStyle(color: textColor, fontSize: 16),
+      hint: hintText != null ? Text(hintText!) : null,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -442,6 +463,10 @@ class _CustomDropdown<T> extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide(color: borderColor, width: 1.5),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: borderColor.withValues(alpha: 0.5)),
         ),
       ),
       items: items.map((item) {

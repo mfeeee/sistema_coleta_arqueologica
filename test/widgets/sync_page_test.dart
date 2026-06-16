@@ -165,6 +165,14 @@ class _StubSyncApiDatasource implements SyncApiDatasource {
       SyncResultado(coletaId: coleta.id, status: SyncResultStatus.sucesso);
 }
 
+class _StubFotoUploadService implements FotoUploadService {
+  @override
+  Future<FotoUploadResult> uploadFotos({
+    required List<String> localPaths,
+    void Function(int current, int total)? onProgress,
+  }) async => const FotoUploadResult(uploadedUrls: [], failedPaths: []);
+}
+
 // ---------------------------------------------------------------------------
 // Fake do SyncNotifier com estado controlável
 // ---------------------------------------------------------------------------
@@ -184,8 +192,9 @@ class _FakeSyncNotifier extends SyncNotifier {
            coletaDatasource: _StubColetaLocalDatasource(),
            strategy: ColetaSyncStrategy(
              apiDatasource: _StubSyncApiDatasource(),
-             fotoUploadService: FotoUploadService(Dio()),
+             fotoUploadService: _StubFotoUploadService(),
            ),
+           coletaApiDatasource: _StubColetaApiDatasource(),
          ),
          secureStorage: _StubSecureStorage(),
          conectividadeService: ConectividadeService(),

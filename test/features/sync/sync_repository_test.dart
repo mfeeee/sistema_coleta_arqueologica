@@ -4,8 +4,11 @@ import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.da
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:sistema_coleta_arqueologica/core/models/artefato_tipo_model.dart';
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_model.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_remota_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/coleta_sync_strategy.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.dart';
@@ -59,6 +62,12 @@ class _FakeColetaLocalDatasource implements ColetaLocalDatasource {
       _pendentes.removeWhere((c) => c.id == uuid);
 }
 
+class _FakeColetaApiDatasource implements ColetaApiDatasource {
+  @override
+  Future<ColetaPage> fetchMinhas({int page = 1}) async =>
+      (items: <ColetaEntity>[], total: 0, temProxima: false);
+}
+
 class _FakeFotoUploadService extends FotoUploadService {
   _FakeFotoUploadService() : super(Dio());
 
@@ -97,6 +106,7 @@ SyncRepository _criarRepositorio({
     apiDatasource: apiDatasource ?? FakeSyncApiDatasource(),
     fotoUploadService: _FakeFotoUploadService(),
   ),
+  coletaApiDatasource: _FakeColetaApiDatasource(),
 );
 
 // ---------------------------------------------------------------------------

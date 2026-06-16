@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 
 class MainPage extends StatelessWidget {
@@ -20,44 +19,25 @@ class MainPage extends StatelessWidget {
     final l10n = context.l10n;
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: ListenableBuilder(
-        listenable: AppScope.of(context).unreadNotificationsCount,
-        builder: (context, _) {
-          final count = AppScope.of(context).unreadNotificationsCount.value;
-          return NavigationBar(
-            selectedIndex: navigationShell.currentIndex,
-            onDestinationSelected: (int index) => _onTap(context, index),
-            destinations: <NavigationDestination>[
-              NavigationDestination(
-                icon: const Icon(Icons.home_outlined),
-                selectedIcon: const Icon(Icons.home),
-                label: l10n.navHome,
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.list_alt_outlined),
-                selectedIcon: const Icon(Icons.list_alt),
-                label: l10n.navCollections,
-              ),
-              NavigationDestination(
-                icon: const Icon(Icons.sync),
-                label: l10n.navSync,
-              ),
-              NavigationDestination(
-                icon: Badge(
-                  label: count > 0 ? Text('$count') : null,
-                  isLabelVisible: count > 0,
-                  child: const Icon(Icons.person_outline),
-                ),
-                selectedIcon: Badge(
-                  label: count > 0 ? Text('$count') : null,
-                  isLabelVisible: count > 0,
-                  child: const Icon(Icons.person),
-                ),
-                label: 'Perfil',
-              ),
-            ],
-          );
-        },
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: navigationShell.currentIndex,
+        onDestinationSelected: (int index) => _onTap(context, index),
+        destinations: <NavigationDestination>[
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: l10n.navHome,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.list_alt_outlined),
+            selectedIcon: const Icon(Icons.list_alt),
+            label: l10n.navCollections,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.sync),
+            label: l10n.navSync,
+          ),
+        ],
       ),
     );
   }

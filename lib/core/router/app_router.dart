@@ -107,11 +107,6 @@ GoRouter createAppRouter(AuthNotifier authNotifier) {
               ),
             ],
           ),
-          StatefulShellBranch(
-            routes: <RouteBase>[
-              GoRoute(path: '/perfil', builder: (_, __) => const ProfilePage()),
-            ],
-          ),
         ],
       ),
     ],

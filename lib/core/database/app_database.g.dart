@@ -102,10 +102,9 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
   late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
     'latitude',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
-    clientDefault: () => 0.0,
   );
   static const VerificationMeta _longitudeMeta = const VerificationMeta(
     'longitude',
@@ -114,10 +113,9 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
   late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
     'longitude',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.double,
     requiredDuringInsert: false,
-    clientDefault: () => 0.0,
   );
   @override
   late final GeneratedColumnWithTypeConverter<List<String>, String> artefatos =
@@ -331,11 +329,11 @@ class $ColetasTable extends Coletas with TableInfo<$ColetasTable, Coleta> {
       latitude: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}latitude'],
-      )!,
+      ),
       longitude: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}longitude'],
-      )!,
+      ),
       artefatos: $ColetasTable.$converterartefatos.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
@@ -393,8 +391,8 @@ class Coleta extends DataClass implements Insertable<Coleta> {
   final String? natureza;
   final String? tipo;
   final String? uf;
-  final double latitude;
-  final double longitude;
+  final double? latitude;
+  final double? longitude;
   final List<String> artefatos;
   final int versao;
   final DateTime updatedAt;
@@ -410,8 +408,8 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     this.natureza,
     this.tipo,
     this.uf,
-    required this.latitude,
-    required this.longitude,
+    this.latitude,
+    this.longitude,
     required this.artefatos,
     required this.versao,
     required this.updatedAt,
@@ -440,8 +438,12 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     if (!nullToAbsent || uf != null) {
       map['uf'] = Variable<String>(uf);
     }
-    map['latitude'] = Variable<double>(latitude);
-    map['longitude'] = Variable<double>(longitude);
+    if (!nullToAbsent || latitude != null) {
+      map['latitude'] = Variable<double>(latitude);
+    }
+    if (!nullToAbsent || longitude != null) {
+      map['longitude'] = Variable<double>(longitude);
+    }
     {
       map['artefatos'] = Variable<String>(
         $ColetasTable.$converterartefatos.toSql(artefatos),
@@ -477,8 +479,12 @@ class Coleta extends DataClass implements Insertable<Coleta> {
           : Value(natureza),
       tipo: tipo == null && nullToAbsent ? const Value.absent() : Value(tipo),
       uf: uf == null && nullToAbsent ? const Value.absent() : Value(uf),
-      latitude: Value(latitude),
-      longitude: Value(longitude),
+      latitude: latitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latitude),
+      longitude: longitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longitude),
       artefatos: Value(artefatos),
       versao: Value(versao),
       updatedAt: Value(updatedAt),
@@ -506,8 +512,8 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       natureza: serializer.fromJson<String?>(json['natureza']),
       tipo: serializer.fromJson<String?>(json['tipo']),
       uf: serializer.fromJson<String?>(json['uf']),
-      latitude: serializer.fromJson<double>(json['latitude']),
-      longitude: serializer.fromJson<double>(json['longitude']),
+      latitude: serializer.fromJson<double?>(json['latitude']),
+      longitude: serializer.fromJson<double?>(json['longitude']),
       artefatos: serializer.fromJson<List<String>>(json['artefatos']),
       versao: serializer.fromJson<int>(json['versao']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -532,8 +538,8 @@ class Coleta extends DataClass implements Insertable<Coleta> {
       'natureza': serializer.toJson<String?>(natureza),
       'tipo': serializer.toJson<String?>(tipo),
       'uf': serializer.toJson<String?>(uf),
-      'latitude': serializer.toJson<double>(latitude),
-      'longitude': serializer.toJson<double>(longitude),
+      'latitude': serializer.toJson<double?>(latitude),
+      'longitude': serializer.toJson<double?>(longitude),
       'artefatos': serializer.toJson<List<String>>(artefatos),
       'versao': serializer.toJson<int>(versao),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -552,8 +558,8 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     Value<String?> natureza = const Value.absent(),
     Value<String?> tipo = const Value.absent(),
     Value<String?> uf = const Value.absent(),
-    double? latitude,
-    double? longitude,
+    Value<double?> latitude = const Value.absent(),
+    Value<double?> longitude = const Value.absent(),
     List<String>? artefatos,
     int? versao,
     DateTime? updatedAt,
@@ -569,8 +575,8 @@ class Coleta extends DataClass implements Insertable<Coleta> {
     natureza: natureza.present ? natureza.value : this.natureza,
     tipo: tipo.present ? tipo.value : this.tipo,
     uf: uf.present ? uf.value : this.uf,
-    latitude: latitude ?? this.latitude,
-    longitude: longitude ?? this.longitude,
+    latitude: latitude.present ? latitude.value : this.latitude,
+    longitude: longitude.present ? longitude.value : this.longitude,
     artefatos: artefatos ?? this.artefatos,
     versao: versao ?? this.versao,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -680,8 +686,8 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
   final Value<String?> natureza;
   final Value<String?> tipo;
   final Value<String?> uf;
-  final Value<double> latitude;
-  final Value<double> longitude;
+  final Value<double?> latitude;
+  final Value<double?> longitude;
   final Value<List<String>> artefatos;
   final Value<int> versao;
   final Value<DateTime> updatedAt;
@@ -779,8 +785,8 @@ class ColetasCompanion extends UpdateCompanion<Coleta> {
     Value<String?>? natureza,
     Value<String?>? tipo,
     Value<String?>? uf,
-    Value<double>? latitude,
-    Value<double>? longitude,
+    Value<double?>? latitude,
+    Value<double?>? longitude,
     Value<List<String>>? artefatos,
     Value<int>? versao,
     Value<DateTime>? updatedAt,
@@ -4956,8 +4962,8 @@ typedef $$ColetasTableCreateCompanionBuilder =
       Value<String?> natureza,
       Value<String?> tipo,
       Value<String?> uf,
-      Value<double> latitude,
-      Value<double> longitude,
+      Value<double?> latitude,
+      Value<double?> longitude,
       Value<List<String>> artefatos,
       Value<int> versao,
       Value<DateTime> updatedAt,
@@ -4976,8 +4982,8 @@ typedef $$ColetasTableUpdateCompanionBuilder =
       Value<String?> natureza,
       Value<String?> tipo,
       Value<String?> uf,
-      Value<double> latitude,
-      Value<double> longitude,
+      Value<double?> latitude,
+      Value<double?> longitude,
       Value<List<String>> artefatos,
       Value<int> versao,
       Value<DateTime> updatedAt,
@@ -5352,8 +5358,8 @@ class $$ColetasTableTableManager
                 Value<String?> natureza = const Value.absent(),
                 Value<String?> tipo = const Value.absent(),
                 Value<String?> uf = const Value.absent(),
-                Value<double> latitude = const Value.absent(),
-                Value<double> longitude = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
                 Value<List<String>> artefatos = const Value.absent(),
                 Value<int> versao = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -5391,8 +5397,8 @@ class $$ColetasTableTableManager
                 Value<String?> natureza = const Value.absent(),
                 Value<String?> tipo = const Value.absent(),
                 Value<String?> uf = const Value.absent(),
-                Value<double> latitude = const Value.absent(),
-                Value<double> longitude = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
                 Value<List<String>> artefatos = const Value.absent(),
                 Value<int> versao = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),

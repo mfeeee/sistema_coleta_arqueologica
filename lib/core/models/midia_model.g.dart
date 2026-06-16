@@ -30,7 +30,7 @@ Map<String, dynamic> _$MidiaModelToJson(MidiaModel instance) =>
     };
 
 const _$TipoMidiaEnumMap = {
-  TipoMidia.foto: 'foto',
+  TipoMidia.imagem: 'imagem',
   TipoMidia.video: 'video',
   TipoMidia.tese: 'tese',
   TipoMidia.artigo: 'artigo',

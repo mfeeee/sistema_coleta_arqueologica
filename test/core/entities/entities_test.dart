@@ -87,7 +87,7 @@ void main() {
       mediableId: 'coleta-001',
       storagePath: '/fotos/artefato.jpg',
       mimeType: 'image/jpeg',
-      tipo: TipoMidia.foto,
+      tipo: TipoMidia.imagem,
       url: 'https://storage.exemplo.com/fotos/artefato.jpg',
     );
 
@@ -96,7 +96,7 @@ void main() {
       check(midia.mediableType).equals('coleta');
       check(midia.storagePath).equals('/fotos/artefato.jpg');
       check(midia.mimeType).equals('image/jpeg');
-      check(midia.tipo).equals(TipoMidia.foto);
+      check(midia.tipo).equals(TipoMidia.imagem);
       check(midia.url).isNotEmpty();
     });
 
@@ -111,7 +111,7 @@ void main() {
         mediableId: 'coleta-001',
         storagePath: '/fotos/detalhe.jpg',
         mimeType: 'image/jpeg',
-        tipo: TipoMidia.foto,
+        tipo: TipoMidia.imagem,
         url: 'https://storage.exemplo.com/fotos/detalhe.jpg',
         descricao: 'Vista frontal do artefato cerâmico',
       );

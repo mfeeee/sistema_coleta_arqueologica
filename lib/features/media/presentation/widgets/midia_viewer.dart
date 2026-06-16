@@ -18,7 +18,7 @@ class MidiaViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (midia.tipo == TipoMidia.foto) {
+    if (midia.tipo == TipoMidia.imagem) {
       return Image.network(
         midia.url,
         width: width,

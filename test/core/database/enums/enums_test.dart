@@ -122,19 +122,19 @@ void main() {
       }
     });
 
-    test('foto está presente nos values', () {
-      check(TipoMidia.values.map((e) => e.name)).contains('foto');
+    test('imagem está presente nos values', () {
+      check(TipoMidia.values.map((e) => e.name)).contains('imagem');
     });
 
     test('fromString retorna o valor correto', () {
-      check(TipoMidia.fromString('foto')).equals(TipoMidia.foto);
+      check(TipoMidia.fromString('imagem')).equals(TipoMidia.imagem);
       check(TipoMidia.fromString('video')).equals(TipoMidia.video);
       check(TipoMidia.fromString('tese')).equals(TipoMidia.tese);
       check(TipoMidia.fromString('artigo')).equals(TipoMidia.artigo);
     });
 
-    test('fromString retorna foto para valor desconhecido (fallback)', () {
-      check(TipoMidia.fromString('inexistente')).equals(TipoMidia.foto);
+    test('fromString retorna imagem para valor desconhecido (fallback)', () {
+      check(TipoMidia.fromString('inexistente')).equals(TipoMidia.imagem);
     });
   });
 

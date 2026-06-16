@@ -19,7 +19,7 @@ class StubMidiaRepository implements MidiaRepository {
       mediableId: mediableId,
       storagePath: 'stub_path.jpg',
       mimeType: 'image/jpeg',
-      tipo: TipoMidia.foto,
+      tipo: TipoMidia.imagem,
       url: 'http://example.com/stub.jpg',
     );
   }

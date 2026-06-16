@@ -120,9 +120,114 @@ class _ProfilePageState extends State<ProfilePage> {
               _PreferenciasSection(viewModel: _viewModel),
               const SizedBox(height: 16.0),
               _AcoesSection(viewModel: _viewModel, onLogout: _confirmarLogout),
+              const SizedBox(height: 16.0),
+              _ContaSection(viewModel: _viewModel),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ContaSection extends StatelessWidget {
+  const _ContaSection({required this.viewModel});
+
+  final ProfileViewModel viewModel;
+
+  Future<void> _confirmarExclusao(BuildContext context) async {
+    final theme = Theme.of(context);
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Excluir conta permanentemente?'),
+        content: const Text(
+          'Seus dados pessoais serão anonimizados conforme a LGPD. '
+          'Suas contribuições científicas serão mantidas de forma anônima. '
+          'Essa ação é irreversível.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ValueListenableBuilder<bool>(
+            valueListenable: viewModel.excluindoConta,
+            builder: (context, excluindo, _) => FilledButton(
+              onPressed: excluindo ? null : () => Navigator.pop(context, true),
+              style: FilledButton.styleFrom(
+                backgroundColor: theme.colorScheme.error,
+                foregroundColor: theme.colorScheme.onError,
+              ),
+              child: excluindo
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text('Sim, excluir'),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmado == true) {
+      final sucesso = await viewModel.excluirConta();
+      if (!sucesso && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              viewModel.erroSalvamento.value ?? 'Erro ao excluir conta',
+            ),
+            backgroundColor: theme.colorScheme.error,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Conta',
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              letterSpacing: -0.45,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              border: Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: _SettingsTile(
+              icon: Icons.delete_forever_outlined,
+              title: 'Excluir minha conta',
+              trailing: Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.error,
+              ),
+              onTap: () => _confirmarExclusao(context),
+            ),
+          ),
+        ],
       ),
     );
   }

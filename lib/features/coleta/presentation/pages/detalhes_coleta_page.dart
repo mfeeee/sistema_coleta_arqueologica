@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/media/presentation/widgets/midia_viewer.dart';
@@ -96,6 +97,10 @@ class _DetalhesColetaPageState extends State<DetalhesColetaPage> {
                         const SizedBox(height: 16),
                         _SecaoIdentificacao(coleta: coleta),
                         const SizedBox(height: 16),
+                        if (coleta.localizacao != null) ...[
+                          _SecaoLocalizacao(localizacao: coleta.localizacao!),
+                          const SizedBox(height: 16),
+                        ],
                         _SecaoDadosTecnicos(coleta: coleta),
                         const SizedBox(height: 16),
                         _SecaoDescricao(dadosColetados: coleta.dadosColetados),
@@ -221,12 +226,19 @@ class _SecaoIdentificacao extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = coleta.localizacao;
     final localizacao =
-        coleta.uf ??
-        (coleta.localizacao?.lat != null && coleta.localizacao?.lng != null
-            ? '${coleta.localizacao!.lat!.toStringAsFixed(5)}, '
-                  '${coleta.localizacao!.lng!.toStringAsFixed(5)}'
-            : '—');
+        [
+          if (loc?.municipio?.isNotEmpty ?? false) loc!.municipio!,
+          if (loc?.uf?.isNotEmpty ?? false) loc!.uf!,
+        ].join(' / ').isNotEmpty
+        ? [
+            loc?.municipio,
+            loc?.uf,
+          ].whereType<String>().where((s) => s.isNotEmpty).join(' / ')
+        : (loc?.lat != null
+              ? '${loc!.lat!.toStringAsFixed(5)}, ${loc.lng!.toStringAsFixed(5)}'
+              : '—');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,6 +269,69 @@ class _SecaoIdentificacao extends StatelessWidget {
               _LinhaInfo(
                 rotulo: 'Data',
                 valor: _formatarData(coleta.dataColeta),
+                theme: theme,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SecaoLocalizacao extends StatelessWidget {
+  const _SecaoLocalizacao({required this.localizacao});
+
+  final LocalizacaoEntity localizacao;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    String val(String? s) => (s != null && s.isNotEmpty) ? s : '—';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _TituloSecao(titulo: 'LOCALIZAÇÃO', theme: theme),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
+          ),
+          child: Column(
+            children: [
+              _LinhaInfo(
+                rotulo: 'Município',
+                valor: val(localizacao.municipio),
+                theme: theme,
+              ),
+              Divider(height: 1, color: theme.colorScheme.outlineVariant),
+              _LinhaInfo(
+                rotulo: 'UF',
+                valor: val(localizacao.uf),
+                theme: theme,
+              ),
+              Divider(height: 1, color: theme.colorScheme.outlineVariant),
+              _LinhaInfo(
+                rotulo: 'CEP',
+                valor: val(localizacao.cep),
+                theme: theme,
+              ),
+              Divider(height: 1, color: theme.colorScheme.outlineVariant),
+              _LinhaInfo(
+                rotulo: 'Logradouro',
+                valor: val(localizacao.logradouro),
+                theme: theme,
+              ),
+              Divider(height: 1, color: theme.colorScheme.outlineVariant),
+              _LinhaInfo(
+                rotulo: 'Coordenadas',
+                valor: (localizacao.lat != null && localizacao.lng != null)
+                    ? '${localizacao.lat!.toStringAsFixed(5)}, ${localizacao.lng!.toStringAsFixed(5)}'
+                    : '—',
                 theme: theme,
               ),
             ],

@@ -405,20 +405,18 @@ class _RegisterFormState extends State<_RegisterForm> {
                 Wrap(
                   alignment: WrapAlignment.center,
                   children: [
-                    TextButton(
-                      onPressed: () {
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          context.go('#');
-                        }
-                      },
-                      child: Text(
-                        l10n.registerTermsService,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.surfaceTint,
-                          decoration: TextDecoration.underline,
+                    Semantics(
+                      label: 'Ver Termos de Serviço',
+                      button: true,
+                      child: TextButton(
+                        onPressed: () => context.push('/termos-de-uso'),
+                        child: Text(
+                          l10n.registerTermsService,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.surfaceTint,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                     ),
@@ -426,20 +424,18 @@ class _RegisterFormState extends State<_RegisterForm> {
                       l10n.registerTermsAnd,
                       style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        if (context.canPop()) {
-                          context.pop();
-                        } else {
-                          context.go('#');
-                        }
-                      },
-                      child: Text(
-                        l10n.registerPrivacyPolicy,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.surfaceTint,
-                          decoration: TextDecoration.underline,
+                    Semantics(
+                      label: 'Ver Política de Privacidade',
+                      button: true,
+                      child: TextButton(
+                        onPressed: () => context.push('/termos-de-uso'),
+                        child: Text(
+                          l10n.registerPrivacyPolicy,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.surfaceTint,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                     ),

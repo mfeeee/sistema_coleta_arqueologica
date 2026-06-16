@@ -24,8 +24,9 @@ class LocalizacaoModel extends LocalizacaoEntity {
   double? get lng => super.lng;
 
   static Object? readLat(Map json, String key) {
+    if (json['lat'] != null) return json['lat'];
     final geom = json['geom'];
-    if (geom is Map) return geom['lat'] ?? json['lat'];
+    if (geom is Map) return geom['lat'];
     if (geom is String && geom.startsWith('POINT')) {
       final match = RegExp(r'POINT\s?\((.*)\)').firstMatch(geom);
       if (match != null) {
@@ -35,12 +36,13 @@ class LocalizacaoModel extends LocalizacaoEntity {
         }
       }
     }
-    return json['lat'];
+    return null;
   }
 
   static Object? readLng(Map json, String key) {
+    if (json['lng'] != null) return json['lng'];
     final geom = json['geom'];
-    if (geom is Map) return geom['lng'] ?? json['lng'];
+    if (geom is Map) return geom['lng'];
     if (geom is String && geom.startsWith('POINT')) {
       final match = RegExp(r'POINT\s?\((.*)\)').firstMatch(geom);
       if (match != null) {
@@ -50,7 +52,7 @@ class LocalizacaoModel extends LocalizacaoEntity {
         }
       }
     }
-    return json['lng'];
+    return null;
   }
 
   factory LocalizacaoModel.fromJson(Map<String, dynamic> json) =>

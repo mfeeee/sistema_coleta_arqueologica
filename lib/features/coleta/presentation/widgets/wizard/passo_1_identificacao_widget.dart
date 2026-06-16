@@ -31,9 +31,19 @@ class Passo1IdentificacaoWidget extends StatefulWidget {
 }
 
 class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
+  VoidCallback? _formListener;
+
   @override
   void initState() {
     super.initState();
+
+    _formListener = () {
+      if (mounted) {
+        setState(() {});
+      }
+    };
+    widget.formNotifier.addListener(_formListener!);
+
     // Inicializa localização com coordenadas do GPS se ainda não existir
     if (widget.formNotifier.localizacao == null) {
       widget.formNotifier.setLocalizacao(
@@ -44,6 +54,14 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
         ),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    if (_formListener != null) {
+      widget.formNotifier.removeListener(_formListener!);
+    }
+    super.dispose();
   }
 
   @override

@@ -33,17 +33,17 @@ Map<String, dynamic> _$NotificacaoModelToJson(NotificacaoModel instance) =>
 PreferenciasNotificacaoModel _$PreferenciasNotificacaoModelFromJson(
   Map<String, dynamic> json,
 ) => PreferenciasNotificacaoModel(
-  pushEnabled: json['push_enabled'] as bool,
-  emailEnabled: json['email_enabled'] as bool,
-  tiposHabilitados: (json['tipos_habilitados'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
+  coleta: json['coleta'] as bool,
+  sync: json['sync'] as bool,
+  sistema: json['sistema'] as bool,
+  push: json['push'] as bool,
 );
 
 Map<String, dynamic> _$PreferenciasNotificacaoModelToJson(
   PreferenciasNotificacaoModel instance,
 ) => <String, dynamic>{
-  'push_enabled': instance.pushEnabled,
-  'email_enabled': instance.emailEnabled,
-  'tipos_habilitados': instance.tiposHabilitados,
+  'coleta': instance.coleta,
+  'sync': instance.sync,
+  'sistema': instance.sistema,
+  'push': instance.push,
 };

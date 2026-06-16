@@ -51,14 +51,16 @@ class NotificacaoModel {
 @JsonSerializable(fieldRename: FieldRename.snake)
 class PreferenciasNotificacaoModel {
   const PreferenciasNotificacaoModel({
-    required this.pushEnabled,
-    required this.emailEnabled,
-    required this.tiposHabilitados,
+    required this.coleta,
+    required this.sync,
+    required this.sistema,
+    required this.push,
   });
 
-  final bool pushEnabled;
-  final bool emailEnabled;
-  final List<String> tiposHabilitados;
+  final bool coleta;
+  final bool sync;
+  final bool sistema;
+  final bool push;
 
   factory PreferenciasNotificacaoModel.fromJson(Map<String, dynamic> json) =>
       _$PreferenciasNotificacaoModelFromJson(json);
@@ -66,14 +68,16 @@ class PreferenciasNotificacaoModel {
   Map<String, dynamic> toJson() => _$PreferenciasNotificacaoModelToJson(this);
 
   PreferenciasNotificacaoModel copyWith({
-    bool? pushEnabled,
-    bool? emailEnabled,
-    List<String>? tiposHabilitados,
+    bool? coleta,
+    bool? sync,
+    bool? sistema,
+    bool? push,
   }) {
     return PreferenciasNotificacaoModel(
-      pushEnabled: pushEnabled ?? this.pushEnabled,
-      emailEnabled: emailEnabled ?? this.emailEnabled,
-      tiposHabilitados: tiposHabilitados ?? this.tiposHabilitados,
+      coleta: coleta ?? this.coleta,
+      sync: sync ?? this.sync,
+      sistema: sistema ?? this.sistema,
+      push: push ?? this.push,
     );
   }
 }

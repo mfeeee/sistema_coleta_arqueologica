@@ -436,3 +436,19 @@ class _CustomDropdown<T> extends StatelessWidget {
     );
   }
 }
+
+List<TipoBem> tiposPermitidosPorNatureza(NaturezaBem? natureza) {
+  if (natureza == null) return const [];
+
+  switch (natureza) {
+    case NaturezaBem.bemPaleontologico:
+      return const [TipoBem.colecao, TipoBem.sitio];
+    case NaturezaBem.bemArqueologico:
+      return const [
+        TipoBem.acervoOuColecao,
+        TipoBem.colecao,
+        TipoBem.bemOuConjunto,
+        TipoBem.sitio,
+      ];
+  }
+}

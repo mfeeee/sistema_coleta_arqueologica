@@ -50,7 +50,7 @@ class NotificacaoApiDatasourceImpl implements NotificacaoApiDatasource {
   @override
   Future<void> marcarComoLida(String id) async {
     try {
-      await dio.post('/v1/mobile/notificacoes/$id/ler');
+      await dio.patch('/v1/mobile/notificacoes/$id/lida');
     } on DioException catch (e) {
       if (e.error is ArqueoException) {
         throw e.error as ArqueoException;

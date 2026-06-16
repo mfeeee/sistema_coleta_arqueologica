@@ -53,6 +53,7 @@ class ProfileViewModel {
   ValueNotifier<Locale> get idiomaAtual => _idiomaApp;
 
   final ValueNotifier<bool> salvandoDados = ValueNotifier(false);
+  final ValueNotifier<bool> excluindoConta = ValueNotifier(false);
   final ValueNotifier<bool> fotoCarregando = ValueNotifier(false);
   final ValueNotifier<String?> erroSalvamento = ValueNotifier(null);
 
@@ -290,6 +291,33 @@ class ProfileViewModel {
     estaCarregando.value = false;
   }
 
+  Future<bool> excluirConta() async {
+    excluindoConta.value = true;
+    erroSalvamento.value = null;
+    try {
+      final result = await _profileService.deleteAccount();
+      switch (result) {
+        case ProfileSuccess():
+          await _authNotifier.logout();
+          return true;
+        case ProfileFailure(:final message):
+          erroSalvamento.value = message;
+          return false;
+      }
+    } catch (e, st) {
+      log(
+        'Erro ao excluir conta',
+        error: e,
+        stackTrace: st,
+        name: 'ProfileViewModel',
+      );
+      erroSalvamento.value = 'Não foi possível excluir a conta.';
+      return false;
+    } finally {
+      excluindoConta.value = false;
+    }
+  }
+
   Future<void> exportarLogs() async {
     if (kIsWeb) return;
     exportandoLogs.value = true;
@@ -358,6 +386,7 @@ class ProfileViewModel {
     classificacaoAtual.dispose();
     avatarUrl.dispose();
     salvandoDados.dispose();
+    excluindoConta.dispose();
     fotoCarregando.dispose();
     erroSalvamento.dispose();
     alertasSincronizacao

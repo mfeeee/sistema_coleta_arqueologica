@@ -134,6 +134,8 @@ class _Passo1IdentificacaoWidgetState extends State<Passo1IdentificacaoWidget> {
                   const SizedBox(height: 12),
                   LocationPickerWidget(
                     initialValue: widget.formNotifier.localizacao,
+                    latitude: widget.latitude,
+                    longitude: widget.longitude,
                     borderColor: borderColor,
                     onChanged: widget.formNotifier.setLocalizacao,
                   ),

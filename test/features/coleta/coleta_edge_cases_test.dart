@@ -125,7 +125,7 @@ void main() {
             mediableId: 'c3',
             storagePath: 'foto1.jpg',
             mimeType: 'image/jpeg',
-            tipo: TipoMidia.foto,
+            tipo: TipoMidia.imagem,
             url: 'http://...',
           ),
         ],

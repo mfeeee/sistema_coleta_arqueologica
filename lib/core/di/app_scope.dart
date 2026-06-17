@@ -47,9 +47,13 @@ class AppScope extends InheritedWidget {
     required this.profileService,
     required this.secureStorage,
     required this.dioPublic,
+    required this.database,
+    required this.dio,
     required super.child,
   });
 
+  final AppDatabase database;
+  final Dio dio;
   final AuthNotifier authNotifier;
   final SyncNotifier syncNotifier;
   final ColetaRepository coletaRepository;
@@ -115,6 +119,8 @@ class AppScope extends InheritedWidget {
     final uploadMidiaUseCase = UploadMidiaUseCase(midiaRepository);
 
     return AppScope(
+      database: database,
+      dio: dio,
       authNotifier: authNotifier,
       syncNotifier: syncNotifier,
       coletaRepository: coletaRepository,
@@ -145,6 +151,8 @@ class AppScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(AppScope oldWidget) =>
+      database != oldWidget.database ||
+      dio != oldWidget.dio ||
       authNotifier != oldWidget.authNotifier ||
       syncNotifier != oldWidget.syncNotifier ||
       coletaRepository != oldWidget.coletaRepository ||

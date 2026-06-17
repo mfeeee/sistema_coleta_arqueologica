@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import '../../viewmodels/coleta_form_notifier.dart';
 import '../artefato_tipo_picker.dart';
@@ -19,7 +18,6 @@ class Passo2ArtefatosWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final scope = AppScope.of(context);
     final l10n = context.l10n;
 
     return Scaffold(
@@ -70,7 +68,6 @@ class Passo2ArtefatosWidget extends StatelessWidget {
                     return ArtefatoTipoPicker(
                       selectedTypes: formNotifier.artefatos,
                       onChanged: formNotifier.setArtefatos,
-                      dio: scope.dioPublic,
                     );
                   },
                 ),

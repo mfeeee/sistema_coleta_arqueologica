@@ -1,19 +1,19 @@
-import 'package:dio/dio.dart';
+import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
-import 'package:sistema_coleta_arqueologica/core/models/artefato_tipo_model.dart';
 import 'package:uuid/uuid.dart';
+import 'package:drift/drift.dart' show InsertMode;
+import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
+import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
 
 class ArtefatoTipoPicker extends StatefulWidget {
   final List<ArtefatoTipoEntity> selectedTypes;
   final ValueChanged<List<ArtefatoTipoEntity>> onChanged;
-  final Dio dio;
 
   const ArtefatoTipoPicker({
     super.key,
     required this.selectedTypes,
     required this.onChanged,
-    required this.dio,
   });
 
   @override
@@ -23,33 +23,81 @@ class ArtefatoTipoPicker extends StatefulWidget {
 class _ArtefatoTipoPickerState extends State<ArtefatoTipoPicker> {
   List<ArtefatoTipoEntity> _availableTypes = [];
   bool _loading = true;
-  String? _error;
 
   @override
-  void initState() {
-    super.initState();
-    _fetchTypes();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _carregarDoLocal();
   }
 
-  Future<void> _fetchTypes() async {
+  Future<void> _carregarDoLocal() async {
+    if (!mounted) return;
+    setState(() => _loading = true);
     try {
-      final response = await widget.dio.get('/v1/mobile/artefato-tipos');
-      final data = response.data as List;
+      final db = AppScope.of(context).database;
+      final rows = await db.select(db.artefatoTipos).get();
       if (mounted) {
         setState(() {
-          _availableTypes = data
-              .map((e) => ArtefatoTipoModel.fromJson(e as Map<String, dynamic>))
+          _availableTypes = rows
+              .map(
+                (r) => ArtefatoTipoEntity(
+                  id: r.id,
+                  nome: r.nome,
+                  novoTipo: r.novoTipo,
+                ),
+              )
               .toList();
           _loading = false;
         });
       }
-    } catch (e) {
+      // Sync em background — não bloqueia o usuário
+      _sincronizarEmBackground();
+    } catch (e, st) {
+      log('Erro ao carregar artefato tipos local', error: e, stackTrace: st);
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _sincronizarEmBackground() async {
+    try {
+      final scope = AppScope.of(context);
+      if (!scope.conectividadeService.estaOnline.value) return;
+
+      final response = await scope.dio.get('/v1/mobile/artefato-tipos');
+      final data = response.data as List;
+      final db = scope.database;
+
+      await db.batch((b) {
+        for (final e in data) {
+          b.insert(
+            db.artefatoTipos,
+            ArtefatoTiposCompanion.insert(
+              id: e['id'].toString(),
+              nome: e['nome'] as String,
+            ),
+            mode: InsertMode.insertOrReplace,
+          );
+        }
+      });
+
+      // Atualiza a lista na tela silenciosamente
+      final rows = await db.select(db.artefatoTipos).get();
       if (mounted) {
         setState(() {
-          _error = 'Erro ao carregar tipos de artefato';
-          _loading = false;
+          _availableTypes = rows
+              .map(
+                (r) => ArtefatoTipoEntity(
+                  id: r.id,
+                  nome: r.nome,
+                  novoTipo: r.novoTipo,
+                ),
+              )
+              .toList();
         });
       }
+    } catch (e) {
+      log('Sync artefato-tipos em background falhou (ignorado)', error: e);
+      // Falha silenciosa — offline é aceitável
     }
   }
 
@@ -112,22 +160,7 @@ class _ArtefatoTipoPickerState extends State<ArtefatoTipoPicker> {
       );
     }
 
-    if (_error != null) {
-      return Center(
-        child: Column(
-          children: [
-            Text(_error!, style: const TextStyle(color: Colors.red)),
-            TextButton(
-              onPressed: _fetchTypes,
-              child: const Text('Tentar novamente'),
-            ),
-          ],
-        ),
-      );
-    }
-
     final cs = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

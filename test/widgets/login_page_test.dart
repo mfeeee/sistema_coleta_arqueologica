@@ -391,14 +391,16 @@ void main() {
     expect(find.text('E-mail ou senha inválidos.'), findsOneWidget);
   });
 
-  testWidgets('tocar em "Crie uma conta" navega para /register', (
-    tester,
-  ) async {
+  testWidgets('tocar em "Criar Conta" navega para /register', (tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
     final notifier = _FakeAuthNotifier();
     await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.textContaining('Crie uma conta'));
+    await tester.tap(find.textContaining('Criar Conta'));
     await tester.pumpAndSettle();
 
     expect(find.text('Cadastro'), findsOneWidget);

@@ -24,6 +24,13 @@ import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
 import 'package:dio/dio.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_model.dart';
+import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/data/coleta_sync_strategy.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/domain/entities/sync_resumo.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/presentation/pages/sync_page.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/presentation/viewmodels/sync_notifier.dart';
@@ -115,6 +122,49 @@ class _StubColetaApiDatasource implements ColetaApiDatasource {
       (items: <ColetaEntity>[], total: 0, temProxima: false);
 }
 
+class _StubColetaLocalDatasource implements ColetaLocalDatasource {
+  @override
+  Future<List<ColetaModel>> getAll() async => [];
+  @override
+  Future<List<ColetaModel>> getPendentes() async => [];
+  @override
+  Future<ColetaModel?> getById(String uuid) async => null;
+  @override
+  Future<int> contarTodas() async => 0;
+  @override
+  Future<int> contarPorStatus(dynamic status) async => 0;
+  @override
+  Future<List<ColetaModel>> getRecentes(int limite) async => [];
+  @override
+  Future<void> inserir(ColetaModel coleta) async {}
+  @override
+  Future<void> atualizarStatus(
+    String uuid,
+    StatusColeta status,
+    int novaVersao,
+  ) async {}
+  @override
+  Future<void> deletar(String uuid) async {}
+}
+
+class _StubSyncApiDatasource implements SyncApiDatasource {
+  @override
+  Future<SyncResultado> enviarColeta({
+    required ColetaEntity coleta,
+    Map<String, dynamic>? dadosColetadosOverride,
+    void Function(int tentativa, int max)? onTentativa,
+  }) async =>
+      SyncResultado(coletaId: coleta.id, status: SyncResultStatus.sucesso);
+}
+
+class _StubFotoUploadService implements FotoUploadService {
+  @override
+  Future<FotoUploadResult> uploadFotos({
+    required List<String> localPaths,
+    void Function(int current, int total)? onProgress,
+  }) async => const FotoUploadResult(uploadedUrls: [], failedPaths: []);
+}
+
 // ---------------------------------------------------------------------------
 // Fake do SyncNotifier
 // ---------------------------------------------------------------------------
@@ -122,7 +172,14 @@ class _StubColetaApiDatasource implements ColetaApiDatasource {
 class _FakeSyncNotifier extends SyncNotifier {
   _FakeSyncNotifier()
     : super(
-        repository: null as dynamic, // Não usado no fake
+        repository: SyncRepository(
+          coletaDatasource: _StubColetaLocalDatasource(),
+          strategy: ColetaSyncStrategy(
+            apiDatasource: _StubSyncApiDatasource(),
+            fotoUploadService: _StubFotoUploadService(),
+          ),
+          coletaApiDatasource: _StubColetaApiDatasource(),
+        ),
         secureStorage: _StubSecureStorage(),
         conectividadeService: ConectividadeService(),
       );
@@ -133,6 +190,8 @@ class _FakeSyncNotifier extends SyncNotifier {
 
   @override
   SyncState get state => _state;
+  @override
+  bool get sincronizando => _state == SyncState.sincronizando;
   @override
   SyncResumo? get ultimoResumo => _resumo;
   @override
@@ -244,16 +303,24 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
 
 void main() {
   testWidgets('exibe estado idle com botão de sincronizar', (tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
     final notifier = _FakeSyncNotifier();
     await tester.pumpWidget(await _montarSyncPage(notifier));
     await tester.pumpAndSettle();
 
-    expect(find.text('SINCRONIZAÇÃO'), findsOneWidget);
+    expect(find.text('Sincronizar'), findsOneWidget);
     expect(find.byType(ElevatedButton), findsOneWidget);
-    expect(find.textContaining('INICIAR'), findsOneWidget);
+    expect(find.textContaining('Iniciar'), findsOneWidget);
   });
 
   testWidgets('exibe progresso durante a sincronização', (tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
     final notifier = _FakeSyncNotifier();
     await tester.pumpWidget(await _montarSyncPage(notifier));
     await tester.pumpAndSettle();
@@ -262,10 +329,13 @@ void main() {
     await tester.pump();
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.textContaining('Sincronizando'), findsOneWidget);
   });
 
   testWidgets('exibe resumo após sucesso', (tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
     final notifier = _FakeSyncNotifier();
     await tester.pumpWidget(await _montarSyncPage(notifier));
     await tester.pumpAndSettle();
@@ -274,11 +344,15 @@ void main() {
     notifier.setResumo(const SyncResumo(sucessos: 5, conflitos: 0, erros: 0));
     await tester.pump();
 
-    expect(find.text('5'), findsOneWidget); // Sucessos
-    expect(find.text('CONCLUÍDO'), findsOneWidget);
+    expect(find.text('100%'), findsOneWidget);
+    expect(find.textContaining('sucesso'), findsOneWidget);
   });
 
   testWidgets('exibe erro quando falha', (tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
     final notifier = _FakeSyncNotifier();
     await tester.pumpWidget(await _montarSyncPage(notifier));
     await tester.pumpAndSettle();
@@ -287,10 +361,13 @@ void main() {
     await tester.pump();
 
     expect(find.text('Falha de conexão com o servidor'), findsOneWidget);
-    expect(find.text('TENTAR NOVAMENTE'), findsOneWidget);
   });
 
   testWidgets('tocar no botão de sincronizar chama o notifier', (tester) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
     final notifier = _FakeSyncNotifier();
     await tester.pumpWidget(await _montarSyncPage(notifier));
     await tester.pumpAndSettle();

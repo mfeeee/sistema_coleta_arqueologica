@@ -1,11 +1,13 @@
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
+import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/services/auth_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
@@ -15,23 +17,16 @@ import 'package:sistema_coleta_arqueologica/features/auth/auth_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/auth/domain/usecases/executar_sync_pos_login_use_case.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/entities/bem_material_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/bem_material/domain/repositories/bem_material_repository.dart';
-import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
-import 'package:sistema_coleta_arqueologica/features/coleta/data/models/coleta_model.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_remota_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
-import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_api_datasource.dart';
-import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_remota_repository.dart';
 import 'package:dio/dio.dart';
-import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
-import 'package:sistema_coleta_arqueologica/features/sync/data/coleta_sync_strategy.dart';
-import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasource.dart';
-import 'package:sistema_coleta_arqueologica/features/sync/data/sync_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/domain/entities/sync_resumo.dart';
-import 'package:sistema_coleta_arqueologica/features/sync/presentation/viewmodels/sync_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/presentation/pages/sync_page.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/presentation/viewmodels/sync_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/models/notificacao_model.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/profile/data/models/preferencias_notificacao.dart';
@@ -45,15 +40,8 @@ import '../helpers/stub_midia_repository.dart';
 
 class _StubSecureStorage extends SecureStorageService {
   _StubSecureStorage() : super(const FlutterSecureStorage());
-
   @override
-  Future<void> saveJwt(String token) async {}
-
-  @override
-  Future<String?> getJwt() async => null;
-
-  @override
-  Future<void> clearAll() async {}
+  Future<String?> getJwt() async => 'fake-jwt';
 }
 
 class _StubColetaRepository implements ColetaRepository {
@@ -72,11 +60,7 @@ class _StubColetaRepository implements ColetaRepository {
   @override
   Future<void> salvar(ColetaEntity coleta) async {}
   @override
-  Future<void> atualizarStatus(
-    String uuid,
-    dynamic status,
-    int novaVersao,
-  ) async {}
+  Future<void> atualizarStatus(String uuid, dynamic status, int v) async {}
   @override
   Future<void> deletar(String uuid) async {}
 }
@@ -131,102 +115,54 @@ class _StubColetaApiDatasource implements ColetaApiDatasource {
       (items: <ColetaEntity>[], total: 0, temProxima: false);
 }
 
-class _StubColetaLocalDatasource implements ColetaLocalDatasource {
-  @override
-  Future<List<ColetaModel>> getAll() async => [];
-  @override
-  Future<List<ColetaModel>> getPendentes() async => [];
-  @override
-  Future<ColetaModel?> getById(String uuid) async => null;
-  @override
-  Future<int> contarTodas() async => 0;
-  @override
-  Future<int> contarPorStatus(StatusColeta status) async => 0;
-  @override
-  Future<List<ColetaModel>> getRecentes(int limite) async => [];
-  @override
-  Future<void> inserir(ColetaModel coleta) async {}
-  @override
-  Future<void> atualizarStatus(
-    String uuid,
-    StatusColeta status,
-    int novaVersao,
-  ) async {}
-  @override
-  Future<void> deletar(String uuid) async {}
-}
-
-class _StubSyncApiDatasource implements SyncApiDatasource {
-  @override
-  Future<SyncResultado> enviarColeta({
-    required ColetaEntity coleta,
-    Map<String, dynamic>? dadosColetadosOverride,
-    void Function(int tentativa, int max)? onTentativa,
-  }) async =>
-      SyncResultado(coletaId: coleta.id, status: SyncResultStatus.sucesso);
-}
-
-class _StubFotoUploadService implements FotoUploadService {
-  @override
-  Future<FotoUploadResult> uploadFotos({
-    required List<String> localPaths,
-    void Function(int current, int total)? onProgress,
-  }) async => const FotoUploadResult(uploadedUrls: [], failedPaths: []);
-}
-
 // ---------------------------------------------------------------------------
-// Fake do SyncNotifier com estado controlável
+// Fake do SyncNotifier
 // ---------------------------------------------------------------------------
 
 class _FakeSyncNotifier extends SyncNotifier {
-  _FakeSyncNotifier({
-    bool fakeSincronizando = false,
-    SyncResumo? fakeResumo,
-    SyncState fakeState = SyncState.idle,
-    int fakePendentes = 0,
-  }) : _fakeSincronizando = fakeSincronizando,
-       _fakeResumo = fakeResumo,
-       _fakeState = fakeState,
-       _fakePendentes = fakePendentes,
-       super(
-         repository: SyncRepository(
-           coletaDatasource: _StubColetaLocalDatasource(),
-           strategy: ColetaSyncStrategy(
-             apiDatasource: _StubSyncApiDatasource(),
-             fotoUploadService: _StubFotoUploadService(),
-           ),
-           coletaApiDatasource: _StubColetaApiDatasource(),
-         ),
-         secureStorage: _StubSecureStorage(),
-         conectividadeService: ConectividadeService(),
-       );
+  _FakeSyncNotifier()
+    : super(
+        repository: null as dynamic, // Não usado no fake
+        secureStorage: _StubSecureStorage(),
+        conectividadeService: ConectividadeService(),
+      );
 
-  final bool _fakeSincronizando;
-  final SyncResumo? _fakeResumo;
-  final SyncState _fakeState;
-  final int _fakePendentes;
+  SyncState _state = SyncState.idle;
+  SyncResumo? _resumo;
+  String? _erro;
 
   @override
-  bool get sincronizando => _fakeSincronizando;
-
+  SyncState get state => _state;
   @override
-  SyncResumo? get ultimoResumo => _fakeResumo;
-
+  SyncResumo? get ultimoResumo => _resumo;
   @override
-  SyncState get state => _fakeState;
+  String? get mensagemErro => _erro;
 
-  @override
-  int get pendentes => _fakePendentes;
+  void setState(SyncState s) {
+    _state = s;
+    notifyListeners();
+  }
 
-  @override
-  Future<void> carregarPendentes() async {}
+  void setResumo(SyncResumo r) {
+    _resumo = r;
+    notifyListeners();
+  }
 
+  void setErro(String e) {
+    _erro = e;
+    _state = SyncState.erro;
+    notifyListeners();
+  }
+
+  bool syncChamado = false;
   @override
-  Future<void> sincronizar() async {}
+  Future<void> sincronizar() async {
+    syncChamado = true;
+  }
 }
 
 // ---------------------------------------------------------------------------
-// Auxiliar de montagem
+// Helpers
 // ---------------------------------------------------------------------------
 
 AuthNotifier _criarStubAuthNotifier() {
@@ -234,14 +170,16 @@ AuthNotifier _criarStubAuthNotifier() {
     secureStorage: _StubSecureStorage(),
     dio: Dio(),
   );
+  final pullService = PullService(
+    apiDatasource: _StubColetaApiDatasource(),
+    localRepository: _StubColetaRepository(),
+    secureStorage: _StubSecureStorage(),
+  );
+
   return AuthNotifier(
     authService: authService,
     executarSyncPosLogin: ExecutarSyncPosLoginUseCase(
-      pullService: PullService(
-        apiDatasource: _StubColetaApiDatasource(),
-        localRepository: _StubColetaRepository(),
-        secureStorage: _StubSecureStorage(),
-      ),
+      pullService: pullService,
       bemMaterialRepository: _StubBemMaterialRepository(),
       obterColetasPendentesUseCase: ObterColetasPendentesUseCase(
         _StubColetaRepository(),
@@ -263,8 +201,11 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
 
   final conectividadeService = ConectividadeService();
   final dio = Dio();
+  final db = AppDatabase(NativeDatabase.memory());
 
   return AppScope(
+    database: db,
+    dio: dio,
     authNotifier: _criarStubAuthNotifier(),
     syncNotifier: syncNotifier,
     coletaRepository: _StubColetaRepository(),
@@ -302,71 +243,59 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
 // ---------------------------------------------------------------------------
 
 void main() {
-  testWidgets('estado sincronizando exibe CircularProgressIndicator no botão', (
-    tester,
-  ) async {
-    final notifier = _FakeSyncNotifier(
-      fakeSincronizando: true,
-      fakeState: SyncState.sincronizando,
-    );
-    await tester.pumpWidget(await _montarSyncPage(notifier));
-    await tester.pump();
-
-    expect(find.byType(CircularProgressIndicator), findsWidgets);
-  });
-
-  testWidgets('estado sincronizando desabilita o botão de sincronização', (
-    tester,
-  ) async {
-    final notifier = _FakeSyncNotifier(
-      fakeSincronizando: true,
-      fakeState: SyncState.sincronizando,
-    );
-    await tester.pumpWidget(await _montarSyncPage(notifier));
-    await tester.pump();
-
-    final botao = tester.widget<ElevatedButton>(
-      find.byType(ElevatedButton).first,
-    );
-    expect(botao.onPressed, isNull);
-  });
-
-  testWidgets('estado concluído com sucesso exibe mensagem de confirmação', (
-    tester,
-  ) async {
-    final notifier = _FakeSyncNotifier(
-      fakeState: SyncState.concluido,
-      fakeResumo: const SyncResumo(sucessos: 3, conflitos: 0, erros: 0),
-    );
+  testWidgets('exibe estado idle com botão de sincronizar', (tester) async {
+    final notifier = _FakeSyncNotifier();
     await tester.pumpWidget(await _montarSyncPage(notifier));
     await tester.pumpAndSettle();
 
-    expect(find.text('Tudo sincronizado com sucesso!'), findsOneWidget);
+    expect(find.text('SINCRONIZAÇÃO'), findsOneWidget);
+    expect(find.byType(ElevatedButton), findsOneWidget);
+    expect(find.textContaining('INICIAR'), findsOneWidget);
   });
 
-  testWidgets('estado concluído com conflitos exibe contagem de conflitos', (
-    tester,
-  ) async {
-    final notifier = _FakeSyncNotifier(
-      fakeState: SyncState.concluido,
-      fakeResumo: const SyncResumo(sucessos: 1, conflitos: 2, erros: 0),
-    );
+  testWidgets('exibe progresso durante a sincronização', (tester) async {
+    final notifier = _FakeSyncNotifier();
     await tester.pumpWidget(await _montarSyncPage(notifier));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('2 conflito(s)'), findsWidgets);
-  });
-
-  testWidgets('estado idle exibe botão de sincronização habilitado', (
-    tester,
-  ) async {
-    final notifier = _FakeSyncNotifier(fakeState: SyncState.idle);
-    await tester.pumpWidget(await _montarSyncPage(notifier));
+    notifier.setState(SyncState.sincronizando);
     await tester.pump();
 
-    final botao = tester.widget<ElevatedButton>(
-      find.byType(ElevatedButton).first,
-    );
-    expect(botao.onPressed, isNotNull);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.textContaining('Sincronizando'), findsOneWidget);
+  });
+
+  testWidgets('exibe resumo após sucesso', (tester) async {
+    final notifier = _FakeSyncNotifier();
+    await tester.pumpWidget(await _montarSyncPage(notifier));
+    await tester.pumpAndSettle();
+
+    notifier.setState(SyncState.concluido);
+    notifier.setResumo(const SyncResumo(sucessos: 5, conflitos: 0, erros: 0));
+    await tester.pump();
+
+    expect(find.text('5'), findsOneWidget); // Sucessos
+    expect(find.text('CONCLUÍDO'), findsOneWidget);
+  });
+
+  testWidgets('exibe erro quando falha', (tester) async {
+    final notifier = _FakeSyncNotifier();
+    await tester.pumpWidget(await _montarSyncPage(notifier));
+    await tester.pumpAndSettle();
+
+    notifier.setErro('Falha de conexão com o servidor');
+    await tester.pump();
+
+    expect(find.text('Falha de conexão com o servidor'), findsOneWidget);
+    expect(find.text('TENTAR NOVAMENTE'), findsOneWidget);
+  });
+
+  testWidgets('tocar no botão de sincronizar chama o notifier', (tester) async {
+    final notifier = _FakeSyncNotifier();
+    await tester.pumpWidget(await _montarSyncPage(notifier));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(ElevatedButton));
+    expect(notifier.syncChamado, isTrue);
   });
 }

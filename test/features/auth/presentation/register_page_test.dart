@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
 import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
@@ -276,8 +278,11 @@ Future<Widget> _montarWidget(_FakeAuthNotifier notifier) async {
   );
 
   final dio = Dio();
+  final db = AppDatabase(NativeDatabase.memory());
 
   return AppScope(
+    database: db,
+    dio: dio,
     authNotifier: notifier,
     syncNotifier: _criarStubSyncNotifier(),
     coletaRepository: _StubColetaRepository(),

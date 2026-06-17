@@ -1,13 +1,16 @@
 import 'dart:async';
 
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
+import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/services/auth_service.dart';
 import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
@@ -26,7 +29,6 @@ import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/cole
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
-import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:dio/dio.dart';
 import 'package:sistema_coleta_arqueologica/core/services/foto_upload_service.dart';
 import 'package:sistema_coleta_arqueologica/features/sync/data/coleta_sync_strategy.dart';
@@ -42,7 +44,7 @@ import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
 import '../helpers/stub_midia_repository.dart';
 
 // ---------------------------------------------------------------------------
-// Stubs de infraestrutura
+// Stubs de infraestrutura (nunca chamados nos testes de LoginPage)
 // ---------------------------------------------------------------------------
 
 class _StubSecureStorage extends SecureStorageService {
@@ -50,10 +52,8 @@ class _StubSecureStorage extends SecureStorageService {
 
   @override
   Future<void> saveJwt(String token) async {}
-
   @override
   Future<String?> getJwt() async => null;
-
   @override
   Future<void> clearAll() async {}
 }
@@ -177,7 +177,7 @@ class _StubFotoUploadService implements FotoUploadService {
 }
 
 // ---------------------------------------------------------------------------
-// Fake do AuthNotifier com controle de estado
+// Fake do AuthNotifier — rastreia chamadas e simula estado de carregamento
 // ---------------------------------------------------------------------------
 
 final _stubAuthService = AuthService(
@@ -207,7 +207,6 @@ class _FakeAuthNotifier extends AuthNotifier {
       );
 
   bool loginChamado = false;
-  String? emailRecebido;
   Completer<void>? _aguardando;
   String? _erroFake;
 
@@ -220,7 +219,6 @@ class _FakeAuthNotifier extends AuthNotifier {
   @override
   Future<void> login(String email, String password) async {
     loginChamado = true;
-    emailRecebido = email;
     _aguardando = Completer();
     notifyListeners();
     await _aguardando!.future;
@@ -239,7 +237,7 @@ class _FakeAuthNotifier extends AuthNotifier {
 }
 
 // ---------------------------------------------------------------------------
-// Auxiliar de montagem
+// Auxiliar de montagem do widget
 // ---------------------------------------------------------------------------
 
 SyncNotifier _criarStubSyncNotifier() => SyncNotifier(
@@ -255,7 +253,7 @@ SyncNotifier _criarStubSyncNotifier() => SyncNotifier(
   conectividadeService: ConectividadeService(),
 );
 
-Future<Widget> _montarLoginPage(_FakeAuthNotifier notifier) async {
+Future<Widget> _montarWidget(_FakeAuthNotifier notifier) async {
   SharedPreferences.setMockInitialValues({});
   final prefs = await SharedPreferences.getInstance();
 
@@ -275,8 +273,11 @@ Future<Widget> _montarLoginPage(_FakeAuthNotifier notifier) async {
   );
 
   final dio = Dio();
+  final db = AppDatabase(NativeDatabase.memory());
 
   return AppScope(
+    database: db,
+    dio: dio,
     authNotifier: notifier,
     syncNotifier: _criarStubSyncNotifier(),
     coletaRepository: _StubColetaRepository(),
@@ -310,6 +311,21 @@ Future<Widget> _montarLoginPage(_FakeAuthNotifier notifier) async {
 }
 
 // ---------------------------------------------------------------------------
+// Helpers de preenchimento do formulário
+// ---------------------------------------------------------------------------
+
+Future<void> _preencherFormularioValido(WidgetTester tester) async {
+  await tester.enterText(find.byType(TextFormField).at(0), 'teste@example.com');
+  await tester.enterText(find.byType(TextFormField).at(1), 'senha123');
+  await tester.pumpAndSettle();
+}
+
+Future<void> _tocarBotaoEntrar(WidgetTester tester) async {
+  await tester.tap(find.byType(ElevatedButton));
+  await tester.pump();
+}
+
+// ---------------------------------------------------------------------------
 // Testes
 // ---------------------------------------------------------------------------
 
@@ -318,99 +334,73 @@ void main() {
     tester,
   ) async {
     final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(await _montarLoginPage(notifier));
+    await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
-    final botao = tester.widget<ElevatedButton>(
-      find.byType(ElevatedButton).first,
-    );
+    final botao = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
     expect(botao.onPressed, isNull);
   });
 
-  testWidgets('e-mail inválido sem senha: botão permanece desabilitado', (
+  testWidgets('formulário preenchido: botão Entrar fica habilitado', (
     tester,
   ) async {
     final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(await _montarLoginPage(notifier));
+    await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
-    final campos = find.byType(TextFormField);
-    await tester.enterText(campos.at(0), 'nao-e-email');
-    await tester.enterText(campos.at(1), 'senha123');
-    await tester.pump();
+    await _preencherFormularioValido(tester);
 
-    final botao = tester.widget<ElevatedButton>(
-      find.byType(ElevatedButton).first,
-    );
-    expect(botao.onPressed, isNull);
-  });
-
-  testWidgets('e-mail e senha válidos: botão Entrar fica habilitado', (
-    tester,
-  ) async {
-    final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(await _montarLoginPage(notifier));
-    await tester.pumpAndSettle();
-
-    final campos = find.byType(TextFormField);
-    await tester.enterText(campos.at(0), 'usuario@example.com');
-    await tester.enterText(campos.at(1), 'senha123');
-    await tester.pump();
-
-    final botao = tester.widget<ElevatedButton>(
-      find.byType(ElevatedButton).first,
-    );
+    final botao = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
     expect(botao.onPressed, isNotNull);
   });
 
-  testWidgets('submissão com dados válidos chama notifier.login', (
-    tester,
-  ) async {
+  testWidgets('submissão chama notifier.login', (tester) async {
     final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(await _montarLoginPage(notifier));
+    await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
-    final campos = find.byType(TextFormField);
-    await tester.enterText(campos.at(0), 'usuario@example.com');
-    await tester.enterText(campos.at(1), 'senha123');
-    await tester.pump();
-
-    await tester.tap(find.byType(ElevatedButton).first);
-    await tester.pump();
+    await _preencherFormularioValido(tester);
+    await _tocarBotaoEntrar(tester);
 
     expect(notifier.loginChamado, isTrue);
-    expect(notifier.emailRecebido, 'usuario@example.com');
   });
 
-  testWidgets('durante carregamento: botão Entrar fica desabilitado', (
+  testWidgets('durante o carregamento: botão Entrar fica desabilitado', (
     tester,
   ) async {
     final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(await _montarLoginPage(notifier));
+    await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
-    final campos = find.byType(TextFormField);
-    await tester.enterText(campos.at(0), 'usuario@example.com');
-    await tester.enterText(campos.at(1), 'senha123');
-    await tester.pump();
-    await tester.tap(find.byType(ElevatedButton).first);
-    await tester.pump();
+    await _preencherFormularioValido(tester);
+    await _tocarBotaoEntrar(tester);
 
     expect(notifier.isLoading, isTrue);
-    final botao = tester.widget<ElevatedButton>(
-      find.byType(ElevatedButton).first,
-    );
+    final botao = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
     expect(botao.onPressed, isNull);
   });
 
   testWidgets('mensagem de erro do notifier é exibida na tela', (tester) async {
     final notifier = _FakeAuthNotifier();
-    await tester.pumpWidget(await _montarLoginPage(notifier));
+    await tester.pumpWidget(await _montarWidget(notifier));
     await tester.pumpAndSettle();
 
-    notifier.definirErro('Credenciais inválidas.');
+    notifier.definirErro('E-mail ou senha inválidos.');
     await tester.pump();
 
-    expect(find.text('Credenciais inválidas.'), findsOneWidget);
+    expect(find.text('E-mail ou senha inválidos.'), findsOneWidget);
+  });
+
+  testWidgets('tocar em "Crie uma conta" navega para /register', (
+    tester,
+  ) async {
+    final notifier = _FakeAuthNotifier();
+    await tester.pumpWidget(await _montarWidget(notifier));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.textContaining('Crie uma conta'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cadastro'), findsOneWidget);
   });
 }

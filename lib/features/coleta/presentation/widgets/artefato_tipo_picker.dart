@@ -23,10 +23,13 @@ class ArtefatoTipoPicker extends StatefulWidget {
 class _ArtefatoTipoPickerState extends State<ArtefatoTipoPicker> {
   List<ArtefatoTipoEntity> _availableTypes = [];
   bool _loading = true;
+  bool _carregado = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_carregado) return;
+    _carregado = true;
     _carregarDoLocal();
   }
 

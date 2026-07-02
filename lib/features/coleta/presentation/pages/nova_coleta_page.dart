@@ -158,24 +158,32 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
             preferredSize: const Size.fromHeight(1.0),
             child: Container(height: 1.0),
           ),
-          title: ValueListenableBuilder<ColetaStep>(
-            valueListenable: _viewModel.stepNotifier,
-            builder: (context, step, _) {
-              final String titulo;
-              if (widget.id != null) {
-                titulo = l10n.coletaRetakeTitle;
-              } else if (step == ColetaStep.fillingForm) {
-                titulo = l10n.coletaStepPrefix(_formNotifier.passoAtual + 1, 3);
-              } else {
-                titulo = l10n.coletaNewTitle;
-              }
-              return Text(
-                titulo,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.45,
-                ),
+          title: AnimatedBuilder(
+            animation: _formNotifier,
+            builder: (context, _) {
+              return ValueListenableBuilder<ColetaStep>(
+                valueListenable: _viewModel.stepNotifier,
+                builder: (context, step, _) {
+                  final String titulo;
+                  if (widget.id != null) {
+                    titulo = l10n.coletaRetakeTitle;
+                  } else if (step == ColetaStep.fillingForm) {
+                    titulo = l10n.coletaStepPrefix(
+                      _formNotifier.passoAtual + 1,
+                      3,
+                    );
+                  } else {
+                    titulo = l10n.coletaNewTitle;
+                  }
+                  return Text(
+                    titulo,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.45,
+                    ),
+                  );
+                },
               );
             },
           ),

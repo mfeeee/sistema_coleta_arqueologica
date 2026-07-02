@@ -33,6 +33,9 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Ignorar arquivos LaTeX gerados localmente
+LATEX/
+
 # Symbolication related
 app.*.symbols
 

@@ -37,6 +37,7 @@ class _ColetaWizardWidgetState extends State<ColetaWizardWidget> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialPage);
+    widget.formNotifier.setPassoAtual(widget.initialPage);
   }
 
   void _irParaPagina(int index) {
@@ -46,6 +47,10 @@ class _ColetaWizardWidgetState extends State<ColetaWizardWidget> {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+  }
+
+  void _onPageChanged(int index) {
+    widget.formNotifier.setPassoAtual(index);
   }
 
   void _avancarParaPasso2() {
@@ -81,6 +86,7 @@ class _ColetaWizardWidgetState extends State<ColetaWizardWidget> {
     return PageView(
       controller: _pageController,
       physics: const NeverScrollableScrollPhysics(),
+      onPageChanged: _onPageChanged,
       children: [
         Passo1IdentificacaoWidget(
           formKey: _formKeyPasso1,

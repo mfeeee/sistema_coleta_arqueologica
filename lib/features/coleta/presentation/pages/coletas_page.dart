@@ -168,7 +168,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onDeletar: _deletarColeta,
                       ),
                       _ListaColetasFiltrada(
-                        coletas: _viewModel.pendentes,
+                        coletas: _viewModel.aguardandoDecisao,
                         carregando: carregando,
                         erro: erro,
                         mensagemVazia: l10n.coletasEmptyPending,
@@ -179,7 +179,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onDeletar: _deletarColeta,
                       ),
                       _ListaColetasFiltrada(
-                        coletas: _viewModel.sincronizadas,
+                        coletas: _viewModel.aprovadas,
                         carregando: carregando,
                         erro: erro,
                         mensagemVazia: l10n.coletasEmptyApproved,
@@ -190,7 +190,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onDeletar: _deletarColeta,
                       ),
                       _ListaColetasFiltrada(
-                        coletas: _viewModel.conflitos,
+                        coletas: _viewModel.rejeitadas,
                         carregando: carregando,
                         erro: erro,
                         mensagemVazia: l10n.coletasEmptyRejected,

@@ -79,6 +79,20 @@ class SyncRepository {
             coleta.versao + 1,
           );
           conflitos++;
+        case SyncResultStatus.recusada:
+          // Sai da fila automática. O motivo aparece nos detalhes e some
+          // quando o coletor corrige e salva a coleta de novo.
+          await _coletaDatasource.inserir(
+            coleta.copyWith(
+              syncStatus: StatusColeta.conflito,
+              dadosColetados: {
+                ...coleta.dadosColetados,
+                'motivo_recusa':
+                    res.mensagem ?? 'Dados recusados pelo servidor.',
+              },
+            ),
+          );
+          conflitos++;
         case SyncResultStatus.erroRede:
           erros++;
       }

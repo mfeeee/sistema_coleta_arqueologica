@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_curadoria.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
@@ -95,6 +96,10 @@ class _DetalhesColetaPageState extends State<DetalhesColetaPage> {
                       children: <Widget>[
                         _StatusColeta(status: coleta.syncStatus),
                         const SizedBox(height: 16),
+                        if (_ResultadoCuradoria.temAviso(coleta)) ...[
+                          _ResultadoCuradoria(coleta: coleta),
+                          const SizedBox(height: 16),
+                        ],
                         _SecaoIdentificacao(coleta: coleta),
                         const SizedBox(height: 16),
                         if (coleta.localizacao != null) ...[
@@ -113,6 +118,65 @@ class _DetalhesColetaPageState extends State<DetalhesColetaPage> {
                 );
               },
             ),
+    );
+  }
+}
+
+/// Decisão da curadoria (com o motivo, se rejeitada) ou recusa do servidor
+/// no envio, para o coletor saber o que aconteceu e o que fazer.
+class _ResultadoCuradoria extends StatelessWidget {
+  const _ResultadoCuradoria({required this.coleta});
+
+  final ColetaEntity coleta;
+
+  static String? _motivoRecusa(ColetaEntity c) =>
+      c.dadosColetados['motivo_recusa'] as String?;
+
+  static bool temAviso(ColetaEntity c) =>
+      _motivoRecusa(c) != null ||
+      c.curadoriaStatus == StatusCuradoria.aprovado ||
+      c.curadoriaStatus == StatusCuradoria.rejeitado;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final motivoRecusa = _motivoRecusa(coleta);
+    final aprovada = coleta.curadoriaStatus == StatusCuradoria.aprovado;
+    final (titulo, texto) = switch (motivoRecusa) {
+      final String motivo => (
+        'Recusada pelo servidor',
+        '$motivo\nCorrija a coleta e salve de novo para reenviar.',
+      ),
+      null when aprovada => (
+        'Aprovada pela curadoria',
+        coleta.curadoriaObservacao ?? 'O registro foi aceito.',
+      ),
+      null => (
+        'Rejeitada pela curadoria',
+        coleta.curadoriaObservacao ?? 'Motivo não informado.',
+      ),
+    };
+    final cor = aprovada && motivoRecusa == null ? AppColors.success : cs.error;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        border: Border.all(color: cor.withValues(alpha: 0.4)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            titulo,
+            style: TextStyle(fontWeight: FontWeight.w600, color: cor),
+          ),
+          const SizedBox(height: 6),
+          Text(texto),
+        ],
+      ),
     );
   }
 }

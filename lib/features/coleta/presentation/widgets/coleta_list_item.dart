@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_curadoria.dart';
 import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
@@ -63,9 +64,11 @@ class _BadgesRow extends StatelessWidget {
 
   final ColetaEntity coleta;
 
+  // A coleta recusada pela API (motivo_recusa) nunca chegou ao servidor.
   bool get _estaSincronizado =>
       coleta.syncStatus == StatusColeta.sincronizado ||
-      coleta.syncStatus == StatusColeta.conflito;
+      (coleta.syncStatus == StatusColeta.conflito &&
+          coleta.dadosColetados['motivo_recusa'] == null);
 
   @override
   Widget build(BuildContext context) {
@@ -82,25 +85,25 @@ class _BadgesRow extends StatelessWidget {
             AppColors.warningBg,
           );
 
-    final (
-      rotuloStatus,
-      textoStatus,
-      fundoStatus,
-    ) = switch (coleta.syncStatus) {
-      StatusColeta.sincronizado => (
+    final (rotuloStatus, textoStatus, fundoStatus) = switch ((
+      coleta.syncStatus,
+      coleta.curadoriaStatus,
+    )) {
+      // Aprovada ou rejeitada vem da curadoria, não do estado de envio.
+      (StatusColeta.rascunho, _) => (
+        l10n.coletaStatusRascunho,
+        AppColors.warningText,
+        AppColors.warningBg,
+      ),
+      (_, StatusCuradoria.aprovado) => (
         l10n.coletaStatusAprovado,
         AppColors.successText,
         AppColors.successBg,
       ),
-      StatusColeta.conflito => (
+      (_, StatusCuradoria.rejeitado) => (
         l10n.coletaStatusRejeitado,
         AppColors.errorText,
         AppColors.errorBg,
-      ),
-      StatusColeta.rascunho => (
-        l10n.coletaStatusRascunho,
-        AppColors.warningText,
-        AppColors.warningBg,
       ),
       _ => (
         l10n.coletaStatusPendente,
@@ -287,9 +290,28 @@ class _AcoesColeta extends StatelessWidget {
     return switch (coleta.syncStatus) {
       StatusColeta.pendente => _acoesPendente(theme, l10n),
       StatusColeta.sincronizado => _botaoVerDetalhes(theme, l10n),
+      // Recusada pela API: o coletor corrige e salva para reenviar.
+      StatusColeta.conflito
+          when coleta.dadosColetados['motivo_recusa'] != null =>
+        _botaoCorrigir(theme, l10n),
       StatusColeta.conflito => _botaoConflito(theme, l10n),
       StatusColeta.rascunho => _acoesRascunho(theme, l10n),
     };
+  }
+
+  Widget _botaoCorrigir(ThemeData theme, AppLocalizations l10n) {
+    return OutlinedButton.icon(
+      onPressed: onEditar,
+      icon: Icon(Icons.edit_outlined, size: 16, color: theme.colorScheme.error),
+      label: Text(
+        l10n.coletaActionEdit,
+        style: TextStyle(color: theme.colorScheme.error),
+      ),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.3)),
+        minimumSize: const Size(double.infinity, 40),
+      ),
+    );
   }
 
   Widget _acoesPendente(ThemeData theme, AppLocalizations l10n) {

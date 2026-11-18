@@ -111,25 +111,9 @@ class ColetaLocalDatasourceImpl implements ColetaLocalDatasource {
       midiasMap.putIfAbsent(row.mediableId, () => []).add(midia);
     }
 
-    return coletas.map((c) {
-      return ColetaModel(
-        id: c.id,
-        usuarioId: c.usuarioId,
-        dataColeta: c.dataColeta,
-        syncStatus: c.syncStatus,
-        nomeBem: c.nomeBem,
-        localizacao: c.localizacao,
-        artefatoTipos: c.artefatoTipos,
-        versao: c.versao,
-        updatedAt: c.updatedAt,
-        dadosColetados: c.dadosColetados,
-        midias: midiasMap[c.id] ?? [],
-        natureza: c.natureza,
-        tipo: c.tipo,
-        uf: c.uf,
-        deletadoEm: c.deletadoEm,
-      );
-    }).toList();
+    return coletas
+        .map((c) => c.copyWith(midias: midiasMap[c.id] ?? []))
+        .toList();
   }
 
   @override

@@ -13,4 +13,6 @@ class SyncResumo {
   int get total => sucessos + conflitos + erros;
 }
 
-enum SyncResultStatus { sucesso, conflito, erroRede }
+/// `recusada`: a API recusou a coleta (403 ou 422); reenviar igual não
+/// adianta, o coletor precisa corrigir.
+enum SyncResultStatus { sucesso, conflito, recusada, erroRede }

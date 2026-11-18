@@ -1,7 +1,16 @@
 import 'dart:developer';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
 import 'package:sistema_coleta_arqueologica/core/services/secure_storage_service.dart';
+import '../entities/coleta_entity.dart';
 import '../repositories/coleta_remota_repository.dart';
 import '../repositories/coleta_repository.dart';
+
+/// A decisão da curadoria não muda a versão da coleta (de propósito, para não
+/// gerar conflito falso). Só atualiza se não há edição local esperando envio.
+bool _curadoriaMudou(ColetaEntity local, ColetaEntity remota) =>
+    local.syncStatus == StatusColeta.sincronizado &&
+    (local.curadoriaStatus != remota.curadoriaStatus ||
+        local.curadoriaObservacao != remota.curadoriaObservacao);
 
 class PullService {
   PullService({
@@ -36,7 +45,9 @@ class PullService {
         }
 
         final local = await localRepository.getById(remota.id);
-        if (local == null || remota.versao > local.versao) {
+        if (local == null ||
+            remota.versao > local.versao ||
+            _curadoriaMudou(local, remota)) {
           await localRepository.salvar(remota);
           importadas++;
         }

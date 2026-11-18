@@ -29,8 +29,9 @@ class _FakeColetaLocalDatasource implements ColetaLocalDatasource {
   @override
   Future<List<ColetaModel>> getAll() async => _pendentes;
 
+  // Cópia, como o banco real: inserir durante o laço não pode crescer a fila.
   @override
-  Future<List<ColetaModel>> getPendentes() async => _pendentes;
+  Future<List<ColetaModel>> getPendentes() async => List.of(_pendentes);
 
   @override
   Future<ColetaModel?> getById(String uuid) async =>
@@ -163,6 +164,28 @@ void main() {
       expect(
         datasource.statusAtualizado['coleta-conflito'],
         StatusColeta.conflito,
+      );
+    });
+
+    test('recusa (422) tira a coleta da fila e guarda o motivo', () async {
+      final coleta = _criarColetaPendente('coleta-recusada');
+      final datasource = _FakeColetaLocalDatasource(pendentes: [coleta]);
+      final repo = _criarRepositorio(
+        datasource: datasource,
+        apiDatasource: FakeSyncApiDatasource(
+          status: SyncResultStatus.recusada,
+          mensagem: 'O campo uf é obrigatório.',
+        ),
+      );
+
+      final resumo = await repo.sincronizarTodas();
+      final salva = (await datasource.getAll()).last;
+
+      expect(resumo.conflitos, 1);
+      expect(salva.syncStatus, StatusColeta.conflito);
+      expect(
+        salva.dadosColetados['motivo_recusa'],
+        'O campo uf é obrigatório.',
       );
     });
 

@@ -10,10 +10,15 @@ class SyncResultado {
   final String coletaId;
   final SyncResultStatus status;
   final ColetaModel? coletaAtualizada;
+
+  /// Motivo devolvido pela API quando a coleta é recusada (403 ou 422).
+  final String? mensagem;
+
   const SyncResultado({
     required this.coletaId,
     required this.status,
     this.coletaAtualizada,
+    this.mensagem,
   });
 }
 
@@ -100,6 +105,16 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
         );
       }
 
+      // 403 (coleta de outra pessoa) e 422 (dado inválido) não mudam com
+      // nova tentativa: a coleta precisa ser corrigida antes de reenviar.
+      if (statusCode == 403 || statusCode == 422) {
+        return SyncResultado(
+          coletaId: coleta.id,
+          status: SyncResultStatus.recusada,
+          mensagem: _mensagemDaApi(response.data),
+        );
+      }
+
       return SyncResultado(
         coletaId: coleta.id,
         status: statusCode == 409
@@ -118,4 +133,9 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
       );
     }
   }
+}
+
+String? _mensagemDaApi(Object? data) {
+  final mensagem = data is Map ? data['message'] : null;
+  return mensagem is String ? mensagem : null;
 }

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_curadoria.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
 
@@ -28,6 +29,38 @@ class ColetasViewModel {
 
   List<ColetaEntity> get conflitos => coletas.value
       .where((c) => c.syncStatus == StatusColeta.conflito)
+      .toList();
+
+  // As abas PENDENTES, APROVADOS e REJEITADOS seguem a decisão da curadoria,
+  // não o estado de envio; cada coleta (fora os rascunhos) cai em uma só.
+  bool _rejeitada(ColetaEntity c) =>
+      c.syncStatus == StatusColeta.conflito ||
+      c.curadoriaStatus == StatusCuradoria.rejeitado;
+
+  bool _foraDosRascunhos(ColetaEntity c) =>
+      c.syncStatus != StatusColeta.rascunho;
+
+  List<ColetaEntity> get rejeitadas => coletas.value
+      .where((c) => _foraDosRascunhos(c) && _rejeitada(c))
+      .toList();
+
+  List<ColetaEntity> get aprovadas => coletas.value
+      .where(
+        (c) =>
+            _foraDosRascunhos(c) &&
+            !_rejeitada(c) &&
+            c.curadoriaStatus == StatusCuradoria.aprovado,
+      )
+      .toList();
+
+  /// Ainda não enviadas ou enviadas aguardando a curadoria.
+  List<ColetaEntity> get aguardandoDecisao => coletas.value
+      .where(
+        (c) =>
+            _foraDosRascunhos(c) &&
+            !_rejeitada(c) &&
+            c.curadoriaStatus != StatusCuradoria.aprovado,
+      )
       .toList();
 
   int get totalColetas => coletas.value.length;

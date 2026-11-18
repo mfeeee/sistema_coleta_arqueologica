@@ -602,6 +602,48 @@ abstract class AppLocalizations {
   /// **'Pendente'**
   String get coletaStatusPendente;
 
+  /// No description provided for @coletaActionSendToCuration.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar para curadoria'**
+  String get coletaActionSendToCuration;
+
+  /// No description provided for @coletaSendToCurationTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar para curadoria?'**
+  String get coletaSendToCurationTitle;
+
+  /// No description provided for @coletaSendToCurationConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Depois de enviada, a coleta não pode mais ser editada.'**
+  String get coletaSendToCurationConfirm;
+
+  /// No description provided for @coletaSendToCurationSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coleta enviada para curadoria.'**
+  String get coletaSendToCurationSuccess;
+
+  /// No description provided for @coletaSendToCurationError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível enviar. Verifique a conexão e tente de novo.'**
+  String get coletaSendToCurationError;
+
+  /// No description provided for @coletaStatusNaoEnviada.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não enviada'**
+  String get coletaStatusNaoEnviada;
+
+  /// No description provided for @coletaStatusEmCuradoria.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em curadoria'**
+  String get coletaStatusEmCuradoria;
+
   /// No description provided for @coletaDatePrefix.
   ///
   /// In pt, this message translates to:

@@ -109,6 +109,13 @@
   "coletaStatusRejeitado": "Rejeitado",
   "coletaStatusRascunho": "Rascunho",
   "coletaStatusPendente": "Pendente",
+  "coletaActionSendToCuration": "Enviar para curadoria",
+  "coletaSendToCurationTitle": "Enviar para curadoria?",
+  "coletaSendToCurationConfirm": "Depois de enviada, a coleta não pode mais ser editada.",
+  "coletaSendToCurationSuccess": "Coleta enviada para curadoria.",
+  "coletaSendToCurationError": "Não foi possível enviar. Verifique a conexão e tente de novo.",
+  "coletaStatusNaoEnviada": "Não enviada",
+  "coletaStatusEmCuradoria": "Em curadoria",
   "coletaDatePrefix": "Coletado em: {date}",
   "@coletaDatePrefix": {
     "placeholders": {

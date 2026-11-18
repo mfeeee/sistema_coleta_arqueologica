@@ -59,6 +59,9 @@ class ColetaFormNotifier extends ChangeNotifier {
   bool _carregandoMidia = false;
 
   bool _modificado = false;
+
+  // Mantida ao editar uma coleta já sincronizada.
+  int _versao = 1;
   bool get modificado => _modificado;
 
   List<MidiaModel> get midias => List.unmodifiable(_midias);
@@ -196,6 +199,7 @@ class ColetaFormNotifier extends ChangeNotifier {
 
   void restaurarDeEntity(ColetaEntity entity) {
     nome = entity.nomeBem;
+    _versao = entity.versao;
     natureza = entity.natureza;
     tipo = entity.tipo;
 
@@ -261,6 +265,7 @@ class ColetaFormNotifier extends ChangeNotifier {
         meiosAcesso: meiosAcesso,
         midias: _midias,
         usuarioId: usuarioId,
+        versao: _versao,
       ),
     );
   }
@@ -281,6 +286,7 @@ class ColetaFormNotifier extends ChangeNotifier {
         meiosAcesso: meiosAcesso,
         midias: _midias,
         usuarioId: usuarioId,
+        versao: _versao,
       ),
     );
   }

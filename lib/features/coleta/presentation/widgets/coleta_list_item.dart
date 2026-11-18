@@ -16,12 +16,14 @@ class ColetaListItem extends StatelessWidget {
     required this.onVerDetalhes,
     this.onEditar,
     this.onDeletar,
+    this.onEnviarParaCuradoria,
   });
 
   final ColetaEntity coleta;
   final VoidCallback onVerDetalhes;
   final VoidCallback? onEditar;
   final VoidCallback? onDeletar;
+  final VoidCallback? onEnviarParaCuradoria;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +50,7 @@ class ColetaListItem extends StatelessWidget {
         onVerDetalhes: onVerDetalhes,
         onEditar: onEditar,
         onDeletar: onDeletar,
+        onEnviarParaCuradoria: onEnviarParaCuradoria,
       ),
     );
   }
@@ -104,6 +107,17 @@ class _BadgesRow extends StatelessWidget {
         l10n.coletaStatusRejeitado,
         AppColors.errorText,
         AppColors.errorBg,
+      ),
+      (_, StatusCuradoria.pendente) => (
+        l10n.coletaStatusEmCuradoria,
+        AppColors.warningText,
+        AppColors.warningBg,
+      ),
+      // Sincronizada, mas o coletor ainda não mandou para a curadoria.
+      (StatusColeta.sincronizado, null) => (
+        l10n.coletaStatusNaoEnviada,
+        AppColors.warningText,
+        AppColors.warningBg,
       ),
       _ => (
         l10n.coletaStatusPendente,
@@ -275,12 +289,14 @@ class _AcoesColeta extends StatelessWidget {
     required this.onVerDetalhes,
     this.onEditar,
     this.onDeletar,
+    this.onEnviarParaCuradoria,
   });
 
   final ColetaEntity coleta;
   final VoidCallback onVerDetalhes;
   final VoidCallback? onEditar;
   final VoidCallback? onDeletar;
+  final VoidCallback? onEnviarParaCuradoria;
 
   @override
   Widget build(BuildContext context) {
@@ -289,6 +305,10 @@ class _AcoesColeta extends StatelessWidget {
 
     return switch (coleta.syncStatus) {
       StatusColeta.pendente => _acoesPendente(theme, l10n),
+      // Já está no servidor e ainda não foi para a curadoria: dá para editar
+      // ou enviar. Depois de enviada, só ver os detalhes.
+      StatusColeta.sincronizado when coleta.curadoriaStatus == null =>
+        _acoesSincronizada(theme, l10n),
       StatusColeta.sincronizado => _botaoVerDetalhes(theme, l10n),
       // Recusada pela API: o coletor corrige e salva para reenviar.
       StatusColeta.conflito
@@ -297,6 +317,44 @@ class _AcoesColeta extends StatelessWidget {
       StatusColeta.conflito => _botaoConflito(theme, l10n),
       StatusColeta.rascunho => _acoesRascunho(theme, l10n),
     };
+  }
+
+  Widget _acoesSincronizada(ThemeData theme, AppLocalizations l10n) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          flex: 2,
+          child: OutlinedButton.icon(
+            onPressed: onEditar,
+            icon: Icon(
+              Icons.edit_outlined,
+              size: 16,
+              color: theme.colorScheme.primary,
+            ),
+            label: Text(
+              l10n.coletaActionEdit,
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 3,
+          child: ElevatedButton.icon(
+            onPressed: onEnviarParaCuradoria,
+            icon: Icon(
+              Icons.send_outlined,
+              size: 16,
+              color: theme.colorScheme.onPrimary,
+            ),
+            label: Text(
+              l10n.coletaActionSendToCuration,
+              style: TextStyle(color: theme.colorScheme.onPrimary),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _botaoCorrigir(ThemeData theme, AppLocalizations l10n) {

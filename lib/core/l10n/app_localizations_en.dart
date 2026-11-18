@@ -281,6 +281,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coletaStatusPendente => 'Pendente';
 
   @override
+  String get coletaActionSendToCuration => 'Send for review';
+
+  @override
+  String get coletaSendToCurationTitle => 'Send for review?';
+
+  @override
+  String get coletaSendToCurationConfirm =>
+      'Once sent, the collection can no longer be edited.';
+
+  @override
+  String get coletaSendToCurationSuccess => 'Collection sent for review.';
+
+  @override
+  String get coletaSendToCurationError =>
+      'Could not send. Check your connection and try again.';
+
+  @override
+  String get coletaStatusNaoEnviada => 'Not sent';
+
+  @override
+  String get coletaStatusEmCuradoria => 'Under review';
+
+  @override
   String coletaDatePrefix(String date) {
     return 'Coletado em: $date';
   }

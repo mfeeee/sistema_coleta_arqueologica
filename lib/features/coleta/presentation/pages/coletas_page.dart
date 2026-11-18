@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sistema_coleta_arqueologica/core/di/app_scope.dart';
 import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/services/envio_curadoria_service.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coletas_viewmodel.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/widgets/coleta_list_item.dart';
@@ -70,6 +71,45 @@ class _ColetasPageState extends State<ColetasPage> {
     if (confirmado == true) {
       await _viewModel.deletarColeta(id);
     }
+  }
+
+  /// Segundo passo: a coleta já sincronizada entra na fila de curadoria.
+  /// Pede confirmação porque, depois disso, ela não pode mais ser editada.
+  void _enviarParaCuradoria(String id) async {
+    final l10n = context.l10n;
+    final scope = AppScope.of(context);
+    final mensageiro = ScaffoldMessenger.of(context);
+    final confirmado = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.coletaSendToCurationTitle),
+        content: Text(l10n.coletaSendToCurationConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.commonCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.coletaActionSendToCuration),
+          ),
+        ],
+      ),
+    );
+    if (confirmado != true) return;
+
+    final servico = EnvioCuradoriaService(
+      dio: scope.dio,
+      coletaRepository: scope.coletaRepository,
+    );
+    String mensagem;
+    try {
+      mensagem = await servico.enviar(id) ?? l10n.coletaSendToCurationSuccess;
+    } catch (_) {
+      mensagem = l10n.coletaSendToCurationError;
+    }
+    mensageiro.showSnackBar(SnackBar(content: Text(mensagem)));
+    if (mounted) await _viewModel.atualizar();
   }
 
   @override
@@ -155,6 +195,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onVerDetalhes: _verDetalhes,
                         onEditar: _editarColeta,
                         onDeletar: _deletarColeta,
+                        onEnviarParaCuradoria: _enviarParaCuradoria,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.rascunhos,
@@ -166,6 +207,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onVerDetalhes: _verDetalhes,
                         onEditar: _editarColeta,
                         onDeletar: _deletarColeta,
+                        onEnviarParaCuradoria: _enviarParaCuradoria,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.aguardandoDecisao,
@@ -177,6 +219,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onVerDetalhes: _verDetalhes,
                         onEditar: _editarColeta,
                         onDeletar: _deletarColeta,
+                        onEnviarParaCuradoria: _enviarParaCuradoria,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.aprovadas,
@@ -188,6 +231,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onVerDetalhes: _verDetalhes,
                         onEditar: _editarColeta,
                         onDeletar: _deletarColeta,
+                        onEnviarParaCuradoria: _enviarParaCuradoria,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.rejeitadas,
@@ -199,6 +243,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onVerDetalhes: _verDetalhes,
                         onEditar: _editarColeta,
                         onDeletar: _deletarColeta,
+                        onEnviarParaCuradoria: _enviarParaCuradoria,
                       ),
                     ],
                   );
@@ -233,6 +278,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
     required this.onVerDetalhes,
     required this.onEditar,
     required this.onDeletar,
+    required this.onEnviarParaCuradoria,
   });
 
   final List<ColetaEntity> coletas;
@@ -244,6 +290,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
   final void Function(String id) onVerDetalhes;
   final void Function(String id) onEditar;
   final void Function(String id) onDeletar;
+  final void Function(String id) onEnviarParaCuradoria;
 
   @override
   Widget build(BuildContext context) {
@@ -282,6 +329,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
           onVerDetalhes: () => onVerDetalhes(coletas[index].id),
           onEditar: () => onEditar(coletas[index].id),
           onDeletar: () => onDeletar(coletas[index].id),
+          onEnviarParaCuradoria: () => onEnviarParaCuradoria(coletas[index].id),
         ),
       ),
     );

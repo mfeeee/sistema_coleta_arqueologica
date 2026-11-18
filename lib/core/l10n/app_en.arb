@@ -201,5 +201,12 @@
   "navHome": "Home",
   "navCollections": "Collections",
   "navSync": "Sync",
-  "navProfile": "Profile"
+  "navProfile": "Profile",
+  "coletaActionSendToCuration": "Send for review",
+  "coletaSendToCurationTitle": "Send for review?",
+  "coletaSendToCurationConfirm": "Once sent, the collection can no longer be edited.",
+  "coletaSendToCurationSuccess": "Collection sent for review.",
+  "coletaSendToCurationError": "Could not send. Check your connection and try again.",
+  "coletaStatusNaoEnviada": "Not sent",
+  "coletaStatusEmCuradoria": "Under review"
 }

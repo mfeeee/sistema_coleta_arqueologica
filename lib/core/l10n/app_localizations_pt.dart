@@ -281,6 +281,29 @@ class AppLocalizationsPt extends AppLocalizations {
   String get coletaStatusPendente => 'Pendente';
 
   @override
+  String get coletaActionSendToCuration => 'Enviar para curadoria';
+
+  @override
+  String get coletaSendToCurationTitle => 'Enviar para curadoria?';
+
+  @override
+  String get coletaSendToCurationConfirm =>
+      'Depois de enviada, a coleta não pode mais ser editada.';
+
+  @override
+  String get coletaSendToCurationSuccess => 'Coleta enviada para curadoria.';
+
+  @override
+  String get coletaSendToCurationError =>
+      'Não foi possível enviar. Verifique a conexão e tente de novo.';
+
+  @override
+  String get coletaStatusNaoEnviada => 'Não enviada';
+
+  @override
+  String get coletaStatusEmCuradoria => 'Em curadoria';
+
+  @override
   String coletaDatePrefix(String date) {
     return 'Coletado em: $date';
   }

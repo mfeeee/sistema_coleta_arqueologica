@@ -38,6 +38,7 @@
   "registerTermsService": "Terms of Service",
   "registerTermsAnd": "and",
   "registerPrivacyPolicy": "Privacy Policy",
+  "registerAcceptTerms": "I have read and accept the Terms of Service and the Privacy Policy",
 
   "recoverPasswordTitle": "Reset Password",
   "recoverPasswordSubtitle": "Enter your registered email to receive recovery instructions.",

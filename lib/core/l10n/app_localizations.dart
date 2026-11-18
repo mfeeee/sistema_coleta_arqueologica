@@ -314,6 +314,12 @@ abstract class AppLocalizations {
   /// **'Política de Privacidade'**
   String get registerPrivacyPolicy;
 
+  /// No description provided for @registerAcceptTerms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Li e aceito os Termos de Serviço e a Política de Privacidade'**
+  String get registerAcceptTerms;
+
   /// No description provided for @recoverPasswordTitle.
   ///
   /// In pt, this message translates to:

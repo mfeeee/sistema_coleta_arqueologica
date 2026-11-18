@@ -114,12 +114,14 @@ class _RegisterFormState extends State<_RegisterForm> {
   bool _hideConfirmPassword = true;
 
   String _selectedClassification = 'estudante';
+  bool _aceitouTermos = false;
 
   bool get _podeSubmeter =>
       _nameController.text.trim().isNotEmpty &&
       _regexEmail.hasMatch(_emailController.text.trim()) &&
       _passwordController.text.length >= 8 &&
-      _confirmPasswordController.text == _passwordController.text;
+      _confirmPasswordController.text == _passwordController.text &&
+      _aceitouTermos;
 
   @override
   void dispose() {
@@ -344,7 +346,20 @@ class _RegisterFormState extends State<_RegisterForm> {
                     textAlign: TextAlign.center,
                   ),
                 ],
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
+                // LGPD: o aceite é obrigatório e a API guarda quando foi dado.
+                CheckboxListTile(
+                  value: _aceitouTermos,
+                  onChanged: (valor) =>
+                      setState(() => _aceitouTermos = valor ?? false),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    l10n.registerAcceptTerms,
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: (notifier.isLoading || !_podeSubmeter)
                       ? null

@@ -38,6 +38,7 @@
   "registerTermsService": "Termos de Serviço",
   "registerTermsAnd": "e",
   "registerPrivacyPolicy": "Política de Privacidade",
+  "registerAcceptTerms": "Li e aceito os Termos de Serviço e a Política de Privacidade",
 
   "recoverPasswordTitle": "Recuperar Senha",
   "recoverPasswordSubtitle": "Insira o e-mail cadastrado para receber as instruções de recuperação.",

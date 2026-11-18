@@ -118,6 +118,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get registerPrivacyPolicy => 'Política de Privacidade';
 
   @override
+  String get registerAcceptTerms =>
+      'Li e aceito os Termos de Serviço e a Política de Privacidade';
+
+  @override
   String get recoverPasswordTitle => 'Recuperar Senha';
 
   @override

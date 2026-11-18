@@ -118,6 +118,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerPrivacyPolicy => 'Privacy Policy';
 
   @override
+  String get registerAcceptTerms =>
+      'I have read and accept the Terms of Service and the Privacy Policy';
+
+  @override
   String get recoverPasswordTitle => 'Reset Password';
 
   @override

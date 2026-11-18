@@ -305,13 +305,21 @@ Future<Widget> _montarWidget(_FakeAuthNotifier notifier) async {
 // Helpers de preenchimento do formulário
 // ---------------------------------------------------------------------------
 
-Future<void> _preencherFormularioValido(WidgetTester tester) async {
+Future<void> _preencherFormularioValido(
+  WidgetTester tester, {
+  bool aceitarTermos = true,
+}) async {
   final campos = find.byType(TextFormField);
   await tester.enterText(campos.at(0), 'João Silva');
   await tester.enterText(campos.at(1), 'joao@example.com');
   await tester.enterText(campos.at(2), 'senha12345');
   await tester.enterText(campos.at(3), 'senha12345');
   await tester.pumpAndSettle();
+  if (aceitarTermos) {
+    await tester.ensureVisible(find.byType(CheckboxListTile));
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pumpAndSettle();
+  }
 }
 
 Future<void> _tocarBotaoSubmissao(WidgetTester tester) async {
@@ -348,6 +356,19 @@ void main() {
 
     final botao = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
     expect(botao.onPressed, isNotNull);
+  });
+
+  testWidgets('sem aceitar os termos: botão Criar Conta segue desabilitado', (
+    tester,
+  ) async {
+    final notifier = _FakeAuthNotifier();
+    await tester.pumpWidget(await _montarWidget(notifier));
+    await tester.pumpAndSettle();
+
+    await _preencherFormularioValido(tester, aceitarTermos: false);
+
+    final botao = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
+    expect(botao.onPressed, isNull);
   });
 
   testWidgets('submissão com formulário válido chama notifier.register', (

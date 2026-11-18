@@ -6,6 +6,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/col
 import 'package:sqlite3/open.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 import 'package:workmanager/workmanager.dart';
+import '../constants/api_constants.dart';
 import '../database/app_database.dart';
 import '../network/dio_client.dart';
 import 'foto_upload_service.dart';
@@ -15,10 +16,6 @@ import '../../features/sync/data/coleta_sync_strategy.dart';
 import '../../features/sync/data/sync_api_datasource.dart';
 import '../../features/sync/data/sync_repository.dart';
 
-// Duplicado intencionalmente: o callbackDispatcher roda em isolate separado,
-// sem acesso às constantes do main.dart.
-const _kBaseUrl =
-    'https://sistemaarqueologicoapi-production.up.railway.app/api';
 const _kTaskTag = 'arqueodata_sync';
 const _kTaskName = 'sincronizacao_periodica';
 
@@ -63,7 +60,7 @@ Future<void> _executarSync() async {
 
   try {
     final dioAuth = DioClient.authenticated(
-      baseUrl: _kBaseUrl,
+      baseUrl: kApiBaseUrl,
       secureStorage: secureStorage,
     );
 

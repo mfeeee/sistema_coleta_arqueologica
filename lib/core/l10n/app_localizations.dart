@@ -422,6 +422,18 @@ abstract class AppLocalizations {
   /// **'Ver Minhas Coletas'**
   String get homeViewCollections;
 
+  /// No description provided for @homeShowUnpublished.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mostrar não publicados'**
+  String get homeShowUnpublished;
+
+  /// No description provided for @homeUnpublishedWarning.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estes sítios ainda têm informações incompletas ou em análise. Se você conhece o local, ajude enviando uma coleta.'**
+  String get homeUnpublishedWarning;
+
   /// No description provided for @homeSyncNow.
   ///
   /// In pt, this message translates to:

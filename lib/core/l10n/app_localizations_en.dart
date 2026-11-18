@@ -185,6 +185,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeViewCollections => 'View My Collections';
 
   @override
+  String get homeShowUnpublished => 'Show unpublished';
+
+  @override
+  String get homeUnpublishedWarning =>
+      'These sites still have incomplete information or are under review. If you know the place, help by sending a collection.';
+
+  @override
   String get homeSyncNow => 'Sync Now';
 
   @override

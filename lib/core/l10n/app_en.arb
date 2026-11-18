@@ -58,6 +58,8 @@
   "homePendingBanner": "{count, plural, one{{count} collection awaiting upload} other{{count} collections awaiting upload}}",
   "homeNewCollection": "New Collection",
   "homeViewCollections": "View My Collections",
+  "homeShowUnpublished": "Show unpublished",
+  "homeUnpublishedWarning": "These sites still have incomplete information or are under review. If you know the place, help by sending a collection.",
   "homeSyncNow": "Sync Now",
   "homeActivitySummary": "Activity Summary",
   "homeTotal": "TOTAL",

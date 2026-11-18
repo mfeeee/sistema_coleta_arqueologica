@@ -23,6 +23,15 @@ class HomeViewModel {
   final ValueNotifier<String> nomeUsuario;
   final ValueNotifier<String?> erroAtual = ValueNotifier(null);
 
+  /// D1: por padrão só sítios publicados; ligado, mostra também os não
+  /// publicados para quem quiser ajudar a completar as informações.
+  final ValueNotifier<bool> mostrarNaoPublicados = ValueNotifier(false);
+
+  Future<void> alternarNaoPublicados(bool mostrar) {
+    mostrarNaoPublicados.value = mostrar;
+    return carregarDados();
+  }
+
   HomeViewModel({
     required ColetaRepository coletaRepository,
     required BemMaterialRepository bemMaterialRepository,
@@ -68,7 +77,17 @@ class HomeViewModel {
 
       final List<BemMaterialEntity> bens = await _bemMaterialRepository
           .getAll();
-      final bensPublicados = bens.where((b) => b.publicado).toList();
+      // Os bens criados junto com as coletas do próprio coletor já aparecem
+      // como pino de coleta; os não publicados entram só se pedidos.
+      final idsColetas = todasColetas.map((c) => c.id).toSet();
+      final bensPublicados = bens
+          .where(
+            (b) =>
+                b.publicado ||
+                (mostrarNaoPublicados.value &&
+                    !idsColetas.contains(b.coletaId)),
+          )
+          .toList();
       final pinosBem = bensPublicados
           .where((b) => _coordsValidas(b.localizacao?.lat, b.localizacao?.lng))
           .map((b) => b.paraMapa)
@@ -99,5 +118,6 @@ class HomeViewModel {
     pinosNoMapa.dispose();
     nomeUsuario.dispose();
     erroAtual.dispose();
+    mostrarNaoPublicados.dispose();
   }
 }

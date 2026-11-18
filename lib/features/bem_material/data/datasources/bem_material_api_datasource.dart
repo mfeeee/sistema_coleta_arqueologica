@@ -19,7 +19,9 @@ class BemMaterialApiDatasourceImpl implements BemMaterialApiDatasource {
     try {
       final response = await dio.get(
         '/v1/mobile/bens-materiais',
-        queryParameters: {'page': page},
+        // D1: o cache guarda também os não publicados; o mapa só os mostra
+        // quando o usuário pede (HomeViewModel.mostrarNaoPublicados).
+        queryParameters: {'page': page, 'publicado': 'all'},
       );
 
       final decoded = response.data;

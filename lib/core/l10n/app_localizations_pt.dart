@@ -185,6 +185,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeViewCollections => 'Ver Minhas Coletas';
 
   @override
+  String get homeShowUnpublished => 'Mostrar não publicados';
+
+  @override
+  String get homeUnpublishedWarning =>
+      'Estes sítios ainda têm informações incompletas ou em análise. Se você conhece o local, ajude enviando uma coleta.';
+
+  @override
   String get homeSyncNow => 'Sincronizar Agora';
 
   @override

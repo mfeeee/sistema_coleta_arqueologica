@@ -68,6 +68,8 @@
   },
   "homeNewCollection": "Nova Coleta",
   "homeViewCollections": "Ver Minhas Coletas",
+  "homeShowUnpublished": "Mostrar não publicados",
+  "homeUnpublishedWarning": "Estes sítios ainda têm informações incompletas ou em análise. Se você conhece o local, ajude enviando uma coleta.",
   "homeSyncNow": "Sincronizar Agora",
   "homeActivitySummary": "Resumo das Atividades",
   "homeTotal": "TOTAL",

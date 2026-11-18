@@ -36,10 +36,7 @@ import 'package:sistema_coleta_arqueologica/features/sync/presentation/pages/syn
 import 'package:sistema_coleta_arqueologica/features/sync/presentation/viewmodels/sync_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/models/notificacao_model.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
-import 'package:sistema_coleta_arqueologica/features/profile/data/models/preferencias_notificacao.dart';
-import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
-import '../helpers/stub_midia_repository.dart';
 
 // ---------------------------------------------------------------------------
 // Stubs de infraestrutura
@@ -106,14 +103,6 @@ class _StubNotificacaoRepository implements NotificacaoRepository {
   Future<void> atualizarPreferencias(
     PreferenciasNotificacaoModel preferencias,
   ) async {}
-}
-
-class _StubPreferenciasRepository implements PreferenciasNotificacaoRepository {
-  @override
-  Future<PreferenciasNotificacao> carregar() async =>
-      const PreferenciasNotificacao();
-  @override
-  Future<void> salvar(PreferenciasNotificacao prefs) async {}
 }
 
 class _StubColetaApiDatasource implements ColetaApiDatasource {
@@ -270,9 +259,6 @@ Future<Widget> _montarSyncPage(_FakeSyncNotifier syncNotifier) async {
     coletaRepository: _StubColetaRepository(),
     bemMaterialRepository: _StubBemMaterialRepository(),
     notificacaoRepository: _StubNotificacaoRepository(),
-    preferenciasRepository: _StubPreferenciasRepository(),
-    midiaRepository: StubMidiaRepository(),
-    uploadMidiaUseCase: StubUploadMidiaUseCase(),
     mediaService: MediaService(ImagePicker()),
     conectividadeService: conectividadeService,
     prefs: prefs,

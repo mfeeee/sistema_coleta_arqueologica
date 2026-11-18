@@ -62,6 +62,7 @@ class CriarColetaUseCase {
       dadosColetados: {
         'nomes_populares': input.nomesPopulares,
         'meios_acesso': input.meiosAcesso,
+        'foto_paths': _fotosNaoEnviadas(input.midias),
       },
       midias: input.midias,
     );
@@ -105,8 +106,15 @@ class CriarColetaUseCase {
       dadosColetados: {
         'nomes_populares': input.nomesPopulares,
         'meios_acesso': input.meiosAcesso,
+        'foto_paths': _fotosNaoEnviadas(input.midias),
       },
       midias: input.midias,
     );
   }
 }
+
+/// Fotos guardadas no aparelho que a sincronização ainda precisa enviar.
+List<String> _fotosNaoEnviadas(List<MidiaEntity> midias) => [
+  for (final midia in midias)
+    if (midia.url.isEmpty) midia.storagePath,
+];

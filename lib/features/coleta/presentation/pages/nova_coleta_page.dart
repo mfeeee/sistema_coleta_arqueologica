@@ -42,7 +42,6 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     _formNotifier = ColetaFormNotifier(
       id: widget.id,
       mediaService: scope.mediaService,
-      uploadMidiaUseCase: scope.uploadMidiaUseCase,
     );
 
     if (widget.id != null) {

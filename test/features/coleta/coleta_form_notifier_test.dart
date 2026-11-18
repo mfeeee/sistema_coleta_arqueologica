@@ -1,6 +1,5 @@
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
-import "../../helpers/stub_midia_repository.dart";
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -19,10 +18,8 @@ class _StubMediaService extends MediaService {
       throw UnsupportedError('não deve ser chamado nos testes unitários');
 }
 
-ColetaFormNotifier _criarNotifier() => ColetaFormNotifier(
-  uploadMidiaUseCase: StubUploadMidiaUseCase(),
-  mediaService: _StubMediaService(),
-);
+ColetaFormNotifier _criarNotifier() =>
+    ColetaFormNotifier(mediaService: _StubMediaService());
 
 const _artefatoCeramica = ArtefatoTipoEntity(id: '1', nome: 'Cerâmica');
 const _artefatoLitico = ArtefatoTipoEntity(id: '2', nome: 'Lítico');

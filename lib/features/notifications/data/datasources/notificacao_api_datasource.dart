@@ -19,7 +19,7 @@ class NotificacaoApiDatasourceImpl implements NotificacaoApiDatasource {
   @override
   Future<void> vincularTokenFCM(String token) async {
     try {
-      await dio.put('/v1/mobile/fcm-token', data: {'fcm_token': token});
+      await dio.post('/auth/notificacoes/token', data: {'token': token});
     } on DioException catch (e) {
       if (e.error is ArqueoException) {
         throw e.error as ArqueoException;

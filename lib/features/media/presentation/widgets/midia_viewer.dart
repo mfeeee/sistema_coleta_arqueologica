@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/database/enums/tipo_midia.dart';
 import '../../../../core/models/midia_model.dart';
@@ -18,6 +21,16 @@ class MidiaViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Foto ainda não enviada: só existe no aparelho (url vazia).
+    if (midia.tipo == TipoMidia.imagem && midia.url.isEmpty && !kIsWeb) {
+      return Image.file(
+        File(midia.storagePath),
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) => _buildError(),
+      );
+    }
     if (midia.tipo == TipoMidia.imagem) {
       return Image.network(
         midia.url,

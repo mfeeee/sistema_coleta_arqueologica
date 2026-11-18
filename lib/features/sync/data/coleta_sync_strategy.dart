@@ -51,9 +51,12 @@ class ColetaSyncStrategy {
           name: 'ColetaSyncStrategy',
         );
       }
+      // Mantém as URLs de um envio anterior (quando parte das fotos falhou).
+      final jaEnviadas =
+          (dadosOriginais['foto_urls'] as List?)?.cast<String>() ?? [];
       dadosFinais = {
         ...dadosOriginais,
-        'foto_urls': upload.uploadedUrls,
+        'foto_urls': [...jaEnviadas, ...upload.uploadedUrls],
         'foto_paths': upload.failedPaths,
       };
     }

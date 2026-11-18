@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../coleta/data/models/coleta_model.dart';
 import '../../coleta/domain/entities/coleta_entity.dart';
 import '../../../../core/utils/retry_util.dart';
@@ -53,10 +54,13 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
         delayInicial: const Duration(seconds: 1),
         onTentativa: onTentativa,
         operacao: () {
-          log(
-            'POST /v1/mobile/sync payload: $payload',
-            name: 'SyncApiDatasource',
-          );
+          // O payload tem coordenadas e dados do coletor: só em depuração.
+          if (kDebugMode) {
+            log(
+              'POST /v1/mobile/sync payload: $payload',
+              name: 'SyncApiDatasource',
+            );
+          }
           return _dio.post(
             '/v1/mobile/sync',
             data: payload,

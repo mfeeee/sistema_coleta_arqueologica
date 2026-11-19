@@ -114,6 +114,8 @@ class _LocationPickerWidgetState extends State<LocationPickerWidget> {
                 hintText: '00000-000',
                 borderColor: widget.borderColor,
                 onChanged: (_) => _notifyChange(),
+                // A API recusa CEP com mais de 9 caracteres (00000-000).
+                maxLength: 9,
                 keyboardType: TextInputType.number,
               ),
             ),

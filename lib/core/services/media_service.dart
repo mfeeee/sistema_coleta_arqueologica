@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -15,7 +14,10 @@ class MediaService {
 
       if (picked == null) return null;
 
-      final compressedPath = await compute(_compressIsolate, picked.path);
+      // Sem compute(): o plugin de compressão usa canal nativo, que não existe
+      // em isolate secundário (falhava em silêncio e a foto sumia). A
+      // compressão já roda fora da thread de UI, no lado nativo.
+      final compressedPath = await _comprimir(picked.path);
 
       if (compressedPath == null) return null;
 
@@ -27,7 +29,7 @@ class MediaService {
   }
 }
 
-Future<String?> _compressIsolate(String sourcePath) async {
+Future<String?> _comprimir(String sourcePath) async {
   if (!File(sourcePath).existsSync()) {
     return null;
   }
@@ -45,6 +47,7 @@ Future<String?> _compressIsolate(String sourcePath) async {
 
     return result?.path;
   } catch (e) {
+    log('Falha ao comprimir foto', error: e, name: 'MediaService');
     return null;
   }
 }

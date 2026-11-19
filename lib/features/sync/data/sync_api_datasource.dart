@@ -136,6 +136,17 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
 }
 
 String? _mensagemDaApi(Object? data) {
-  final mensagem = data is Map ? data['message'] : null;
+  if (data is! Map) return null;
+  // No 422 de validação, `message` é só "Erro de validação."; o motivo útil
+  // (ex.: "O campo CEP não deve ter mais de 9 caracteres.") vem em `errors`.
+  final erros = data['errors'];
+  if (erros is Map) {
+    for (final lista in erros.values) {
+      if (lista is List && lista.isNotEmpty && lista.first is String) {
+        return lista.first as String;
+      }
+    }
+  }
+  final mensagem = data['message'];
   return mensagem is String ? mensagem : null;
 }

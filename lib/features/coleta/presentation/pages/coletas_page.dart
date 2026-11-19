@@ -7,6 +7,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/data/services/envio_
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coletas_viewmodel.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/widgets/coleta_list_item.dart';
+import 'package:sistema_coleta_arqueologica/features/sync/presentation/viewmodels/sync_notifier.dart';
 
 class ColetasPage extends StatefulWidget {
   const ColetasPage({super.key});
@@ -112,6 +113,52 @@ class _ColetasPageState extends State<ColetasPage> {
     if (mounted) await _viewModel.atualizar();
   }
 
+  /// Botão "Sincronizar agora" do card: envia só essa coleta e mostra o
+  /// andamento e o resultado. Enviar para curadoria é um passo à parte.
+  void _sincronizar(String id) async {
+    final l10n = context.l10n;
+    final sync = AppScope.of(context).syncNotifier;
+    final mensageiro = ScaffoldMessenger.of(context);
+    if (sync.sincronizando) return;
+
+    mensageiro
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          duration: const Duration(minutes: 5),
+          content: Row(
+            children: [
+              const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              const SizedBox(width: 12),
+              Text(l10n.syncInProgress),
+            ],
+          ),
+        ),
+      );
+
+    await sync.sincronizar(coletaId: id);
+
+    final resumo = sync.ultimoResumo;
+    final mensagem = switch (sync.state) {
+      SyncState.concluido when resumo == null || resumo.totalOk =>
+        l10n.syncSuccessAll,
+      SyncState.concluido when resumo!.conflitos > 0 => l10n.syncNeedsReview(
+        resumo.conflitos,
+      ),
+      SyncState.concluido => l10n.syncErrorCount(resumo!.erros),
+      SyncState.semConexao => l10n.syncNoConnection,
+      SyncState.semToken => l10n.syncExpiredSession,
+      _ => sync.mensagemErro ?? l10n.syncUnexpectedError,
+    };
+    mensageiro
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(mensagem)));
+    if (mounted) await _viewModel.atualizar();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -196,6 +243,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onEditar: _editarColeta,
                         onDeletar: _deletarColeta,
                         onEnviarParaCuradoria: _enviarParaCuradoria,
+                        onSincronizar: _sincronizar,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.rascunhos,
@@ -208,6 +256,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onEditar: _editarColeta,
                         onDeletar: _deletarColeta,
                         onEnviarParaCuradoria: _enviarParaCuradoria,
+                        onSincronizar: _sincronizar,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.aguardandoDecisao,
@@ -220,6 +269,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onEditar: _editarColeta,
                         onDeletar: _deletarColeta,
                         onEnviarParaCuradoria: _enviarParaCuradoria,
+                        onSincronizar: _sincronizar,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.aprovadas,
@@ -232,6 +282,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onEditar: _editarColeta,
                         onDeletar: _deletarColeta,
                         onEnviarParaCuradoria: _enviarParaCuradoria,
+                        onSincronizar: _sincronizar,
                       ),
                       _ListaColetasFiltrada(
                         coletas: _viewModel.rejeitadas,
@@ -244,6 +295,7 @@ class _ColetasPageState extends State<ColetasPage> {
                         onEditar: _editarColeta,
                         onDeletar: _deletarColeta,
                         onEnviarParaCuradoria: _enviarParaCuradoria,
+                        onSincronizar: _sincronizar,
                       ),
                     ],
                   );
@@ -279,6 +331,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
     required this.onEditar,
     required this.onDeletar,
     required this.onEnviarParaCuradoria,
+    required this.onSincronizar,
   });
 
   final List<ColetaEntity> coletas;
@@ -291,6 +344,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
   final void Function(String id) onEditar;
   final void Function(String id) onDeletar;
   final void Function(String id) onEnviarParaCuradoria;
+  final void Function(String id) onSincronizar;
 
   @override
   Widget build(BuildContext context) {
@@ -330,6 +384,7 @@ class _ListaColetasFiltrada extends StatelessWidget {
           onEditar: () => onEditar(coletas[index].id),
           onDeletar: () => onDeletar(coletas[index].id),
           onEnviarParaCuradoria: () => onEnviarParaCuradoria(coletas[index].id),
+          onSincronizar: () => onSincronizar(coletas[index].id),
         ),
       ),
     );

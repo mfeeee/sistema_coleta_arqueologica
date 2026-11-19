@@ -210,9 +210,11 @@ class ColetaModel extends ColetaEntity {
       dataColeta:
           DateTime.tryParse(json['data_coleta'] as String? ?? '') ??
           (throw const FormatException('data_coleta inválida')),
-      syncStatus: StatusColeta.fromString(
-        json['status_sincronizacao'] as String? ?? '',
-      ),
+      // Veio do servidor, então já está salva lá. Copiar um "pendente" do
+      // servidor fazia o app reenviar a coleta, e a API a recusava (422).
+      syncStatus: json['status_sincronizacao'] == 'conflito'
+          ? StatusColeta.conflito
+          : StatusColeta.sincronizado,
       nomeBem: json['nome_bem'] as String? ?? '',
       localizacao: localizacao,
       artefatoTipos:

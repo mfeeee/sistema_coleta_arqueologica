@@ -64,9 +64,13 @@ class _FakeColetaLocalDatasource implements ColetaLocalDatasource {
 }
 
 class _FakeColetaApiDatasource implements ColetaApiDatasource {
+  _FakeColetaApiDatasource([this.doServidor = const []]);
+
+  final List<ColetaEntity> doServidor;
+
   @override
   Future<ColetaPage> fetchMinhas({int page = 1}) async =>
-      (items: <ColetaEntity>[], total: 0, temProxima: false);
+      (items: doServidor, total: doServidor.length, temProxima: false);
 }
 
 class _FakeFotoUploadService extends FotoUploadService {
@@ -101,13 +105,14 @@ ColetaModel _criarColetaPendente(String id) => ColetaModel(
 SyncRepository _criarRepositorio({
   required _FakeColetaLocalDatasource datasource,
   SyncApiDatasource? apiDatasource,
+  List<ColetaEntity> doServidor = const [],
 }) => SyncRepository(
   coletaDatasource: datasource,
   strategy: ColetaSyncStrategy(
     apiDatasource: apiDatasource ?? FakeSyncApiDatasource(),
     fotoUploadService: _FakeFotoUploadService(),
   ),
-  coletaApiDatasource: _FakeColetaApiDatasource(),
+  coletaApiDatasource: _FakeColetaApiDatasource(doServidor),
 );
 
 // ---------------------------------------------------------------------------
@@ -222,6 +227,45 @@ void main() {
       for (final id in ['c1', 'c2', 'c3']) {
         expect(datasource.statusAtualizado[id], StatusColeta.sincronizado);
       }
+    });
+  });
+
+  test('somenteId envia só a coleta escolhida', () async {
+    final datasource = _FakeColetaLocalDatasource(
+      pendentes: [_criarColetaPendente('a'), _criarColetaPendente('b')],
+    );
+    final repo = _criarRepositorio(
+      datasource: datasource,
+      apiDatasource: FakeSyncApiDatasource(status: SyncResultStatus.sucesso),
+    );
+
+    final resumo = await repo.sincronizarTodas(somenteId: 'b');
+
+    expect(resumo.sucessos, 1);
+    expect(datasource.statusAtualizado.keys, ['b']);
+  });
+
+  group('SyncRepository.puxarDoServidor', () {
+    test('não sobrescreve edição local ainda não enviada', () async {
+      final local = _criarColetaPendente('editada');
+      final datasource = _FakeColetaLocalDatasource(pendentes: [local]);
+      final doServidor = _criarColetaPendente('editada').copyWith(
+        syncStatus: StatusColeta.sincronizado,
+        dadosColetados: {'versao_do_servidor': true},
+      );
+      final nova = _criarColetaPendente(
+        'nova',
+      ).copyWith(syncStatus: StatusColeta.sincronizado);
+      final repo = _criarRepositorio(
+        datasource: datasource,
+        doServidor: [doServidor, nova],
+      );
+
+      await repo.puxarDoServidor();
+
+      final gravadas = await datasource.getAll();
+      expect(gravadas.map((c) => c.id), ['editada', 'nova']);
+      expect(gravadas.first.dadosColetados, isEmpty);
     });
   });
 

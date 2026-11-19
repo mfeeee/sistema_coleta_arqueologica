@@ -22,6 +22,7 @@ class _FakeSyncRepository extends Fake implements SyncRepository {
   @override
   Future<SyncResumo> sincronizarTodas({
     void Function(String)? onProgresso,
+    String? somenteId,
   }) async {
     onProgresso?.call('Sincronizando...');
     _pendentes = 0;

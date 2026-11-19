@@ -17,6 +17,7 @@ class ColetaListItem extends StatelessWidget {
     this.onEditar,
     this.onDeletar,
     this.onEnviarParaCuradoria,
+    this.onSincronizar,
   });
 
   final ColetaEntity coleta;
@@ -24,6 +25,7 @@ class ColetaListItem extends StatelessWidget {
   final VoidCallback? onEditar;
   final VoidCallback? onDeletar;
   final VoidCallback? onEnviarParaCuradoria;
+  final VoidCallback? onSincronizar;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +53,7 @@ class ColetaListItem extends StatelessWidget {
         onEditar: onEditar,
         onDeletar: onDeletar,
         onEnviarParaCuradoria: onEnviarParaCuradoria,
+        onSincronizar: onSincronizar,
       ),
     );
   }
@@ -290,6 +293,7 @@ class _AcoesColeta extends StatelessWidget {
     this.onEditar,
     this.onDeletar,
     this.onEnviarParaCuradoria,
+    this.onSincronizar,
   });
 
   final ColetaEntity coleta;
@@ -297,6 +301,7 @@ class _AcoesColeta extends StatelessWidget {
   final VoidCallback? onEditar;
   final VoidCallback? onDeletar;
   final VoidCallback? onEnviarParaCuradoria;
+  final VoidCallback? onSincronizar;
 
   @override
   Widget build(BuildContext context) {
@@ -399,7 +404,7 @@ class _AcoesColeta extends StatelessWidget {
         Expanded(
           flex: 3,
           child: ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: onSincronizar,
             icon: Icon(
               Icons.sync,
               size: 16,

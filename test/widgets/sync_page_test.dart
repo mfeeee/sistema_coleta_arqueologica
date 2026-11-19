@@ -204,7 +204,7 @@ class _FakeSyncNotifier extends SyncNotifier {
 
   bool syncChamado = false;
   @override
-  Future<void> sincronizar() async {
+  Future<void> sincronizar({String? coletaId}) async {
     syncChamado = true;
   }
 }

@@ -11,12 +11,14 @@ class AlertaProximidadeWidget extends StatelessWidget {
     required this.latAtual,
     required this.lonAtual,
     required this.onProsseguir,
+    required this.onEscolherSitio,
   });
 
   final List<ColetaEntity> sitios;
   final double latAtual;
   final double lonAtual;
   final VoidCallback onProsseguir;
+  final void Function(ColetaEntity sitio) onEscolherSitio;
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +35,11 @@ class AlertaProximidadeWidget extends StatelessWidget {
             _CabecalhoAlerta(
               nomeSitio: maisProximo.sitio.nomeBem,
               distancia: maisProximo.distanciaMetros,
+              onTap: () => onEscolherSitio(maisProximo.sitio),
             ),
             if (demais.isNotEmpty) ...[
               const SizedBox(height: 16),
-              _ListaOutrosSitios(sitios: demais),
+              _ListaOutrosSitios(sitios: demais, onTap: onEscolherSitio),
             ],
             const SizedBox(height: 32),
             _BotoesAcao(
@@ -88,10 +91,15 @@ String _formatarDistancia(double metros) {
 }
 
 class _CabecalhoAlerta extends StatelessWidget {
-  const _CabecalhoAlerta({required this.nomeSitio, required this.distancia});
+  const _CabecalhoAlerta({
+    required this.nomeSitio,
+    required this.distancia,
+    required this.onTap,
+  });
 
   final String nomeSitio;
   final double distancia;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +148,8 @@ class _CabecalhoAlerta extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Existe um registro a menos de 500m da sua localização. '
-            'Verifique antes de iniciar uma nova coleta.',
+            'Toque num sítio para modificá-lo, ou continue com um registro '
+            'novo: o curador vai analisar.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
@@ -148,44 +157,49 @@ class _CabecalhoAlerta extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: corAlertaBg,
+          Material(
+            color: corAlertaBg,
+            borderRadius: BorderRadius.circular(8),
+            child: InkWell(
               borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.location_on_outlined,
-                  color: corAlerta,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        nomeSitio.isNotEmpty ? nomeSitio : 'Sítio sem nome',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                        ),
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on_outlined,
+                      color: corAlerta,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            nomeSitio.isNotEmpty ? nomeSitio : 'Sítio sem nome',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _formatarDistancia(distancia),
+                            style: const TextStyle(
+                              color: corAlerta,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _formatarDistancia(distancia),
-                        style: const TextStyle(
-                          color: corAlerta,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const Icon(Icons.chevron_right, color: corAlerta),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ],
@@ -195,9 +209,10 @@ class _CabecalhoAlerta extends StatelessWidget {
 }
 
 class _ListaOutrosSitios extends StatelessWidget {
-  const _ListaOutrosSitios({required this.sitios});
+  const _ListaOutrosSitios({required this.sitios, required this.onTap});
 
   final List<_SitioComDistancia> sitios;
+  final void Function(ColetaEntity sitio) onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -234,36 +249,43 @@ class _ListaOutrosSitios extends StatelessWidget {
             ),
             itemBuilder: (_, i) {
               final item = sitios[i];
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 12.0,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.location_on_outlined,
-                      size: 18,
-                      color: theme.colorScheme.primary.withValues(alpha: 0.6),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        item.sitio.nomeBem.isNotEmpty
-                            ? item.sitio.nomeBem
-                            : 'Sítio sem nome',
-                        style: const TextStyle(fontSize: 14),
+              return InkWell(
+                onTap: () => onTap(item.sitio),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 12.0,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 18,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.6),
                       ),
-                    ),
-                    Text(
-                      _formatarDistancia(item.distanciaMetros),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          item.sitio.nomeBem.isNotEmpty
+                              ? item.sitio.nomeBem
+                              : 'Sítio sem nome',
+                          style: const TextStyle(fontSize: 14),
+                        ),
                       ),
-                    ),
-                  ],
+                      Text(
+                        _formatarDistancia(item.distanciaMetros),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.6),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -309,7 +331,7 @@ class _BotoesAcao extends StatelessWidget {
           ),
           onPressed: onProsseguir,
           child: const Text(
-            'Ignorar e Continuar',
+            'Continuar com registro novo',
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
         ),

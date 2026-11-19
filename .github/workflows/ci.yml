@@ -21,6 +21,9 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          # Fixa a versão usada no projeto: a 3.50 marcou flutter/material.dart
+          # como obsoleto e o analyze passou a falhar sem mudança no código.
+          flutter-version: '3.35.5'
 
       # 3. Baixa as dependências do projeto
       - name: Install Dependencies

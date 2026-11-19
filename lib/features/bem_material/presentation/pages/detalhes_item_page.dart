@@ -22,6 +22,10 @@ class DetalhesItemPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (!bem.publicado) ...[
+                const _AvisoNaoPublicado(),
+                const SizedBox(height: 16),
+              ],
               _SecaoDados(
                 titulo: 'IDENTIFICAÇÃO',
                 linhas: [
@@ -299,6 +303,42 @@ class _SecaoTexto extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// D1: sítio ainda não publicado, aberto para quem quer ajudar a completar.
+class _AvisoNaoPublicado extends StatelessWidget {
+  const _AvisoNaoPublicado();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cs.tertiaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Não publicado — ajude a completar',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: cs.onTertiaryContainer,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Este sítio ainda tem informações incompletas ou em análise. '
+            'Se você conhece o local, ajude enviando uma coleta.',
+            style: TextStyle(color: cs.onTertiaryContainer),
+          ),
+        ],
+      ),
     );
   }
 }

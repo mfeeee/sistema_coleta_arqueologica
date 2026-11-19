@@ -2,6 +2,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_curadoria.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/localizacao_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/midia_entity.dart';
@@ -27,6 +28,12 @@ class ColetaEntity {
   final List<MidiaEntity> midias;
   final DateTime? deletadoEm;
 
+  /// Última decisão da curadoria; nula enquanto ninguém avaliou.
+  final StatusCuradoria? curadoriaStatus;
+
+  /// Observação do curador (o motivo, quando a coleta é rejeitada).
+  final String? curadoriaObservacao;
+
   const ColetaEntity({
     required this.id,
     required this.usuarioId,
@@ -43,6 +50,8 @@ class ColetaEntity {
     this.tipo,
     this.uf,
     this.deletadoEm,
+    this.curadoriaStatus,
+    this.curadoriaObservacao,
   });
 }
 

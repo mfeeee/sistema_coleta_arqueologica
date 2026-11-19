@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_curadoria.dart';
 import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/l10n/app_localizations.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
@@ -15,12 +16,16 @@ class ColetaListItem extends StatelessWidget {
     required this.onVerDetalhes,
     this.onEditar,
     this.onDeletar,
+    this.onEnviarParaCuradoria,
+    this.onSincronizar,
   });
 
   final ColetaEntity coleta;
   final VoidCallback onVerDetalhes;
   final VoidCallback? onEditar;
   final VoidCallback? onDeletar;
+  final VoidCallback? onEnviarParaCuradoria;
+  final VoidCallback? onSincronizar;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +52,8 @@ class ColetaListItem extends StatelessWidget {
         onVerDetalhes: onVerDetalhes,
         onEditar: onEditar,
         onDeletar: onDeletar,
+        onEnviarParaCuradoria: onEnviarParaCuradoria,
+        onSincronizar: onSincronizar,
       ),
     );
   }
@@ -63,9 +70,11 @@ class _BadgesRow extends StatelessWidget {
 
   final ColetaEntity coleta;
 
+  // A coleta recusada pela API (motivo_recusa) nunca chegou ao servidor.
   bool get _estaSincronizado =>
       coleta.syncStatus == StatusColeta.sincronizado ||
-      coleta.syncStatus == StatusColeta.conflito;
+      (coleta.syncStatus == StatusColeta.conflito &&
+          coleta.dadosColetados['motivo_recusa'] == null);
 
   @override
   Widget build(BuildContext context) {
@@ -82,23 +91,34 @@ class _BadgesRow extends StatelessWidget {
             AppColors.warningBg,
           );
 
-    final (
-      rotuloStatus,
-      textoStatus,
-      fundoStatus,
-    ) = switch (coleta.syncStatus) {
-      StatusColeta.sincronizado => (
+    final (rotuloStatus, textoStatus, fundoStatus) = switch ((
+      coleta.syncStatus,
+      coleta.curadoriaStatus,
+    )) {
+      // Aprovada ou rejeitada vem da curadoria, não do estado de envio.
+      (StatusColeta.rascunho, _) => (
+        l10n.coletaStatusRascunho,
+        AppColors.warningText,
+        AppColors.warningBg,
+      ),
+      (_, StatusCuradoria.aprovado) => (
         l10n.coletaStatusAprovado,
         AppColors.successText,
         AppColors.successBg,
       ),
-      StatusColeta.conflito => (
+      (_, StatusCuradoria.rejeitado) => (
         l10n.coletaStatusRejeitado,
         AppColors.errorText,
         AppColors.errorBg,
       ),
-      StatusColeta.rascunho => (
-        l10n.coletaStatusRascunho,
+      (_, StatusCuradoria.pendente) => (
+        l10n.coletaStatusEmCuradoria,
+        AppColors.warningText,
+        AppColors.warningBg,
+      ),
+      // Sincronizada, mas o coletor ainda não mandou para a curadoria.
+      (StatusColeta.sincronizado, null) => (
+        l10n.coletaStatusNaoEnviada,
         AppColors.warningText,
         AppColors.warningBg,
       ),
@@ -272,12 +292,16 @@ class _AcoesColeta extends StatelessWidget {
     required this.onVerDetalhes,
     this.onEditar,
     this.onDeletar,
+    this.onEnviarParaCuradoria,
+    this.onSincronizar,
   });
 
   final ColetaEntity coleta;
   final VoidCallback onVerDetalhes;
   final VoidCallback? onEditar;
   final VoidCallback? onDeletar;
+  final VoidCallback? onEnviarParaCuradoria;
+  final VoidCallback? onSincronizar;
 
   @override
   Widget build(BuildContext context) {
@@ -286,10 +310,71 @@ class _AcoesColeta extends StatelessWidget {
 
     return switch (coleta.syncStatus) {
       StatusColeta.pendente => _acoesPendente(theme, l10n),
+      // Já está no servidor e ainda não foi para a curadoria: dá para editar
+      // ou enviar. Depois de enviada, só ver os detalhes.
+      StatusColeta.sincronizado when coleta.curadoriaStatus == null =>
+        _acoesSincronizada(theme, l10n),
       StatusColeta.sincronizado => _botaoVerDetalhes(theme, l10n),
+      // Recusada pela API: o coletor corrige e salva para reenviar.
+      StatusColeta.conflito
+          when coleta.dadosColetados['motivo_recusa'] != null =>
+        _botaoCorrigir(theme, l10n),
       StatusColeta.conflito => _botaoConflito(theme, l10n),
       StatusColeta.rascunho => _acoesRascunho(theme, l10n),
     };
+  }
+
+  Widget _acoesSincronizada(ThemeData theme, AppLocalizations l10n) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          flex: 2,
+          child: OutlinedButton.icon(
+            onPressed: onEditar,
+            icon: Icon(
+              Icons.edit_outlined,
+              size: 16,
+              color: theme.colorScheme.primary,
+            ),
+            label: Text(
+              l10n.coletaActionEdit,
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 3,
+          child: ElevatedButton.icon(
+            onPressed: onEnviarParaCuradoria,
+            icon: Icon(
+              Icons.send_outlined,
+              size: 16,
+              color: theme.colorScheme.onPrimary,
+            ),
+            label: Text(
+              l10n.coletaActionSendToCuration,
+              style: TextStyle(color: theme.colorScheme.onPrimary),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _botaoCorrigir(ThemeData theme, AppLocalizations l10n) {
+    return OutlinedButton.icon(
+      onPressed: onEditar,
+      icon: Icon(Icons.edit_outlined, size: 16, color: theme.colorScheme.error),
+      label: Text(
+        l10n.coletaActionEdit,
+        style: TextStyle(color: theme.colorScheme.error),
+      ),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.3)),
+        minimumSize: const Size(double.infinity, 40),
+      ),
+    );
   }
 
   Widget _acoesPendente(ThemeData theme, AppLocalizations l10n) {
@@ -319,7 +404,7 @@ class _AcoesColeta extends StatelessWidget {
         Expanded(
           flex: 3,
           child: ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: onSincronizar,
             icon: Icon(
               Icons.sync,
               size: 16,

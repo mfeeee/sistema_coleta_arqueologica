@@ -118,6 +118,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get registerPrivacyPolicy => 'Política de Privacidade';
 
   @override
+  String get registerAcceptTerms =>
+      'Li e aceito os Termos de Serviço e a Política de Privacidade';
+
+  @override
   String get recoverPasswordTitle => 'Recuperar Senha';
 
   @override
@@ -179,6 +183,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get homeViewCollections => 'Ver Minhas Coletas';
+
+  @override
+  String get homeShowUnpublished => 'Mostrar não publicados';
+
+  @override
+  String get homeUnpublishedWarning =>
+      'Estes sítios ainda têm informações incompletas ou em análise. Se você conhece o local, ajude enviando uma coleta.';
 
   @override
   String get homeSyncNow => 'Sincronizar Agora';
@@ -268,6 +279,29 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get coletaStatusPendente => 'Pendente';
+
+  @override
+  String get coletaActionSendToCuration => 'Enviar para curadoria';
+
+  @override
+  String get coletaSendToCurationTitle => 'Enviar para curadoria?';
+
+  @override
+  String get coletaSendToCurationConfirm =>
+      'Depois de enviada, a coleta não pode mais ser editada.';
+
+  @override
+  String get coletaSendToCurationSuccess => 'Coleta enviada para curadoria.';
+
+  @override
+  String get coletaSendToCurationError =>
+      'Não foi possível enviar. Verifique a conexão e tente de novo.';
+
+  @override
+  String get coletaStatusNaoEnviada => 'Não enviada';
+
+  @override
+  String get coletaStatusEmCuradoria => 'Em curadoria';
 
   @override
   String coletaDatePrefix(String date) {

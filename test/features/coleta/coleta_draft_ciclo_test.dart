@@ -1,6 +1,5 @@
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
-import "../../helpers/stub_midia_repository.dart";
 // Testes de ciclo automatizados:
 // preenche → toRascunho → [banco] → restauraDeEntity
 //
@@ -14,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/data/draft_photo_storage.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coleta_form_notifier.dart';
 
 // ---------------------------------------------------------------------------
@@ -32,10 +32,21 @@ class _StubMediaService extends MediaService {
 // Helpers
 // ---------------------------------------------------------------------------
 
+/// Guarda a foto num caminho previsível (o real usa path_provider).
+class _FotoStorageFake implements DraftPhotoStorage {
+  @override
+  Future<List<String>> persistir(List<File> files) async => [
+    for (final f in files) 'persistida/${f.uri.pathSegments.last}',
+  ];
+
+  @override
+  List<File> restaurar(List<String> paths) => [];
+}
+
 ColetaFormNotifier _criarNotifier({File? foto}) {
   return ColetaFormNotifier(
-    uploadMidiaUseCase: StubUploadMidiaUseCase(),
     mediaService: _StubMediaService(foto),
+    fotoStorage: _FotoStorageFake(),
   );
 }
 
@@ -127,7 +138,12 @@ void main() {
       sessao2.restaurarDeEntity(rascunho);
 
       check(sessao2.totalMidias).equals(1);
-      check(sessao2.midias.first.storagePath).equals('stub_path.jpg');
+      check(sessao2.midias.first.storagePath).equals('persistida/captura.jpg');
+      check(sessao2.midias.first.url).equals('');
+      // A sincronização envia a foto para /v1/mobile/fotos a partir daqui.
+      check(
+        rascunho.dadosColetados['foto_paths'] as List,
+      ).deepEquals(['persistida/captura.jpg']);
     });
   });
 }

@@ -26,11 +26,16 @@ class ColetaViewModel {
   ColetaViewModel({
     required ProximidadeService proximidadeService,
     required GeolocatorHelper geolocatorHelper,
+    this.verificarProximidade = true,
   }) : _proximidadeService = proximidadeService,
        _geolocatorHelper = geolocatorHelper;
 
   final ProximidadeService _proximidadeService;
   final GeolocatorHelper _geolocatorHelper;
+
+  /// Falso ao editar uma coleta: o alerta listaria a própria coleta e
+  /// atrasaria a correção antes do envio para curadoria.
+  final bool verificarProximidade;
 
   final ValueNotifier<ColetaStep> stepNotifier = ValueNotifier<ColetaStep>(
     ColetaStep.initial,
@@ -46,6 +51,11 @@ class ColetaViewModel {
 
     try {
       coordenadaAtual = await _geolocatorHelper.obterCoordenadaAtual();
+
+      if (!verificarProximidade) {
+        stepNotifier.value = ColetaStep.fillingForm;
+        return;
+      }
 
       stepNotifier.value = ColetaStep.checkingProximity;
 

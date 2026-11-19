@@ -3,14 +3,19 @@ import 'package:sistema_coleta_arqueologica/features/sync/data/sync_api_datasour
 import 'package:sistema_coleta_arqueologica/features/sync/domain/entities/sync_resumo.dart';
 
 class FakeSyncApiDatasource implements SyncApiDatasource {
-  FakeSyncApiDatasource({this.status = SyncResultStatus.sucesso});
+  FakeSyncApiDatasource({
+    this.status = SyncResultStatus.sucesso,
+    this.mensagem,
+  });
 
   final SyncResultStatus status;
+  final String? mensagem;
 
   @override
   Future<SyncResultado> enviarColeta({
     required ColetaEntity coleta,
     Map<String, dynamic>? dadosColetadosOverride,
     void Function(int tentativa, int max)? onTentativa,
-  }) async => SyncResultado(coletaId: coleta.id, status: status);
+  }) async =>
+      SyncResultado(coletaId: coleta.id, status: status, mensagem: mensagem);
 }

@@ -38,10 +38,7 @@ import 'package:sistema_coleta_arqueologica/features/sync/domain/entities/sync_r
 import 'package:sistema_coleta_arqueologica/features/sync/presentation/viewmodels/sync_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/models/notificacao_model.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
-import 'package:sistema_coleta_arqueologica/features/profile/data/models/preferencias_notificacao.dart';
-import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
 import 'package:sistema_coleta_arqueologica/core/services/profile_service.dart';
-import '../../../helpers/stub_midia_repository.dart';
 
 // ---------------------------------------------------------------------------
 // Stubs de infraestrutura (nunca chamados nos testes de RegisterPage)
@@ -117,14 +114,6 @@ class _StubNotificacaoRepository implements NotificacaoRepository {
   Future<void> atualizarPreferencias(
     PreferenciasNotificacaoModel preferencias,
   ) async {}
-}
-
-class _StubPreferenciasRepository implements PreferenciasNotificacaoRepository {
-  @override
-  Future<PreferenciasNotificacao> carregar() async =>
-      const PreferenciasNotificacao();
-  @override
-  Future<void> salvar(PreferenciasNotificacao prefs) async {}
 }
 
 class _StubColetaApiDatasource implements ColetaApiDatasource {
@@ -288,9 +277,6 @@ Future<Widget> _montarWidget(_FakeAuthNotifier notifier) async {
     coletaRepository: _StubColetaRepository(),
     bemMaterialRepository: _StubBemMaterialRepository(),
     notificacaoRepository: _StubNotificacaoRepository(),
-    preferenciasRepository: _StubPreferenciasRepository(),
-    midiaRepository: StubMidiaRepository(),
-    uploadMidiaUseCase: StubUploadMidiaUseCase(),
     mediaService: MediaService(ImagePicker()),
     conectividadeService: ConectividadeService(),
     prefs: prefs,
@@ -319,13 +305,21 @@ Future<Widget> _montarWidget(_FakeAuthNotifier notifier) async {
 // Helpers de preenchimento do formulário
 // ---------------------------------------------------------------------------
 
-Future<void> _preencherFormularioValido(WidgetTester tester) async {
+Future<void> _preencherFormularioValido(
+  WidgetTester tester, {
+  bool aceitarTermos = true,
+}) async {
   final campos = find.byType(TextFormField);
   await tester.enterText(campos.at(0), 'João Silva');
   await tester.enterText(campos.at(1), 'joao@example.com');
   await tester.enterText(campos.at(2), 'senha12345');
   await tester.enterText(campos.at(3), 'senha12345');
   await tester.pumpAndSettle();
+  if (aceitarTermos) {
+    await tester.ensureVisible(find.byType(CheckboxListTile));
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pumpAndSettle();
+  }
 }
 
 Future<void> _tocarBotaoSubmissao(WidgetTester tester) async {
@@ -362,6 +356,19 @@ void main() {
 
     final botao = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
     expect(botao.onPressed, isNotNull);
+  });
+
+  testWidgets('sem aceitar os termos: botão Criar Conta segue desabilitado', (
+    tester,
+  ) async {
+    final notifier = _FakeAuthNotifier();
+    await tester.pumpWidget(await _montarWidget(notifier));
+    await tester.pumpAndSettle();
+
+    await _preencherFormularioValido(tester, aceitarTermos: false);
+
+    final botao = tester.widget<ElevatedButton>(find.byType(ElevatedButton));
+    expect(botao.onPressed, isNull);
   });
 
   testWidgets('submissão com formulário válido chama notifier.register', (

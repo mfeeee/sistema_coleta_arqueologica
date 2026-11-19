@@ -118,6 +118,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerPrivacyPolicy => 'Privacy Policy';
 
   @override
+  String get registerAcceptTerms =>
+      'I have read and accept the Terms of Service and the Privacy Policy';
+
+  @override
   String get recoverPasswordTitle => 'Reset Password';
 
   @override
@@ -179,6 +183,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeViewCollections => 'View My Collections';
+
+  @override
+  String get homeShowUnpublished => 'Show unpublished';
+
+  @override
+  String get homeUnpublishedWarning =>
+      'These sites still have incomplete information or are under review. If you know the place, help by sending a collection.';
 
   @override
   String get homeSyncNow => 'Sync Now';
@@ -268,6 +279,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coletaStatusPendente => 'Pendente';
+
+  @override
+  String get coletaActionSendToCuration => 'Send for review';
+
+  @override
+  String get coletaSendToCurationTitle => 'Send for review?';
+
+  @override
+  String get coletaSendToCurationConfirm =>
+      'Once sent, the collection can no longer be edited.';
+
+  @override
+  String get coletaSendToCurationSuccess => 'Collection sent for review.';
+
+  @override
+  String get coletaSendToCurationError =>
+      'Could not send. Check your connection and try again.';
+
+  @override
+  String get coletaStatusNaoEnviada => 'Not sent';
+
+  @override
+  String get coletaStatusEmCuradoria => 'Under review';
 
   @override
   String coletaDatePrefix(String date) {

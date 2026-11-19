@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
@@ -29,8 +30,7 @@ import 'package:sistema_coleta_arqueologica/features/coleta/domain/services/pull
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/usecases/obter_coletas_pendentes_use_case.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/datasources/notificacao_api_datasource.dart';
 import 'package:sistema_coleta_arqueologica/features/notifications/data/repositories/notificacao_repository.dart';
-import 'package:sistema_coleta_arqueologica/features/profile/data/datasources/preferencias_api_datasource.dart';
-import 'package:sistema_coleta_arqueologica/features/profile/data/repositories/preferencias_notificacao_repository.dart';
+import 'package:sistema_coleta_arqueologica/core/errors/auth_exceptions.dart';
 
 import 'core/constants/api_constants.dart';
 import 'core/router/app_router.dart';
@@ -153,28 +153,11 @@ Future<void> main() async {
     notificacaoRepository: notificacaoRepository,
   );
 
-  final preferenciasApiDatasource = PreferenciasApiDatasourceImpl(dio: dioAuth);
-  final preferenciasRepository = PreferenciasNotificacaoRepositoryImpl(
-    prefs,
-    apiDatasource: preferenciasApiDatasource,
-  );
-
   // Agenda sync em background se já há sessão ativa.
   if ((await secureStorage.getJwt()) != null) {
     await BackgroundSyncService.agendar();
-
-    // Tenta registrar o token FCM se a sessão já estiver ativa ao iniciar o app
-    NotificationService.instance.getToken().then((token) {
-      if (token != null) {
-        notificacaoRepository.vincularTokenFCM(token).catchError((e) {
-          log(
-            'Falha ao vincular token FCM na restauração',
-            error: e,
-            name: 'Main',
-          );
-        });
-      }
-    });
+    // Sem await: sem internet, o app abre do mesmo jeito.
+    unawaited(_renovarSessao(authNotifier, notificacaoRepository));
   }
 
   final router = createAppRouter(authNotifier);
@@ -200,7 +183,6 @@ Future<void> main() async {
       temaModo: temaModo,
       idiomaAtual: idiomaAtual,
       notificacaoRepository: notificacaoRepository,
-      preferenciasRepository: preferenciasRepository,
       profileService: profileService,
       bemMaterialRepository: bemMaterialRepository,
       child: _ArqueoApp(
@@ -210,6 +192,28 @@ Future<void> main() async {
       ),
     ),
   );
+}
+
+/// O token vale 30 dias: renova ao abrir o app e só depois vincula o token de
+/// push, para as duas chamadas não usarem tokens diferentes.
+Future<void> _renovarSessao(
+  AuthNotifier authNotifier,
+  NotificacaoRepository notificacaoRepository,
+) async {
+  try {
+    await authNotifier.authService.renovarToken();
+  } on AccountDeactivatedException catch (e) {
+    await authNotifier.sairPorSessaoExpirada(e.message);
+    return;
+  }
+
+  final token = await NotificationService.instance.getToken();
+  if (token == null) return;
+  try {
+    await notificacaoRepository.vincularTokenFCM(token);
+  } catch (e) {
+    log('Falha ao vincular token FCM na restauração', error: e, name: 'Main');
+  }
 }
 
 Locale _localeSalva(String? salvo) {

@@ -29,8 +29,9 @@ class _FakeColetaLocalDatasource implements ColetaLocalDatasource {
   @override
   Future<List<ColetaModel>> getAll() async => _pendentes;
 
+  // Cópia, como o banco real: inserir durante o laço não pode crescer a fila.
   @override
-  Future<List<ColetaModel>> getPendentes() async => _pendentes;
+  Future<List<ColetaModel>> getPendentes() async => List.of(_pendentes);
 
   @override
   Future<ColetaModel?> getById(String uuid) async =>
@@ -63,9 +64,13 @@ class _FakeColetaLocalDatasource implements ColetaLocalDatasource {
 }
 
 class _FakeColetaApiDatasource implements ColetaApiDatasource {
+  _FakeColetaApiDatasource([this.doServidor = const []]);
+
+  final List<ColetaEntity> doServidor;
+
   @override
   Future<ColetaPage> fetchMinhas({int page = 1}) async =>
-      (items: <ColetaEntity>[], total: 0, temProxima: false);
+      (items: doServidor, total: doServidor.length, temProxima: false);
 }
 
 class _FakeFotoUploadService extends FotoUploadService {
@@ -100,13 +105,14 @@ ColetaModel _criarColetaPendente(String id) => ColetaModel(
 SyncRepository _criarRepositorio({
   required _FakeColetaLocalDatasource datasource,
   SyncApiDatasource? apiDatasource,
+  List<ColetaEntity> doServidor = const [],
 }) => SyncRepository(
   coletaDatasource: datasource,
   strategy: ColetaSyncStrategy(
     apiDatasource: apiDatasource ?? FakeSyncApiDatasource(),
     fotoUploadService: _FakeFotoUploadService(),
   ),
-  coletaApiDatasource: _FakeColetaApiDatasource(),
+  coletaApiDatasource: _FakeColetaApiDatasource(doServidor),
 );
 
 // ---------------------------------------------------------------------------
@@ -166,6 +172,28 @@ void main() {
       );
     });
 
+    test('recusa (422) tira a coleta da fila e guarda o motivo', () async {
+      final coleta = _criarColetaPendente('coleta-recusada');
+      final datasource = _FakeColetaLocalDatasource(pendentes: [coleta]);
+      final repo = _criarRepositorio(
+        datasource: datasource,
+        apiDatasource: FakeSyncApiDatasource(
+          status: SyncResultStatus.recusada,
+          mensagem: 'O campo uf é obrigatório.',
+        ),
+      );
+
+      final resumo = await repo.sincronizarTodas();
+      final salva = (await datasource.getAll()).last;
+
+      expect(resumo.conflitos, 1);
+      expect(salva.syncStatus, StatusColeta.conflito);
+      expect(
+        salva.dadosColetados['motivo_recusa'],
+        'O campo uf é obrigatório.',
+      );
+    });
+
     test('falha de rede mantém o status sem atualização', () async {
       final coleta = _criarColetaPendente('coleta-erro');
       final datasource = _FakeColetaLocalDatasource(pendentes: [coleta]);
@@ -199,6 +227,45 @@ void main() {
       for (final id in ['c1', 'c2', 'c3']) {
         expect(datasource.statusAtualizado[id], StatusColeta.sincronizado);
       }
+    });
+  });
+
+  test('somenteId envia só a coleta escolhida', () async {
+    final datasource = _FakeColetaLocalDatasource(
+      pendentes: [_criarColetaPendente('a'), _criarColetaPendente('b')],
+    );
+    final repo = _criarRepositorio(
+      datasource: datasource,
+      apiDatasource: FakeSyncApiDatasource(status: SyncResultStatus.sucesso),
+    );
+
+    final resumo = await repo.sincronizarTodas(somenteId: 'b');
+
+    expect(resumo.sucessos, 1);
+    expect(datasource.statusAtualizado.keys, ['b']);
+  });
+
+  group('SyncRepository.puxarDoServidor', () {
+    test('não sobrescreve edição local ainda não enviada', () async {
+      final local = _criarColetaPendente('editada');
+      final datasource = _FakeColetaLocalDatasource(pendentes: [local]);
+      final doServidor = _criarColetaPendente('editada').copyWith(
+        syncStatus: StatusColeta.sincronizado,
+        dadosColetados: {'versao_do_servidor': true},
+      );
+      final nova = _criarColetaPendente(
+        'nova',
+      ).copyWith(syncStatus: StatusColeta.sincronizado);
+      final repo = _criarRepositorio(
+        datasource: datasource,
+        doServidor: [doServidor, nova],
+      );
+
+      await repo.puxarDoServidor();
+
+      final gravadas = await datasource.getAll();
+      expect(gravadas.map((c) => c.id), ['editada', 'nova']);
+      expect(gravadas.first.dadosColetados, isEmpty);
     });
   });
 

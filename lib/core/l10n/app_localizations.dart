@@ -314,6 +314,12 @@ abstract class AppLocalizations {
   /// **'Política de Privacidade'**
   String get registerPrivacyPolicy;
 
+  /// No description provided for @registerAcceptTerms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Li e aceito os Termos de Serviço e a Política de Privacidade'**
+  String get registerAcceptTerms;
+
   /// No description provided for @recoverPasswordTitle.
   ///
   /// In pt, this message translates to:
@@ -415,6 +421,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ver Minhas Coletas'**
   String get homeViewCollections;
+
+  /// No description provided for @homeShowUnpublished.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mostrar não publicados'**
+  String get homeShowUnpublished;
+
+  /// No description provided for @homeUnpublishedWarning.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estes sítios ainda têm informações incompletas ou em análise. Se você conhece o local, ajude enviando uma coleta.'**
+  String get homeUnpublishedWarning;
 
   /// No description provided for @homeSyncNow.
   ///
@@ -583,6 +601,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Pendente'**
   String get coletaStatusPendente;
+
+  /// No description provided for @coletaActionSendToCuration.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar para curadoria'**
+  String get coletaActionSendToCuration;
+
+  /// No description provided for @coletaSendToCurationTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar para curadoria?'**
+  String get coletaSendToCurationTitle;
+
+  /// No description provided for @coletaSendToCurationConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Depois de enviada, a coleta não pode mais ser editada.'**
+  String get coletaSendToCurationConfirm;
+
+  /// No description provided for @coletaSendToCurationSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Coleta enviada para curadoria.'**
+  String get coletaSendToCurationSuccess;
+
+  /// No description provided for @coletaSendToCurationError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível enviar. Verifique a conexão e tente de novo.'**
+  String get coletaSendToCurationError;
+
+  /// No description provided for @coletaStatusNaoEnviada.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não enviada'**
+  String get coletaStatusNaoEnviada;
+
+  /// No description provided for @coletaStatusEmCuradoria.
+  ///
+  /// In pt, this message translates to:
+  /// **'Em curadoria'**
+  String get coletaStatusEmCuradoria;
 
   /// No description provided for @coletaDatePrefix.
   ///

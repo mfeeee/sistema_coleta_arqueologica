@@ -8,25 +8,26 @@ import 'package:sistema_coleta_arqueologica/core/services/media_service.dart';
 import 'package:sistema_coleta_arqueologica/core/models/midia_model.dart';
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:sistema_coleta_arqueologica/core/entities/artefato_tipo_entity.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_midia.dart';
 import 'package:sistema_coleta_arqueologica/core/utils/natureza_tipo_mapper.dart';
-import 'package:sistema_coleta_arqueologica/features/media/domain/usecases/upload_midia_usecase.dart';
+import '../../data/draft_photo_storage.dart';
 import '../../domain/entities/coleta_entity.dart';
 import '../../domain/usecases/criar_coleta_use_case.dart';
 
 class ColetaFormNotifier extends ChangeNotifier {
   final String id;
   final MediaService _mediaService;
-  final UploadMidiaUseCase _uploadMidiaUseCase;
+  final DraftPhotoStorage _fotoStorage;
   final CriarColetaUseCase _criarColetaUseCase;
 
   ColetaFormNotifier({
     String? id,
     required MediaService mediaService,
-    required UploadMidiaUseCase uploadMidiaUseCase,
+    DraftPhotoStorage fotoStorage = const DraftPhotoStorageImpl(),
     CriarColetaUseCase criarColetaUseCase = const CriarColetaUseCase(),
   }) : id = id ?? const Uuid().v4(),
        _mediaService = mediaService,
-       _uploadMidiaUseCase = uploadMidiaUseCase,
+       _fotoStorage = fotoStorage,
        _criarColetaUseCase = criarColetaUseCase;
 
   // Passo Atual (para UI)
@@ -58,6 +59,9 @@ class ColetaFormNotifier extends ChangeNotifier {
   bool _carregandoMidia = false;
 
   bool _modificado = false;
+
+  // Mantida ao editar uma coleta já sincronizada.
+  int _versao = 1;
   bool get modificado => _modificado;
 
   List<MidiaModel> get midias => List.unmodifiable(_midias);
@@ -137,14 +141,13 @@ class ColetaFormNotifier extends ChangeNotifier {
     try {
       final file = await _mediaService.pickAndCompress(source);
       if (file != null) {
-        final midia = await _uploadMidiaUseCase(
-          file: file,
-          mediableType: 'coleta',
-          mediableId: id,
-          tipo: 'foto',
-        );
-        _midias.add(midia);
-        _marcarModificado();
+        // A foto fica no aparelho (offline). A sincronização envia para
+        // /v1/mobile/fotos a partir de dados_coletados['foto_paths'].
+        final caminhos = await _fotoStorage.persistir([file]);
+        if (caminhos.isNotEmpty) {
+          _midias.add(_fotoLocal(caminhos.first));
+          _marcarModificado();
+        }
       }
     } catch (e) {
       log('Erro ao adicionar foto', error: e, name: 'ColetaFormNotifier');
@@ -153,6 +156,17 @@ class ColetaFormNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Foto ainda não enviada: `url` vazia e `storagePath` no aparelho.
+  MidiaModel _fotoLocal(String caminho) => MidiaModel(
+    id: const Uuid().v4(),
+    mediableType: 'coleta',
+    mediableId: id,
+    storagePath: caminho,
+    mimeType: 'image/jpeg',
+    tipo: TipoMidia.imagem,
+    url: '',
+  );
 
   void removerMidia(int index) {
     if (index < 0 || index >= _midias.length) return;
@@ -185,6 +199,7 @@ class ColetaFormNotifier extends ChangeNotifier {
 
   void restaurarDeEntity(ColetaEntity entity) {
     nome = entity.nomeBem;
+    _versao = entity.versao;
     natureza = entity.natureza;
     tipo = entity.tipo;
 
@@ -250,6 +265,7 @@ class ColetaFormNotifier extends ChangeNotifier {
         meiosAcesso: meiosAcesso,
         midias: _midias,
         usuarioId: usuarioId,
+        versao: _versao,
       ),
     );
   }
@@ -270,6 +286,7 @@ class ColetaFormNotifier extends ChangeNotifier {
         meiosAcesso: meiosAcesso,
         midias: _midias,
         usuarioId: usuarioId,
+        versao: _versao,
       ),
     );
   }

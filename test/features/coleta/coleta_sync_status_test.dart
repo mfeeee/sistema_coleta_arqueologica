@@ -71,11 +71,13 @@ void main() {
     });
 
     test(
-      'ColetaModel.fromJson com status ausente usa pendente como padrão',
+      'ColetaModel.fromJson trata pendente do servidor como sincronizado',
       () {
         final json = {
           'uuid': 'j2',
           'usuario_id': 'u1',
+          // Coleta já no servidor: reenviá-la faria a API recusar (422).
+          'status_sincronizacao': 'pendente',
           'data_coleta': '2024-01-01T00:00:00.000',
           'updated_at': '2024-01-01T00:00:00.000',
           'nome_bem': 'Bem JSON',
@@ -90,7 +92,7 @@ void main() {
 
         final model = ColetaModel.fromJson(json);
 
-        expect(model.syncStatus, StatusColeta.pendente);
+        expect(model.syncStatus, StatusColeta.sincronizado);
       },
     );
 

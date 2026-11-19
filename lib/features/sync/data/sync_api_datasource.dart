@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../coleta/data/models/coleta_model.dart';
 import '../../coleta/domain/entities/coleta_entity.dart';
 import '../../../../core/utils/retry_util.dart';
@@ -9,10 +10,15 @@ class SyncResultado {
   final String coletaId;
   final SyncResultStatus status;
   final ColetaModel? coletaAtualizada;
+
+  /// Motivo devolvido pela API quando a coleta é recusada (403 ou 422).
+  final String? mensagem;
+
   const SyncResultado({
     required this.coletaId,
     required this.status,
     this.coletaAtualizada,
+    this.mensagem,
   });
 }
 
@@ -53,10 +59,13 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
         delayInicial: const Duration(seconds: 1),
         onTentativa: onTentativa,
         operacao: () {
-          log(
-            'POST /v1/mobile/sync payload: $payload',
-            name: 'SyncApiDatasource',
-          );
+          // O payload tem coordenadas e dados do coletor: só em depuração.
+          if (kDebugMode) {
+            log(
+              'POST /v1/mobile/sync payload: $payload',
+              name: 'SyncApiDatasource',
+            );
+          }
           return _dio.post(
             '/v1/mobile/sync',
             data: payload,
@@ -96,6 +105,16 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
         );
       }
 
+      // 403 (coleta de outra pessoa) e 422 (dado inválido) não mudam com
+      // nova tentativa: a coleta precisa ser corrigida antes de reenviar.
+      if (statusCode == 403 || statusCode == 422) {
+        return SyncResultado(
+          coletaId: coleta.id,
+          status: SyncResultStatus.recusada,
+          mensagem: _mensagemDaApi(response.data),
+        );
+      }
+
       return SyncResultado(
         coletaId: coleta.id,
         status: statusCode == 409
@@ -114,4 +133,20 @@ class SyncApiDatasourceImpl implements SyncApiDatasource {
       );
     }
   }
+}
+
+String? _mensagemDaApi(Object? data) {
+  if (data is! Map) return null;
+  // No 422 de validação, `message` é só "Erro de validação."; o motivo útil
+  // (ex.: "O campo CEP não deve ter mais de 9 caracteres.") vem em `errors`.
+  final erros = data['errors'];
+  if (erros is Map) {
+    for (final lista in erros.values) {
+      if (lista is List && lista.isNotEmpty && lista.first is String) {
+        return lista.first as String;
+      }
+    }
+  }
+  final mensagem = data['message'];
+  return mensagem is String ? mensagem : null;
 }

@@ -38,7 +38,8 @@ class SyncNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sincronizar() async {
+  /// [coletaId]: sincroniza só essa coleta; sem ele, todas as pendentes.
+  Future<void> sincronizar({String? coletaId}) async {
     if (_state == SyncState.sincronizando) return;
 
     final online = await _conectividadeService.verificar();
@@ -66,6 +67,7 @@ class SyncNotifier extends ChangeNotifier {
     try {
       // 1. Envia coletas pendentes para o servidor
       final resumo = await _repository.sincronizarTodas(
+        somenteId: coletaId,
         onProgresso: (msg) {
           _mensagemProgresso = msg;
           notifyListeners();

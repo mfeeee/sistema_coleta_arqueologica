@@ -1,5 +1,8 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/coleta_entity.dart';
 import 'package:sistema_coleta_arqueologica/core/extensions/context_extensions.dart';
 import 'package:sistema_coleta_arqueologica/core/theme/app_colors.dart';
 import 'package:sistema_coleta_arqueologica/core/services/conectividade_service.dart';
@@ -42,7 +45,6 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     _formNotifier = ColetaFormNotifier(
       id: widget.id,
       mediaService: scope.mediaService,
-      uploadMidiaUseCase: scope.uploadMidiaUseCase,
     );
 
     if (widget.id != null) {
@@ -54,6 +56,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     _viewModel = ColetaViewModel(
       proximidadeService: proximidadeService,
       geolocatorHelper: geolocatorHelper,
+      verificarProximidade: widget.id == null,
     );
     _viewModel.iniciarMapeamento();
   }
@@ -236,6 +239,67 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
     );
   }
 
+  /// Toque num sítio da lista de proximidade: em vez de criar um registro
+  /// novo, o coletor modifica ou completa o registro existente.
+  Future<void> _abrirSitioProximo(ColetaEntity sitio) async {
+    final editavel = switch (sitio.syncStatus) {
+      StatusColeta.sincronizado => sitio.curadoriaStatus == null,
+      _ => true,
+    };
+    final nome = sitio.nomeBem.isNotEmpty ? sitio.nomeBem : 'Sítio sem nome';
+
+    if (!editavel) {
+      final verDetalhes = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(nome),
+          content: const Text(
+            'Este registro já foi enviado para curadoria e não pode mais ser '
+            'alterado.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Voltar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Ver detalhes'),
+            ),
+          ],
+        ),
+      );
+      if (verDetalhes == true && mounted) {
+        context.push('/detalhes-coleta', extra: sitio.id);
+      }
+      return;
+    }
+
+    final modificar = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(nome),
+        content: const Text(
+          'Quer modificar ou adicionar informações a este sítio? '
+          'O registro novo que você começou será descartado.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Modificar este sítio'),
+          ),
+        ],
+      ),
+    );
+    if (modificar != true || !mounted) return;
+    _descartouRascunho = true;
+    context.pushReplacement('/nova-coleta', extra: sitio.id);
+  }
+
   Widget _buildBody(ColetaStep step) {
     final l10n = context.l10n;
     return switch (step) {
@@ -248,6 +312,7 @@ class _NovaColetaPageState extends State<NovaColetaPage> {
         latAtual: _viewModel.coordenadaAtual?.latitude ?? 0.0,
         lonAtual: _viewModel.coordenadaAtual?.longitude ?? 0.0,
         onProsseguir: _viewModel.prosseguirParaFormularioIgnorandoAlerta,
+        onEscolherSitio: _abrirSitioProximo,
       ),
 
       ColetaStep.fillingForm => ColetaWizardWidget(

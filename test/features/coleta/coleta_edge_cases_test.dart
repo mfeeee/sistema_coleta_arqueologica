@@ -14,7 +14,6 @@ import 'package:sistema_coleta_arqueologica/features/coleta/domain/entities/cole
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coleta_form_notifier.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/presentation/viewmodels/coletas_viewmodel.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/domain/repositories/coleta_repository.dart';
-import "../../helpers/stub_midia_repository.dart";
 
 // ---------------------------------------------------------------------------
 // Fakes
@@ -67,10 +66,7 @@ class _StubColetaRepository implements ColetaRepository {
 void main() {
   group('Coleta Edge Cases — Form Notifier', () {
     test('Abrir sem rascunho (estado inicial)', () {
-      final notifier = ColetaFormNotifier(
-        uploadMidiaUseCase: StubUploadMidiaUseCase(),
-        mediaService: _StubMediaService(),
-      );
+      final notifier = ColetaFormNotifier(mediaService: _StubMediaService());
 
       check(notifier.nome).isEmpty();
       check(notifier.natureza).isNull();
@@ -94,10 +90,7 @@ void main() {
         dadosColetados: {},
       );
 
-      final notifier = ColetaFormNotifier(
-        uploadMidiaUseCase: StubUploadMidiaUseCase(),
-        mediaService: _StubMediaService(),
-      );
+      final notifier = ColetaFormNotifier(mediaService: _StubMediaService());
 
       notifier.restaurarDeEntity(entity);
 
@@ -131,10 +124,7 @@ void main() {
         ],
       );
 
-      final notifier = ColetaFormNotifier(
-        uploadMidiaUseCase: StubUploadMidiaUseCase(),
-        mediaService: _StubMediaService(),
-      );
+      final notifier = ColetaFormNotifier(mediaService: _StubMediaService());
 
       notifier.restaurarDeEntity(entity);
 
@@ -143,10 +133,7 @@ void main() {
     });
 
     test('Finalizar offline (toResult gera entidade local)', () async {
-      final notifier = ColetaFormNotifier(
-        uploadMidiaUseCase: StubUploadMidiaUseCase(),
-        mediaService: _StubMediaService(),
-      );
+      final notifier = ColetaFormNotifier(mediaService: _StubMediaService());
 
       notifier.setNome('Teste Offline');
       notifier.setNatureza(NaturezaBem.bemArqueologico);
@@ -163,10 +150,7 @@ void main() {
     });
 
     test('Modificado flag funciona corretamente', () {
-      final notifier = ColetaFormNotifier(
-        uploadMidiaUseCase: StubUploadMidiaUseCase(),
-        mediaService: _StubMediaService(),
-      );
+      final notifier = ColetaFormNotifier(mediaService: _StubMediaService());
 
       check(notifier.modificado).isFalse();
 

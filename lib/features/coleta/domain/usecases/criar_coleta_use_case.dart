@@ -26,6 +26,10 @@ class CriarColetaInput {
   final LocalizacaoEntity? localizacao;
   final String usuarioId;
 
+  /// Versão da coleta: 1 na criação; a mesma do servidor ao editar uma já
+  /// sincronizada (a API recusa versão menor que a dela).
+  final int versao;
+
   const CriarColetaInput({
     this.id,
     required this.nome,
@@ -37,6 +41,7 @@ class CriarColetaInput {
     this.natureza,
     this.tipo,
     this.meiosAcesso,
+    this.versao = 1,
   });
 }
 
@@ -57,11 +62,12 @@ class CriarColetaUseCase {
       tipo: input.tipo,
       localizacao: input.localizacao,
       artefatoTipos: input.artefatoTipos,
-      versao: 1,
+      versao: input.versao,
       updatedAt: agora,
       dadosColetados: {
         'nomes_populares': input.nomesPopulares,
         'meios_acesso': input.meiosAcesso,
+        'foto_paths': _fotosNaoEnviadas(input.midias),
       },
       midias: input.midias,
     );
@@ -100,13 +106,20 @@ class CriarColetaUseCase {
       tipo: input.tipo,
       localizacao: input.localizacao,
       artefatoTipos: input.artefatoTipos,
-      versao: 1,
+      versao: input.versao,
       updatedAt: agora,
       dadosColetados: {
         'nomes_populares': input.nomesPopulares,
         'meios_acesso': input.meiosAcesso,
+        'foto_paths': _fotosNaoEnviadas(input.midias),
       },
       midias: input.midias,
     );
   }
 }
+
+/// Fotos guardadas no aparelho que a sincronização ainda precisa enviar.
+List<String> _fotosNaoEnviadas(List<MidiaEntity> midias) => [
+  for (final midia in midias)
+    if (midia.url.isEmpty) midia.storagePath,
+];

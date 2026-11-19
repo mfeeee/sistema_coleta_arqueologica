@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_curadoria.dart';
 import 'package:sistema_coleta_arqueologica/core/models/artefato_tipo_model.dart';
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
 import 'package:sistema_coleta_arqueologica/features/coleta/data/datasources/coleta_local_datasource.dart';
@@ -50,6 +51,24 @@ void main() {
       check(encontrada!.id).equals('uuid-001');
       check(encontrada.nomeBem).equals('Bem uuid-001');
       check(encontrada.syncStatus).equals(StatusColeta.pendente);
+    });
+
+    test('guarda a decisão da curadoria sem misturar nos dados', () async {
+      final remota = ColetaModel.fromJson({
+        'uuid': 'uuid-cur',
+        'usuario_id': 'arq-001',
+        'data_coleta': '2025-01-15T00:00:00Z',
+        'status_sincronizacao': 'sincronizado',
+        'dados_coletados': {'meios_acesso': 'Trilha'},
+        'curadoria': {'status': 'rejeitado', 'observacao': 'Foto sem escala'},
+      });
+      await datasource.inserir(remota);
+
+      final local = await datasource.getById('uuid-cur');
+
+      check(local!.curadoriaStatus).equals(StatusCuradoria.rejeitado);
+      check(local.curadoriaObservacao).equals('Foto sem escala');
+      check(local.dadosColetados.containsKey('curadoria')).isFalse();
     });
 
     test('getAll retorna todas as coletas inseridas', () async {

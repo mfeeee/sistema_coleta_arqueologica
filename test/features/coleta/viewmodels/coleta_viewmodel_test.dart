@@ -66,12 +66,14 @@ _FakeGeolocatorHelper _gpsLancando(Exception excecao) =>
 ColetaViewModel _criarViewModel({
   required GeolocatorHelper geolocator,
   List<ColetaEntity> sitiosProximos = const [],
+  bool verificarProximidade = true,
 }) {
   final repositorio = _FakeColetaRepository(sitiosProximos);
   final proximidade = ProximidadeService(repositorio);
   return ColetaViewModel(
     proximidadeService: proximidade,
     geolocatorHelper: geolocator,
+    verificarProximidade: verificarProximidade,
   );
 }
 
@@ -123,6 +125,36 @@ void main() {
 
       expect(vm.stepNotifier.value, ColetaStep.proximityAlert);
       expect(vm.sitiosConflitantes, hasLength(1));
+
+      vm.dispose();
+    });
+
+    test('edição: pula o alerta mesmo com sítios próximos', () async {
+      final sitio = ColetaEntity(
+        id: 'site-1',
+        nomeBem: 'Sítio Teste',
+        localizacao: const LocalizacaoEntity(
+          id: 'loc-1',
+          lat: -8.8475,
+          lng: -42.5480,
+        ),
+        dataColeta: DateTime.now(),
+        updatedAt: DateTime.now(),
+        versao: 1,
+        usuarioId: 'u1',
+        artefatoTipos: [],
+        syncStatus: StatusColeta.pendente,
+        dadosColetados: {},
+      );
+      final vm = _criarViewModel(
+        geolocator: _gpsComCoordenada(-8.8475, -42.5480),
+        sitiosProximos: [sitio],
+        verificarProximidade: false,
+      );
+
+      await vm.iniciarMapeamento();
+
+      expect(vm.stepNotifier.value, ColetaStep.fillingForm);
 
       vm.dispose();
     });

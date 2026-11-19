@@ -38,6 +38,7 @@
   "registerTermsService": "Termos de Serviço",
   "registerTermsAnd": "e",
   "registerPrivacyPolicy": "Política de Privacidade",
+  "registerAcceptTerms": "Li e aceito os Termos de Serviço e a Política de Privacidade",
 
   "recoverPasswordTitle": "Recuperar Senha",
   "recoverPasswordSubtitle": "Insira o e-mail cadastrado para receber as instruções de recuperação.",
@@ -67,6 +68,8 @@
   },
   "homeNewCollection": "Nova Coleta",
   "homeViewCollections": "Ver Minhas Coletas",
+  "homeShowUnpublished": "Mostrar não publicados",
+  "homeUnpublishedWarning": "Estes sítios ainda têm informações incompletas ou em análise. Se você conhece o local, ajude enviando uma coleta.",
   "homeSyncNow": "Sincronizar Agora",
   "homeActivitySummary": "Resumo das Atividades",
   "homeTotal": "TOTAL",
@@ -106,6 +109,13 @@
   "coletaStatusRejeitado": "Rejeitado",
   "coletaStatusRascunho": "Rascunho",
   "coletaStatusPendente": "Pendente",
+  "coletaActionSendToCuration": "Enviar para curadoria",
+  "coletaSendToCurationTitle": "Enviar para curadoria?",
+  "coletaSendToCurationConfirm": "Depois de enviada, a coleta não pode mais ser editada.",
+  "coletaSendToCurationSuccess": "Coleta enviada para curadoria.",
+  "coletaSendToCurationError": "Não foi possível enviar. Verifique a conexão e tente de novo.",
+  "coletaStatusNaoEnviada": "Não enviada",
+  "coletaStatusEmCuradoria": "Em curadoria",
   "coletaDatePrefix": "Coletado em: {date}",
   "@coletaDatePrefix": {
     "placeholders": {

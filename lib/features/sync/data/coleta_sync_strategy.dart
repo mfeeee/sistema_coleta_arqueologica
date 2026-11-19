@@ -9,10 +9,12 @@ class ColetaSyncResultado {
   final SyncResultStatus status;
   final List<String> uploadedUrls;
   final ColetaModel? coletaAtualizada;
+  final String? mensagem;
   const ColetaSyncResultado({
     required this.status,
     required this.uploadedUrls,
     this.coletaAtualizada,
+    this.mensagem,
   });
 }
 
@@ -51,9 +53,12 @@ class ColetaSyncStrategy {
           name: 'ColetaSyncStrategy',
         );
       }
+      // Mantém as URLs de um envio anterior (quando parte das fotos falhou).
+      final jaEnviadas =
+          (dadosOriginais['foto_urls'] as List?)?.cast<String>() ?? [];
       dadosFinais = {
         ...dadosOriginais,
-        'foto_urls': upload.uploadedUrls,
+        'foto_urls': [...jaEnviadas, ...upload.uploadedUrls],
         'foto_paths': upload.failedPaths,
       };
     }
@@ -68,6 +73,7 @@ class ColetaSyncStrategy {
       status: resultado.status,
       uploadedUrls: uploadedUrls,
       coletaAtualizada: resultado.coletaAtualizada,
+      mensagem: resultado.mensagem,
     );
   }
 }

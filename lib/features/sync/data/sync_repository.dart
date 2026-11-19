@@ -26,6 +26,11 @@ class SyncRepository {
   }
 
   Future<void> puxarDoServidor() async {
+    // Edição local ainda não enviada (ex.: falha de rede) não pode ser
+    // sobrescrita pela versão antiga do servidor.
+    final naoEnviadas = {
+      for (final c in await _coletaDatasource.getPendentes()) c.id,
+    };
     int page = 1;
     bool temProxima = true;
 
@@ -33,6 +38,7 @@ class SyncRepository {
       final resultado = await _coletaApiDatasource.fetchMinhas(page: page);
 
       for (final item in resultado.items) {
+        if (naoEnviadas.contains(item.id)) continue;
         await _coletaDatasource.inserir(ColetaModel.fromEntity(item));
       }
 
@@ -43,10 +49,15 @@ class SyncRepository {
     log('Pull concluído — página(s): ${page - 1}', name: 'SyncRepository');
   }
 
+  /// [somenteId]: envia só essa coleta (botão do card); sem ele, todas.
   Future<SyncResumo> sincronizarTodas({
     void Function(String mensagem)? onProgresso,
+    String? somenteId,
   }) async {
-    final pendentes = await _coletaDatasource.getPendentes();
+    final pendentes = [
+      for (final c in await _coletaDatasource.getPendentes())
+        if (somenteId == null || c.id == somenteId) c,
+    ];
     if (pendentes.isEmpty) {
       return const SyncResumo(sucessos: 0, conflitos: 0, erros: 0);
     }
@@ -77,6 +88,20 @@ class SyncRepository {
             coleta.id,
             StatusColeta.conflito,
             coleta.versao + 1,
+          );
+          conflitos++;
+        case SyncResultStatus.recusada:
+          // Sai da fila automática. O motivo aparece nos detalhes e some
+          // quando o coletor corrige e salva a coleta de novo.
+          await _coletaDatasource.inserir(
+            coleta.copyWith(
+              syncStatus: StatusColeta.conflito,
+              dadosColetados: {
+                ...coleta.dadosColetados,
+                'motivo_recusa':
+                    res.mensagem ?? 'Dados recusados pelo servidor.',
+              },
+            ),
           );
           conflitos++;
         case SyncResultStatus.erroRede:

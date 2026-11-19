@@ -38,6 +38,7 @@
   "registerTermsService": "Terms of Service",
   "registerTermsAnd": "and",
   "registerPrivacyPolicy": "Privacy Policy",
+  "registerAcceptTerms": "I have read and accept the Terms of Service and the Privacy Policy",
 
   "recoverPasswordTitle": "Reset Password",
   "recoverPasswordSubtitle": "Enter your registered email to receive recovery instructions.",
@@ -57,6 +58,8 @@
   "homePendingBanner": "{count, plural, one{{count} collection awaiting upload} other{{count} collections awaiting upload}}",
   "homeNewCollection": "New Collection",
   "homeViewCollections": "View My Collections",
+  "homeShowUnpublished": "Show unpublished",
+  "homeUnpublishedWarning": "These sites still have incomplete information or are under review. If you know the place, help by sending a collection.",
   "homeSyncNow": "Sync Now",
   "homeActivitySummary": "Activity Summary",
   "homeTotal": "TOTAL",
@@ -198,5 +201,12 @@
   "navHome": "Home",
   "navCollections": "Collections",
   "navSync": "Sync",
-  "navProfile": "Profile"
+  "navProfile": "Profile",
+  "coletaActionSendToCuration": "Send for review",
+  "coletaSendToCurationTitle": "Send for review?",
+  "coletaSendToCurationConfirm": "Once sent, the collection can no longer be edited.",
+  "coletaSendToCurationSuccess": "Collection sent for review.",
+  "coletaSendToCurationError": "Could not send. Check your connection and try again.",
+  "coletaStatusNaoEnviada": "Not sent",
+  "coletaStatusEmCuradoria": "Under review"
 }

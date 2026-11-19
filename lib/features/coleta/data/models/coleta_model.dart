@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:sistema_coleta_arqueologica/core/database/app_database.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/status_coleta.dart';
+import 'package:sistema_coleta_arqueologica/core/database/enums/status_curadoria.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/natureza_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/database/enums/tipo_bem.dart';
 import 'package:sistema_coleta_arqueologica/core/models/localizacao_model.dart';
@@ -26,7 +27,33 @@ class ColetaModel extends ColetaEntity {
     super.tipo,
     super.uf,
     super.deletadoEm,
+    super.curadoriaStatus,
+    super.curadoriaObservacao,
   }) : super(midias: midias);
+
+  ColetaModel copyWith({
+    StatusColeta? syncStatus,
+    Map<String, dynamic>? dadosColetados,
+    List<MidiaModel>? midias,
+  }) => ColetaModel(
+    id: id,
+    usuarioId: usuarioId,
+    dataColeta: dataColeta,
+    syncStatus: syncStatus ?? this.syncStatus,
+    nomeBem: nomeBem,
+    localizacao: localizacao,
+    artefatoTipos: artefatoTipos,
+    versao: versao,
+    updatedAt: updatedAt,
+    dadosColetados: dadosColetados ?? this.dadosColetados,
+    midias: midias ?? this.midias,
+    natureza: natureza,
+    tipo: tipo,
+    uf: uf,
+    deletadoEm: deletadoEm,
+    curadoriaStatus: curadoriaStatus,
+    curadoriaObservacao: curadoriaObservacao,
+  );
 
   @override
   LocalizacaoModel? get localizacao => super.localizacao as LocalizacaoModel?;
@@ -93,9 +120,12 @@ class ColetaModel extends ColetaEntity {
       artefatoTipos: artefatos,
       versao: row.versao,
       updatedAt: row.updatedAt,
-      dadosColetados: dados,
+      // A curadoria fica guardada junto, mas não volta para a API no envio.
+      dadosColetados: Map.of(dados)..remove('curadoria'),
       midias: [], // Midias are loaded separately or from a joined table
       deletadoEm: row.deletadoEm,
+      curadoriaStatus: _statusCuradoria(dados['curadoria']),
+      curadoriaObservacao: _observacaoCuradoria(dados['curadoria']),
     );
   }
 
@@ -148,6 +178,8 @@ class ColetaModel extends ColetaEntity {
           )
           .toList(),
       deletadoEm: entity.deletadoEm,
+      curadoriaStatus: entity.curadoriaStatus,
+      curadoriaObservacao: entity.curadoriaObservacao,
     );
   }
 
@@ -178,9 +210,11 @@ class ColetaModel extends ColetaEntity {
       dataColeta:
           DateTime.tryParse(json['data_coleta'] as String? ?? '') ??
           (throw const FormatException('data_coleta inválida')),
-      syncStatus: StatusColeta.fromString(
-        json['status_sincronizacao'] as String? ?? '',
-      ),
+      // Veio do servidor, então já está salva lá. Copiar um "pendente" do
+      // servidor fazia o app reenviar a coleta, e a API a recusava (422).
+      syncStatus: json['status_sincronizacao'] == 'conflito'
+          ? StatusColeta.conflito
+          : StatusColeta.sincronizado,
       nomeBem: json['nome_bem'] as String? ?? '',
       localizacao: localizacao,
       artefatoTipos:
@@ -210,6 +244,8 @@ class ColetaModel extends ColetaEntity {
       deletadoEm: json['deletado_em'] != null
           ? DateTime.tryParse(json['deletado_em'] as String)
           : null,
+      curadoriaStatus: _statusCuradoria(json['curadoria']),
+      curadoriaObservacao: _observacaoCuradoria(json['curadoria']),
     );
   }
 
@@ -245,6 +281,12 @@ class ColetaModel extends ColetaEntity {
     novosDados['artefatos_completos'] = artefatoTipos
         .map((e) => e.toJson())
         .toList();
+    if (curadoriaStatus != null) {
+      novosDados['curadoria'] = {
+        'status': curadoriaStatus!.name,
+        'observacao': curadoriaObservacao,
+      };
+    }
 
     return ColetasCompanion.insert(
       uuid: id,
@@ -264,4 +306,16 @@ class ColetaModel extends ColetaEntity {
       deletadoEm: Value(deletadoEm),
     );
   }
+}
+
+// `curadoria` vem da API (GET /v1/mobile/coletas) e fica guardada no banco
+// local dentro de dados_coletados: {status, observacao}.
+StatusCuradoria? _statusCuradoria(Object? curadoria) {
+  final status = curadoria is Map ? curadoria['status'] : null;
+  return status is String ? StatusCuradoria.fromString(status) : null;
+}
+
+String? _observacaoCuradoria(Object? curadoria) {
+  final observacao = curadoria is Map ? curadoria['observacao'] : null;
+  return observacao is String ? observacao : null;
 }

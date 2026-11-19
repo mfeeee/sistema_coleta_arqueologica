@@ -107,6 +107,8 @@ class AuthService {
           'password': password,
           'password_confirmation': password,
           'classificacao': classificacao,
+          // A tela de cadastro só chega aqui com a caixa de aceite marcada.
+          'termos_aceitos': true,
         },
       );
 

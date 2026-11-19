@@ -93,6 +93,11 @@ class _InicioPageState extends State<InicioPage> {
             mapController: _mapController,
           ),
           Positioned(left: 16.0, bottom: peekBottom, child: const MapLegend()),
+          Positioned(
+            right: 16.0,
+            bottom: peekBottom,
+            child: _FiltroNaoPublicados(viewModel: _viewModel),
+          ),
           // Search bar fica abaixo do sheet no z-order: sheet cobre ao expandir.
           Positioned(
             top: 0,
@@ -141,6 +146,35 @@ class _InicioPageState extends State<InicioPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Sítios não publicados (D1) ────────────────────────────────────────────────
+
+class _FiltroNaoPublicados extends StatelessWidget {
+  const _FiltroNaoPublicados({required this.viewModel});
+
+  final HomeViewModel viewModel;
+
+  void _alternar(BuildContext context, bool mostrar) {
+    viewModel.alternarNaoPublicados(mostrar);
+    if (mostrar) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.homeUnpublishedWarning)),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: viewModel.mostrarNaoPublicados,
+      builder: (context, mostrar, _) => FilterChip(
+        label: Text(context.l10n.homeShowUnpublished),
+        selected: mostrar,
+        onSelected: (valor) => _alternar(context, valor),
       ),
     );
   }
